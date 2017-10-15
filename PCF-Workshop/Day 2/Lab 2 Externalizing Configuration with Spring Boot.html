@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<!-- saved from url=(0070)https://workshop-content.cfapps.io/labs/82-cs-spring-boot-adv-lab.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="alternate" href="https://cdn.enablement.pivotal.io/index.xml" type="application/rss+xml" title="Externalizing Configuration with Spring Boot">
+		<link rel="icon" href="https://cdn.enablement.pivotal.io/spring-boot-primer/externalizing-configuration/P_Mark_WhiteOnTeal.png">
+		<title>Externalizing Configuration with Spring Boot</title>
+		<link rel="stylesheet" href="./Lab 2 Externalizing Configuration with Spring Boot_files/highlight.js.min.css">
+		<link rel="stylesheet" href="./Lab 2 Externalizing Configuration with Spring Boot_files/pivotal-ui.css">
+		<link rel="stylesheet" href="./Lab 2 Externalizing Configuration with Spring Boot_files/theme.css">
+		<link rel="stylesheet" href="./Lab 2 Externalizing Configuration with Spring Boot_files/bootie-docs.css">
+	</head>
+
+<body role="document">
+	
+
+
+<main role="main">
+
+<div class="row">
+	
+	<div class="pane bg-dark-2">
+		<div class="container">
+			<h2 class="type-neutral-11 title">Externalizing Configuration with Spring Boot</h2>
+			<p></p>
+		</div>
+	</div>
+</div>
+
+
+	<div class="doc-main">
+		<div class="container">
+			<div class="row">
+				
+<div class="col-sm-14 doc-sidebar">
+	<div class="sidebar-module">
+		<div class="sidebar-toc">
+			<h4>Table of Contents</h4>
+			<nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/externalizing-configuration/index.html#requirements:3976528693a0108357f4928017600865">Requirements</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/externalizing-configuration/index.html#what-you-will-learn:3976528693a0108357f4928017600865">What You Will Learn</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/externalizing-configuration/index.html#exercises:3976528693a0108357f4928017600865">Exercises</a>
+<ul>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/externalizing-configuration/index.html#refactoring-to-externalize-the-config:3976528693a0108357f4928017600865">Refactoring to Externalize the Config</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/externalizing-configuration/index.html#using-environment-variables-for-config:3976528693a0108357f4928017600865">Using Environment Variables for Config</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/externalizing-configuration/index.html#using-spring-profiles-for-config:3976528693a0108357f4928017600865">Using Spring Profiles for Config</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/externalizing-configuration/index.html#resolving-conflicts:3976528693a0108357f4928017600865">Resolving Conflicts</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+		</div>
+	</div>
+</div>
+
+			</div>
+			<div class="row">
+				
+
+<h2 id="requirements:3976528693a0108357f4928017600865">Requirements</h2>
+
+<p><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/requirements">Lab Requirements</a></p>
+
+<hr>
+
+<h2 id="what-you-will-learn:3976528693a0108357f4928017600865">What You Will Learn</h2>
+
+<ul>
+<li>How to externalize configuration in a Spring Boot project</li>
+</ul>
+
+<hr>
+
+<p>Estimated time: 25 minutes</p>
+
+<hr>
+
+<h2 id="exercises:3976528693a0108357f4928017600865">Exercises</h2>
+
+<h3 id="refactoring-to-externalize-the-config:3976528693a0108357f4928017600865">Refactoring to Externalize the Config</h3>
+
+<p>1) Review the following file:<code>$SPRING_BOOT_LABS_HOME/hello-spring-boot-external-config/src/main/resources/application.yml</code>.  We have refactored the <code>application.properties</code> to <code>application.yml</code>.</p>
+
+<pre><code class="language-yml hljs http"><span class="hljs-attribute"><span class="hljs-attribute">greeting</span></span>: <span class="hljs-string"><span class="hljs-string">Hello</span></span>
+</code></pre>
+
+<p>Spring Boot supports both configuration formats: traditional properties files and YAML.  YAML offers a conscise format when compared to properties files.  Additionally, support for multiple documents within one file add an added capability not present in properties files (more on this later in the lab).  For more details on externalizing configuration review the following <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html">documentation</a>.</p>
+
+<p>2) Review the following file:<code>$SPRING_BOOT_LABS_HOME/hello-spring-boot-external-config/src/main/java/io/pivotal/hello/HelloSpringBootApplication.java</code>.</p>
+
+<pre><code class="language-java hljs"><span class="hljs-annotation"><span class="hljs-annotation">@SpringBootApplication</span></span>
+<span class="hljs-annotation"><span class="hljs-annotation">@RestController</span></span>
+<span class="hljs-keyword"><span class="hljs-keyword">public</span></span> <span class="hljs-class"><span class="hljs-keyword"><span class="hljs-class"><span class="hljs-keyword">class</span></span></span><span class="hljs-class"> </span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">HelloSpringBootApplication</span></span></span><span class="hljs-class"> </span></span>{
+
+	<span class="hljs-annotation"><span class="hljs-annotation">@Value</span></span>(<span class="hljs-string"><span class="hljs-string">"${greeting}"</span></span>)
+	String greeting;
+
+    <span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">static</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">void</span></span></span><span class="hljs-function"> </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">main</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">(String[] args)</span></span></span><span class="hljs-function"> </span></span>{
+        SpringApplication.run(HelloSpringBootApplication.class, args);
+    }
+
+    <span class="hljs-annotation"><span class="hljs-annotation">@RequestMapping</span></span>(<span class="hljs-string"><span class="hljs-string">"/"</span></span>)
+    <span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> String </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">hello</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">()</span></span></span><span class="hljs-function"> </span></span>{
+        <span class="hljs-keyword"><span class="hljs-keyword">return</span></span> String.format(<span class="hljs-string"><span class="hljs-string">"%s World!"</span></span>, greeting);
+    }
+}
+</code></pre>
+
+<p>We have refactored the class to inject the greeting:</p>
+
+<pre><code class="language-java hljs"><span class="hljs-annotation"><span class="hljs-annotation">@Value</span></span>(<span class="hljs-string"><span class="hljs-string">"${greeting}"</span></span>)
+String greeting;
+</code></pre>
+
+<p>We have also refactored the <code>hello()</code> method to return the injected greeting:</p>
+
+<pre><code class="language-java hljs"><span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> String </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">hello</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">()</span></span></span><span class="hljs-function"> </span></span>{
+		<span class="hljs-keyword"><span class="hljs-keyword">return</span></span> String.format(<span class="hljs-string"><span class="hljs-string">"%s World!"</span></span>, greeting);
+}
+</code></pre>
+
+<p>3) Open a new terminal window.  Run the <code>hello-spring-boot-external-config</code> application:</p>
+
+<pre><code class="language-bash hljs">$ <span class="hljs-built_in"><span class="hljs-built_in">cd</span></span> hello-spring-boot-external-config
+$ mvn clean spring-boot:run
+</code></pre>
+
+<p>4) Visit the application in the browser <a href="http://localhost:8080/">http://localhost:8080</a>, and verify that the output is still the following:</p>
+
+<p><img src="./Lab 2 Externalizing Configuration with Spring Boot_files/hello-world.png" alt="Hello World" title="Hello World"></p>
+
+<p>5) Stop the <code>hello-spring-boot-external-config</code> application.</p>
+
+<h3 id="using-environment-variables-for-config:3976528693a0108357f4928017600865">Using Environment Variables for Config</h3>
+
+<p>1) Run the application again, this time setting the <code>GREETING</code> environment variable:</p>
+
+<pre><code class="language-bash hljs">[mac, linux]
+$ GREETING=Ohai mvn clean spring-boot:run
+
+[windows]
+$ <span class="hljs-built_in"><span class="hljs-built_in">set</span></span> GREETING=Ohai
+$ mvn clean spring-boot:run
+</code></pre>
+
+<p>2) Visit the application in the browser <a href="http://localhost:8080/">http://localhost:8080</a>, and verify that the output has changed to the following:</p>
+
+<p><img src="./Lab 2 Externalizing Configuration with Spring Boot_files/ohai-world.png" alt="Ohai World" title="Ohai World"></p>
+
+<p><strong><em>What Just Happened?</em></strong></p>
+
+<p>Instead of returning the <code>greeting</code> value from the <code>application.yml</code>, the value from the environment variable was used.  The environment variable overrides the value from the <code>application.yml</code> file.</p>
+
+<p>3) Stop the <code>hello-spring-boot-external-config</code> application.</p>
+
+<h3 id="using-spring-profiles-for-config:3976528693a0108357f4928017600865">Using Spring Profiles for Config</h3>
+
+<p>1) Add a spanish profile to the <code>$SPRING_BOOT_LABS_HOME/hello-spring-boot-external-config/src/main/resources/application.yml</code>. Your finished configuration should reflect the following.  <em>You must edit the file.</em></p>
+
+<pre><code class="language-yml hljs http"><span class="hljs-attribute"><span class="hljs-attribute">greeting</span></span>: <span class="hljs-string"><span class="hljs-string">Hello</span></span>
+
+<span class="css"><span class="hljs-tag"><span class="css"><span class="hljs-tag">---</span></span></span><span class="css">
+
+</span><span class="hljs-rule"><span class="hljs-attribute"><span class="css"><span class="hljs-rule"><span class="hljs-attribute">spring</span></span></span></span><span class="css"><span class="hljs-rule">:</span></span><span class="hljs-value"><span class="css"><span class="hljs-rule"><span class="hljs-value">
+  profiles: spanish
+
+greeting: Hola
+</span></span></span></span></span></span></code></pre>
+
+<p>Yaml supports having multiple documents in one file.  The first document is the default configuration.  In the second document, we  use the <code>spring.profiles</code> key to indicate when it applies.  When running with the spanish profile, use “Hola” as the greeting.</p>
+
+<p>2) Run the <code>hello-spring-boot-external-config</code> application.  This time setting the <code>SPRING_PROFILES_ACTIVE</code> environment variable:</p>
+
+<pre><code class="language-bash hljs">[mac, linux]
+$ SPRING_PROFILES_ACTIVE=spanish mvn clean spring-boot:run
+
+[windows]
+<span class="hljs-comment"><span class="hljs-comment">#remove GREETING env variable</span></span>
+$ <span class="hljs-built_in"><span class="hljs-built_in">set</span></span> GREETING=
+$ <span class="hljs-built_in"><span class="hljs-built_in">set</span></span> SPRING_PROFILES_ACTIVE=spanish
+$ mvn clean spring-boot:run
+</code></pre>
+
+<p>3) Visit the application in the browser <a href="http://localhost:8080/">http://localhost:8080</a>, and verify that the output has changed to the following:</p>
+
+<p><img src="./Lab 2 Externalizing Configuration with Spring Boot_files/hola-world.png" alt="Hola World" title="Hola World"></p>
+
+<p><strong><em>What Just Happened?</em></strong></p>
+
+<p>The value for the <code>greeting</code> key was pulled from the the spanish profile yaml document, because the spanish profile is active.</p>
+
+<p>4) Stop the <code>hello-spring-boot-external-config</code> application.</p>
+
+<h3 id="resolving-conflicts:3976528693a0108357f4928017600865">Resolving Conflicts</h3>
+
+<p>1) Run the <code>hello-spring-boot-external-config</code> application, this time setting both the <code>SPRING_PROFILES_ACTIVE</code> and <code>GREETING</code> environment variables:</p>
+
+<pre><code class="hljs ruby">[mac, linux]
+<span class="hljs-variable"><span class="hljs-variable">$ </span></span><span class="hljs-constant"><span class="hljs-constant">SPRING_PROFILES_ACTIVE</span></span>=spanish <span class="hljs-constant"><span class="hljs-constant">GREETING</span></span>=<span class="hljs-constant"><span class="hljs-constant">Ohai</span></span> mvn clean spring-<span class="hljs-symbol"><span class="hljs-symbol">boot:</span></span>run
+
+[windows]
+<span class="hljs-variable"><span class="hljs-variable">$ </span></span>set <span class="hljs-constant"><span class="hljs-constant">SPRING_PROFILES_ACTIVE</span></span>=spanish
+<span class="hljs-variable"><span class="hljs-variable">$ </span></span>set <span class="hljs-constant"><span class="hljs-constant">GREETING</span></span>=<span class="hljs-constant"><span class="hljs-constant">Ohai</span></span>
+<span class="hljs-variable"><span class="hljs-variable">$ </span></span>mvn clean spring-<span class="hljs-symbol"><span class="hljs-symbol">boot:</span></span>run
+</code></pre>
+
+<p>Visit the application in the browser <a href="http://localhost:8080/">http://localhost:8080</a>, and verify that the output has changed to the following:</p>
+
+<p><img src="./Lab 2 Externalizing Configuration with Spring Boot_files/ohai-world.png" alt="Ohai World" title="Ohai World"></p>
+
+<p>2) Stop the <code>hello-spring-boot-external-config</code> application.</p>
+
+<p><strong><em>What Just Happened?</em></strong></p>
+
+<p>Instead of returning either <code>greeting</code> value from the <code>application.yml</code>, the value from the environment variable was used.  It overrides the active profile (<code>SPRING_PROFILES_ACTIVE</code>).</p>
+
+<p>Visit <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html">http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html</a> to learn more about this outcome and the entire priority scheme for conflict resolution.</p>
+
+			</div>
+		</div>
+	</div>
+
+
+
+
+</main>
+
+
+<hr>
+<div class="container">
+	<div class="row">
+		<div class="col-sm-8">
+			<p class="doc-footer-em"><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/externalizing-configuration/index.html#">Back to TOP</a></p>
+		</div>
+	</div>
+
+</div> 
+
+<footer class="doc-footer">
+	
+	<p>© Copyright Pivotal. All rights reserved.</p>
+</footer>
+
+
+
+
+
+<script src="./Lab 2 Externalizing Configuration with Spring Boot_files/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script src="./Lab 2 Externalizing Configuration with Spring Boot_files/ie10-viewport-bug-workaround.js"></script>
+
+
+
+
+</body></html>

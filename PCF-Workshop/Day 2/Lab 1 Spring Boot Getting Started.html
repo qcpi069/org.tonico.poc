@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<!-- saved from url=(0070)https://workshop-content.cfapps.io/labs/80-spring-boot-basics-lab.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="alternate" href="https://cdn.enablement.pivotal.io/index.xml" type="application/rss+xml" title="Spring Boot Getting Started">
+		<link rel="icon" href="https://cdn.enablement.pivotal.io/spring-boot-primer/getting-started/P_Mark_WhiteOnTeal.png">
+		<title>Spring Boot Getting Started</title>
+		<link rel="stylesheet" href="./Lab 1 Spring Boot Getting Started_files/highlight.js.min.css">
+		<link rel="stylesheet" href="./Lab 1 Spring Boot Getting Started_files/pivotal-ui.css">
+		<link rel="stylesheet" href="./Lab 1 Spring Boot Getting Started_files/theme.css">
+		<link rel="stylesheet" href="./Lab 1 Spring Boot Getting Started_files/bootie-docs.css">
+	</head>
+
+<body role="document">
+	
+
+
+<main role="main">
+
+<div class="row">
+	
+	<div class="pane bg-dark-2">
+		<div class="container">
+			<h2 class="type-neutral-11 title">Spring Boot Getting Started</h2>
+			<p></p>
+		</div>
+	</div>
+</div>
+
+
+	<div class="doc-main">
+		<div class="container">
+			<div class="row">
+				
+<div class="col-sm-14 doc-sidebar">
+	<div class="sidebar-module">
+		<div class="sidebar-toc">
+			<h4>Table of Contents</h4>
+			<nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/getting-started/index.html#requirements:3976528693a0108357f4928017600865">Requirements</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/getting-started/index.html#what-you-will-learn:3976528693a0108357f4928017600865">What You Will Learn</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/getting-started/index.html#exercises:3976528693a0108357f4928017600865">Exercises</a>
+<ul>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/getting-started/index.html#create-a-spring-boot-project:3976528693a0108357f4928017600865">Create A Spring Boot Project</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/getting-started/index.html#add-an-endpoint:3976528693a0108357f4928017600865">Add an Endpoint</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/getting-started/index.html#run-the-hello-spring-boot-application:3976528693a0108357f4928017600865">Run the <code>hello-spring-boot</code> Application</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+		</div>
+	</div>
+</div>
+
+			</div>
+			<div class="row">
+				
+
+<hr>
+
+<p>Estimated time: 25 minutes</p>
+
+<hr>
+
+<h2 id="requirements:3976528693a0108357f4928017600865">Requirements</h2>
+
+<p><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/labs-setup">Lab Requirements</a></p>
+
+<hr>
+
+<h2 id="what-you-will-learn:3976528693a0108357f4928017600865">What You Will Learn</h2>
+
+<ul>
+<li>How to create a Spring Boot Project</li>
+</ul>
+
+<hr>
+
+<h2 id="exercises:3976528693a0108357f4928017600865">Exercises</h2>
+
+<h3 id="create-a-spring-boot-project:3976528693a0108357f4928017600865">Create A Spring Boot Project</h3>
+
+<p>1) Browse to <a href="https://start.spring.io/">https://start.spring.io/</a></p>
+
+<p><img src="./Lab 1 Spring Boot Getting Started_files/spring-initializr-init.png" alt="Spring Initializr" title="Spring Initializr"></p>
+
+<p><strong><em>Fill Out the Form Accordingly:</em></strong></p>
+
+<p>2) Generate a <code>Maven Project</code> with Spring Boot <code>1.3</code> (if this version is unavailable then get the latest 1.3.X version, but no SNAPSHOTS).</p>
+
+<p>3) In the <strong>Project Metadata</strong> section, add the following:</p>
+
+<p><strong>Group</strong></p>
+
+<p><code>io.pivotal</code></p>
+
+<p><strong>Artifact</strong></p>
+
+<p><code>hello-spring-boot</code></p>
+
+<p>4) In the <strong>Dependencies</strong> section, add the following:</p>
+
+<ul>
+<li><code>Web</code></li>
+</ul>
+
+<p>Completed Form:
+<img src="./Lab 1 Spring Boot Getting Started_files/spring-initializr-complete.png" alt="Spring Initializr" title="Spring Initializr"></p>
+
+<p>5) Click the Generate Project button. Your browser will download a zip file. Unpack that zip file into the repos directory (<code>$REPOS_HOME</code>).  If you don’t know what <code>$REPOS_HOME</code> is then go back and do the <a href="https://cdn.enablement.pivotal.io/spring-boot-primer/labs-setup">setup</a>.</p>
+
+<p>6) Import the project’s <code>pom.xml</code> into your editor/IDE of choice.</p>
+
+<p><strong>STS Import Help</strong>:</p>
+
+<p>Select File &gt; Import… Then select Maven &gt; Existing Maven Projects. On the Import Maven Projects page, browse to your <code>$REPOS_HOME/hello-spring-boot</code> (e.g. <code>~/repos/hello-spring-boot</code>).</p>
+
+<h3 id="add-an-endpoint:3976528693a0108357f4928017600865">Add an Endpoint</h3>
+
+<p>1) Add a <code>@RestController</code> annotation to the class <code>io.pivotal.HelloSpringBootApplication</code> (<code>$REPOS_HOME/hello-spring-boot/src/main/java/io/pivotal/HelloSpringBootApplication.java</code>).</p>
+
+<pre><code class="language-java hljs"><span class="hljs-keyword"><span class="hljs-keyword">package</span></span> io.pivotal;
+
+<span class="hljs-keyword"><span class="hljs-keyword">import</span></span> org.springframework.boot.SpringApplication;
+<span class="hljs-keyword"><span class="hljs-keyword">import</span></span> org.springframework.boot.autoconfigure.SpringBootApplication;
+<span class="hljs-keyword"><span class="hljs-keyword">import</span></span> org.springframework.web.bind.annotation.RestController;
+
+<span class="hljs-annotation"><span class="hljs-annotation">@SpringBootApplication</span></span>
+<span class="hljs-annotation"><span class="hljs-annotation">@RestController</span></span>
+<span class="hljs-keyword"><span class="hljs-keyword">public</span></span> <span class="hljs-class"><span class="hljs-keyword"><span class="hljs-class"><span class="hljs-keyword">class</span></span></span><span class="hljs-class"> </span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">HelloSpringBootApplication</span></span></span><span class="hljs-class"> </span></span>{
+
+    <span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">static</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">void</span></span></span><span class="hljs-function"> </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">main</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">(String[] args)</span></span></span><span class="hljs-function"> </span></span>{
+        SpringApplication.run(HelloSpringBootApplication.class, args);
+    }
+}
+
+</code></pre>
+
+<p><strong>STS Shortcut Help</strong>:</p>
+
+<p><em>Need help adding an import?</em></p>
+
+<p>Use the <code>organize imports</code> command:</p>
+
+<ul>
+<li><strong>PC:</strong> Ctrl + Shift + O</li>
+<li><strong>Mac:</strong> Cmd + Shift + O</li>
+</ul>
+
+<p><em>Not sure how to resolve the problem STS is reporting?</em></p>
+
+<p>Try the <code>quick-fix</code> (magic shortcut) command:</p>
+
+<ul>
+<li><strong>PC:</strong> Ctrl + 1</li>
+<li><strong>Mac:</strong> Cmd + 1</li>
+</ul>
+
+<p>Other helpful <a href="https://blog.codecentric.de/en/2012/08/my-top-10-shortcuts-for-eclipse-on-mac-os-x-and-windows-and-how-you-survive-the-change-from-windows-to-mac/">shortcuts</a>.</p>
+
+<p>2) Add the following request handler to the class <code>io.pivotal.HelloSpringBootApplication</code> (<code>$REPOS_HOME/hello-spring-boot/src/main/java/io/pivotal/HelloSpringBootApplication.java</code>).</p>
+
+<pre><code class="language-java hljs"><span class="hljs-annotation"><span class="hljs-annotation">@RequestMapping</span></span>(<span class="hljs-string"><span class="hljs-string">"/"</span></span>)
+<span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> String </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">hello</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">()</span></span></span><span class="hljs-function"> </span></span>{
+    <span class="hljs-keyword"><span class="hljs-keyword">return</span></span> <span class="hljs-string"><span class="hljs-string">"Hello World!"</span></span>;
+}
+</code></pre>
+
+<p>Completed:</p>
+
+<pre><code class="language-java hljs"><span class="hljs-keyword"><span class="hljs-keyword">package</span></span> io.pivotal;
+
+<span class="hljs-keyword"><span class="hljs-keyword">import</span></span> org.springframework.boot.SpringApplication;
+<span class="hljs-keyword"><span class="hljs-keyword">import</span></span> org.springframework.boot.autoconfigure.SpringBootApplication;
+<span class="hljs-keyword"><span class="hljs-keyword">import</span></span> org.springframework.web.bind.annotation.RequestMapping;
+<span class="hljs-keyword"><span class="hljs-keyword">import</span></span> org.springframework.web.bind.annotation.RestController;
+
+<span class="hljs-annotation"><span class="hljs-annotation">@SpringBootApplication</span></span>
+<span class="hljs-annotation"><span class="hljs-annotation">@RestController</span></span>
+<span class="hljs-keyword"><span class="hljs-keyword">public</span></span> <span class="hljs-class"><span class="hljs-keyword"><span class="hljs-class"><span class="hljs-keyword">class</span></span></span><span class="hljs-class"> </span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">HelloSpringBootApplication</span></span></span><span class="hljs-class"> </span></span>{
+
+    <span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">static</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">void</span></span></span><span class="hljs-function"> </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">main</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">(String[] args)</span></span></span><span class="hljs-function"> </span></span>{
+        SpringApplication.run(HelloSpringBootApplication.class, args);
+    }
+
+    <span class="hljs-annotation"><span class="hljs-annotation">@RequestMapping</span></span>(<span class="hljs-string"><span class="hljs-string">"/"</span></span>)
+    <span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> String </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">hello</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">()</span></span></span><span class="hljs-function"> </span></span>{
+        <span class="hljs-keyword"><span class="hljs-keyword">return</span></span> <span class="hljs-string"><span class="hljs-string">"Hello World!"</span></span>;
+    }
+}
+</code></pre>
+
+<h3 id="run-the-hello-spring-boot-application:3976528693a0108357f4928017600865">Run the <code>hello-spring-boot</code> Application</h3>
+
+<p>1) Open a terminal window and change to <code>hello-spring-boot</code> directory:</p>
+
+<pre><code class="language-bash hljs">$ <span class="hljs-built_in"><span class="hljs-built_in">cd</span></span> <span class="hljs-variable"><span class="hljs-variable">$REPOS_HOME</span></span>/hello-spring-boot
+</code></pre>
+
+<p>2) Run the application</p>
+
+<pre><code class="hljs css"><span class="hljs-tag"><span class="hljs-tag">mvn</span></span> <span class="hljs-tag"><span class="hljs-tag">clean</span></span> <span class="hljs-rule"><span class="hljs-attribute"><span class="hljs-rule"><span class="hljs-attribute">spring-boot</span></span></span><span class="hljs-rule">:</span><span class="hljs-value"><span class="hljs-rule"><span class="hljs-value">run
+</span></span></span></span></code></pre>
+
+<p>3) You should see the application start up an embedded Apache Tomcat server on port 8080 (review terminal output):</p>
+
+<pre><code class="hljs css">2015<span class="hljs-tag"><span class="hljs-tag">-10-02</span></span> 13<span class="hljs-pseudo"><span class="hljs-pseudo">:26</span></span><span class="hljs-pseudo"><span class="hljs-pseudo">:59</span></span><span class="hljs-class"><span class="hljs-class">.264</span></span>  <span class="hljs-tag"><span class="hljs-tag">INFO</span></span> 44749 <span class="hljs-tag"><span class="hljs-tag">---</span></span> <span class="hljs-attr_selector"><span class="hljs-attr_selector">[lication.main()]</span></span> <span class="hljs-rule"><span class="hljs-attribute"><span class="hljs-rule"><span class="hljs-attribute">s.b.c.e.t.TomcatEmbeddedServletContainer </span></span></span><span class="hljs-rule">:</span><span class="hljs-value"><span class="hljs-rule"><span class="hljs-value"> Tomcat started on </span></span><span class="hljs-function"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-function">port</span></span></span></span><span class="hljs-rule"><span class="hljs-value">(s): </span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">8080</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> (http)
+</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">2015</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">10</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">02</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> </span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">13</span></span></span></span><span class="hljs-rule"><span class="hljs-value">:</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">26</span></span></span></span><span class="hljs-rule"><span class="hljs-value">:</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">59.267</span></span></span></span><span class="hljs-rule"><span class="hljs-value">  INFO </span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">44749</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> --- [lication.</span></span><span class="hljs-function"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-function">main</span></span></span></span><span class="hljs-rule"><span class="hljs-value">()] io.pivotal.hello.HelloSpringBootApplication     : Started HelloSpringBootApplication in </span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">2.541</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> seconds (JVM running for </span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">9.141</span></span></span></span><span class="hljs-rule"><span class="hljs-value">)
+</span></span></span></span></code></pre>
+
+<p>4) Browse to: <a href="http://localhost:8080/">http://localhost:8080/</a></p>
+
+<p><img src="./Lab 1 Spring Boot Getting Started_files/hello-world.png" alt="Hello World" title="Hello World"></p>
+
+<p>5) Stop the <code>hello-spring-boot</code> application.  In the terminal window: <code>Ctrl + C</code></p>
+
+<p><strong>Congratulations!</strong>  You’ve just completed your first Spring Boot application.</p>
+
+			</div>
+		</div>
+	</div>
+
+
+
+
+</main>
+
+
+<hr>
+<div class="container">
+	<div class="row">
+		<div class="col-sm-8">
+			<p class="doc-footer-em"><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/getting-started/index.html#">Back to TOP</a></p>
+		</div>
+	</div>
+
+</div> 
+
+<footer class="doc-footer">
+	
+	<p>© Copyright Pivotal. All rights reserved.</p>
+</footer>
+
+
+
+
+
+<script src="./Lab 1 Spring Boot Getting Started_files/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script src="./Lab 1 Spring Boot Getting Started_files/ie10-viewport-bug-workaround.js"></script>
+
+
+
+
+</body></html>

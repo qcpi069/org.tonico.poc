@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<!-- saved from url=(0068)https://workshop-content.cfapps.io/labs/84-spring-data-rest-lab.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="alternate" href="https://cdn.enablement.pivotal.io/index.xml" type="application/rss+xml" title="Spring Boot with Spring Data Rest">
+		<link rel="icon" href="https://cdn.enablement.pivotal.io/spring-boot-primer/spring-data-rest/P_Mark_WhiteOnTeal.png">
+		<title>Spring Boot with Spring Data Rest</title>
+		<link rel="stylesheet" href="./Lab 4 Spring Boot with Spring Data Rest_files/highlight.js.min.css">
+		<link rel="stylesheet" href="./Lab 4 Spring Boot with Spring Data Rest_files/pivotal-ui.css">
+		<link rel="stylesheet" href="./Lab 4 Spring Boot with Spring Data Rest_files/theme.css">
+		<link rel="stylesheet" href="./Lab 4 Spring Boot with Spring Data Rest_files/bootie-docs.css">
+	</head>
+
+<body role="document">
+	
+
+
+<main role="main">
+
+<div class="row">
+	
+	<div class="pane bg-dark-2">
+		<div class="container">
+			<h2 class="type-neutral-11 title">Spring Boot with Spring Data Rest</h2>
+			<p></p>
+		</div>
+	</div>
+</div>
+
+
+	<div class="doc-main">
+		<div class="container">
+			<div class="row">
+				
+<div class="col-sm-14 doc-sidebar">
+	<div class="sidebar-module">
+		<div class="sidebar-toc">
+			<h4>Table of Contents</h4>
+			<nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/spring-data-rest/index.html#requirements:3976528693a0108357f4928017600865">Requirements</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/spring-data-rest/index.html#what-you-will-learn:3976528693a0108357f4928017600865">What You Will Learn</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/spring-data-rest/index.html#exercises:3976528693a0108357f4928017600865">Exercises</a>
+<ul>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/spring-data-rest/index.html#add-an-embedded-database:3976528693a0108357f4928017600865">Add an Embedded Database</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/spring-data-rest/index.html#persistence-with-spring-data-jpa:3976528693a0108357f4928017600865">Persistence With Spring Data JPA</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/spring-data-rest/index.html#add-a-restful-api-with-spring-data-rest:3976528693a0108357f4928017600865">Add a Restful API with Spring Data Rest</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/spring-data-rest/index.html#how-to-run-code-on-startup:3976528693a0108357f4928017600865">How to Run Code on Startup</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/spring-data-rest/index.html#turn-up-logging:3976528693a0108357f4928017600865">Turn Up Logging</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/spring-data-rest/index.html#run-hello-spring-boot-rest:3976528693a0108357f4928017600865">Run <code>hello-spring-boot-rest</code></a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/spring-data-rest/index.html#deploy-to-pcf-with-no-code-changes-but-use-mysql:3976528693a0108357f4928017600865">Deploy to PCF with No Code Changes But Use MySQL</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+		</div>
+	</div>
+</div>
+
+			</div>
+			<div class="row">
+				
+
+<hr>
+
+<p>Estimated Time: 45 minutes</p>
+
+<hr>
+
+<h2 id="requirements:3976528693a0108357f4928017600865">Requirements</h2>
+
+<p><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/labs-setup">Lab Requirements</a></p>
+
+<hr>
+
+<h2 id="what-you-will-learn:3976528693a0108357f4928017600865">What You Will Learn</h2>
+
+<ul>
+<li>How to use repositories for data access</li>
+<li>How to expose a REST API on top of those repositories</li>
+<li>How to use an embedded database for development</li>
+<li>How to use a production ready database in production</li>
+<li>How to gain access to the command line arguments and run specific code once</li>
+<li>How to control log levels</li>
+</ul>
+
+<hr>
+
+<h2 id="exercises:3976528693a0108357f4928017600865">Exercises</h2>
+
+<h3 id="add-an-embedded-database:3976528693a0108357f4928017600865">Add an Embedded Database</h3>
+
+<p>1) Review the following file: <code>$SPRING_BOOT_LABS_HOME/hello-spring-boot-rest/pom.xml</code>.  By adding the <code>hsqldb</code> dependency, we have added embedded database support for the <code>hello-spring-boot-rest</code> application.  This helps us get started quickly in development, as we don’t have to provision a database.</p>
+
+<pre><code class="language-xml hljs"><span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>org.hsqldb<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>hsqldb<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">scope</span></span></span><span class="hljs-tag">&gt;</span></span>runtime<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">scope</span></span></span><span class="hljs-tag">&gt;</span></span>
+<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+</code></pre>
+
+<h3 id="persistence-with-spring-data-jpa:3976528693a0108357f4928017600865">Persistence With Spring Data JPA</h3>
+
+<p>1) Review the following file: <code>$SPRING_BOOT_LABS_HOME/hello-spring-boot-rest/pom.xml</code>.  By adding the <code>spring-boot-starter-data-jpa</code> dependency, we have added Spring Data JPA support for the <code>hello-spring-boot-rest</code> application.</p>
+
+<pre><code class="language-xml hljs"><span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>org.springframework.boot<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>spring-boot-starter-data-jpa<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+</code></pre>
+
+<p>Implementing a data access layer of an application has been cumbersome for quite a while. Too much boilerplate code has to be written to execute simple queries as well as perform pagination, and auditing. Spring Data JPA aims to significantly improve the implementation of data access layers by reducing the effort to the amount that’s actually needed. As a developer you write your repository interfaces, including custom finder methods, and Spring will provide the implementation automatically.</p>
+
+<p>To read more on Spring Data JPA go <a href="http://docs.spring.io/spring-data/jpa/docs/1.9.0.RELEASE/reference/html/">here</a>.</p>
+
+<p>2) Review the following file: <code>$SPRING_BOOT_LABS_HOME/hello-spring-boot-rest/src/main/java/io/pivotal/hello/Greeting.java</code>.  This is a typical JPA domain (<code>Entity</code>) class.  This class represents one row in our <code>greeting</code> table.</p>
+
+<pre><code class="language-java hljs"><span class="hljs-annotation"><span class="hljs-annotation">@Entity</span></span>
+<span class="hljs-keyword"><span class="hljs-keyword">public</span></span> <span class="hljs-class"><span class="hljs-keyword"><span class="hljs-class"><span class="hljs-keyword">class</span></span></span><span class="hljs-class"> </span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">Greeting</span></span></span><span class="hljs-class"> </span></span>{
+
+	<span class="hljs-annotation"><span class="hljs-annotation">@Id</span></span>
+	<span class="hljs-keyword"><span class="hljs-keyword">private</span></span> Integer id;
+
+	<span class="hljs-keyword"><span class="hljs-keyword">private</span></span> String text;
+
+	<span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">Greeting</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">(Integer id, String text)</span></span></span><span class="hljs-function"> </span></span>{
+		<span class="hljs-keyword"><span class="hljs-keyword">super</span></span>();
+		<span class="hljs-keyword"><span class="hljs-keyword">this</span></span>.id = id;
+		<span class="hljs-keyword"><span class="hljs-keyword">this</span></span>.text = text;
+	}
+
+	<span class="hljs-annotation"><span class="hljs-annotation">@Override</span></span>
+	<span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> String </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">toString</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">()</span></span></span><span class="hljs-function"> </span></span>{
+		<span class="hljs-keyword"><span class="hljs-keyword">return</span></span> <span class="hljs-string"><span class="hljs-string">"Greeting [id="</span></span> + id + <span class="hljs-string"><span class="hljs-string">", text="</span></span> + text + <span class="hljs-string"><span class="hljs-string">"]"</span></span>;
+	}
+
+	<span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> Integer </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">getId</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">()</span></span></span><span class="hljs-function"> </span></span>{
+		<span class="hljs-keyword"><span class="hljs-keyword">return</span></span> id;
+	}
+
+	<span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> String </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">getText</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">()</span></span></span><span class="hljs-function"> </span></span>{
+		<span class="hljs-keyword"><span class="hljs-keyword">return</span></span> text;
+	}
+
+	<span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">Greeting</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">()</span></span></span><span class="hljs-function"> </span></span>{
+
+	}
+
+}
+</code></pre>
+
+<p>3) Review the following file: <code>$SPRING_BOOT_LABS_HOME/hello-spring-boot-rest/src/main/java/io/pivotal/hello/GreetingRepository.java</code>.  This repository interface provides <a href="http://docs.spring.io/spring-data/jpa/docs/current/api/org/springframework/data/jpa/repository/JpaRepository.html">CRUD operations</a> against the <code>greeting</code> table.  All without the developer having to write any implementation!</p>
+
+<pre><code class="language-java hljs"><span class="hljs-keyword"><span class="hljs-keyword">public</span></span> <span class="hljs-class"><span class="hljs-keyword"><span class="hljs-class"><span class="hljs-keyword">interface</span></span></span><span class="hljs-class"> </span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">GreetingRepository</span></span></span><span class="hljs-class"> </span><span class="hljs-keyword"><span class="hljs-class"><span class="hljs-keyword">extends</span></span></span><span class="hljs-class"> </span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">JpaRepository</span></span></span><span class="hljs-class">&lt;</span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">Greeting</span></span></span><span class="hljs-class">, </span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">Long</span></span></span><span class="hljs-class">&gt;</span></span>{
+
+}
+</code></pre>
+
+<p>4) Review the following file: <code>$SPRING_BOOT_LABS_HOME/hello-spring-boot-rest/src/main/resources/application.yml</code>.  The <code>spring.jpa.hibernate.ddl-auto</code> setting controls how/if DDL changes are made.  In this case, our application will update the schema if needed on startup.  Read more on database initialization <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/howto-database-initialization.html">here</a>.</p>
+
+<pre><code class="language-yml hljs cpp">spring:
+  jpa:
+    hibernate:
+      ddl-<span class="hljs-keyword"><span class="hljs-keyword">auto</span></span>: update
+</code></pre>
+
+<h3 id="add-a-restful-api-with-spring-data-rest:3976528693a0108357f4928017600865">Add a Restful API with Spring Data Rest</h3>
+
+<p>1) Review the following file: <code>$SPRING_BOOT_LABS_HOME/hello-spring-boot-rest/pom.xml</code>.  By adding the <code>spring-boot-starter-data-rest</code> dependency, we have added REST support for our JPA repositories in the <code>hello-spring-boot-rest</code> application.</p>
+
+<pre><code class="language-xml hljs"><span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>org.springframework.boot<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>spring-boot-starter-data-rest<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+</code></pre>
+
+<p>The goal of the Spring Data REST project is to provide a solid foundation on which to expose CRUD operations to your repositories using plain HTTP REST semantics.  Read more on Spring Data REST <a href="http://docs.spring.io/spring-data/rest/docs/2.4.0.RELEASE/reference/html/">here</a>.</p>
+
+<p>For the <code>GreetingRepository</code>, Spring Data REST exposes a collection resource at <code>/greetings</code>. The path is derived from the uncapitalized, pluralized, simple class name of the domain class being managed. It also exposes an item resource for each of the items managed by the repository under the URI template <code>/greetings/{id}</code>.</p>
+
+<p>We will explore the REST API, once we populate the database.</p>
+
+<h3 id="how-to-run-code-on-startup:3976528693a0108357f4928017600865">How to Run Code on Startup</h3>
+
+<p>In many cases, you need to run some code on startup.  Spring Boot allows you capture the command line arguments and run code just as if you had implemented <code>public static void main(String[] args)</code> by implementing a <code>CommandLineRunner</code> bean.</p>
+
+<p><code>CommandLineRunner</code> is a core feature to Spring Boot so there are no dependencies that need to be explicitly added.</p>
+
+<p>1) Review the following file: <code>$SPRING_BOOT_LABS_HOME/hello-spring-boot-rest/src/main/java/io/pivotal/hello/HelloSpringBootApplication.java</code>.</p>
+
+<pre><code class="language-java hljs"><span class="hljs-annotation"><span class="hljs-annotation">@SpringBootApplication</span></span>
+<span class="hljs-keyword"><span class="hljs-keyword">public</span></span> <span class="hljs-class"><span class="hljs-keyword"><span class="hljs-class"><span class="hljs-keyword">class</span></span></span><span class="hljs-class"> </span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">HelloSpringBootApplication</span></span></span><span class="hljs-class"> </span></span>{
+
+	Logger logger = LoggerFactory
+			.getLogger(HelloSpringBootApplication.class);
+
+	<span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">static</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">void</span></span></span><span class="hljs-function"> </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">main</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">(String[] args)</span></span></span><span class="hljs-function"> </span></span>{
+		SpringApplication.run(HelloSpringBootApplication.class, args);
+	}
+
+	<span class="hljs-javadoc"><span class="hljs-javadoc">/**
+	 *
+	 * Loads the database on startup
+	 *
+	 *</span><span class="hljs-javadoctag"><span class="hljs-javadoc"><span class="hljs-javadoctag"> @param</span></span></span><span class="hljs-javadoc"> gr
+	 *</span><span class="hljs-javadoctag"><span class="hljs-javadoc"><span class="hljs-javadoctag"> @return</span></span></span><span class="hljs-javadoc">
+	 */</span></span>
+	<span class="hljs-annotation"><span class="hljs-annotation">@Bean</span></span>
+	<span class="hljs-function"><span class="hljs-function">CommandLineRunner </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">loadDatabase</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">(GreetingRepository gr)</span></span></span><span class="hljs-function"> </span></span>{
+		<span class="hljs-keyword"><span class="hljs-keyword">return</span></span> args -&gt; {
+			logger.debug(<span class="hljs-string"><span class="hljs-string">"loading database.."</span></span>);
+			gr.save(<span class="hljs-keyword"><span class="hljs-keyword">new</span></span> Greeting(<span class="hljs-number"><span class="hljs-number">1</span></span>, <span class="hljs-string"><span class="hljs-string">"Hello"</span></span>));
+			gr.save(<span class="hljs-keyword"><span class="hljs-keyword">new</span></span> Greeting(<span class="hljs-number"><span class="hljs-number">2</span></span>, <span class="hljs-string"><span class="hljs-string">"Hola"</span></span>));
+			gr.save(<span class="hljs-keyword"><span class="hljs-keyword">new</span></span> Greeting(<span class="hljs-number"><span class="hljs-number">3</span></span>, <span class="hljs-string"><span class="hljs-string">"Ohai"</span></span>));
+			logger.debug(<span class="hljs-string"><span class="hljs-string">"record count: {}"</span></span>, gr.count());
+			gr.findAll().forEach(x -&gt; logger.debug(x.toString()));
+		};
+
+	}
+
+}
+
+</code></pre>
+
+<p>In this case, we are using a <code>CommandLineRunner</code> to populate the database with our <code>GreetingRepository</code>.</p>
+
+<h3 id="turn-up-logging:3976528693a0108357f4928017600865">Turn Up Logging</h3>
+
+<p>To view the debug statements in the class we can turn up logging.</p>
+
+<p>1) Review the following file: <code>$SPRING_BOOT_LABS_HOME/hello-spring-boot-rest/src/main/resources/application.yml</code>.</p>
+
+<pre><code class="language-yaml hljs css"><span class="hljs-rule"><span class="hljs-attribute"><span class="hljs-rule"><span class="hljs-attribute">logging</span></span></span><span class="hljs-rule">:</span><span class="hljs-value"><span class="hljs-rule"><span class="hljs-value">
+  level:
+    io:
+      pivotal:DEBUG
+</span></span></span></span></code></pre>
+
+<p>Log levels can be  <code>ERROR</code>, <code>WARN</code>, <code>INFO</code>, <code>DEBUG</code> or <code>TRACE</code>.</p>
+
+<p>Simply specify the package/class in the <code>logging.level</code> key and set the desired level.</p>
+
+<p>In this case, we have turned on <code>DEBUG</code> logging for everything in the <code>io.pivotal</code> package.</p>
+
+<h3 id="run-hello-spring-boot-rest:3976528693a0108357f4928017600865">Run <code>hello-spring-boot-rest</code></h3>
+
+<p>1) Open a terminal window.</p>
+
+<pre><code class="language-bash hljs">$ <span class="hljs-built_in"><span class="hljs-built_in">cd</span></span> <span class="hljs-variable"><span class="hljs-variable">$SPRING_BOOT_LABS_HOME</span></span>/hello-spring-boot-rest
+$ mvn clean spring-boot:run
+</code></pre>
+
+<p>2) View the logs in the terminal output.  See the database being populated.</p>
+
+<pre><code class="hljs sql">2015-10-06 13:42:27.350 DEBUG 65573 <span class="hljs-comment"><span class="hljs-comment">--- [lication.main()] i.p.hello.HelloSpringBootApplication     : loading database..</span></span>
+2015-10-06 13:42:27.527 DEBUG 65573 <span class="hljs-comment"><span class="hljs-comment">--- [lication.main()] i.p.hello.HelloSpringBootApplication     : record count: 3</span></span>
+2015-10-06 13:42:27.564 DEBUG 65573 <span class="hljs-comment"><span class="hljs-comment">--- [lication.main()] i.p.hello.HelloSpringBootApplication     : Greeting [id=1, text=Hello]</span></span>
+2015-10-06 13:42:27.564 DEBUG 65573 <span class="hljs-comment"><span class="hljs-comment">--- [lication.main()] i.p.hello.HelloSpringBootApplication     : Greeting [id=2, text=Hola]</span></span>
+2015-10-06 13:42:27.564 DEBUG 65573 <span class="hljs-comment"><span class="hljs-comment">--- [lication.main()] i.p.hello.HelloSpringBootApplication     : Greeting [id=3, text=Ohai]</span></span>
+</code></pre>
+
+<p>3) Browse to <a href="http://localhost:8080/greetings">http://localhost:8080/greetings</a></p>
+
+<p><img src="./Lab 4 Spring Boot with Spring Data Rest_files/greetings.png" alt="greetings" title="greetings"></p>
+
+<p>Notice that not just data is returned but links on how to navigate the API.  This is provided by <a href="http://projects.spring.io/spring-hateoas/">Spring HATEOAS</a> as opposed to establishing a contract up front or use of documentation.  Read more on <a href="https://en.wikipedia.org/wiki/HATEOAS">HATEOAS</a>.</p>
+
+<p>4) Experiment with paging and sorting</p>
+
+<ul>
+<li>Sort by text in ascending order: <a href="http://localhost:8080/greetings?sort=text,asc">http://localhost:8080/greetings?sort=text,asc</a></li>
+<li>Sort by text in decending order: <a href="http://localhost:8080/greetings?sort=text,desc">http://localhost:8080/greetings?sort=text,desc</a></li>
+<li>Get page 0, size 1: <a href="http://localhost:8080/greetings?size=1&amp;page=0">http://localhost:8080/greetings?size=1&amp;page=0</a></li>
+<li>Get page 1, size 1: <a href="http://localhost:8080/greetings?size=1&amp;page=1">http://localhost:8080/greetings?size=1&amp;page=1</a></li>
+</ul>
+
+<p>5) Stop the <code>hello-spring-boot-rest</code> application.</p>
+
+<h3 id="deploy-to-pcf-with-no-code-changes-but-use-mysql:3976528693a0108357f4928017600865">Deploy to PCF with No Code Changes But Use MySQL</h3>
+
+<p>We know that we don’t want to use our embedded database when we deploy our application.  In this case, we plan to use MySql.</p>
+
+<p>1) Review the following file: <code>$SPRING_BOOT_LABS_HOME/hello-spring-boot-rest/pom.xml</code>.  By adding the <code>mysql-connector-java</code> dependency, we have added MySQL support for the <code>hello-spring-boot-rest</code> application.</p>
+
+<pre><code class="language-xml hljs"><span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>mysql<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>mysql-connector-java<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">scope</span></span></span><span class="hljs-tag">&gt;</span></span>runtime<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">scope</span></span></span><span class="hljs-tag">&gt;</span></span>
+<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+</code></pre>
+
+<p>2) Set your Pivotal Cloud Foundry API endpoint.</p>
+
+<pre><code class="hljs ruby"><span class="hljs-variable"><span class="hljs-variable">$ </span></span>cf api
+</code></pre>
+
+<p>3) Login the Pivotal Cloud Foundry environment.</p>
+
+<pre><code class="hljs ruby"><span class="hljs-variable"><span class="hljs-variable">$ </span></span>cf login
+</code></pre>
+
+<p>4) Create a MySQL service instance.  Note that you may have a different MySql service offering (e.g. if using Pivotal Web Services) in your Pivotal Cloud Foundry Environment.  If so, use an equivalent plan (usually the lowest offering available).</p>
+
+<pre><code class="hljs ruby"><span class="hljs-variable"><span class="hljs-variable">$ </span></span>cf create-service p-mysql <span class="hljs-number"><span class="hljs-number">100</span></span>mb-dev greetings-db
+</code></pre>
+
+<p>5) Deploy your <code>hello-spring-boot-rest</code> application:</p>
+
+<pre><code class="language-bash hljs">$ mvn clean package
+$ cf push hello-spring-boot-rest -p target/hello-spring-boot-rest-<span class="hljs-number"><span class="hljs-number">0.0</span></span>.<span class="hljs-number"><span class="hljs-number">1</span></span>-SNAPSHOT.jar -m <span class="hljs-number"><span class="hljs-number">512</span></span>M --random-route --no-start
+$ cf <span class="hljs-built_in"><span class="hljs-built_in">bind</span></span>-service hello-spring-boot-rest greetings-db
+$ cf start hello-spring-boot-rest
+</code></pre>
+
+<p>You can safely ignore the <em>TIP: Use ‘cf restage’ to ensure your env variable changes take effect message from the CLI.</em> We can just start the <code>hello-spring-boot-rest</code> application.</p>
+
+<p>The <code>hello-spring-boot-rest</code> application will be deployed to a random uri in your Pivotal Cloud Foundry Environment.  Make note of the uri, you will use it in the next step.</p>
+
+<p>6) Browse to the <code>hello-spring-boot-rest</code> <code>/greetings</code> endpoint (e.g. <code>http://&lt;random uri&gt;/greetings</code>) to verify that the <code>hello-spring-boot-rest</code> application is working. The <code>hello-spring-boot-rest</code> application works the same as it did with an embedded database, but now it uses MySQL with no code changes.</p>
+
+<p><strong><em>What Just Happened?</em></strong></p>
+
+<p>When running locally Spring Boot will use the embedded database (<code>hsqldb</code>) and create the <code>DataSource</code> (how to connect to the database) for you.  The Cloud Foundry Java Buildpack will detect a database service binding and re-write the <code>DataSource</code> for you when you run in the cloud, so that you can connect to your bound service.  This part of the Java Buildpack is known as auto-reconfiguration.  More details can be found <a href="https://github.com/cloudfoundry/java-buildpack-auto-reconfiguration">here</a>.</p>
+
+			</div>
+		</div>
+	</div>
+
+
+
+
+</main>
+
+
+<hr>
+<div class="container">
+	<div class="row">
+		<div class="col-sm-8">
+			<p class="doc-footer-em"><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/spring-data-rest/index.html#">Back to TOP</a></p>
+		</div>
+	</div>
+
+</div> 
+
+<footer class="doc-footer">
+	
+	<p>© Copyright Pivotal. All rights reserved.</p>
+</footer>
+
+
+
+
+
+<script src="./Lab 4 Spring Boot with Spring Data Rest_files/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script src="./Lab 4 Spring Boot with Spring Data Rest_files/ie10-viewport-bug-workaround.js"></script>
+
+
+
+
+</body></html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<!-- saved from url=(0089)https://workshop-content.cfapps.io/labs/88-spring-cloud-netflix-circuit-breakers-lab.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="alternate" href="https://cdn.enablement.pivotal.io/index.xml" type="application/rss+xml" title="Spring Cloud Netflix: Circuit Breakers">
+		<link rel="icon" href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-circuit-breakers/P_Mark_WhiteOnTeal.png">
+		<title>Spring Cloud Netflix: Circuit Breakers</title>
+		<link rel="stylesheet" href="./Lab 7 Spring Cloud Netflix_ Circuit Breakers_files/highlight.js.min.css">
+		<link rel="stylesheet" href="./Lab 7 Spring Cloud Netflix_ Circuit Breakers_files/pivotal-ui.css">
+		<link rel="stylesheet" href="./Lab 7 Spring Cloud Netflix_ Circuit Breakers_files/theme.css">
+		<link rel="stylesheet" href="./Lab 7 Spring Cloud Netflix_ Circuit Breakers_files/bootie-docs.css">
+	</head>
+
+<body role="document">
+	
+
+
+<main role="main">
+
+<div class="row">
+	
+	<div class="pane bg-dark-2">
+		<div class="container">
+			<h2 class="type-neutral-11 title">Spring Cloud Netflix: Circuit Breakers</h2>
+			<p></p>
+		</div>
+	</div>
+</div>
+
+
+	<div class="doc-main">
+		<div class="container">
+			<div class="row">
+				
+<div class="col-sm-14 doc-sidebar">
+	<div class="sidebar-module">
+		<div class="sidebar-toc">
+			<h4>Table of Contents</h4>
+			<nav id="TableOfContents">
+<ul>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-circuit-breakers/index.html#spring-cloud-netflix-circuit-breakers:3976528693a0108357f4928017600865">Spring Cloud Netflix: Circuit Breakers</a>
+<ul>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-circuit-breakers/index.html#requirements:3976528693a0108357f4928017600865">Requirements</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-circuit-breakers/index.html#what-you-will-learn:3976528693a0108357f4928017600865">What You Will Learn</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-circuit-breakers/index.html#exercises:3976528693a0108357f4928017600865">Exercises</a>
+<ul>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-circuit-breakers/index.html#start-the-config-server-service-registry-and-fortune-service:3976528693a0108357f4928017600865">Start the  <code>config-server</code>,  <code>service-registry</code>, and <code>fortune-service</code></a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-circuit-breakers/index.html#set-up-greeting-hystrix:3976528693a0108357f4928017600865">Set up <code>greeting-hystrix</code></a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-circuit-breakers/index.html#set-up-the-greeting-hystrix-metric-stream:3976528693a0108357f4928017600865">Set up the <code>greeting-hystrix</code> metric stream</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-circuit-breakers/index.html#set-up-hystrix-dashboard:3976528693a0108357f4928017600865">Set up <code>hystrix-dashboard</code></a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+		</div>
+	</div>
+</div>
+
+			</div>
+			<div class="row">
+				
+
+<h1 id="spring-cloud-netflix-circuit-breakers:3976528693a0108357f4928017600865">Spring Cloud Netflix: Circuit Breakers</h1>
+
+<hr>
+
+<p>Estimated Time: 25 minutes</p>
+
+<hr>
+
+<h2 id="requirements:3976528693a0108357f4928017600865">Requirements</h2>
+
+<p><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/requirements">Lab Requirements</a></p>
+
+<hr>
+
+<h2 id="what-you-will-learn:3976528693a0108357f4928017600865">What You Will Learn</h2>
+
+<ul>
+<li>How to protect your application (<code>greeting-hystrix</code>) from failures or latency with the circuit breaker pattern</li>
+<li>How to publish circuit-breaking metrics from your application (<code>greeting-hystrix</code>)</li>
+<li>How to consume metric streams with the <code>hystrix-dashboard</code></li>
+</ul>
+
+<hr>
+
+<h2 id="exercises:3976528693a0108357f4928017600865">Exercises</h2>
+
+<hr>
+
+<h3 id="start-the-config-server-service-registry-and-fortune-service:3976528693a0108357f4928017600865">Start the  <code>config-server</code>,  <code>service-registry</code>, and <code>fortune-service</code></h3>
+
+<p>1) Start the <code>config-server</code> in a terminal window.  You may have terminal windows still open from previous labs.  They may be reused for this lab.</p>
+
+<pre><code class="language-bash hljs">$ <span class="hljs-built_in"><span class="hljs-built_in">cd</span></span> <span class="hljs-variable"><span class="hljs-variable">$SPRING_CLOUD_SERVICES_LABS_HOME</span></span>/config-server
+$ mvn clean spring-boot:run
+</code></pre>
+
+<p>2) Start the <code>service-registry</code></p>
+
+<pre><code class="language-bash hljs">$ <span class="hljs-built_in"><span class="hljs-built_in">cd</span></span> <span class="hljs-variable"><span class="hljs-variable">$SPRING_CLOUD_SERVICES_LABS_HOME</span></span>/service-registry
+$ mvn clean spring-boot:run
+</code></pre>
+
+<p>3) Start the <code>fortune-service</code></p>
+
+<pre><code class="language-bash hljs">$ <span class="hljs-built_in"><span class="hljs-built_in">cd</span></span> <span class="hljs-variable"><span class="hljs-variable">$SPRING_CLOUD_SERVICES_LABS_HOME</span></span>/fortune-service
+$ mvn clean spring-boot:run
+</code></pre>
+
+<h3 id="set-up-greeting-hystrix:3976528693a0108357f4928017600865">Set up <code>greeting-hystrix</code></h3>
+
+<p>1) Review the <code>$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-hystrix/pom.xml</code> file.  By adding <code>spring-cloud-services-starter-circuit-breaker</code> to the classpath this application is eligible to use circuit breakers via Hystrix.</p>
+
+<pre><code class="language-xml hljs"><span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>io.pivotal.spring.cloud<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>spring-cloud-services-starter-circuit-breaker<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+</code></pre>
+
+<p>2) Review the following file: <code>$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-hystrix/src/main/java/io/pivotal/GreetingHystrixApplication.java</code>.  Note the use of the <code>@EnableCircuitBreaker</code> annotation. This allows the application to create circuit breakers.</p>
+
+<pre><code class="language-java hljs"><span class="hljs-annotation"><span class="hljs-annotation">@SpringBootApplication</span></span>
+<span class="hljs-annotation"><span class="hljs-annotation">@EnableDiscoveryClient</span></span>
+<span class="hljs-annotation"><span class="hljs-annotation">@EnableCircuitBreaker</span></span>
+<span class="hljs-keyword"><span class="hljs-keyword">public</span></span> <span class="hljs-class"><span class="hljs-keyword"><span class="hljs-class"><span class="hljs-keyword">class</span></span></span><span class="hljs-class"> </span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">GreetingHystrixApplication</span></span></span><span class="hljs-class"> </span></span>{
+
+
+    <span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">static</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">void</span></span></span><span class="hljs-function"> </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">main</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">(String[] args)</span></span></span><span class="hljs-function"> </span></span>{
+        SpringApplication.run(GreetingHystrixApplication.class, args);
+    }
+
+}
+</code></pre>
+
+<p>3). Review the following file: <code>$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-hystrix/src/main/java/io/pivotal/fortune/FortuneService.java</code>.  Note the use of the <code>@HystrixCommand</code>.  This is our circuit breaker.  If <code>getFortune()</code> fails, a fallback method <code>defaultFortune</code> will be invoked.</p>
+
+<pre><code class="language-java hljs"><span class="hljs-annotation"><span class="hljs-annotation">@Service</span></span>
+<span class="hljs-keyword"><span class="hljs-keyword">public</span></span> <span class="hljs-class"><span class="hljs-keyword"><span class="hljs-class"><span class="hljs-keyword">class</span></span></span><span class="hljs-class"> </span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">FortuneService</span></span></span><span class="hljs-class"> </span></span>{
+
+	Logger logger = LoggerFactory
+			.getLogger(FortuneService.class);
+
+	<span class="hljs-annotation"><span class="hljs-annotation">@Autowired</span></span>
+	<span class="hljs-annotation"><span class="hljs-annotation">@LoadBalanced</span></span>
+	<span class="hljs-keyword"><span class="hljs-keyword">private</span></span> RestTemplate restTemplate;
+
+	<span class="hljs-annotation"><span class="hljs-annotation">@HystrixCommand</span></span>(fallbackMethod = <span class="hljs-string"><span class="hljs-string">"defaultFortune"</span></span>)
+	<span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> String </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">getFortune</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">()</span></span></span><span class="hljs-function"> </span></span>{
+    String fortune = restTemplate.getForObject(<span class="hljs-string"><span class="hljs-string">"http://fortune-service"</span></span>, String.class);
+		<span class="hljs-keyword"><span class="hljs-keyword">return</span></span> fortune;
+	}
+
+	<span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> String </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">defaultFortune</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">()</span></span></span></span>{
+		logger.debug(<span class="hljs-string"><span class="hljs-string">"Default fortune used."</span></span>);
+		<span class="hljs-keyword"><span class="hljs-keyword">return</span></span> <span class="hljs-string"><span class="hljs-string">"This fortune is no good. Try another."</span></span>;
+	}
+
+
+
+}
+
+</code></pre>
+
+<p>4) Open a new terminal window. Start the <code>greeting-hystrix</code></p>
+
+<pre><code class="language-bash hljs">$ <span class="hljs-built_in"><span class="hljs-built_in">cd</span></span> <span class="hljs-variable"><span class="hljs-variable">$SPRING_CLOUD_SERVICES_LABS_HOME</span></span>/greeting-hystrix
+$ mvn clean spring-boot:run
+</code></pre>
+
+<p>5) Refresh the <code>greeting-hystrix</code> <code>/</code> endpoint.  You should get fortunes from the <code>fortune-service</code>.</p>
+
+<p>6) Stop the <code>fortune-service</code>.  And refresh the <code>greeting-hystrix</code> <code>/</code> endpoint again.  The default fortune is given.</p>
+
+<p>7) Restart the <code>fortune-service</code>.  And refresh the <code>greeting-hystrix</code> <code>/</code> endpoint again.  After some time, fortunes from the <code>fortune-service</code> are back.</p>
+
+<p><strong><em>What Just Happened?</em></strong></p>
+
+<p>The circuit breaker insulated <code>greeting-hystrix</code> from failures when the <code>fortune-service</code> was not available.  This results in a better experience for our users and can also prevent cascading failures.</p>
+
+<h3 id="set-up-the-greeting-hystrix-metric-stream:3976528693a0108357f4928017600865">Set up the <code>greeting-hystrix</code> metric stream</h3>
+
+<p>Being able to monitor the state of our circuit breakers is highly valuable, but first the <code>greeting-hystrix</code> application must expose the metrics.</p>
+
+<p>This is accomplished by including the <code>actuator</code> dependency in the <code>greeting-hystrix</code> <code>pom.xml</code>.</p>
+
+<p>1) Review the <code>$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-hystrix/pom.xml</code> file.  By adding <code>spring-boot-starter-actuator</code> to the classpath this application will publish metrics at the <code>/hystrix.stream</code> endpoint.</p>
+
+<pre><code class="language-xml hljs"><span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>org.springframework.boot<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>spring-boot-starter-actuator<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+</code></pre>
+
+<p>2) Browse to <a href="http://localhost:8080/hystrix.stream">http://localhost:8080/hystrix.stream</a> to review the metric stream.
+<img src="./Lab 7 Spring Cloud Netflix_ Circuit Breakers_files/hystrix-stream.png" alt="hystrix-stream" title="hystrix-stream"></p>
+
+<h3 id="set-up-hystrix-dashboard:3976528693a0108357f4928017600865">Set up <code>hystrix-dashboard</code></h3>
+
+<p>Consuming the metric stream is difficult to interpret on our own.  The metric stream can be visualized with the Hystrix Dashboard.</p>
+
+<p>1) Review the <code>$SPRING_CLOUD_SERVICES_LABS_HOME/hystrix-dashboard/pom.xml</code> file.  By adding <code>spring-cloud-starter-hystrix-dashboard</code> to the classpath this application is exposes a Hystrix Dashboard.</p>
+
+<pre><code class="language-xml hljs"><span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+    <span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>org.springframework.cloud<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+    <span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>spring-cloud-starter-hystrix-dashboard<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+</code></pre>
+
+<p>2) Review the following file: <code>$SPRING_CLOUD_SERVICES_LABS_HOME/hystrix-dashboard/src/main/java/io/pivotal/HystrixDashboardApplication.java</code>.  Note the use of the <code>@EnableHystrixDashboard</code> annotation. This creates a Hystrix Dashboard.</p>
+
+<pre><code class="language-java hljs"><span class="hljs-annotation"><span class="hljs-annotation">@SpringBootApplication</span></span>
+<span class="hljs-annotation"><span class="hljs-annotation">@EnableHystrixDashboard</span></span>
+<span class="hljs-keyword"><span class="hljs-keyword">public</span></span> <span class="hljs-class"><span class="hljs-keyword"><span class="hljs-class"><span class="hljs-keyword">class</span></span></span><span class="hljs-class"> </span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">HystrixDashboardApplication</span></span></span><span class="hljs-class"> </span></span>{
+
+    <span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">static</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">void</span></span></span><span class="hljs-function"> </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">main</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">(String[] args)</span></span></span><span class="hljs-function"> </span></span>{
+        SpringApplication.run(HystrixDashboardApplication.class, args);
+    }
+}
+</code></pre>
+
+<p>3) Open a new terminal window. Start the <code>hystrix-dashboard</code></p>
+
+<pre><code class="language-bash hljs">$ <span class="hljs-built_in"><span class="hljs-built_in">cd</span></span> <span class="hljs-variable"><span class="hljs-variable">$SPRING_CLOUD_SERVICES_LABS_HOME</span></span>/hystrix-dashboard
+$ mvn clean spring-boot:run
+</code></pre>
+
+<p>4) Open a browser to <a href="http://localhost:8686/hystrix">http://localhost:8686/hystrix</a>
+<img src="./Lab 7 Spring Cloud Netflix_ Circuit Breakers_files/hystrix-dashboard.png" alt="hystrix-dashboard" title="hystrix-dashboard"></p>
+
+<p>5) Link the <code>hystrix-dashboard</code> to the <code>greeting-hystrix</code> app.  Enter <code>http://localhost:8080/hystrix.stream</code> as the stream to monitor.</p>
+
+<p>6) Experiment! Refresh the <code>greeting-hystrix</code> <code>/</code> endpoint several times.  Take down the <code>fortune-service</code> app.  What does the dashboard do?  Review the <a href="https://github.com/Netflix/Hystrix/wiki/Dashboard">dashboard doc</a> for an explanation on metrics.</p>
+
+<p><img src="./Lab 7 Spring Cloud Netflix_ Circuit Breakers_files/dashboard-activity.png" alt="dashboard-activity" title="dashboard-activity"></p>
+
+			</div>
+		</div>
+	</div>
+
+
+
+
+</main>
+
+
+<hr>
+<div class="container">
+	<div class="row">
+		<div class="col-sm-8">
+			<p class="doc-footer-em"><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-circuit-breakers/index.html#">Back to TOP</a></p>
+		</div>
+	</div>
+
+</div> 
+
+<footer class="doc-footer">
+	
+	<p>© Copyright Pivotal. All rights reserved.</p>
+</footer>
+
+
+
+
+
+<script src="./Lab 7 Spring Cloud Netflix_ Circuit Breakers_files/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script src="./Lab 7 Spring Cloud Netflix_ Circuit Breakers_files/ie10-viewport-bug-workaround.js"></script>
+
+
+
+
+</body></html>

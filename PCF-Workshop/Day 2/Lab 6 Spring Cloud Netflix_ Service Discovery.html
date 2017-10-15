@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<!-- saved from url=(0090)https://workshop-content.cfapps.io/labs/86-spring-cloud-netflix-service-discovery-lab.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="alternate" href="https://cdn.enablement.pivotal.io/index.xml" type="application/rss+xml" title="Spring Cloud Netflix: Service Discovery">
+		<link rel="icon" href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-service-discovery/P_Mark_WhiteOnTeal.png">
+		<title>Spring Cloud Netflix: Service Discovery</title>
+		<link rel="stylesheet" href="./Lab 6 Spring Cloud Netflix_ Service Discovery_files/highlight.js.min.css">
+		<link rel="stylesheet" href="./Lab 6 Spring Cloud Netflix_ Service Discovery_files/pivotal-ui.css">
+		<link rel="stylesheet" href="./Lab 6 Spring Cloud Netflix_ Service Discovery_files/theme.css">
+		<link rel="stylesheet" href="./Lab 6 Spring Cloud Netflix_ Service Discovery_files/bootie-docs.css">
+	</head>
+
+<body role="document">
+	
+
+
+<main role="main">
+
+<div class="row">
+	
+	<div class="pane bg-dark-2">
+		<div class="container">
+			<h2 class="type-neutral-11 title">Spring Cloud Netflix: Service Discovery</h2>
+			<p></p>
+		</div>
+	</div>
+</div>
+
+
+	<div class="doc-main">
+		<div class="container">
+			<div class="row">
+				
+<div class="col-sm-14 doc-sidebar">
+	<div class="sidebar-module">
+		<div class="sidebar-toc">
+			<h4>Table of Contents</h4>
+			<nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-service-discovery/index.html#requirements:3976528693a0108357f4928017600865">Requirements</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-service-discovery/index.html#what-you-will-learn:3976528693a0108357f4928017600865">What You Will Learn</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-service-discovery/index.html#exercises:3976528693a0108357f4928017600865">Exercises</a>
+<ul>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-service-discovery/index.html#set-up-the-app-config-repo:3976528693a0108357f4928017600865">Set up the <code>app-config</code> Repo</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-service-discovery/index.html#set-up-config-server:3976528693a0108357f4928017600865">Set up <code>config-server</code></a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-service-discovery/index.html#set-up-service-registry:3976528693a0108357f4928017600865">Set up <code>service-registry</code></a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-service-discovery/index.html#set-up-fortune-service:3976528693a0108357f4928017600865">Set up <code>fortune-service</code></a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-service-discovery/index.html#set-up-greeting-service:3976528693a0108357f4928017600865">Set up <code>greeting-service</code></a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-service-discovery/index.html#optionally-update-app-config-for-fortune-service-and-greeting-service-to-run-on-pcf:3976528693a0108357f4928017600865">Optionally Update App Config for <code>fortune-service</code> and <code>greeting-service</code> to run on PCF</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-service-discovery/index.html#deploy-the-fortune-service-to-pcf:3976528693a0108357f4928017600865">Deploy the <code>fortune-service</code> to PCF</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-service-discovery/index.html#deploy-the-greeting-service-app-to-pcf:3976528693a0108357f4928017600865">Deploy the <code>greeting-service</code> app to PCF</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-service-discovery/index.html#scale-the-fortune-service:3976528693a0108357f4928017600865">Scale the <code>fortune-service</code></a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+		</div>
+	</div>
+</div>
+
+			</div>
+			<div class="row">
+				
+
+<hr>
+
+<p>Estimated Time: 45 minutes</p>
+
+<hr>
+
+<h2 id="requirements:3976528693a0108357f4928017600865">Requirements</h2>
+
+<p><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/requirements">Lab Requirements</a></p>
+
+<hr>
+
+<h2 id="what-you-will-learn:3976528693a0108357f4928017600865">What You Will Learn</h2>
+
+<ul>
+<li>How to embed Eureka in a Spring Boot application</li>
+<li>How to register services (<code>greeting-service</code> and <code>fortune-service</code>) with Eureka</li>
+<li>How to discover services (<code>fortune-service</code>) with Eureka</li>
+<li>How to use Spring Cloud Services to provision a Service Registry</li>
+</ul>
+
+<hr>
+
+<h2 id="exercises:3976528693a0108357f4928017600865">Exercises</h2>
+
+<hr>
+
+<h3 id="set-up-the-app-config-repo:3976528693a0108357f4928017600865">Set up the <code>app-config</code> Repo</h3>
+
+<p>1) Create an <code>$APP_CONFIG_REPO_HOME/application.yml</code> in your fork of the <code>app-config</code> repo with the following contents:</p>
+
+<pre><code class="language-yml hljs makefile"><span class="hljs-title"><span class="hljs-title">security:</span></span>
+  basic:
+    enabled: false
+
+<span class="hljs-title"><span class="hljs-title">management:</span></span>
+  security:
+    enabled: false
+
+<span class="hljs-title"><span class="hljs-title">logging:</span></span>
+  level:
+    io:
+      pivotal: DEBUG
+</code></pre>
+
+<p>Then commit and push back to Github.</p>
+
+<p><strong><em>A note about the application.yml</em></strong></p>
+
+<p>When the <code>config-server</code>’s backing repository contains an <code>application.yml</code> it is shared with all applications.  Therefore, it is a great place to put common configuration for all applications.  In this case, we have dropped security on all the endpoints and setup logging.</p>
+
+<p>In the <a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-config">Spring Cloud Config Lab</a>, we used application specific configuration files:</p>
+
+<ul>
+<li>One based on the application name <code>greeting-config.yml</code></li>
+<li>One based on the application name + profile <code>greeting-config-qa.yml</code></li>
+</ul>
+
+<p>Application specific files override configuration settings in the <code>application.yml</code>.</p>
+
+<h3 id="set-up-config-server:3976528693a0108357f4928017600865">Set up <code>config-server</code></h3>
+
+<p>1) Start the <code>config-server</code> in a terminal window.  You may have a terminal window still open from the previous lab.</p>
+
+<pre><code class="language-bash hljs">$ <span class="hljs-built_in"><span class="hljs-built_in">cd</span></span> <span class="hljs-variable"><span class="hljs-variable">$SPRING_CLOUD_SERVICES_LABS_HOME</span></span>/config-server
+$ mvn clean spring-boot:run
+</code></pre>
+
+<p>2) Verify the <code>config-server</code> is up.  Open a browser and fetch <a href="http://localhost:8888/myapp/default">http://localhost:8888/myapp/default</a></p>
+
+<p><img src="./Lab 6 Spring Cloud Netflix_ Service Discovery_files/restful-api.png" alt="Config Server" title="Config Server"></p>
+
+<p>Note that a random application name was used and it picked up configuration from the <code>application.yml</code>.</p>
+
+<h3 id="set-up-service-registry:3976528693a0108357f4928017600865">Set up <code>service-registry</code></h3>
+
+<p>1) Review the <code>$SPRING_CLOUD_SERVICES_LABS_HOME/service-registry/pom.xml</code> file.  By adding <code>spring-cloud-starter-eureka-server</code> to the classpath this application is eligible to embed an Eureka server.</p>
+
+<pre><code class="language-xml hljs"><span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+    <span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>org.springframework.cloud<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+    <span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>spring-cloud-starter-eureka-server<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+</code></pre>
+
+<p>2) Review the following file: <code>$SPRING_CLOUD_SERVICES_LABS_HOME/service-registry/src/main/java/io/pivotal/ServiceRegistryApplication.java</code>.  Note the use of the <code>@EnableEurekaServer</code> annotation that makes this application a Eureka server.</p>
+
+<pre><code class="language-java hljs"> <span class="hljs-annotation"><span class="hljs-annotation">@SpringBootApplication</span></span>
+ <span class="hljs-annotation"><span class="hljs-annotation">@EnableEurekaServer</span></span>
+ <span class="hljs-keyword"><span class="hljs-keyword">public</span></span> <span class="hljs-class"><span class="hljs-keyword"><span class="hljs-class"><span class="hljs-keyword">class</span></span></span><span class="hljs-class"> </span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">ServiceRegistryApplication</span></span></span><span class="hljs-class"> </span></span>{
+
+     <span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">static</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">void</span></span></span><span class="hljs-function"> </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">main</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">(String[] args)</span></span></span><span class="hljs-function"> </span></span>{
+         SpringApplication.run(ServiceRegistryApplication.class, args);
+     }
+ }
+</code></pre>
+
+<p>3). Review the following file: <code>$SPRING_CLOUD_SERVICES_LABS_HOME/service-registry/src/main/resources/application.yml</code></p>
+
+<pre><code class="language-yml hljs bash"> server:
+   port: <span class="hljs-number"><span class="hljs-number">8761</span></span>
+
+ eureka:
+   instance:
+     hostname: localhost
+   client:
+     registerWithEureka: <span class="hljs-literal"><span class="hljs-literal">false</span></span>
+     fetchRegistry: <span class="hljs-literal"><span class="hljs-literal">false</span></span>
+     serviceUrl:
+       defaultZone: http://<span class="hljs-variable"><span class="hljs-variable">${eureka.instance.hostname}</span></span>:<span class="hljs-variable"><span class="hljs-variable">${server.port}</span></span>/eureka/
+</code></pre>
+
+<p><strong><em>About Eureka</em></strong></p>
+
+<p>Eureka is designed for peer awareness (running multiple instances with knowledge of each other) to further increase availability.  Because of this, Eureka is not only a server but a client as well.  Therefore, Eureka Servers will be clients to each other.  <code>Eureka Server A</code> ⇄ <code>Eureka Server B</code>.</p>
+
+<p>For the purposes of this lab, we will simplify that configuration to run in standalone mode.</p>
+
+<p>Standlalone mode still offers a high degree of resilience with:</p>
+
+<ul>
+<li>Heartbeats between the client and server to keep registrations up to date</li>
+<li>Client side caching, so that clients don’t go to Eureka for every lookup</li>
+<li>By running in Pivotal Cloud Foundry which is designed to keep applications up by design</li>
+</ul>
+
+<p>With the above configuration, we have configured Eureka to run in standalone mode.</p>
+
+<p><strong><em>Understanding the configuration parameters</em></strong></p>
+
+<ul>
+<li><code>eureka.instance.hostname</code> - the hostname for this service. In this case, what host to use to reach our standalone Eureka instance.</li>
+<li><code>eureka.client.registerWithEureka</code> - should this application (our standalone Eureka instance) register with Eureka</li>
+<li><code>eureka.client.fetchRegistry</code> - should this application (our stand alone Eureka instance) fetch the registry (for how to discover services)</li>
+<li><code>eureka.client.serviceUrl.defaultZone</code> - the Eureka instance to use for registering and discovering services.  Notice it is pointing to itself (<code>localhost</code>, <code>8761</code>).</li>
+</ul>
+
+<p>4) Open a new terminal window.  Start the <code>service-registry</code>.</p>
+
+<pre><code class="language-bash hljs">$ <span class="hljs-built_in"><span class="hljs-built_in">cd</span></span> <span class="hljs-variable"><span class="hljs-variable">$SPRING_CLOUD_SERVICES_LABS_HOME</span></span>/service-registry
+$ mvn clean spring-boot:run
+</code></pre>
+
+<p>5) Verify the <code>service-registry</code> is up.  Browse to <a href="http://localhost:8761/">http://localhost:8761/</a>
+<img src="./Lab 6 Spring Cloud Netflix_ Service Discovery_files/eureka.png" alt="eureka" title="eureka"></p>
+
+<h3 id="set-up-fortune-service:3976528693a0108357f4928017600865">Set up <code>fortune-service</code></h3>
+
+<p>1) Review the <code>$SPRING_CLOUD_SERVICES_LABS_HOME/fortune-service/src/main/resources/bootstrap.yml</code> file.  The name of this app is <code>fortune-service</code>.  It also uses the <code>config-server</code>.</p>
+
+<pre><code class="language-yml hljs css"> <span class="hljs-rule"><span class="hljs-attribute"><span class="hljs-rule"><span class="hljs-attribute">server</span></span></span><span class="hljs-rule">:</span><span class="hljs-value"><span class="hljs-rule"><span class="hljs-value">
+   port: </span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">8787</span></span></span></span><span class="hljs-rule"><span class="hljs-value">
+ spring:
+   application:
+     name: fortune-service
+</span></span></span></span></code></pre>
+
+<p><code>spring.application.name</code> is the name the application will use when registering with Eureka.</p>
+
+<p>2) Review the <code>$SPRING_CLOUD_SERVICES_LABS_HOME/fortune-service/pom.xml</code> file.  By adding <code>spring-cloud-services-starter-service-registry</code> to the classpath this application is eligible to register and discover services with the <code>service-registry</code>.</p>
+
+<pre><code class="language-xml hljs"><span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>io.pivotal.spring.cloud<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>spring-cloud-services-starter-service-registry<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+</code></pre>
+
+<p>3) Review the following file: <code>$SPRING_CLOUD_SERVICES_LABS_HOME/fortune-service/src/main/java/io/pivotal/FortuneServiceApplication.java</code>.  Notice the <code>@EnableDiscoveryClient</code>.  This enables a discovery client that registers the <code>fortune-service</code> with the <code>service-registry</code> application.</p>
+
+<pre><code class="language-java hljs"><span class="hljs-annotation"><span class="hljs-annotation">@SpringBootApplication</span></span>
+<span class="hljs-annotation"><span class="hljs-annotation">@EnableDiscoveryClient</span></span>
+<span class="hljs-keyword"><span class="hljs-keyword">public</span></span> <span class="hljs-class"><span class="hljs-keyword"><span class="hljs-class"><span class="hljs-keyword">class</span></span></span><span class="hljs-class"> </span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">FortuneServiceApplication</span></span></span><span class="hljs-class"> </span></span>{
+
+    <span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">static</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">void</span></span></span><span class="hljs-function"> </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">main</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">(String[] args)</span></span></span><span class="hljs-function"> </span></span>{
+        SpringApplication.run(FortuneServiceApplication.class, args);
+    }
+}
+</code></pre>
+
+<p>4) Open a new terminal window.  Start the <code>fortune-service</code></p>
+
+<pre><code class="language-bash hljs">$ <span class="hljs-built_in"><span class="hljs-built_in">cd</span></span> <span class="hljs-variable"><span class="hljs-variable">$SPRING_CLOUD_SERVICES_LABS_HOME</span></span>/fortune-service
+$ mvn clean spring-boot:run
+</code></pre>
+
+<p>5) After the a few moments, check the <code>service-registry</code> dashboard.  Confirm the <code>fortune-service</code> is registered.
+<img src="./Lab 6 Spring Cloud Netflix_ Service Discovery_files/fortune-service.png" alt="fortune-service" title="fortune-service"></p>
+
+<p>The Eureka Dashboard may report a warning, because we aren’t setup with multiple peers.  This can safely be ignored.
+<img src="./Lab 6 Spring Cloud Netflix_ Service Discovery_files/warning.png" alt="warning" title="warning"></p>
+
+<h3 id="set-up-greeting-service:3976528693a0108357f4928017600865">Set up <code>greeting-service</code></h3>
+
+<p>1) Review the <code>$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-service/src/main/resources/bootstrap.yml</code> file.  The name of this app is <code>greeting-service</code>.  It also uses the <code>config-server</code>.</p>
+
+<pre><code class="language-yml hljs css"> <span class="hljs-rule"><span class="hljs-attribute"><span class="hljs-rule"><span class="hljs-attribute">spring</span></span></span><span class="hljs-rule">:</span><span class="hljs-value"><span class="hljs-rule"><span class="hljs-value">
+   application:
+     name: greeting-service
+</span></span></span></span></code></pre>
+
+<p>2) Review the <code>$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-service/pom.xml</code> file.  By adding <code>spring-cloud-services-starter-service-registry</code> to the classpath this application is eligible to register and discover services with the <code>service-registry</code>.</p>
+
+<pre><code class="language-xml hljs"><span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>io.pivotal.spring.cloud<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>spring-cloud-services-starter-service-registry<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+</code></pre>
+
+<p>3) Review the following file: <code>$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-service/src/main/java/io/pivotal/GreetingServiceApplication.java</code>.  Notice the <code>@EnableDiscoveryClient</code>.   This enables a discovery client that registers the <code>greeting-service</code> app with the <code>service-registry</code>.</p>
+
+<pre><code class="language-java hljs"> <span class="hljs-annotation"><span class="hljs-annotation">@SpringBootApplication</span></span>
+ <span class="hljs-annotation"><span class="hljs-annotation">@EnableDiscoveryClient</span></span>
+ <span class="hljs-keyword"><span class="hljs-keyword">public</span></span> <span class="hljs-class"><span class="hljs-keyword"><span class="hljs-class"><span class="hljs-keyword">class</span></span></span><span class="hljs-class"> </span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">GreetingServiceApplication</span></span></span><span class="hljs-class"> </span></span>{
+
+
+     <span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">static</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">void</span></span></span><span class="hljs-function"> </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">main</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">(String[] args)</span></span></span><span class="hljs-function"> </span></span>{
+         SpringApplication.run(GreetingServiceApplication.class, args);
+     }
+
+ }
+</code></pre>
+
+<p>4) Review the the following file: <code>$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-service/src/main/java/io/pivotal/greeting/GreetingController.java</code>.  Notice the <code>DiscoveryClient</code>.  <code>DiscoveryClient</code> is used to discover services registered with the <code>service-registry</code>.  See <code>fetchFortuneServiceUrl()</code>.</p>
+
+<pre><code class="language-java hljs"><span class="hljs-annotation"><span class="hljs-annotation">@Controller</span></span>
+<span class="hljs-keyword"><span class="hljs-keyword">public</span></span> <span class="hljs-class"><span class="hljs-keyword"><span class="hljs-class"><span class="hljs-keyword">class</span></span></span><span class="hljs-class"> </span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">GreetingController</span></span></span><span class="hljs-class"> </span></span>{
+
+	Logger logger = LoggerFactory
+			.getLogger(GreetingController.class);
+
+
+
+
+	<span class="hljs-annotation"><span class="hljs-annotation">@Autowired</span></span>
+	<span class="hljs-keyword"><span class="hljs-keyword">private</span></span> DiscoveryClient discoveryClient;
+
+	<span class="hljs-annotation"><span class="hljs-annotation">@RequestMapping</span></span>(<span class="hljs-string"><span class="hljs-string">"/"</span></span>)
+	<span class="hljs-function"><span class="hljs-function">String </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">getGreeting</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">(Model model)</span></span></span></span>{
+
+		logger.debug(<span class="hljs-string"><span class="hljs-string">"Adding greeting"</span></span>);
+		model.addAttribute(<span class="hljs-string"><span class="hljs-string">"msg"</span></span>, <span class="hljs-string"><span class="hljs-string">"Greetings!!!"</span></span>);
+
+
+		RestTemplate restTemplate = <span class="hljs-keyword"><span class="hljs-keyword">new</span></span> RestTemplate();
+        String fortune = restTemplate.getForObject(fetchFortuneServiceUrl(), String.class);
+
+		logger.debug(<span class="hljs-string"><span class="hljs-string">"Adding fortune"</span></span>);
+		model.addAttribute(<span class="hljs-string"><span class="hljs-string">"fortune"</span></span>, fortune);
+
+		<span class="hljs-comment"><span class="hljs-comment">//resolves to the greeting.vm velocity template</span></span>
+		<span class="hljs-keyword"><span class="hljs-keyword">return</span></span> <span class="hljs-string"><span class="hljs-string">"greeting"</span></span>;
+	}
+
+	<span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">private</span></span></span><span class="hljs-function"> String </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">fetchFortuneServiceUrl</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">()</span></span></span><span class="hljs-function"> </span></span>{
+	    InstanceInfo instance = discoveryClient.getNextServerFromEureka(<span class="hljs-string"><span class="hljs-string">"FORTUNE-SERVICE"</span></span>, <span class="hljs-keyword"><span class="hljs-keyword">false</span></span>);
+	    logger.debug(<span class="hljs-string"><span class="hljs-string">"instanceID: {}"</span></span>, instance.getId());
+
+	    String fortuneServiceUrl = instance.getHomePageUrl();
+		  logger.debug(<span class="hljs-string"><span class="hljs-string">"fortune service homePageUrl: {}"</span></span>, fortuneServiceUrl);
+
+	    <span class="hljs-keyword"><span class="hljs-keyword">return</span></span> fortuneServiceUrl;
+	}
+
+}
+</code></pre>
+
+<p>5) Open a new terminal window.  Start the <code>greeting-service</code> app</p>
+
+<pre><code class="language-bash hljs">$ <span class="hljs-built_in"><span class="hljs-built_in">cd</span></span> <span class="hljs-variable"><span class="hljs-variable">$SPRING_CLOUD_SERVICES_LABS_HOME</span></span>/greeting-service
+$ mvn clean spring-boot:run
+</code></pre>
+
+<p>6) After the a few moments, check the <code>service-registry</code> dashboard <a href="http://localhost:8761/">http://localhost:8761</a>.  Confirm the <code>greeting-service</code> app is registered.
+<img src="./Lab 6 Spring Cloud Netflix_ Service Discovery_files/greeting.png" alt="greeting" title="greeting"></p>
+
+<p>7) Browse to <a href="http://localhost:8080/">http://localhost:8080/</a> to the <code>greeting-service</code> application.  Confirm you are seeing fortunes.  Refresh as desired.  Also review the terminal output for the <code>greeting-service</code>.  See the <code>fortune-service</code> <code>instanceId</code> and <code>homePageUrl</code> being logged.</p>
+
+<p><strong><em>What Just Happened?</em></strong></p>
+
+<p>The <code>greeting-service</code> application was able to discover how to reach the <code>fortune-service</code> via the <code>service-registry</code> (Eureka).</p>
+
+<p>8) When done stop the <code>config-server</code>, <code>service-registry</code>, <code>fortune-service</code> and <code>greeting-service</code> applications.</p>
+
+<h3 id="optionally-update-app-config-for-fortune-service-and-greeting-service-to-run-on-pcf:3976528693a0108357f4928017600865">Optionally Update App Config for <code>fortune-service</code> and <code>greeting-service</code> to run on PCF</h3>
+
+<p>1) You may specify the registration method to use for the applications using the <code>spring.cloud.services.registrationMethod</code> parameter.</p>
+
+<p>It can take either of two values:</p>
+
+<p><code>route</code>: The application will be registered using its Cloud Foundry route (this is the default).</p>
+
+<p><code>direct</code>: The application will be registered using its host IP and port.</p>
+
+<p>The <code>direct</code> registration method is only compatible with Pivotal Cloud Foundry version 1.5 or higher. In Pivotal Cloud Foundry Operations Manager, within the Pivotal Elastic Runtime tile’s Security Config, the “Enable cross-container traffic within each DEA” or “Enable cross-container traffic” option must be enabled.</p>
+
+<p>When using the <code>direct</code> registration method, requests from client applications to registered applications will not go through the Pivotal Cloud Foundry <code>router</code>. You can utilize this with client-side load balancing techniques using <a href="http://projects.spring.io/spring-cloud/docs/1.0.3/spring-cloud.html#spring-cloud-ribbon">Spring Cloud and Netflix Ribbon</a>. To read more on registration techniques go <a href="http://docs.pivotal.io/spring-cloud-services/service-registry/registering-a-service.html">here</a>.</p>
+
+<p>If cross container traffic has been enabled, in your fork of the <code>app-config</code> repo add an additional section to the <code>$APP_CONFIG_REPO_HOME/application.yml</code> file as seen below and push back to GitHub.  If using the <code>route</code> option then no change is needed; move to the next step.</p>
+
+<pre><code class="language-yml hljs makefile"><span class="hljs-title"><span class="hljs-title">security:</span></span>
+  basic:
+    enabled: false
+
+<span class="hljs-title"><span class="hljs-title">management:</span></span>
+  security:
+    enabled: false
+
+<span class="hljs-title"><span class="hljs-title">logging:</span></span>
+  level:
+    io:
+      pivotal: DEBUG
+
+spring: <span class="hljs-comment"><span class="hljs-comment"># &lt;---NEW SECTION</span></span>
+  cloud:
+    services:
+      registrationMethod: direct
+</code></pre>
+
+<p><strong><em>Pivotal Cloud Foundry with HTTPS Only</em></strong></p>
+
+<p>If your Pivotal Cloud Foundry environment has been configured to only accept HTTPS traffic and is using the <code>route</code> registration method then skip this step, however you will need to change all the code examples moving forward in the labs that use <code>http</code> to <code>https</code> before deploying to your Pivotal Cloud Foundry environment.  For instance, the <code>GreetingController</code> from above would have the following change:</p>
+
+<pre><code class="hljs nginx"><span class="hljs-title"><span class="hljs-title">InstanceInfo</span></span> instance = discoveryClient.getNextServerFromEureka(<span class="hljs-string"><span class="hljs-string">"FORTUNE-SERVICE"</span></span>, <span class="hljs-built_in"><span class="hljs-built_in">true</span></span>);
+</code></pre>
+
+<h3 id="deploy-the-fortune-service-to-pcf:3976528693a0108357f4928017600865">Deploy the <code>fortune-service</code> to PCF</h3>
+
+<p>1) Package <code>fortune-service</code></p>
+
+<pre><code class="language-bash hljs">$ mvn clean package
+</code></pre>
+
+<p>2) Deploy <code>fortune-service</code>.</p>
+
+<pre><code class="language-bash hljs">$ cf push fortune-service -p target/fortune-service-<span class="hljs-number"><span class="hljs-number">0.0</span></span>.<span class="hljs-number"><span class="hljs-number">1</span></span>-SNAPSHOT.jar -m <span class="hljs-number"><span class="hljs-number">512</span></span>M --random-route --no-start
+</code></pre>
+
+<p>3) Create a Service Registry Service Instance.  The <code>service-registry</code> service instance will not be immediately bindable.  It needs a few moments to initialize.</p>
+
+<pre><code class="language-bash hljs">$ cf create-service p-service-registry standard service-registry
+</code></pre>
+
+<p>Click on the <strong><em>Manage</em></strong> link to determine when the <code>service-registry</code> is ready.</p>
+
+<p><img src="./Lab 6 Spring Cloud Netflix_ Service Discovery_files/manage.png" alt="manage" title="manage"></p>
+
+<p>4) Bind services to the <code>fortune-service</code>.</p>
+
+<pre><code class="language-bash hljs">$ cf <span class="hljs-built_in"><span class="hljs-built_in">bind</span></span>-service fortune-service config-server
+$ cf <span class="hljs-built_in"><span class="hljs-built_in">bind</span></span>-service fortune-service service-registry
+</code></pre>
+
+<p>You will need to wait and try again if you see the following message when binding the <code>service-registry</code>:</p>
+
+<pre><code class="hljs python">Binding service service-registry to app fortune-service <span class="hljs-keyword"><span class="hljs-keyword">in</span></span> org dave / space dev <span class="hljs-keyword"><span class="hljs-keyword">as</span></span> droberts<span class="hljs-decorator"><span class="hljs-decorator">@pivotal.io...</span></span>
+FAILED
+Server error, status code: <span class="hljs-number"><span class="hljs-number">502</span></span>, error code: <span class="hljs-number"><span class="hljs-number">10001</span></span>, message: Service broker error: Service instance <span class="hljs-keyword"><span class="hljs-keyword">is</span></span> <span class="hljs-keyword"><span class="hljs-keyword">not</span></span> running <span class="hljs-keyword"><span class="hljs-keyword">and</span></span> available <span class="hljs-keyword"><span class="hljs-keyword">for</span></span> binding.
+</code></pre>
+
+<p>You can safely ignore the <em>TIP: Use ‘cf restage’ to ensure your env variable changes take effect</em> message from the CLI.  We don’t need to restage at this time.</p>
+
+<p>5) If using self-signed certificates, set the <code>CF_TARGET</code> environment variable for the <code>fortune-service</code> application.</p>
+
+<pre><code class="language-bash hljs">$ cf <span class="hljs-built_in"><span class="hljs-built_in">set</span></span>-env fortune-service CF_TARGET &lt;your api endpoint - make sure it starts with <span class="hljs-string"><span class="hljs-string">"https://"</span></span>&gt;
+</code></pre>
+
+<p>You can safely ignore the <em>TIP: Use ‘cf restage’ to ensure your env variable changes take effect</em> message from the CLI.  We don’t need to restage at this time.</p>
+
+<p>6) Start the <code>fortune-service</code> app.</p>
+
+<pre><code class="language-bash hljs">$ cf start fortune-service
+</code></pre>
+
+<p>7) Confirm <code>fortune-service</code> registered with the <code>service-registry</code>.  This will take a few moments.</p>
+
+<p>Click on the <strong><em>Manage</em></strong> link for the <code>service-registry</code>.  You can find it by navigating to the space where your applications are deployed.</p>
+
+<p><img src="./Lab 6 Spring Cloud Netflix_ Service Discovery_files/manage.png" alt="manage" title="manage"></p>
+
+<p><img src="./Lab 6 Spring Cloud Netflix_ Service Discovery_files/cf-fortune-service.png" alt="fortune-service" title="fortune-service"></p>
+
+<h3 id="deploy-the-greeting-service-app-to-pcf:3976528693a0108357f4928017600865">Deploy the <code>greeting-service</code> app to PCF</h3>
+
+<p>1) Package <code>greeting-service</code></p>
+
+<pre><code class="language-bash hljs">$ mvn clean package
+</code></pre>
+
+<p>2) Deploy <code>greeting-service</code>.</p>
+
+<pre><code class="language-bash hljs">$ cf push greeting-service -p target/greeting-service-<span class="hljs-number"><span class="hljs-number">0.0</span></span>.<span class="hljs-number"><span class="hljs-number">1</span></span>-SNAPSHOT.jar -m <span class="hljs-number"><span class="hljs-number">512</span></span>M --random-route --no-start
+</code></pre>
+
+<p>3) Bind services for the <code>greeting-service</code>.</p>
+
+<pre><code class="language-bash hljs">$ cf <span class="hljs-built_in"><span class="hljs-built_in">bind</span></span>-service greeting-service config-server
+$ cf <span class="hljs-built_in"><span class="hljs-built_in">bind</span></span>-service greeting-service service-registry
+</code></pre>
+
+<p>You can safely ignore the <em>TIP: Use ‘cf restage’ to ensure your env variable changes take effect</em> message from the CLI.  We don’t need to restage at this time.</p>
+
+<p>4) If using self signed certificates, set the <code>CF_TARGET</code> environment variable for the <code>greeting-service</code> application.</p>
+
+<pre><code class="language-bash hljs">$ cf <span class="hljs-built_in"><span class="hljs-built_in">set</span></span>-env greeting-service CF_TARGET &lt;your api endpoint - make sure it starts with <span class="hljs-string"><span class="hljs-string">"https://"</span></span>&gt;
+</code></pre>
+
+<p>You can safely ignore the <em>TIP: Use ‘cf restage’ to ensure your env variable changes take effect</em> message from the CLI.  We don’t need to restage at this time.</p>
+
+<p>5) Start the <code>greeting-service</code> app.</p>
+
+<pre><code class="language-bash hljs">$ cf start greeting-service
+</code></pre>
+
+<p>6) Confirm <code>greeting-service</code> registered with the <code>service-registry</code>.  This will take a few moments.
+<img src="./Lab 6 Spring Cloud Netflix_ Service Discovery_files/cf-greeting.png" alt="greeting" title="greeting"></p>
+
+<p>7) Browse to the <code>greeting-service</code> application.  Confirm you are seeing fortunes.  Refresh as desired.</p>
+
+<h3 id="scale-the-fortune-service:3976528693a0108357f4928017600865">Scale the <code>fortune-service</code></h3>
+
+<p>1) Scale the <code>fortune-service</code> app instances to 3.</p>
+
+<pre><code class="hljs ruby"><span class="hljs-variable"><span class="hljs-variable">$ </span></span>cf scale fortune-service -i <span class="hljs-number"><span class="hljs-number">3</span></span>
+</code></pre>
+
+<p>2) Wait for the new instances to register with the <code>service-registry</code>.  This will take a few moments.</p>
+
+<p>3) Tail the logs for the <code>greeting-service</code> application.</p>
+
+<pre><code class="language-bash hljs">[mac, linux]
+$ cf logs greeting-service | grep GreetingController
+
+[windows]
+$ cf logs greeting-service
+$ <span class="hljs-comment"><span class="hljs-comment"># then search output for "GreetingController"</span></span>
+</code></pre>
+
+<p>4) Refresh the <code>greeting-service</code> <code>/</code> endpoint.</p>
+
+<p>5) Observe the log output.  Compare the <code>instanceId</code> and <code>homePageUrl</code> being logged across log entries. The <code>discoveryClient</code> round robins the <code>fortune-service</code> instances.</p>
+
+<pre><code class="hljs perl"><span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span>T15:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">56.48</span></span>-<span class="hljs-number"><span class="hljs-number">0500</span></span> [APP/<span class="hljs-number"><span class="hljs-number">0</span></span>]      OUT <span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span> <span class="hljs-number"><span class="hljs-number">20</span></span>:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">56.481</span></span> DEBUG <span class="hljs-number"><span class="hljs-number">23</span></span> --- [nio-<span class="hljs-number"><span class="hljs-number">8080</span></span>-<span class="hljs-keyword"><span class="hljs-keyword">exec</span></span>-<span class="hljs-number"><span class="hljs-number">1</span></span>] io.pivotal.greeting.GreetingController   : Adding greeting
+<span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span>T15:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">56.49</span></span>-<span class="hljs-number"><span class="hljs-number">0500</span></span> [APP/<span class="hljs-number"><span class="hljs-number">0</span></span>]      OUT <span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span> <span class="hljs-number"><span class="hljs-number">20</span></span>:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">56.497</span></span> DEBUG <span class="hljs-number"><span class="hljs-number">23</span></span> --- [nio-<span class="hljs-number"><span class="hljs-number">8080</span></span>-<span class="hljs-keyword"><span class="hljs-keyword">exec</span></span>-<span class="hljs-number"><span class="hljs-number">1</span></span>] io.pivotal.greeting.GreetingController   : instanceID: <span class="hljs-number"><span class="hljs-number">10.68</span></span>.<span class="hljs-number"><span class="hljs-number">104.27</span></span>:<span class="hljs-number"><span class="hljs-number">9</span></span>f960352-f80b-<span class="hljs-number"><span class="hljs-number">4316</span></span>-<span class="hljs-number"><span class="hljs-number">7577</span></span>-<span class="hljs-number"><span class="hljs-number">61</span></span>dd1815ac5f
+<span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span>T15:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">56.49</span></span>-<span class="hljs-number"><span class="hljs-number">0500</span></span> [APP/<span class="hljs-number"><span class="hljs-number">0</span></span>]      OUT <span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span> <span class="hljs-number"><span class="hljs-number">20</span></span>:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">56.498</span></span> DEBUG <span class="hljs-number"><span class="hljs-number">23</span></span> --- [nio-<span class="hljs-number"><span class="hljs-number">8080</span></span>-<span class="hljs-keyword"><span class="hljs-keyword">exec</span></span>-<span class="hljs-number"><span class="hljs-number">1</span></span>] io.pivotal.greeting.GreetingController   : fortune service homePageUrl: http:<span class="hljs-regexp"><span class="hljs-regexp">//</span></span><span class="hljs-number"><span class="hljs-number">10.68</span></span>.<span class="hljs-number"><span class="hljs-number">104.27</span></span>:<span class="hljs-number"><span class="hljs-number">60028</span></span>/
+<span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span>T15:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">56.50</span></span>-<span class="hljs-number"><span class="hljs-number">0500</span></span> [APP/<span class="hljs-number"><span class="hljs-number">0</span></span>]      OUT <span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span> <span class="hljs-number"><span class="hljs-number">20</span></span>:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">56.507</span></span> DEBUG <span class="hljs-number"><span class="hljs-number">23</span></span> --- [nio-<span class="hljs-number"><span class="hljs-number">8080</span></span>-<span class="hljs-keyword"><span class="hljs-keyword">exec</span></span>-<span class="hljs-number"><span class="hljs-number">1</span></span>] io.pivotal.greeting.GreetingController   : Adding fortune
+<span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span>T15:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">57.72</span></span>-<span class="hljs-number"><span class="hljs-number">0500</span></span> [APP/<span class="hljs-number"><span class="hljs-number">0</span></span>]      OUT <span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span> <span class="hljs-number"><span class="hljs-number">20</span></span>:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">57.722</span></span> DEBUG <span class="hljs-number"><span class="hljs-number">23</span></span> --- [nio-<span class="hljs-number"><span class="hljs-number">8080</span></span>-<span class="hljs-keyword"><span class="hljs-keyword">exec</span></span>-<span class="hljs-number"><span class="hljs-number">6</span></span>] io.pivotal.greeting.GreetingController   : Adding greeting
+<span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span>T15:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">57.73</span></span>-<span class="hljs-number"><span class="hljs-number">0500</span></span> [APP/<span class="hljs-number"><span class="hljs-number">0</span></span>]      OUT <span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span> <span class="hljs-number"><span class="hljs-number">20</span></span>:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">57.737</span></span> DEBUG <span class="hljs-number"><span class="hljs-number">23</span></span> --- [nio-<span class="hljs-number"><span class="hljs-number">8080</span></span>-<span class="hljs-keyword"><span class="hljs-keyword">exec</span></span>-<span class="hljs-number"><span class="hljs-number">6</span></span>] io.pivotal.greeting.GreetingController   : instanceID: <span class="hljs-number"><span class="hljs-number">10.68</span></span>.<span class="hljs-number"><span class="hljs-number">104.28</span></span>:<span class="hljs-number"><span class="hljs-number">72</span></span>aa9f59-b27f-<span class="hljs-number"><span class="hljs-number">4</span></span>d85-<span class="hljs-number"><span class="hljs-number">4323</span></span>-<span class="hljs-number"><span class="hljs-number">2</span></span>d79a9d7720c
+<span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span>T15:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">57.73</span></span>-<span class="hljs-number"><span class="hljs-number">0500</span></span> [APP/<span class="hljs-number"><span class="hljs-number">0</span></span>]      OUT <span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span> <span class="hljs-number"><span class="hljs-number">20</span></span>:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">57.737</span></span> DEBUG <span class="hljs-number"><span class="hljs-number">23</span></span> --- [nio-<span class="hljs-number"><span class="hljs-number">8080</span></span>-<span class="hljs-keyword"><span class="hljs-keyword">exec</span></span>-<span class="hljs-number"><span class="hljs-number">6</span></span>] io.pivotal.greeting.GreetingController   : fortune service homePageUrl: http:<span class="hljs-regexp"><span class="hljs-regexp">//</span></span><span class="hljs-number"><span class="hljs-number">10.68</span></span>.<span class="hljs-number"><span class="hljs-number">104.28</span></span>:<span class="hljs-number"><span class="hljs-number">60026</span></span>/
+<span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span>T15:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">57.74</span></span>-<span class="hljs-number"><span class="hljs-number">0500</span></span> [APP/<span class="hljs-number"><span class="hljs-number">0</span></span>]      OUT <span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span> <span class="hljs-number"><span class="hljs-number">20</span></span>:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">57.745</span></span> DEBUG <span class="hljs-number"><span class="hljs-number">23</span></span> --- [nio-<span class="hljs-number"><span class="hljs-number">8080</span></span>-<span class="hljs-keyword"><span class="hljs-keyword">exec</span></span>-<span class="hljs-number"><span class="hljs-number">6</span></span>] io.pivotal.greeting.GreetingController   : Adding fortune
+<span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span>T15:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">58.66</span></span>-<span class="hljs-number"><span class="hljs-number">0500</span></span> [APP/<span class="hljs-number"><span class="hljs-number">0</span></span>]      OUT <span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span> <span class="hljs-number"><span class="hljs-number">20</span></span>:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">58.660</span></span> DEBUG <span class="hljs-number"><span class="hljs-number">23</span></span> --- [nio-<span class="hljs-number"><span class="hljs-number">8080</span></span>-<span class="hljs-keyword"><span class="hljs-keyword">exec</span></span>-<span class="hljs-number"><span class="hljs-number">2</span></span>] io.pivotal.greeting.GreetingController   : Adding greeting
+<span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span>T15:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">58.67</span></span>-<span class="hljs-number"><span class="hljs-number">0500</span></span> [APP/<span class="hljs-number"><span class="hljs-number">0</span></span>]      OUT <span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span> <span class="hljs-number"><span class="hljs-number">20</span></span>:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">58.672</span></span> DEBUG <span class="hljs-number"><span class="hljs-number">23</span></span> --- [nio-<span class="hljs-number"><span class="hljs-number">8080</span></span>-<span class="hljs-keyword"><span class="hljs-keyword">exec</span></span>-<span class="hljs-number"><span class="hljs-number">2</span></span>] io.pivotal.greeting.GreetingController   : instanceID: <span class="hljs-number"><span class="hljs-number">10.68</span></span>.<span class="hljs-number"><span class="hljs-number">104.29</span></span>:e117fae6-b847-<span class="hljs-number"><span class="hljs-number">42</span></span>c7-<span class="hljs-number"><span class="hljs-number">5286</span></span>-<span class="hljs-number"><span class="hljs-number">8662</span></span>a993351e
+<span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span>T15:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">58.67</span></span>-<span class="hljs-number"><span class="hljs-number">0500</span></span> [APP/<span class="hljs-number"><span class="hljs-number">0</span></span>]      OUT <span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span> <span class="hljs-number"><span class="hljs-number">20</span></span>:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">58.673</span></span> DEBUG <span class="hljs-number"><span class="hljs-number">23</span></span> --- [nio-<span class="hljs-number"><span class="hljs-number">8080</span></span>-<span class="hljs-keyword"><span class="hljs-keyword">exec</span></span>-<span class="hljs-number"><span class="hljs-number">2</span></span>] io.pivotal.greeting.GreetingController   : fortune service homePageUrl: http:<span class="hljs-regexp"><span class="hljs-regexp">//</span></span><span class="hljs-number"><span class="hljs-number">10.68</span></span>.<span class="hljs-number"><span class="hljs-number">104.29</span></span>:<span class="hljs-number"><span class="hljs-number">60020</span></span>/
+<span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span>T15:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">58.68</span></span>-<span class="hljs-number"><span class="hljs-number">0500</span></span> [APP/<span class="hljs-number"><span class="hljs-number">0</span></span>]      OUT <span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span> <span class="hljs-number"><span class="hljs-number">20</span></span>:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">58.682</span></span> DEBUG <span class="hljs-number"><span class="hljs-number">23</span></span> --- [nio-<span class="hljs-number"><span class="hljs-number">8080</span></span>-<span class="hljs-keyword"><span class="hljs-keyword">exec</span></span>-<span class="hljs-number"><span class="hljs-number">2</span></span>] io.pivotal.greeting.GreetingController   : Adding fortune
+<span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span>T15:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">59.60</span></span>-<span class="hljs-number"><span class="hljs-number">0500</span></span> [APP/<span class="hljs-number"><span class="hljs-number">0</span></span>]      OUT <span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span> <span class="hljs-number"><span class="hljs-number">20</span></span>:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">59.609</span></span> DEBUG <span class="hljs-number"><span class="hljs-number">23</span></span> --- [io-<span class="hljs-number"><span class="hljs-number">8080</span></span>-<span class="hljs-keyword"><span class="hljs-keyword">exec</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>] io.pivotal.greeting.GreetingController   : Adding greeting
+<span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span>T15:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">59.62</span></span>-<span class="hljs-number"><span class="hljs-number">0500</span></span> [APP/<span class="hljs-number"><span class="hljs-number">0</span></span>]      OUT <span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span> <span class="hljs-number"><span class="hljs-number">20</span></span>:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">59.626</span></span> DEBUG <span class="hljs-number"><span class="hljs-number">23</span></span> --- [io-<span class="hljs-number"><span class="hljs-number">8080</span></span>-<span class="hljs-keyword"><span class="hljs-keyword">exec</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>] io.pivotal.greeting.GreetingController   : instanceID: <span class="hljs-number"><span class="hljs-number">10.68</span></span>.<span class="hljs-number"><span class="hljs-number">104.27</span></span>:<span class="hljs-number"><span class="hljs-number">9</span></span>f960352-f80b-<span class="hljs-number"><span class="hljs-number">4316</span></span>-<span class="hljs-number"><span class="hljs-number">7577</span></span>-<span class="hljs-number"><span class="hljs-number">61</span></span>dd1815ac5f
+<span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span>T15:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">59.62</span></span>-<span class="hljs-number"><span class="hljs-number">0500</span></span> [APP/<span class="hljs-number"><span class="hljs-number">0</span></span>]      OUT <span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span> <span class="hljs-number"><span class="hljs-number">20</span></span>:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">59.626</span></span> DEBUG <span class="hljs-number"><span class="hljs-number">23</span></span> --- [io-<span class="hljs-number"><span class="hljs-number">8080</span></span>-<span class="hljs-keyword"><span class="hljs-keyword">exec</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>] io.pivotal.greeting.GreetingController   : fortune service homePageUrl: http:<span class="hljs-regexp"><span class="hljs-regexp">//</span></span><span class="hljs-number"><span class="hljs-number">10.68</span></span>.<span class="hljs-number"><span class="hljs-number">104.27</span></span>:<span class="hljs-number"><span class="hljs-number">60028</span></span>/
+<span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span>T15:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">59.63</span></span>-<span class="hljs-number"><span class="hljs-number">0500</span></span> [APP/<span class="hljs-number"><span class="hljs-number">0</span></span>]      OUT <span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span> <span class="hljs-number"><span class="hljs-number">20</span></span>:<span class="hljs-number"><span class="hljs-number">49</span></span>:<span class="hljs-number"><span class="hljs-number">59.637</span></span> DEBUG <span class="hljs-number"><span class="hljs-number">23</span></span> --- [io-<span class="hljs-number"><span class="hljs-number">8080</span></span>-<span class="hljs-keyword"><span class="hljs-keyword">exec</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>] io.pivotal.greeting.GreetingController   : Adding fortune
+<span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span>T15:<span class="hljs-number"><span class="hljs-number">50</span></span>:<span class="hljs-number"><span class="hljs-number">00</span></span>.<span class="hljs-number"><span class="hljs-number">54</span></span>-<span class="hljs-number"><span class="hljs-number">0500</span></span> [APP/<span class="hljs-number"><span class="hljs-number">0</span></span>]      OUT <span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span> <span class="hljs-number"><span class="hljs-number">20</span></span>:<span class="hljs-number"><span class="hljs-number">50</span></span>:<span class="hljs-number"><span class="hljs-number">00</span></span>.<span class="hljs-number"><span class="hljs-number">548</span></span> DEBUG <span class="hljs-number"><span class="hljs-number">23</span></span> --- [nio-<span class="hljs-number"><span class="hljs-number">8080</span></span>-<span class="hljs-keyword"><span class="hljs-keyword">exec</span></span>-<span class="hljs-number"><span class="hljs-number">1</span></span>] io.pivotal.greeting.GreetingController   : Adding greeting
+<span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span>T15:<span class="hljs-number"><span class="hljs-number">50</span></span>:<span class="hljs-number"><span class="hljs-number">00</span></span>.<span class="hljs-number"><span class="hljs-number">56</span></span>-<span class="hljs-number"><span class="hljs-number">0500</span></span> [APP/<span class="hljs-number"><span class="hljs-number">0</span></span>]      OUT <span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span> <span class="hljs-number"><span class="hljs-number">20</span></span>:<span class="hljs-number"><span class="hljs-number">50</span></span>:<span class="hljs-number"><span class="hljs-number">00</span></span>.<span class="hljs-number"><span class="hljs-number">564</span></span> DEBUG <span class="hljs-number"><span class="hljs-number">23</span></span> --- [nio-<span class="hljs-number"><span class="hljs-number">8080</span></span>-<span class="hljs-keyword"><span class="hljs-keyword">exec</span></span>-<span class="hljs-number"><span class="hljs-number">1</span></span>] io.pivotal.greeting.GreetingController   : instanceID: <span class="hljs-number"><span class="hljs-number">10.68</span></span>.<span class="hljs-number"><span class="hljs-number">104.28</span></span>:<span class="hljs-number"><span class="hljs-number">72</span></span>aa9f59-b27f-<span class="hljs-number"><span class="hljs-number">4</span></span>d85-<span class="hljs-number"><span class="hljs-number">4323</span></span>-<span class="hljs-number"><span class="hljs-number">2</span></span>d79a9d7720c
+<span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span>T15:<span class="hljs-number"><span class="hljs-number">50</span></span>:<span class="hljs-number"><span class="hljs-number">00</span></span>.<span class="hljs-number"><span class="hljs-number">56</span></span>-<span class="hljs-number"><span class="hljs-number">0500</span></span> [APP/<span class="hljs-number"><span class="hljs-number">0</span></span>]      OUT <span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span> <span class="hljs-number"><span class="hljs-number">20</span></span>:<span class="hljs-number"><span class="hljs-number">50</span></span>:<span class="hljs-number"><span class="hljs-number">00</span></span>.<span class="hljs-number"><span class="hljs-number">564</span></span> DEBUG <span class="hljs-number"><span class="hljs-number">23</span></span> --- [nio-<span class="hljs-number"><span class="hljs-number">8080</span></span>-<span class="hljs-keyword"><span class="hljs-keyword">exec</span></span>-<span class="hljs-number"><span class="hljs-number">1</span></span>] io.pivotal.greeting.GreetingController   : fortune service homePageUrl: http:<span class="hljs-regexp"><span class="hljs-regexp">//</span></span><span class="hljs-number"><span class="hljs-number">10.68</span></span>.<span class="hljs-number"><span class="hljs-number">104.28</span></span>:<span class="hljs-number"><span class="hljs-number">60026</span></span>/
+<span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span>T15:<span class="hljs-number"><span class="hljs-number">50</span></span>:<span class="hljs-number"><span class="hljs-number">00</span></span>.<span class="hljs-number"><span class="hljs-number">57</span></span>-<span class="hljs-number"><span class="hljs-number">0500</span></span> [APP/<span class="hljs-number"><span class="hljs-number">0</span></span>]      OUT <span class="hljs-number"><span class="hljs-number">2015</span></span>-<span class="hljs-number"><span class="hljs-number">10</span></span>-<span class="hljs-number"><span class="hljs-number">29</span></span> <span class="hljs-number"><span class="hljs-number">20</span></span>:<span class="hljs-number"><span class="hljs-number">50</span></span>:<span class="hljs-number"><span class="hljs-number">00</span></span>.<span class="hljs-number"><span class="hljs-number">572</span></span> DEBUG <span class="hljs-number"><span class="hljs-number">23</span></span> --- [nio-<span class="hljs-number"><span class="hljs-number">8080</span></span>-<span class="hljs-keyword"><span class="hljs-keyword">exec</span></span>-<span class="hljs-number"><span class="hljs-number">1</span></span>] io.pivotal.greeting.GreetingController   : Adding fortune
+</code></pre>
+
+<p><strong><em>What Just Happened?</em></strong></p>
+
+<p>The <code>greeting-service</code> and <code>fortune-service</code> both registered with the <code>service-registry</code> (Eureka).  The <code>greeting-service</code> was able to locate the <code>fortune-service</code> via the <code>service-registry</code>.  The <code>greeting-service</code> round robins requests to all the <code>fortune-service</code> instances.</p>
+
+			</div>
+		</div>
+	</div>
+
+
+
+
+</main>
+
+
+<hr>
+<div class="container">
+	<div class="row">
+		<div class="col-sm-8">
+			<p class="doc-footer-em"><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-netflix-service-discovery/index.html#">Back to TOP</a></p>
+		</div>
+	</div>
+
+</div> 
+
+<footer class="doc-footer">
+	
+	<p>© Copyright Pivotal. All rights reserved.</p>
+</footer>
+
+
+
+
+
+<script src="./Lab 6 Spring Cloud Netflix_ Service Discovery_files/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script src="./Lab 6 Spring Cloud Netflix_ Service Discovery_files/ie10-viewport-bug-workaround.js"></script>
+
+
+
+
+</body></html>

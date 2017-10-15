@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<!-- saved from url=(0071)https://workshop-content.cfapps.io/labs/85-spring-cloud-config-lab.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="alternate" href="https://cdn.enablement.pivotal.io/index.xml" type="application/rss+xml" title="Spring Cloud Config">
+		<link rel="icon" href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-config/P_Mark_WhiteOnTeal.png">
+		<title>Spring Cloud Config</title>
+		<link rel="stylesheet" href="./Lab 5 Spring Cloud Config_files/highlight.js.min.css">
+		<link rel="stylesheet" href="./Lab 5 Spring Cloud Config_files/pivotal-ui.css">
+		<link rel="stylesheet" href="./Lab 5 Spring Cloud Config_files/theme.css">
+		<link rel="stylesheet" href="./Lab 5 Spring Cloud Config_files/bootie-docs.css">
+	</head>
+
+<body role="document">
+	
+
+
+<main role="main">
+
+<div class="row">
+	
+	<div class="pane bg-dark-2">
+		<div class="container">
+			<h2 class="type-neutral-11 title">Spring Cloud Config</h2>
+			<p></p>
+		</div>
+	</div>
+</div>
+
+
+	<div class="doc-main">
+		<div class="container">
+			<div class="row">
+				
+<div class="col-sm-14 doc-sidebar">
+	<div class="sidebar-module">
+		<div class="sidebar-toc">
+			<h4>Table of Contents</h4>
+			<nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-config/index.html#requirements:3976528693a0108357f4928017600865">Requirements</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-config/index.html#what-you-will-learn:3976528693a0108357f4928017600865">What You Will Learn</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-config/index.html#exercises:3976528693a0108357f4928017600865">Exercises</a>
+<ul>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-config/index.html#set-up-the-app-config-repo:3976528693a0108357f4928017600865">Set up the <code>app-config</code> Repo</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-config/index.html#set-up-config-server:3976528693a0108357f4928017600865">Set up <code>config-server</code></a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-config/index.html#set-up-greeting-config:3976528693a0108357f4928017600865">Set up <code>greeting-config</code></a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-config/index.html#unsecure-the-endpoints:3976528693a0108357f4928017600865">Unsecure the Endpoints</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-config/index.html#changing-logging-levels:3976528693a0108357f4928017600865">Changing Logging Levels</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-config/index.html#turning-on-a-feature-with-configurationproperties:3976528693a0108357f4928017600865">Turning on a Feature with <code>@ConfigurationProperties</code></a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-config/index.html#reinitializing-beans-with-refreshscope:3976528693a0108357f4928017600865">Reinitializing Beans with <code>@RefreshScope</code></a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-config/index.html#override-configuration-values-by-profile:3976528693a0108357f4928017600865">Override Configuration Values By Profile</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-config/index.html#deploy-the-greeting-config-application-to-pcf:3976528693a0108357f4928017600865">Deploy the <code>greeting-config</code> Application to PCF</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-config/index.html#refreshing-application-configuration-at-scale-with-cloud-bus:3976528693a0108357f4928017600865">Refreshing Application Configuration at Scale with Cloud Bus</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+		</div>
+	</div>
+</div>
+
+			</div>
+			<div class="row">
+				
+
+<hr>
+
+<p>Estimated Time: 60 minutes</p>
+
+<hr>
+
+<h2 id="requirements:3976528693a0108357f4928017600865">Requirements</h2>
+
+<p><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/requirements">Lab Requirements</a></p>
+
+<hr>
+
+<h2 id="what-you-will-learn:3976528693a0108357f4928017600865">What You Will Learn</h2>
+
+<ul>
+<li>How to set up a git repository to hold configuration data</li>
+<li>How to set up a config server (<code>config-server</code>) with a git backend</li>
+<li>How to set up a client (<code>greeting-config</code>) to pull configuration from the <code>config-server</code></li>
+<li>How to change log levels for a running application (<code>greeting-config</code>)</li>
+<li>How to use <code>@ConfigurationProperties</code> to capture configuration changes (<code>greeting-config</code>)</li>
+<li>How to use <code>@RefreshScope</code> to capture configuration changes (<code>greeting-config</code>)</li>
+<li>How to override configuration values by profile (<code>greeting-config</code>)</li>
+<li>How to use Spring Cloud Service to provision and configure a Config Server</li>
+<li>How to use Cloud Bus to notify applications (<code>greeting-config</code>) to refresh configuration at scale</li>
+</ul>
+
+<hr>
+
+<h2 id="exercises:3976528693a0108357f4928017600865">Exercises</h2>
+
+<hr>
+
+<h3 id="set-up-the-app-config-repo:3976528693a0108357f4928017600865">Set up the <code>app-config</code> Repo</h3>
+
+<p>To start, we need a repository to hold our configuration.</p>
+
+<p>1) Fork the configuration repo to your account.  Browse to: <a href="https://github.com/decelc-pivotal/app-config">https://github.com/decelc-pivotal/app-config</a>.  Then fork the repo.
+<img src="./Lab 5 Spring Cloud Config_files/fork.png" alt="fork" title="fork"></p>
+
+<p>2) GitHub displays your new fork. Copy the HTTPS clone URL from your fork.</p>
+
+<p>3) Open a new terminal window and clone the fork you just created (you may want to create a common location for your GitHub repos, such as ~/repos):</p>
+
+<pre><code class="language-bash hljs">$ <span class="hljs-built_in"><span class="hljs-built_in">cd</span></span> [location of your github repos, e.g. ~/repos]
+$ git <span class="hljs-built_in"><span class="hljs-built_in">clone</span></span> &lt;Your fork of the app-config repo - HTTPS <span class="hljs-built_in"><span class="hljs-built_in">clone</span></span> URL&gt;
+$ <span class="hljs-built_in"><span class="hljs-built_in">cd</span></span> app-config
+</code></pre>
+
+<p>Notice that this repository is basically empty. This repository will be the source of configuration data.</p>
+
+<h3 id="set-up-config-server:3976528693a0108357f4928017600865">Set up <code>config-server</code></h3>
+
+<p>1) Review the following file: <code>$SPRING_CLOUD_SERVICES_LABS_HOME/config-server/pom.xml</code>
+By adding <code>spring-cloud-config-server</code> to the classpath, this application is eligible to embed a <code>config-server</code>.</p>
+
+<pre><code class="language-xml hljs"><span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+    <span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>org.springframework.cloud<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+    <span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>spring-cloud-config-server<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+</code></pre>
+
+<p>2) Review the following file:<code>$SPRING_CLOUD_SERVICES_LABS_HOME/config-server/src/main/java/io/pivotal/ConfigServerApplication.java</code></p>
+
+<pre><code class="language-java hljs"><span class="hljs-annotation"><span class="hljs-annotation">@SpringBootApplication</span></span>
+<span class="hljs-annotation"><span class="hljs-annotation">@EnableConfigServer</span></span>
+<span class="hljs-keyword"><span class="hljs-keyword">public</span></span> <span class="hljs-class"><span class="hljs-keyword"><span class="hljs-class"><span class="hljs-keyword">class</span></span></span><span class="hljs-class"> </span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">ConfigServerApplication</span></span></span><span class="hljs-class"> </span></span>{
+
+    <span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">static</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">void</span></span></span><span class="hljs-function"> </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">main</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">(String[] args)</span></span></span><span class="hljs-function"> </span></span>{
+        SpringApplication.run(ConfigServerApplication.class, args);
+    }
+}
+</code></pre>
+
+<p>Note the <code>@EnableConfigServer</code> annotation.  That embeds the <code>config-server</code>.</p>
+
+<p>3) Set the GitHub repository for the <code>config-server</code>. This will be the source of the configuration data. <em>Edit the <code>$SPRING_CLOUD_SERVICES_LABS_HOME/config-server/src/main/resources/application.yml</code> file.</em></p>
+
+<pre><code class="language-yml hljs ruby"> <span class="hljs-symbol"><span class="hljs-symbol">server:</span></span>
+   <span class="hljs-symbol"><span class="hljs-symbol">port:</span></span> <span class="hljs-number"><span class="hljs-number">8888</span></span>
+
+ <span class="hljs-symbol"><span class="hljs-symbol">spring:</span></span>
+   <span class="hljs-symbol"><span class="hljs-symbol">cloud:</span></span>
+     <span class="hljs-symbol"><span class="hljs-symbol">config:</span></span>
+       <span class="hljs-symbol"><span class="hljs-symbol">server:</span></span>
+         <span class="hljs-symbol"><span class="hljs-symbol">git:</span></span>
+           <span class="hljs-symbol"><span class="hljs-symbol">uri:</span></span> <span class="hljs-symbol"><span class="hljs-symbol">https:</span></span>/<span class="hljs-regexp"><span class="hljs-regexp">/github.com/d</span></span>4v3r/app-config.git <span class="hljs-comment"><span class="hljs-comment">#&lt;-- CHANGE ME</span></span>
+</code></pre>
+
+<p>Make sure to substitute your forked <code>app-config</code> repository. Do not use the literal above.</p>
+
+<p>4) Open a terminal window and start the <code>config-server</code>.</p>
+
+<pre><code class="language-bash hljs">$ <span class="hljs-built_in"><span class="hljs-built_in">cd</span></span> <span class="hljs-variable"><span class="hljs-variable">$SPRING_CLOUD_SERVICES_LABS_HOME</span></span>/config-server
+$ mvn clean spring-boot:run
+</code></pre>
+
+<p>Your <code>config-server</code> will be running locally once you see a “Started ConfigServerApplication…” message. You
+will not be returned to a command prompt and must leave this window open.</p>
+
+<p>5) Let’s add some configuration.  Edit your fork of the <code>app-config</code> repo.  Create a file called <code>hello-world.yml</code>.  Add the content below to the file and push the changes back to GitHub.  Be sure to substitute your name for <code>&lt;Your name&gt;</code>.</p>
+
+<pre><code class="language-yml hljs http"><span class="hljs-attribute"><span class="hljs-attribute">name</span></span>: <span class="hljs-string"><span class="hljs-string">&lt;Your Name&gt;</span></span>
+</code></pre>
+
+<p>6) Confirm the <code>config-server</code> is up and configured with a backing git repository by calling one of its <a href="http://projects.spring.io/spring-cloud/docs/1.0.3/spring-cloud.html#_quick_start">endpoints</a>.  Because the returned payload is JSON, we recommend using something that will pretty-print the document.  A good tool for this is the Chrome <a href="https://chrome.google.com/webstore/detail/json-formatter/bcjindcccaagfpapjjmafapmmgkkhgoa?hl=en">JSON Formatter</a> plug-in.</p>
+
+<p>Open a browser window and fetch the following url: <a href="http://localhost:8888/hello-world/default">http://localhost:8888/hello-world/default</a></p>
+
+<p><img src="./Lab 5 Spring Cloud Config_files/api.png" alt="Config Server - API" title="Config Server - API"></p>
+
+<p><strong><em>What Just Happened?</em></strong></p>
+
+<p>The <code>config-server</code> exposes several <a href="http://projects.spring.io/spring-cloud/docs/1.0.3/spring-cloud.html#_quick_start">endpoints</a> to fetch configuration.</p>
+
+<p>In this case, we are manually calling one of those endpoints (<code>/{application}/{profile}[/{label}]</code>) to fetch configuration.  We substituted our example client application <code>hello-world</code> as the <code>{application}</code> and the <code>default</code> profile as the <code>{profile}</code>.  We didn’t specify the label to use so <code>master</code> is assumed.  In the returned document, we see the configuration file <code>hello-world.yml</code> listed as a <code>propertySource</code> with the associated key/value pair.  This is just an example, as you move through the lab you will add configuration for <code>greeting-config</code> (our client application).</p>
+
+<h3 id="set-up-greeting-config:3976528693a0108357f4928017600865">Set up <code>greeting-config</code></h3>
+
+<p>1) Review the following file: <code>$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-config/pom.xml</code>
+By adding <code>spring-cloud-services-starter-config-client</code> to the classpath, this application will consume configuration from the <code>config-server</code>.  <code>greeting-config</code> is a config client.</p>
+
+<pre><code class="language-xml hljs"><span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>io.pivotal.spring.cloud<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>spring-cloud-services-starter-config-client<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+</code></pre>
+
+<p>2) Review the <code>$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-config/src/main/resources/bootstrap.yml</code></p>
+
+<pre><code class="language-yml hljs css"><span class="hljs-rule"><span class="hljs-attribute"><span class="hljs-rule"><span class="hljs-attribute">spring</span></span></span><span class="hljs-rule">:</span><span class="hljs-value"><span class="hljs-rule"><span class="hljs-value">
+  application:
+    name: greeting-config
+</span></span></span></span></code></pre>
+
+<p><code>spring.application.name</code> defines the name of the application.  This value is used in several places within Spring Cloud: locating configuration files by name, service discovery/registration by name, etc.  In this lab, it will be used to locate config files for the <code>greeting-config</code> application.</p>
+
+<p>Absent from the bootstrap.yml is the <code>spring.cloud.config.uri</code>, which defines how <code>greeting-config</code> reaches the <code>config-server</code>. Since there is no <code>spring.cloud.config.uri</code> defined in this file, the default value of <code>http://localhost:8888</code> is used.  Notice that this is the same host and port of the <code>config-server</code> application.</p>
+
+<p>3) Open a new terminal window.  Start the <code>greeting-config</code> application:</p>
+
+<pre><code class="language-bash hljs">$ <span class="hljs-built_in"><span class="hljs-built_in">cd</span></span> <span class="hljs-variable"><span class="hljs-variable">$SPRING_CLOUD_SERVICES_LABS_HOME</span></span>/greeting-config
+$ mvn clean spring-boot:run
+</code></pre>
+
+<p>4) Confirm the <code>greeting-config</code> app is up.  Browse to <a href="http://localhost:8080/">http://localhost:8080</a>.  You should be prompted to authenticate.  Why?  <code>spring-cloud-services-starter-config-client</code> has a dependency on <a href="http://projects.spring.io/spring-security/">Spring Security</a>.  Unless the given application has other security configuration, this will cause all application and actuator endpoints to be protected by HTTP Basic authentication.</p>
+
+<p>5) If no explicit username or password has been set then Spring Security will generate one for you.  This is applies for the <code>greeting-config</code> application.  Use the following to login:</p>
+
+<p><strong><em>username:</em></strong> <code>user</code></p>
+
+<p><strong><em>password:</em></strong> You can find this in the terminal output.  Look for a log message similar to the following: <code>Using default security password: 90a3ef2a-4e98-4491-a528-a47a7162dd2a</code>.  Use this password to login.</p>
+
+<p><strong><em>Note:</em></strong> Username and password can be explicitly set through the <code>security.user.name</code> and <code>security.user.password</code> configuration parameters.</p>
+
+<p>6) After logging in you should see the message “Greetings!!!”.
+<img src="./Lab 5 Spring Cloud Config_files/greeting-config.png" alt="greeting-config" title="greeting-config"></p>
+
+<p><strong><em>What Just Happened?</em></strong></p>
+
+<p>At this point, you connected the <code>greeting-config</code> application with the <code>config-server</code>.  This can be confirmed by reviewing the logs of the <code>greeting-config</code> application.</p>
+
+<p><code>greeting-config</code> log output:</p>
+
+<pre><code class="hljs css">2015<span class="hljs-tag"><span class="hljs-tag">-09-18</span></span> 13<span class="hljs-pseudo"><span class="hljs-pseudo">:48</span></span><span class="hljs-pseudo"><span class="hljs-pseudo">:50</span></span><span class="hljs-class"><span class="hljs-class">.147</span></span>  <span class="hljs-tag"><span class="hljs-tag">INFO</span></span> 15706 <span class="hljs-tag"><span class="hljs-tag">---</span></span> <span class="hljs-attr_selector"><span class="hljs-attr_selector">[lication.main()]</span></span> <span class="hljs-rule"><span class="hljs-attribute"><span class="hljs-rule"><span class="hljs-attribute">b.c.PropertySourceBootstrapConfiguration </span></span></span><span class="hljs-rule">:</span><span class="hljs-value"><span class="hljs-rule"><span class="hljs-value">
+Located property source: CompositePropertySource [name=</span></span><span class="hljs-string"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-string">'configService'</span></span></span></span><span class="hljs-rule"><span class="hljs-value">, propertySources=[]]
+</span></span></span></span></code></pre>
+
+<p>There is still no configuration in the git repo for the <code>greeting-config</code> application, but at this point we have everything wired (<code>greeting-config</code> → <code>config-server</code> → <code>app-config</code> repo) so we can add configuration parameters/values and see the effects in out client application <code>greeting-config</code>.</p>
+
+<p>Configuration parameters/values will be added as we move through the lab.</p>
+
+<p>7) Stop the <code>greeting-config</code> application</p>
+
+<h3 id="unsecure-the-endpoints:3976528693a0108357f4928017600865">Unsecure the Endpoints</h3>
+
+<p>For these labs we don’t need Spring Security’s default behavior of securing every endpoint.  This will be our first example of using the <code>config-server</code> to provide configuration for the <code>greeting-config</code> application.</p>
+
+<p>1) Edit your fork of the <code>app-config</code> repo.  Create a file called <code>greeting-config.yml</code>.  Add the content below to the file and push the changes back to GitHub.</p>
+
+<pre><code class="language-yml hljs bash">security:
+  basic:
+    enabled: <span class="hljs-literal"><span class="hljs-literal">false</span></span> <span class="hljs-comment"><span class="hljs-comment"># turn of securing our application endpoints</span></span>
+
+management:
+  security:
+    enabled: <span class="hljs-literal"><span class="hljs-literal">false</span></span> <span class="hljs-comment"><span class="hljs-comment"># turn of securing the actuator endpoints</span></span>
+</code></pre>
+
+<p>2) Browse to <a href="http://localhost:8888/greeting-config/default">http://localhost:8888/greeting-config/default</a> to review the configuration the  <code>config-server</code> is providing for <code>greeting-config</code> application.</p>
+
+<p><img src="./Lab 5 Spring Cloud Config_files/security.png" alt="security" title="security"></p>
+
+<p>3) Start the <code>greeting-config</code> application:</p>
+
+<pre><code class="language-bash hljs">$ mvn clean spring-boot:run
+</code></pre>
+
+<p>4) Review the logs for the <code>greeting-config</code> application.  You can see that configuration is being sourced from the <code>greeting-config.yml</code> file.</p>
+
+<pre><code class="hljs css">2015<span class="hljs-tag"><span class="hljs-tag">-11-02</span></span> 08<span class="hljs-pseudo"><span class="hljs-pseudo">:57</span></span><span class="hljs-pseudo"><span class="hljs-pseudo">:32</span></span><span class="hljs-class"><span class="hljs-class">.962</span></span>  <span class="hljs-tag"><span class="hljs-tag">INFO</span></span> 58597 <span class="hljs-tag"><span class="hljs-tag">---</span></span> <span class="hljs-attr_selector"><span class="hljs-attr_selector">[lication.main()]</span></span> <span class="hljs-rule"><span class="hljs-attribute"><span class="hljs-rule"><span class="hljs-attribute">b.c.PropertySourceBootstrapConfiguration </span></span></span><span class="hljs-rule">:</span><span class="hljs-value"><span class="hljs-rule"><span class="hljs-value"> Located property source: CompositePropertySource [name=</span></span><span class="hljs-string"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-string">'configService'</span></span></span></span><span class="hljs-rule"><span class="hljs-value">, propertySources=[MapPropertySource [name=</span></span><span class="hljs-string"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-string">'https://github.com/d4v3r/app-config.git/greeting-config.yml'</span></span></span></span><span class="hljs-rule"><span class="hljs-value">]]]
+</span></span></span></span></code></pre>
+
+<p>5) Browse to <a href="http://localhost:8080/">http://localhost:8080</a>.  You should no longer be prompted to authenticate.</p>
+
+<h3 id="changing-logging-levels:3976528693a0108357f4928017600865">Changing Logging Levels</h3>
+
+<p>Next you will change the logging level of the <code>greeting-config</code> application.</p>
+
+<p>1) View the <code>getGreeting()</code> method of the <code>GreetingController</code> class (<code>$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-config/src/main/java/io/pivotal/greeting/GreetingController.java</code>).</p>
+
+<pre><code class="language-java hljs"><span class="hljs-annotation"><span class="hljs-annotation">@RequestMapping</span></span>(<span class="hljs-string"><span class="hljs-string">"/"</span></span>)
+<span class="hljs-function"><span class="hljs-function">String </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">getGreeting</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">(Model model)</span></span></span></span>{
+
+  logger.debug(<span class="hljs-string"><span class="hljs-string">"Adding greeting"</span></span>);
+  model.addAttribute(<span class="hljs-string"><span class="hljs-string">"msg"</span></span>, <span class="hljs-string"><span class="hljs-string">"Greetings!!!"</span></span>);
+
+  <span class="hljs-keyword"><span class="hljs-keyword">if</span></span>(greetingProperties.isDisplayFortune()){
+    logger.debug(<span class="hljs-string"><span class="hljs-string">"Adding fortune"</span></span>);
+    model.addAttribute(<span class="hljs-string"><span class="hljs-string">"fortune"</span></span>, fortuneService.getFortune());
+  }
+
+  <span class="hljs-comment"><span class="hljs-comment">//resolves to the greeting.vm velocity template</span></span>
+  <span class="hljs-keyword"><span class="hljs-keyword">return</span></span> <span class="hljs-string"><span class="hljs-string">"greeting"</span></span>;
+}
+</code></pre>
+
+<p>We want to see these debug messages.  By default only log levels of <code>ERROR</code>, <code>WARN</code> and <code>INFO</code> will be logged. You will change the log level to <code>DEBUG</code> using
+configuration. All log output will be directed to <code>System.out</code> &amp; <code>System.error</code> by default, so logs will be output to the terminal window(s).</p>
+
+<p>2) In your fork of the <code>app-config</code> repo.  Add the content below to the <code>greeting-config.yml</code> file and push the changes back to GitHub.</p>
+
+<pre><code class="language-yml hljs cpp">security:
+  basic:
+    enabled: <span class="hljs-keyword"><span class="hljs-keyword">false</span></span>
+
+management:
+  security:
+    enabled: <span class="hljs-keyword"><span class="hljs-keyword">false</span></span>
+
+logging: <span class="hljs-preprocessor"><span class="hljs-preprocessor"># &lt;----New sections below</span></span>
+  level:
+    io:
+      pivotal: DEBUG
+
+greeting:
+  displayFortune: <span class="hljs-keyword"><span class="hljs-keyword">false</span></span>
+
+quoteServiceURL: http:<span class="hljs-comment"><span class="hljs-comment">//quote-service-dev.cfapps.io/quote</span></span>
+
+</code></pre>
+
+<p>We have added several configuration parameters that will be used throughout this lab.  For this exercise, we have set the log level for classes in the <code>io.pivotal</code> package to <code>DEBUG</code>.</p>
+
+<p>3) While watching the <code>greeting-config</code> terminal, refresh the <a href="http://localhost:8080/">http://localhost:8080</a> url.  Notice there are no <code>DEBUG</code> logs yet.</p>
+
+<p>4) Does the <code>config-server</code> see the change in your git repo?  Let’s check what the <code>config-server</code> is serving.  Browse to <a href="http://localhost:8888/greeting-config/default">http://localhost:8888/greeting-config/default</a></p>
+
+<p><img src="./Lab 5 Spring Cloud Config_files/updated-config.png" alt="updated-config" title="updated-config"></p>
+
+<p>The propertySources value has changed!  The <code>config-server</code> has picked up the changes to the git repo. (If you don’t see the change,
+verify that you have pushed the greeting-config.yml to GitHub.)</p>
+
+<p>5) Review the following file: <code>$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-config/pom.xml</code>.  For the <code>greeting-config</code> application to pick up the configuration changes, it must include the <code>actuator</code> dependency.  The <code>actuator</code> adds several additional endpoints to the application for operational visibility and tasks that need to be carried out.  In this case, we have added the actuator so that we can use the <code>/refresh</code> endpoint, which allows us to refresh the application config on demand.</p>
+
+<pre><code class="language-xml hljs"><span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+    <span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>org.springframework.boot<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+  <span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>spring-boot-starter-actuator<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+</code></pre>
+
+<p>6) For the <code>greeting-config</code> application to pick up the configuration changes, it must be told to do so.  Notify <code>greeting-config</code> app to pick up the new config by POSTing to the <code>greeting-config</code> <code>/refresh</code> endpoint.  Open a new terminal window and execute the following:</p>
+
+<pre><code class="language-bash hljs">$ curl -X POST http://localhost:<span class="hljs-number"><span class="hljs-number">8080</span></span>/refresh
+</code></pre>
+
+<p>7) Refresh the <code>greeting-config</code> <a href="http://localhost:8080/">http://localhost:8080</a> url while viewing the <code>greeting-config</code> terminal.  You should see the debug line “Adding greeting”</p>
+
+<p>Congratulations! You have used the <code>config-server</code> and <code>actuator</code> to change the logging level of the <code>greeting-config</code> application without restarting the <code>greeting-config</code> application.</p>
+
+<h3 id="turning-on-a-feature-with-configurationproperties:3976528693a0108357f4928017600865">Turning on a Feature with <code>@ConfigurationProperties</code></h3>
+
+<p>Use of <code>@ConfigurationProperties</code> is a common way to externalize, group, and validate configuration in Spring applications.  <code>@ConfigurationProperties</code> beans are automatically rebound when application config is refreshed.</p>
+
+<p>1) Review <code>$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-config/src/main/java/io/pivotal/greeting/GreetingProperties.java</code>.  Use of the <code>@ConfigurationProperties</code> annotation allows for reading of configuration values.  Configuration keys are a combination of the <code>prefix</code> and the field names.  In this case, there is one field (<code>displayFortune</code>).  Therefore <code>greeting.displayFortune</code> is used to turn the display of fortunes on/off.  Remaining code is typical getter/setters for the fields.</p>
+
+<pre><code class="language-java hljs"><span class="hljs-annotation"><span class="hljs-annotation">@ConfigurationProperties</span></span>(prefix=<span class="hljs-string"><span class="hljs-string">"greeting"</span></span>)
+<span class="hljs-keyword"><span class="hljs-keyword">public</span></span> <span class="hljs-class"><span class="hljs-keyword"><span class="hljs-class"><span class="hljs-keyword">class</span></span></span><span class="hljs-class"> </span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">GreetingProperties</span></span></span><span class="hljs-class"> </span></span>{
+
+	<span class="hljs-keyword"><span class="hljs-keyword">private</span></span> <span class="hljs-keyword"><span class="hljs-keyword">boolean</span></span> displayFortune;
+
+	<span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">boolean</span></span></span><span class="hljs-function"> </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">isDisplayFortune</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">()</span></span></span><span class="hljs-function"> </span></span>{
+		<span class="hljs-keyword"><span class="hljs-keyword">return</span></span> displayFortune;
+	}
+
+	<span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> </span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">void</span></span></span><span class="hljs-function"> </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">setDisplayFortune</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">(</span></span><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-params"><span class="hljs-keyword">boolean</span></span></span></span><span class="hljs-function"><span class="hljs-params"> displayFortune)</span></span></span><span class="hljs-function"> </span></span>{
+		<span class="hljs-keyword"><span class="hljs-keyword">this</span></span>.displayFortune = displayFortune;
+	}
+}
+</code></pre>
+
+<p>2) Review <code>$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-config/src/main/java/io/pivotal/greeting/GreetingController.java</code>.  Note how the <code>greetingProperties.isDisplayFortune()</code> is used to turn the display of fortunes on/off.  There are times when you want to turn features on/off on demand.  In this case, we want the fortune feature “on” with our greeting.</p>
+
+<pre><code class="language-java hljs"><span class="hljs-annotation"><span class="hljs-annotation">@EnableConfigurationProperties</span></span>(GreetingProperties.class)
+<span class="hljs-keyword"><span class="hljs-keyword">public</span></span> <span class="hljs-class"><span class="hljs-keyword"><span class="hljs-class"><span class="hljs-keyword">class</span></span></span><span class="hljs-class"> </span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">GreetingController</span></span></span><span class="hljs-class"> </span></span>{
+
+	Logger logger = LoggerFactory
+			.getLogger(GreetingController.class);
+
+
+	<span class="hljs-annotation"><span class="hljs-annotation">@Autowired</span></span>
+	GreetingProperties greetingProperties;
+
+	<span class="hljs-annotation"><span class="hljs-annotation">@Autowired</span></span>
+	FortuneService fortuneService;
+
+	<span class="hljs-annotation"><span class="hljs-annotation">@RequestMapping</span></span>(<span class="hljs-string"><span class="hljs-string">"/"</span></span>)
+	<span class="hljs-function"><span class="hljs-function">String </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">getGreeting</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">(Model model)</span></span></span></span>{
+
+		logger.debug(<span class="hljs-string"><span class="hljs-string">"Adding greeting"</span></span>);
+		model.addAttribute(<span class="hljs-string"><span class="hljs-string">"msg"</span></span>, <span class="hljs-string"><span class="hljs-string">"Greetings!!!"</span></span>);
+
+		<span class="hljs-keyword"><span class="hljs-keyword">if</span></span>(greetingProperties.isDisplayFortune()){
+			logger.debug(<span class="hljs-string"><span class="hljs-string">"Adding fortune"</span></span>);
+			model.addAttribute(<span class="hljs-string"><span class="hljs-string">"fortune"</span></span>, fortuneService.getFortune());
+		}
+
+		<span class="hljs-comment"><span class="hljs-comment">//resolves to the greeting.vm velocity template</span></span>
+		<span class="hljs-keyword"><span class="hljs-keyword">return</span></span> <span class="hljs-string"><span class="hljs-string">"greeting"</span></span>;
+	}
+
+}
+
+</code></pre>
+
+<p>3) Edit your fork of the <code>app-config</code> repo.   Change <code>greeting.displayFortune</code> from <code>false</code> to <code>true</code> in the <code>greeting-config.yml</code> and push the changes back to GitHub.</p>
+
+<pre><code class="language-yml hljs cpp">security:
+  basic:
+    enabled: <span class="hljs-keyword"><span class="hljs-keyword">false</span></span>
+
+management:
+  security:
+    enabled: <span class="hljs-keyword"><span class="hljs-keyword">false</span></span>
+
+logging:
+  level:
+    io:
+      pivotal: DEBUG
+
+greeting:
+  displayFortune: <span class="hljs-keyword"><span class="hljs-keyword">true</span></span> <span class="hljs-preprocessor"><span class="hljs-preprocessor"># &lt;----Change to true</span></span>
+
+quoteServiceURL: http:<span class="hljs-comment"><span class="hljs-comment">//quote-service-dev.cfapps.io/quote</span></span>
+
+</code></pre>
+
+<p>4) Notify <code>greeting-config</code> app to pick up the new config by POSTing to the <code>/refresh</code> endpoint.</p>
+
+<pre><code class="language-bash hljs">$ curl -X POST http://localhost:<span class="hljs-number"><span class="hljs-number">8080</span></span>/refresh
+</code></pre>
+
+<p>5) Then refresh the <a href="http://localhost:8080/">http://localhost:8080</a> url and see the fortune included.</p>
+
+<p>Congratulations! You have turned on a feature without restarting using the <code>config-server</code>, <code>actuator</code> and <code>@ConfigurationProperties</code>.</p>
+
+<h3 id="reinitializing-beans-with-refreshscope:3976528693a0108357f4928017600865">Reinitializing Beans with <code>@RefreshScope</code></h3>
+
+<p>Now you will use the <code>config-server</code> to obtain a service URI rather than hardcoding it your application code.</p>
+
+<p>Beans annotated with the <code>@RefreshScope</code> will be recreated when refreshed so they can pick up new config values.</p>
+
+<p>1) Review <code>$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-config/src/main/java/io/pivotal/quote/QuoteService.java</code>.  <code>QuoteService</code> uses the <code>@RefreshScope</code> annotation. Beans with the <code>@RefreshScope</code> annotation will be recreated when refreshing configuration.  The <code>@Value</code> annotation allows for injecting the value of the <code>quoteServiceURL</code> configuration parameter.</p>
+
+<p>In this case, we are using a third party service to get quotes.  We want to keep our environments aligned with the third party.  So we are going to override configuration values by profile (next section).</p>
+
+<pre><code class="language-java hljs"><span class="hljs-annotation"><span class="hljs-annotation">@Service</span></span>
+<span class="hljs-annotation"><span class="hljs-annotation">@RefreshScope</span></span>
+<span class="hljs-keyword"><span class="hljs-keyword">public</span></span> <span class="hljs-class"><span class="hljs-keyword"><span class="hljs-class"><span class="hljs-keyword">class</span></span></span><span class="hljs-class"> </span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">QuoteService</span></span></span><span class="hljs-class"> </span></span>{
+	Logger logger = LoggerFactory
+			.getLogger(QuoteController.class);
+
+	<span class="hljs-annotation"><span class="hljs-annotation">@Value</span></span>(<span class="hljs-string"><span class="hljs-string">"${quoteServiceURL}"</span></span>)
+	<span class="hljs-keyword"><span class="hljs-keyword">private</span></span> String quoteServiceURL;
+
+	<span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> String </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">getQuoteServiceURI</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">()</span></span></span><span class="hljs-function"> </span></span>{
+		<span class="hljs-keyword"><span class="hljs-keyword">return</span></span> quoteServiceURL;
+	}
+
+	<span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> Quote </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">getQuote</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">()</span></span></span></span>{
+		logger.info(<span class="hljs-string"><span class="hljs-string">"quoteServiceURL: {}"</span></span>, quoteServiceURL);
+		RestTemplate restTemplate = <span class="hljs-keyword"><span class="hljs-keyword">new</span></span> RestTemplate();
+		Quote quote = restTemplate.getForObject(
+				quoteServiceURL, Quote.class);
+		<span class="hljs-keyword"><span class="hljs-keyword">return</span></span> quote;
+	}
+}
+</code></pre>
+
+<p>2) Review <code>$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-config/src/main/java/io/pivotal/quote/QuoteController.java</code>.  <code>QuoteController</code> calls the <code>QuoteService</code> for quotes.</p>
+
+<pre><code class="language-java hljs"><span class="hljs-annotation"><span class="hljs-annotation">@Controller</span></span>
+<span class="hljs-keyword"><span class="hljs-keyword">public</span></span> <span class="hljs-class"><span class="hljs-keyword"><span class="hljs-class"><span class="hljs-keyword">class</span></span></span><span class="hljs-class"> </span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">QuoteController</span></span></span><span class="hljs-class"> </span></span>{
+
+	Logger logger = LoggerFactory
+			.getLogger(QuoteController.class);
+
+	<span class="hljs-annotation"><span class="hljs-annotation">@Autowired</span></span>
+	<span class="hljs-keyword"><span class="hljs-keyword">private</span></span> QuoteService quoteService;
+
+	<span class="hljs-annotation"><span class="hljs-annotation">@RequestMapping</span></span>(<span class="hljs-string"><span class="hljs-string">"/random-quote"</span></span>)
+	<span class="hljs-function"><span class="hljs-function">String </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">getView</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">(Model model)</span></span></span><span class="hljs-function"> </span></span>{
+
+		model.addAttribute(<span class="hljs-string"><span class="hljs-string">"quote"</span></span>, quoteService.getQuote());
+		model.addAttribute(<span class="hljs-string"><span class="hljs-string">"uri"</span></span>, quoteService.getQuoteServiceURI());
+		<span class="hljs-keyword"><span class="hljs-keyword">return</span></span> <span class="hljs-string"><span class="hljs-string">"quote"</span></span>;
+	}
+}
+</code></pre>
+
+<p>3) In your browser, hit the <a href="http://localhost:8080/random-quote">http://localhost:8080/random-quote</a> url.<br>
+Note where the data is being served from: <code>http://quote-service-dev.cfapps.io/quote</code></p>
+
+<h3 id="override-configuration-values-by-profile:3976528693a0108357f4928017600865">Override Configuration Values By Profile</h3>
+
+<p>1) Stop the <code>greeting-config</code> application using Command-C or CTRL-C in the terminal window.</p>
+
+<p>2) Set the active profile to qa for the <code>greeting-config</code> application.  In the example below, we use an environment variable to set the active profile.</p>
+
+<pre><code class="language-bash hljs">[mac, linux]
+$ SPRING_PROFILES_ACTIVE=qa mvn clean spring-boot:run
+
+[windows]
+$ <span class="hljs-built_in"><span class="hljs-built_in">set</span></span> SPRING_PROFILES_ACTIVE=qa
+$ mvn clean spring-boot:run
+</code></pre>
+
+<p>2) Make sure the profile is set by browsing to the <a href="http://localhost:8080/env">http://localhost:8080/env</a> endpoint (provided by <code>actuator</code>).  Under profiles <code>qa</code> should be listed.</p>
+
+<p><img src="./Lab 5 Spring Cloud Config_files/profile.png" alt="profile" title="qa profile"></p>
+
+<p>3) In your fork of the <code>app-config</code> repository, create a new file: <code>greeting-config-qa.yml</code>. Fill it in with the following content:</p>
+
+<pre><code class="language-yml hljs http"><span class="hljs-attribute"><span class="hljs-attribute">quoteServiceURL</span></span>: <span class="hljs-string"><span class="hljs-string">http://quote-service-qa.cfapps.io/quote</span></span>
+</code></pre>
+
+<p>Make sure to commit and push to GitHub.</p>
+
+<p>4) Browse to <a href="http://localhost:8080/random-quote">http://localhost:8080/random-quote</a>.  Quotes are still being served from <code>http://quote-service-dev.cfapps.io/quote</code>.</p>
+
+<p>5) Refresh the application configuration values</p>
+
+<pre><code class="language-bash hljs">$ curl -X POST http://localhost:<span class="hljs-number"><span class="hljs-number">8080</span></span>/refresh
+</code></pre>
+
+<p>6) Refresh the <a href="http://localhost:8080/random-quote">http://localhost:8080/random-quote</a> url.  Quotes are now being served from QA.</p>
+
+<p>7) Stop both the <code>config-server</code> and <code>greeting-config</code> applications.</p>
+
+<p><strong><em>What Just Happened?</em></strong></p>
+
+<p>Configuration from <code>greeting-config.yml</code> was overridden by a configuration file that was more specific (<code>greeting-config-qa.yml</code>).</p>
+
+<h3 id="deploy-the-greeting-config-application-to-pcf:3976528693a0108357f4928017600865">Deploy the <code>greeting-config</code> Application to PCF</h3>
+
+<p>1) Package the <code>greeting-config</code> application. Execute the following from the <code>greeting-config</code> directory:</p>
+
+<pre><code class="language-bash hljs">$ mvn clean package
+</code></pre>
+
+<p>2) Deploy the <code>greeting-config</code> application to PCF, without starting the application:</p>
+
+<pre><code class="language-bash hljs">$ cf push greeting-config -p target/greeting-config-<span class="hljs-number"><span class="hljs-number">0.0</span></span>.<span class="hljs-number"><span class="hljs-number">1</span></span>-SNAPSHOT.jar -m <span class="hljs-number"><span class="hljs-number">512</span></span>M --random-route --no-start
+</code></pre>
+
+<p>3) Create a Config Server Service Instance</p>
+
+<p>Using Apps Manager do the following (for help review the <a href="http://docs.pivotal.io/spring-cloud-services/config-server/creating-an-instance.html">docs</a>):</p>
+
+<p>a) Log into Apps Manager as a Space Developer. In the Marketplace, select Config Server for Pivotal Cloud Foundry.
+<img src="./Lab 5 Spring Cloud Config_files/1_marketplace.png" alt="marketplace" title="marketplace"></p>
+
+<p>b) Select the desired plan for the new service.
+<img src="./Lab 5 Spring Cloud Config_files/2_select_plan.png" alt="select plan" title="select plan"></p>
+
+<p>c) Name the service <code>config-server</code>. Your space may be different.  Click the <strong><em>Add</em></strong> button.
+<img src="./Lab 5 Spring Cloud Config_files/3_configure.png" alt="configure" title="configure"></p>
+
+<p>d) In the <strong><em>Services</em></strong> list, click the <strong><em>Manage</em></strong> link under the listing for the new service instance.  The Config Server may take a few moments to initialize.
+<img src="./Lab 5 Spring Cloud Config_files/4_service_successfully_added.png" alt="service successfully added" title="service successfully added"></p>
+
+<p>e) Select <code>Git</code> as the <strong><em>Configuration Source</em></strong> and enter your fork of the <code>app-config</code> repo under <strong><em>Git URI</em></strong>.  Do not use the literal below.
+<img src="./Lab 5 Spring Cloud Config_files/dashboard.png" alt="dashboard" title="dashboard"></p>
+
+<p>f) The Config Server instance (<code>config-server</code>) will take a few moments to initialize and then be ready for use.</p>
+
+<p>4) Bind the <code>config-server</code> service to the <code>greeting-config</code> app. This will enable the <code>greeting-config</code> app to read
+configuration values from the <code>config-server</code>.</p>
+
+<pre><code class="language-bash hljs">$ cf <span class="hljs-built_in"><span class="hljs-built_in">bind</span></span>-service greeting-config config-server
+</code></pre>
+
+<p>You can safely ignore the <em>TIP: Use ‘cf restage’ to ensure your env variable changes take effect</em> message from the CLI.  Our app doesn’t need to be restaged at this time.</p>
+
+<p>5) If using self signed certificates, set the <code>CF_TARGET</code> environment variable to API endpoint of your Elastic Runtime instance.  Make sure to use <code>https://</code> not <code>http://</code>.  You can quickly retrieve the API endpoint by running the command <code>cf t</code>.</p>
+
+<pre><code class="language-bash hljs">cf <span class="hljs-built_in"><span class="hljs-built_in">set</span></span>-env greeting-config CF_TARGET &lt;your api endpoint - make sure it starts with <span class="hljs-string"><span class="hljs-string">"https://"</span></span>&gt;
+</code></pre>
+
+<p>You can safely ignore the <em>TIP: Use ‘cf restage’ to ensure your env variable changes take effect</em> message from the CLI.  Our app doesn’t need to be restaged at this time.</p>
+
+<p><strong><em>NOTE:</em></strong></p>
+
+<p>All communication between Spring Cloud Services components are made through HTTPS. If you are on an environment that uses self-signed certs, the Java SSL trust store will not have those certificates.  By adding the <code>CF_TARGET</code> environment variable a trusted domain is added to the Java trust store.</p>
+
+<p>6) Start the <code>greeting-config</code> app.</p>
+
+<pre><code class="language-bash hljs">$ cf start greeting-config
+</code></pre>
+
+<p>7) Browse to your <code>greeting-config</code> application.  Are your configuration settings that were set when developing locally mirrored on PCF?</p>
+
+<ul>
+<li>Is the log level for <code>io.pivotal</code> package set to <code>DEBUG</code>?  Yes, this can be confirmed with <code>cf logs</code> command while refreshing the <code>greeting-config</code> <code>/</code> endpoint (<code>http://&lt;your-random-greeting-config-url/</code>).</li>
+<li>Is <code>greeting-config</code> app displaying the fortune?  Yes, this can be confirmed by visiting the <code>greeting-config</code> <code>/</code> endpoint.</li>
+<li>Is the <code>greeting-config</code> app serving quotes from <code>http://quote-service-qa.cfapps.io/quote</code>?  No, this can be confirmed by visiting the <code>greeting-config</code> <code>/random-quote</code> endpoint.  Why not?  When developing locally we used an environment variable to set the active profile, we need to do the same on PCF.</li>
+</ul>
+
+<pre><code class="language-bash hljs">$ cf <span class="hljs-built_in"><span class="hljs-built_in">set</span></span>-env greeting-config SPRING_PROFILES_ACTIVE qa
+$ cf restart greeting-config
+</code></pre>
+
+<p>You can safely ignore the <em>TIP: Use ‘cf restage’ to ensure your env variable changes take effect</em> message from the CLI.  Our app doesn’t need to be restaged but just re-started.</p>
+
+<p>Then confirm quotes are being served from <code>http://quote-service-qa.cfapps.io/quote</code></p>
+
+<h3 id="refreshing-application-configuration-at-scale-with-cloud-bus:3976528693a0108357f4928017600865">Refreshing Application Configuration at Scale with Cloud Bus</h3>
+
+<p>Until now you have been notifying your application to pick up new configuration by POSTing to the <code>/refresh</code> endpoint.</p>
+
+<p>When running several instances of your application, this poses several problems:</p>
+
+<ul>
+<li>Refreshing each individual instance is time consuming and too much overhead</li>
+<li>When running on Cloud Foundry you don’t have control over which instances you hit when sending the POST request due to load balancing provided by the <code>router</code></li>
+</ul>
+
+<p>Cloud Bus addresses the issues listed above by providing a single endpoint to refresh all application instances via a pub/sub notification.</p>
+
+<p>1) Create a RabbitMQ service instance, bind it to <code>greeting-config</code></p>
+
+<pre><code class="language-bash hljs">$ cf cs p-rabbitmq standard cloud-bus
+$ cf bs greeting-config cloud-bus
+</code></pre>
+
+<p>You can safely ignore the <em>TIP: Use ‘cf restage’ to ensure your env variable changes take effect</em> message from the CLI.  Our app doesn’t need to be restaged.  We will push it again with new functionality in a moment.</p>
+
+<p>2) Include the cloud bus dependency in the  <code>$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-config/pom.xml</code>.  <em>You will need to paste this in your file.</em></p>
+
+<pre><code class="language-xml hljs"><span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+    <span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>org.springframework.cloud<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+    <span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>spring-cloud-starter-bus-amqp<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+</code></pre>
+
+<p>3) Repackage the <code>greeting-config</code> application:</p>
+
+<pre><code class="language-bash hljs">$ mvn clean package
+</code></pre>
+
+<p>4) Deploy the application and scale the number of instances.</p>
+
+<pre><code class="language-bash hljs">$ cf push greeting-config -p target/greeting-config-<span class="hljs-number"><span class="hljs-number">0.0</span></span>.<span class="hljs-number"><span class="hljs-number">1</span></span>-SNAPSHOT.jar -i <span class="hljs-number"><span class="hljs-number">3</span></span>
+</code></pre>
+
+<p>5) Observe the logs that are generated by refreshing the <code>greeting-config</code>
+<code>/</code> endpoint several times in your browser and tailing the logs.  Allow this process to run through the next few steps.</p>
+
+<pre><code class="language-bash hljs">[mac, linux]
+$ cf logs greeting-config | grep GreetingController
+
+[windows]
+$ cf logs greeting-config
+<span class="hljs-comment"><span class="hljs-comment"># then search output for "GreetingController"</span></span>
+</code></pre>
+
+<p>All app instances are creating debug statements.  Notice the <code>[App/X]</code>.  It denotes which app instance is logging.</p>
+
+<pre><code class="hljs css">2015<span class="hljs-tag"><span class="hljs-tag">-09-28T20</span></span><span class="hljs-pseudo"><span class="hljs-pseudo">:53</span></span><span class="hljs-pseudo"><span class="hljs-pseudo">:06</span></span><span class="hljs-class"><span class="hljs-class">.07-0500</span></span> <span class="hljs-attr_selector"><span class="hljs-attr_selector">[App/2]</span></span>      <span class="hljs-tag"><span class="hljs-tag">OUT</span></span> 2015<span class="hljs-tag"><span class="hljs-tag">-09-29</span></span> 01<span class="hljs-pseudo"><span class="hljs-pseudo">:53</span></span><span class="hljs-pseudo"><span class="hljs-pseudo">:06</span></span><span class="hljs-class"><span class="hljs-class">.071</span></span> <span class="hljs-tag"><span class="hljs-tag">DEBUG</span></span> 34 <span class="hljs-tag"><span class="hljs-tag">---</span></span> <span class="hljs-attr_selector"><span class="hljs-attr_selector">[io-64495-exec-6]</span></span> <span class="hljs-rule"><span class="hljs-attribute"><span class="hljs-rule"><span class="hljs-attribute">io.pivotal.greeting.GreetingController   </span></span></span><span class="hljs-rule">:</span><span class="hljs-value"><span class="hljs-rule"><span class="hljs-value"> Adding fortune
+</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">2015</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">09</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">28</span></span></span></span><span class="hljs-rule"><span class="hljs-value">T20:</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">53</span></span></span></span><span class="hljs-rule"><span class="hljs-value">:</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">06.16</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">0500</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> [App/</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">1</span></span></span></span><span class="hljs-rule"><span class="hljs-value">]      OUT </span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">2015</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">09</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">29</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> </span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">01</span></span></span></span><span class="hljs-rule"><span class="hljs-value">:</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">53</span></span></span></span><span class="hljs-rule"><span class="hljs-value">:</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">06.160</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> DEBUG </span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">33</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> --- [io-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">63186</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-exec-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">5</span></span></span></span><span class="hljs-rule"><span class="hljs-value">] io.pivotal.greeting.GreetingController   : Adding greeting
+</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">2015</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">09</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">28</span></span></span></span><span class="hljs-rule"><span class="hljs-value">T20:</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">53</span></span></span></span><span class="hljs-rule"><span class="hljs-value">:</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">06.16</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">0500</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> [App/</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">1</span></span></span></span><span class="hljs-rule"><span class="hljs-value">]      OUT </span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">2015</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">09</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">29</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> </span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">01</span></span></span></span><span class="hljs-rule"><span class="hljs-value">:</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">53</span></span></span></span><span class="hljs-rule"><span class="hljs-value">:</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">06.160</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> DEBUG </span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">33</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> --- [io-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">63186</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-exec-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">5</span></span></span></span><span class="hljs-rule"><span class="hljs-value">] io.pivotal.greeting.GreetingController   : Adding fortune
+</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">2015</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">09</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">28</span></span></span></span><span class="hljs-rule"><span class="hljs-value">T20:</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">53</span></span></span></span><span class="hljs-rule"><span class="hljs-value">:</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">06.24</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">0500</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> [App/</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">1</span></span></span></span><span class="hljs-rule"><span class="hljs-value">]      OUT </span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">2015</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">09</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">29</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> </span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">01</span></span></span></span><span class="hljs-rule"><span class="hljs-value">:</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">53</span></span></span></span><span class="hljs-rule"><span class="hljs-value">:</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">06.246</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> DEBUG </span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">33</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> --- [io-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">63186</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-exec-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">9</span></span></span></span><span class="hljs-rule"><span class="hljs-value">] io.pivotal.greeting.GreetingController   : Adding greeting
+</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">2015</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">09</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">28</span></span></span></span><span class="hljs-rule"><span class="hljs-value">T20:</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">53</span></span></span></span><span class="hljs-rule"><span class="hljs-value">:</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">06.24</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">0500</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> [App/</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">1</span></span></span></span><span class="hljs-rule"><span class="hljs-value">]      OUT </span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">2015</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">09</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">29</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> </span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">01</span></span></span></span><span class="hljs-rule"><span class="hljs-value">:</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">53</span></span></span></span><span class="hljs-rule"><span class="hljs-value">:</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">06.247</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> DEBUG </span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">33</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> --- [io-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">63186</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-exec-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">9</span></span></span></span><span class="hljs-rule"><span class="hljs-value">] io.pivotal.greeting.GreetingController   : Adding fortune
+</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">2015</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">09</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">28</span></span></span></span><span class="hljs-rule"><span class="hljs-value">T20:</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">53</span></span></span></span><span class="hljs-rule"><span class="hljs-value">:</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">06.41</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">0500</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> [App/</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">0</span></span></span></span><span class="hljs-rule"><span class="hljs-value">]      OUT </span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">2015</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">09</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">29</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> </span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">01</span></span></span></span><span class="hljs-rule"><span class="hljs-value">:</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">53</span></span></span></span><span class="hljs-rule"><span class="hljs-value">:</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">06.410</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> DEBUG </span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">33</span></span></span></span><span class="hljs-rule"><span class="hljs-value"> --- [io-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">63566</span></span></span></span><span class="hljs-rule"><span class="hljs-value">-exec-</span></span><span class="hljs-number"><span class="hljs-rule"><span class="hljs-value"><span class="hljs-number">3</span></span></span></span><span class="hljs-rule"><span class="hljs-value">] io.pivotal.greeting.GreetingController   : Adding greeting
+</span></span></span></span></code></pre>
+
+<p>7) Turn logging down.  In your fork of the <code>app-config</code> repo edit the <code>greeting-config.yml</code>.  Set the log level to <code>INFO</code>.  Make sure to push back to Github.</p>
+
+<pre><code class="language-yml hljs css"><span class="hljs-rule"><span class="hljs-attribute"><span class="hljs-rule"><span class="hljs-attribute">logging</span></span></span><span class="hljs-rule">:</span><span class="hljs-value"><span class="hljs-rule"><span class="hljs-value">
+  level:
+    io:
+      pivotal: INFO
+</span></span></span></span></code></pre>
+
+<p>8) Notify applications to pickup the change.  Open a new terminal window.  Send a POST to the <code>greeting-config</code> <code>/bus/refresh</code> endpoint.  Use your <code>greeting-config</code> URL not the literal below.</p>
+
+<pre><code class="language-bash hljs">$ curl -X POST http://greeting-config-hypodermal-subcortex.cfapps.io/bus/refresh
+</code></pre>
+
+<p>9) Refresh the <code>greeting-config</code> <code>/</code> endpoint several times in your browser.  No more logs!</p>
+
+<p>10) Stop tailing logs from the <code>greeting-config</code> application.</p>
+
+			</div>
+		</div>
+	</div>
+
+
+
+
+</main>
+
+
+<hr>
+<div class="container">
+	<div class="row">
+		<div class="col-sm-8">
+			<p class="doc-footer-em"><a href="https://cdn.enablement.pivotal.io/spring-cloud-services/spring-cloud-config/index.html#">Back to TOP</a></p>
+		</div>
+	</div>
+
+</div> 
+
+<footer class="doc-footer">
+	
+	<p>© Copyright Pivotal. All rights reserved.</p>
+</footer>
+
+
+
+
+
+<script src="./Lab 5 Spring Cloud Config_files/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script src="./Lab 5 Spring Cloud Config_files/ie10-viewport-bug-workaround.js"></script>
+
+
+
+
+</body></html>

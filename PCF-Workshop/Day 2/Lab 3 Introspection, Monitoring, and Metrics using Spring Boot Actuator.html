@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<!-- saved from url=(0079)https://workshop-content.cfapps.io/labs/83-spring-boot-primer-actuator-lab.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="alternate" href="https://cdn.enablement.pivotal.io/index.xml" type="application/rss+xml" title="Introspection, Monitoring, and Metrics using Spring Boot Actuator">
+		<link rel="icon" href="https://cdn.enablement.pivotal.io/spring-boot-primer/actuator/P_Mark_WhiteOnTeal.png">
+		<title>Introspection, Monitoring, and Metrics using Spring Boot Actuator</title>
+		<link rel="stylesheet" href="./Lab 3 Introspection, Monitoring, and Metrics using Spring Boot Actuator_files/highlight.js.min.css">
+		<link rel="stylesheet" href="./Lab 3 Introspection, Monitoring, and Metrics using Spring Boot Actuator_files/pivotal-ui.css">
+		<link rel="stylesheet" href="./Lab 3 Introspection, Monitoring, and Metrics using Spring Boot Actuator_files/theme.css">
+		<link rel="stylesheet" href="./Lab 3 Introspection, Monitoring, and Metrics using Spring Boot Actuator_files/bootie-docs.css">
+	</head>
+
+<body role="document">
+	
+
+
+<main role="main">
+
+<div class="row">
+	
+	<div class="pane bg-dark-2">
+		<div class="container">
+			<h2 class="type-neutral-11 title">Introspection, Monitoring, and Metrics using Spring Boot Actuator</h2>
+			<p></p>
+		</div>
+	</div>
+</div>
+
+
+	<div class="doc-main">
+		<div class="container">
+			<div class="row">
+				
+<div class="col-sm-14 doc-sidebar">
+	<div class="sidebar-module">
+		<div class="sidebar-toc">
+			<h4>Table of Contents</h4>
+			<nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/actuator/index.html#requirements:3976528693a0108357f4928017600865">Requirements</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/actuator/index.html#what-you-will-learn:3976528693a0108357f4928017600865">What You Will Learn</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/actuator/index.html#exercises:3976528693a0108357f4928017600865">Exercises</a>
+<ul>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/actuator/index.html#set-up-the-actuator:3976528693a0108357f4928017600865">Set up the Actuator</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/actuator/index.html#introspection-endpoints:3976528693a0108357f4928017600865">Introspection Endpoints</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/actuator/index.html#include-version-control-info:3976528693a0108357f4928017600865">Include Version Control Info</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/actuator/index.html#include-build-info:3976528693a0108357f4928017600865">Include Build Info</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/actuator/index.html#health-indicators:3976528693a0108357f4928017600865">Health Indicators</a></li>
+<li><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/actuator/index.html#metrics:3976528693a0108357f4928017600865">Metrics</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+		</div>
+	</div>
+</div>
+
+			</div>
+			<div class="row">
+				
+
+<hr>
+
+<p>Estimated Time: 30 minutes</p>
+
+<hr>
+
+<h2 id="requirements:3976528693a0108357f4928017600865">Requirements</h2>
+
+<p><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/requirements">Lab Requirements</a></p>
+
+<hr>
+
+<h2 id="what-you-will-learn:3976528693a0108357f4928017600865">What You Will Learn</h2>
+
+<ul>
+<li>How to use the endpoints that the <code>actuator</code> exposes to manage applications</li>
+</ul>
+
+<hr>
+
+<h2 id="exercises:3976528693a0108357f4928017600865">Exercises</h2>
+
+<hr>
+
+<h3 id="set-up-the-actuator:3976528693a0108357f4928017600865">Set up the Actuator</h3>
+
+<p>Spring Boot includes a number of additional features to help you monitor and manage your application when it’s pushed to production.  These features are added by adding <code>spring-boot-starter-actuator</code> to the classpath.</p>
+
+<p>1) Review the following file: <code>$SPRING_BOOT_LABS_HOME/hello-spring-boot-actuator/pom.xml</code>.</p>
+
+<pre><code class="language-xml hljs"><span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>org.springframework.boot<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>spring-boot-starter-actuator<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+</code></pre>
+
+<h3 id="introspection-endpoints:3976528693a0108357f4928017600865">Introspection Endpoints</h3>
+
+<p>1.) Open a new terminal window.  Run the <code>hello-spring-boot-actuator</code> application:</p>
+
+<pre><code class="language-bash hljs">$ <span class="hljs-built_in"><span class="hljs-built_in">cd</span></span> <span class="hljs-variable"><span class="hljs-variable">$SPRING_BOOT_LABS_HOME</span></span>/hello-spring-boot-actuator
+$ mvn clean spring-boot:run
+</code></pre>
+
+<p>Try out the following endpoints. The output is omitted here because it can be quite large:</p>
+
+<p><a href="http://localhost:8080/beans">http://localhost:8080/beans</a></p>
+
+<p>Dumps all of the beans in the Spring context.</p>
+
+<p><a href="http://localhost:8080/autoconfig">http://localhost:8080/autoconfig</a></p>
+
+<p>Dumps all of the auto-configuration performed as part of application bootstrapping.</p>
+
+<p><a href="http://localhost:8080/configprops">http://localhost:8080/configprops</a></p>
+
+<p>Displays a collated list of all <code>@ConfigurationProperties</code>.</p>
+
+<p><a href="http://localhost:8080/env">http://localhost:8080/env</a></p>
+
+<p>Dumps the application’s shell environment as well as all Java system properties.</p>
+
+<p><a href="http://localhost:8080/mappings">http://localhost:8080/mappings</a></p>
+
+<p>Dumps all URI request mappings and the controller methods to which they are mapped.</p>
+
+<p><a href="http://localhost:8080/dump">http://localhost:8080/dump</a></p>
+
+<p>Performs a thread dump.</p>
+
+<p><a href="http://localhost:8080/trace">http://localhost:8080/trace</a></p>
+
+<p>Displays trace information (by default the last few HTTP requests).</p>
+
+<p>2) Stop the <code>hello-spring-boot-actuator</code> application.</p>
+
+<h3 id="include-version-control-info:3976528693a0108357f4928017600865">Include Version Control Info</h3>
+
+<p>Spring Boot provides an endpoint (<a href="http://localhost:8080/info">http://localhost:8080/info</a>) that allows the exposure of arbitrary metadata.  By default, it is empty.</p>
+
+<p><img src="./Lab 3 Introspection, Monitoring, and Metrics using Spring Boot Actuator_files/info.png" alt="info" title="info"></p>
+
+<p>One thing that <code>actuator</code> does well is expose information about the specific build and version control coordinates for a given deployment.</p>
+
+<p>1) Edit the following file: <code>$SPRING_BOOT_LABS_HOME/hello-spring-boot-actuator/pom.xml</code>.  Add the <code>git-commit-id-plugin</code> to your Maven build.  <em>You must edit the file.</em>  The <code>git-commit-id-plugin</code> adds Git branch and commit coordinates to the <code>/info</code> endpoint:</p>
+
+<pre><code class="language-xml hljs"><span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">plugin</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>pl.project13.maven<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>git-commit-id-plugin<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">configuration</span></span></span><span class="hljs-tag">&gt;</span></span>
+			<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dotGitDirectory</span></span></span><span class="hljs-tag">&gt;</span></span>../.git<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dotGitDirectory</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">configuration</span></span></span><span class="hljs-tag">&gt;</span></span>
+<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">plugin</span></span></span><span class="hljs-tag">&gt;</span></span>
+</code></pre>
+
+<p><strong>NOTE</strong>
+The path <code>../.git</code> refers to the <code>.git</code> directory at the root of the lab materials repo.</p>
+
+<p>Completed:</p>
+
+<pre><code class="language-xml hljs"><span class="hljs-pi"><span class="hljs-pi">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span></span>
+<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">project</span></span></span><span class="hljs-tag"> </span><span class="hljs-attribute"><span class="hljs-tag"><span class="hljs-attribute">xmlns</span></span></span><span class="hljs-tag">=</span><span class="hljs-value"><span class="hljs-tag"><span class="hljs-value">"http://maven.apache.org/POM/4.0.0"</span></span></span><span class="hljs-tag"> </span><span class="hljs-attribute"><span class="hljs-tag"><span class="hljs-attribute">xmlns:xsi</span></span></span><span class="hljs-tag">=</span><span class="hljs-value"><span class="hljs-tag"><span class="hljs-value">"http://www.w3.org/2001/XMLSchema-instance"</span></span></span><span class="hljs-tag">
+	</span><span class="hljs-attribute"><span class="hljs-tag"><span class="hljs-attribute">xsi:schemaLocation</span></span></span><span class="hljs-tag">=</span><span class="hljs-value"><span class="hljs-tag"><span class="hljs-value">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">modelVersion</span></span></span><span class="hljs-tag">&gt;</span></span>4.0.0<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">modelVersion</span></span></span><span class="hljs-tag">&gt;</span></span>
+
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>io.pivotal<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>hello-spring-boot-actuator<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">version</span></span></span><span class="hljs-tag">&gt;</span></span>0.0.1-SNAPSHOT<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">version</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">packaging</span></span></span><span class="hljs-tag">&gt;</span></span>jar<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">packaging</span></span></span><span class="hljs-tag">&gt;</span></span>
+
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">name</span></span></span><span class="hljs-tag">&gt;</span></span>hello-spring-boot-actuator<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">name</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">description</span></span></span><span class="hljs-tag">&gt;</span></span>Hello Spring Boot<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">description</span></span></span><span class="hljs-tag">&gt;</span></span>
+
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">parent</span></span></span><span class="hljs-tag">&gt;</span></span>
+		<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>org.springframework.boot<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+		<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>spring-boot-starter-parent<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+		<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">version</span></span></span><span class="hljs-tag">&gt;</span></span>1.2.6.RELEASE<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">version</span></span></span><span class="hljs-tag">&gt;</span></span>
+		<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">relativePath</span></span></span><span class="hljs-tag"> /&gt;</span></span> <span class="hljs-comment"><span class="hljs-comment">&lt;!-- lookup parent from repository --&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">parent</span></span></span><span class="hljs-tag">&gt;</span></span>
+
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">properties</span></span></span><span class="hljs-tag">&gt;</span></span>
+		<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">project.build.sourceEncoding</span></span></span><span class="hljs-tag">&gt;</span></span>UTF-8<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">project.build.sourceEncoding</span></span></span><span class="hljs-tag">&gt;</span></span>
+		<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">java.version</span></span></span><span class="hljs-tag">&gt;</span></span>1.8<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">java.version</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">properties</span></span></span><span class="hljs-tag">&gt;</span></span>
+
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependencies</span></span></span><span class="hljs-tag">&gt;</span></span>
+		<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+			<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>org.springframework.boot<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+			<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>spring-boot-starter-web<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+		<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+		<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+			<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>org.springframework.boot<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+			<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>spring-boot-starter-actuator<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+		<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+		<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+			<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>org.springframework.boot<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+			<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>spring-boot-starter-test<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+			<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">scope</span></span></span><span class="hljs-tag">&gt;</span></span>test<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">scope</span></span></span><span class="hljs-tag">&gt;</span></span>
+		<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependency</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dependencies</span></span></span><span class="hljs-tag">&gt;</span></span>
+
+	<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">build</span></span></span><span class="hljs-tag">&gt;</span></span>
+		<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">plugins</span></span></span><span class="hljs-tag">&gt;</span></span>
+			<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">plugin</span></span></span><span class="hljs-tag">&gt;</span></span>
+				<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>org.springframework.boot<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+				<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>spring-boot-maven-plugin<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+			<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">plugin</span></span></span><span class="hljs-tag">&gt;</span></span>
+			<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">plugin</span></span></span><span class="hljs-tag">&gt;</span></span>
+				<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>pl.project13.maven<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">groupId</span></span></span><span class="hljs-tag">&gt;</span></span>
+				<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>git-commit-id-plugin<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">artifactId</span></span></span><span class="hljs-tag">&gt;</span></span>
+				<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">configuration</span></span></span><span class="hljs-tag">&gt;</span></span>
+					<span class="hljs-tag"><span class="hljs-tag">&lt;</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dotGitDirectory</span></span></span><span class="hljs-tag">&gt;</span></span>../.git<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">dotGitDirectory</span></span></span><span class="hljs-tag">&gt;</span></span>
+				<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">configuration</span></span></span><span class="hljs-tag">&gt;</span></span>
+			<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">plugin</span></span></span><span class="hljs-tag">&gt;</span></span>
+		<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">plugins</span></span></span><span class="hljs-tag">&gt;</span></span>
+	<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">build</span></span></span><span class="hljs-tag">&gt;</span></span>
+
+
+<span class="hljs-tag"><span class="hljs-tag">&lt;/</span><span class="hljs-title"><span class="hljs-tag"><span class="hljs-title">project</span></span></span><span class="hljs-tag">&gt;</span></span>
+
+</code></pre>
+
+<p>2) Run the <code>hello-spring-boot-actuator</code> application:</p>
+
+<pre><code class="language-bash hljs">$ mvn clean spring-boot:run
+</code></pre>
+
+<p>3) Browse to <a href="http://localhost:8080/info">http://localhost:8080/info</a>.  Git commit information is now included.</p>
+
+<p><img src="./Lab 3 Introspection, Monitoring, and Metrics using Spring Boot Actuator_files/git.png" alt="info" title="info"></p>
+
+<p>4) Stop the <code>hello-spring-boot-actuator</code> application.</p>
+
+<p><strong><em>What Just Happened?</em></strong></p>
+
+<p>By including the <code>git-commit-id-plugin</code>, details about git commit information will be included in the <code>/info</code> endpoint.  Git information is captured in a <code>git.properties</code> file that is generated with the build.  Review the following file: <code>$SPRING_BOOT_LABS_HOME/hello-spring-boot-actuator/target/classes/git.properties</code>.</p>
+
+<h3 id="include-build-info:3976528693a0108357f4928017600865">Include Build Info</h3>
+
+<p>1) Add the following properties to <code>$SPRING_BOOT_LABS_HOME/hello-spring-boot-actuator/src/main/resources/application.yml</code>.  <em>You must edit the file.</em></p>
+
+<pre><code class="language-yaml hljs coffeescript"><span class="hljs-attribute"><span class="hljs-attribute">greeting</span></span>: Hello
+<span class="hljs-attribute"><span class="hljs-attribute">info</span></span>: <span class="hljs-comment"><span class="hljs-comment"># add this section</span></span>
+  <span class="hljs-attribute"><span class="hljs-attribute">build</span></span>:
+    <span class="hljs-attribute"><span class="hljs-attribute">artifact</span></span>: <span class="hljs-property"><span class="hljs-property">@project</span></span>.artifactId@
+    <span class="hljs-attribute"><span class="hljs-attribute">name</span></span>: <span class="hljs-property"><span class="hljs-property">@project</span></span>.name@
+    <span class="hljs-attribute"><span class="hljs-attribute">description</span></span>: <span class="hljs-property"><span class="hljs-property">@project</span></span>.description@
+    <span class="hljs-attribute"><span class="hljs-attribute">version</span></span>: <span class="hljs-property"><span class="hljs-property">@project</span></span>.version@
+</code></pre>
+
+<p>These will add the project’s Maven coordinates to the <code>/info</code> endpoint. The Spring Boot Maven plugin will cause them to automatically be replaced in the assembled JAR.</p>
+
+<p><strong>NOTE:</strong> if STS reports a problem with the <code>application.yml</code> due to <code>@</code> character the problem can safely be ignored.</p>
+
+<p>2) Build and run the <code>hello-spring-boot-actuator</code> application:</p>
+
+<pre><code class="hljs ruby"><span class="hljs-variable"><span class="hljs-variable">$ </span></span>mvn clean package
+<span class="hljs-variable"><span class="hljs-variable">$ </span></span>java -jar target/hello-spring-boot-actuator-<span class="hljs-number"><span class="hljs-number">0</span></span>.<span class="hljs-number"><span class="hljs-number">0</span></span>.<span class="hljs-number"><span class="hljs-number">1</span></span>-<span class="hljs-constant"><span class="hljs-constant">SNAPSHOT</span></span>.jar
+</code></pre>
+
+<p>3) Browse to <a href="http://localhost:8080/info">http://localhost:8080/info</a>.  Build information is now included.
+<img src="./Lab 3 Introspection, Monitoring, and Metrics using Spring Boot Actuator_files/build-info.png" alt="info" title="info"></p>
+
+<p>4) Stop the <code>hello-spring-boot-actuator</code> application.</p>
+
+<p><strong><em>What Just Happened?</em></strong></p>
+
+<p>We have mapped Maven properties from the <code>pom.xml</code> into the <code>/info</code> endpoint.</p>
+
+<p>Read more about exposing data in the <code>/info</code> endpoint <a href="http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready">here</a>.</p>
+
+<h3 id="health-indicators:3976528693a0108357f4928017600865">Health Indicators</h3>
+
+<p>Spring Boot provides an endpoint <a href="http://localhost:8080/health">http://localhost:8080/health</a> that exposes various health indicators that describe the health of the given application.</p>
+
+<p>Normally, when Spring Security is not enabled, the <code>/health</code> endpoint will only expose an <code>UP</code> or <code>DOWN</code> value.
+<img src="./Lab 3 Introspection, Monitoring, and Metrics using Spring Boot Actuator_files/health-basic.png" alt="health" title="health"></p>
+
+<p>1) To simplify working with the endpoint for this lab, we will turn off its sensitivity. Add the following to <code>$SPRING_BOOT_LABS_HOME/hello-spring-boot-actuator/src/main/resources/application.yml</code>:</p>
+
+<pre><code class="language-yaml hljs coffeescript"><span class="hljs-attribute"><span class="hljs-attribute">greeting</span></span>: Hello
+<span class="hljs-attribute"><span class="hljs-attribute">info</span></span>:
+  <span class="hljs-attribute"><span class="hljs-attribute">build</span></span>:
+    <span class="hljs-attribute"><span class="hljs-attribute">artifact</span></span>: <span class="hljs-property"><span class="hljs-property">@project</span></span>.artifactId@
+    <span class="hljs-attribute"><span class="hljs-attribute">name</span></span>: <span class="hljs-property"><span class="hljs-property">@project</span></span>.name@
+    <span class="hljs-attribute"><span class="hljs-attribute">description</span></span>: <span class="hljs-property"><span class="hljs-property">@project</span></span>.description@
+    <span class="hljs-attribute"><span class="hljs-attribute">version</span></span>: <span class="hljs-property"><span class="hljs-property">@project</span></span>.version@
+<span class="hljs-attribute"><span class="hljs-attribute">endpoints</span></span>: <span class="hljs-comment"><span class="hljs-comment"># add this section</span></span>
+  <span class="hljs-attribute"><span class="hljs-attribute">health</span></span>:
+    <span class="hljs-attribute"><span class="hljs-attribute">sensitive</span></span>: <span class="hljs-literal"><span class="hljs-literal">false</span></span>
+</code></pre>
+
+<p>2) Build and run the <code>hello-spring-boot-actuator</code> application:</p>
+
+<pre><code class="hljs ruby"><span class="hljs-variable"><span class="hljs-variable">$ </span></span>mvn clean package
+<span class="hljs-variable"><span class="hljs-variable">$ </span></span>java -jar target/hello-spring-boot-actuator-<span class="hljs-number"><span class="hljs-number">0</span></span>.<span class="hljs-number"><span class="hljs-number">0</span></span>.<span class="hljs-number"><span class="hljs-number">1</span></span>-<span class="hljs-constant"><span class="hljs-constant">SNAPSHOT</span></span>.jar
+</code></pre>
+
+<p>3) Browse to <a href="http://localhost:8080/health">http://localhost:8080/health</a>.  Out of the box is a <code>DiskSpaceHealthIndicator</code> that monitors health in terms of available disk space.  Would your Ops team like to know if the app is close to running out of disk space?  <code>DiskSpaceHealthIndicator</code> can be customized via <code>DiskSpaceHealthIndicatorProperties</code>.  For instance, setting a different threshold for when to report the status as <code>DOWN</code>.</p>
+
+<p><img src="./Lab 3 Introspection, Monitoring, and Metrics using Spring Boot Actuator_files/health-notsensitive.png" alt="health" title="health"></p>
+
+<p>4) Stop the <code>hello-spring-boot-actuator</code> application.</p>
+
+<p>5) Create the class <code>io.pivotal.hello.FlappingHealthIndicator</code> (<code>$SPRING_BOOT_LABS_HOME/hello-spring-boot-actuator/src/main/java/io/pivotal/hello/FlappingHealthIndicator.java</code>) and into it paste the following code:</p>
+
+<pre><code class="language-java hljs"><span class="hljs-keyword"><span class="hljs-keyword">package</span></span> io.pivotal.hello;
+
+<span class="hljs-keyword"><span class="hljs-keyword">import</span></span> java.util.Random;
+
+<span class="hljs-keyword"><span class="hljs-keyword">import</span></span> org.springframework.boot.actuate.health.Health;
+<span class="hljs-keyword"><span class="hljs-keyword">import</span></span> org.springframework.boot.actuate.health.HealthIndicator;
+<span class="hljs-keyword"><span class="hljs-keyword">import</span></span> org.springframework.stereotype.Component;
+
+<span class="hljs-annotation"><span class="hljs-annotation">@Component</span></span>
+<span class="hljs-keyword"><span class="hljs-keyword">public</span></span> <span class="hljs-class"><span class="hljs-keyword"><span class="hljs-class"><span class="hljs-keyword">class</span></span></span><span class="hljs-class"> </span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">FlappingHealthIndicator</span></span></span><span class="hljs-class"> </span><span class="hljs-keyword"><span class="hljs-class"><span class="hljs-keyword">implements</span></span></span><span class="hljs-class"> </span><span class="hljs-title"><span class="hljs-class"><span class="hljs-title">HealthIndicator</span></span></span><span class="hljs-class"> </span></span>{
+
+    <span class="hljs-keyword"><span class="hljs-keyword">private</span></span> Random random = <span class="hljs-keyword"><span class="hljs-keyword">new</span></span> Random(System.currentTimeMillis());
+
+    <span class="hljs-annotation"><span class="hljs-annotation">@Override</span></span>
+    <span class="hljs-function"><span class="hljs-keyword"><span class="hljs-function"><span class="hljs-keyword">public</span></span></span><span class="hljs-function"> Health </span><span class="hljs-title"><span class="hljs-function"><span class="hljs-title">health</span></span></span><span class="hljs-params"><span class="hljs-function"><span class="hljs-params">()</span></span></span><span class="hljs-function"> </span></span>{
+        <span class="hljs-keyword"><span class="hljs-keyword">int</span></span> result = random.nextInt(<span class="hljs-number"><span class="hljs-number">100</span></span>);
+        <span class="hljs-keyword"><span class="hljs-keyword">if</span></span> (result &lt; <span class="hljs-number"><span class="hljs-number">50</span></span>) {
+            <span class="hljs-keyword"><span class="hljs-keyword">return</span></span> Health.down().withDetail(<span class="hljs-string"><span class="hljs-string">"flapper"</span></span>, <span class="hljs-string"><span class="hljs-string">"failure"</span></span>).withDetail(<span class="hljs-string"><span class="hljs-string">"random"</span></span>, result).build();
+        } <span class="hljs-keyword"><span class="hljs-keyword">else</span></span> {
+            <span class="hljs-keyword"><span class="hljs-keyword">return</span></span> Health.up().withDetail(<span class="hljs-string"><span class="hljs-string">"flapper"</span></span>, <span class="hljs-string"><span class="hljs-string">"ok"</span></span>).withDetail(<span class="hljs-string"><span class="hljs-string">"random"</span></span>, result).build();
+        }
+    }
+}
+</code></pre>
+
+<p>This demo health indicator will randomize the health check.</p>
+
+<p>6) Build and run the <code>hello-spring-boot-actuator</code> application:</p>
+
+<pre><code class="hljs ruby"><span class="hljs-variable"><span class="hljs-variable">$ </span></span>mvn clean package
+<span class="hljs-variable"><span class="hljs-variable">$ </span></span>java -jar target/hello-spring-boot-actuator-<span class="hljs-number"><span class="hljs-number">0</span></span>.<span class="hljs-number"><span class="hljs-number">0</span></span>.<span class="hljs-number"><span class="hljs-number">1</span></span>-<span class="hljs-constant"><span class="hljs-constant">SNAPSHOT</span></span>.jar
+</code></pre>
+
+<p>7) Browse to <a href="http://localhost:8080/health">http://localhost:8080/health</a> and verify that the output is similar to the following (and changes randomly!).
+<img src="./Lab 3 Introspection, Monitoring, and Metrics using Spring Boot Actuator_files/health-flapping.png" alt="health" title="health"></p>
+
+<h3 id="metrics:3976528693a0108357f4928017600865">Metrics</h3>
+
+<p>Spring Boot provides an endpoint <a href="http://localhost:8080/metrics">http://localhost:8080/metrics</a> that exposes several automatically collected metrics for your application. It also allows for the creation of custom metrics.</p>
+
+<p>1) Browse to <a href="http://localhost:8080/metrics">http://localhost:8080/metrics</a>.  Review the metrics exposed.
+<img src="./Lab 3 Introspection, Monitoring, and Metrics using Spring Boot Actuator_files/metrics.png" alt="metrics" title="metrics"></p>
+
+<p>2) Stop the <code>hello-spring-boot-actuator</code> application.</p>
+
+<p>3) Let’s add some custom metrics.  We have refactored the greeting into a service of its own.  Open the following file: <code>$SPRING_BOOT_LABS_HOME/hello-spring-boot-actuator/src/main/java/io/pivotal/hello/GreetingService.java</code>.</p>
+
+<p>Uncomment this line:</p>
+
+<pre><code class="language-java hljs">		<span class="hljs-comment"><span class="hljs-comment">//counterService.increment("counter.services.greeting.invoked");</span></span>
+</code></pre>
+
+<p>Notice the <code>counterService</code>.  This service allows for any metric to be counted.</p>
+
+<pre><code class="language-java hljs">   <span class="hljs-annotation"><span class="hljs-annotation">@Autowired</span></span>
+   CounterService counterService;
+</code></pre>
+
+<p>4) Review the following file to see how the <code>GreetingService</code> is called: <code>$SPRING_BOOT_LABS_HOME/hello-spring-boot-actuator/src/main/java/io/pivotal/hello/HelloSpringBootApplication.java</code></p>
+
+<p>5) Build and run the <code>hello-spring-boot-actuator</code> application:</p>
+
+<pre><code class="hljs ruby"><span class="hljs-variable"><span class="hljs-variable">$ </span></span>mvn clean package
+<span class="hljs-variable"><span class="hljs-variable">$ </span></span>java -jar target/hello-spring-boot-actuator-<span class="hljs-number"><span class="hljs-number">0</span></span>.<span class="hljs-number"><span class="hljs-number">0</span></span>.<span class="hljs-number"><span class="hljs-number">1</span></span>-<span class="hljs-constant"><span class="hljs-constant">SNAPSHOT</span></span>.jar
+</code></pre>
+
+<p>6) Visit the application in the browser <a href="http://localhost:8080/">http://localhost:8080</a> and refresh the page several times.</p>
+
+<p>Now visit the <code>/metrics</code> endpoint <a href="http://localhost:8080/metrics">http://localhost:8080/metrics</a>. Among the autogenerated metrics you should see a counter for the <code>GreetingService</code> invocations (<code>counter.services.greeting.invoked</code>):</p>
+
+<p><img src="./Lab 3 Introspection, Monitoring, and Metrics using Spring Boot Actuator_files/custom-metrics.png" alt="metrics" title="metrics"></p>
+
+<p>To learn more about the autogenerated metrics, visit <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html">http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-metrics.html</a>.</p>
+
+<p>7) Stop the <code>hello-spring-boot-actuator</code> application.</p>
+
+			</div>
+		</div>
+	</div>
+
+
+
+
+</main>
+
+
+<hr>
+<div class="container">
+	<div class="row">
+		<div class="col-sm-8">
+			<p class="doc-footer-em"><a href="https://cdn.enablement.pivotal.io/spring-boot-primer/actuator/index.html#">Back to TOP</a></p>
+		</div>
+	</div>
+
+</div> 
+
+<footer class="doc-footer">
+	
+	<p>© Copyright Pivotal. All rights reserved.</p>
+</footer>
+
+
+
+
+
+<script src="./Lab 3 Introspection, Monitoring, and Metrics using Spring Boot Actuator_files/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script src="./Lab 3 Introspection, Monitoring, and Metrics using Spring Boot Actuator_files/ie10-viewport-bug-workaround.js"></script>
+
+
+
+
+</body></html>
