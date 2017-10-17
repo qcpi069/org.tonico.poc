@@ -1,0 +1,224 @@
+
+<!-- This xml will select QL crossover claims with an LCM of 3C and populate a count of them into a table on the RPS Datamart 
+     
+     Datasource definition file datasource.xml is in the ./java/Common_java_db_interface/conf.
+     Parameter 1 : Optional, has begin date in the formatt "dashdashbeginDate MMDDYYYY"
+     		   This should be the parameter passed into XML. 
+     		   Note: hyphenhyphen means the two characters. xml does not allow it in the comments, it is part 
+     		   of the reserved symbols.
+     Parameter 2 : Required if parameter 1 is supplied. Has end date in the formatt "dashdashendDate MMDDYYYY"
+     		   The XML file should reside under ./xml directory
+		   
+     Maestro Command with parameter: ./scripts/Common_java_db_interface.ksh  dashdashbeginDate 01012007 dashdashendDate 01312007 refresh_clm_trfsh_lcm3c.xml 
+     Maestro Command without parameter: ./scripts/Common_java_db_interface.ksh refresh_clm_trfsh_lcm3c.xml
+
+-->
+<sqml>
+	
+	<property name="TIMEOUT" value="0"/>
+	<!-- datasource.xml defines DB connection info. It should be under ./java/Common_java_db_interface/conf-->
+
+	<datasources resource="datasource.xml"/>
+	
+	<!--
+		Set-up a try block to send an email on exception.	
+	-->         
+	<command type="try">
+	<try>		
+		
+			<!-- Query DB for current processing quarter info -->
+			<command type="run" datasource="silver" rowName="cycle"><![CDATA[
+				select TO_CHAR(cycle_start_date,'MM/DD/YYYY') as cycleBeginDate				      
+				       ,TO_CHAR(cycle_end_date,'MM/DD/YYYY') as cycleEndDate	
+				  from dma_rbate2.t_rbate_cycle
+				  where rbate_cycle_gid = (select MAX(rbate_cycle_gid) 
+								from dma_rbate2.t_rbate_cycle
+								where rbate_cycle_type_id = 1
+								and   rbate_cycle_status = UPPER('A'))
+			]]></command>
+			<!-- Command to set quarter parameters, either from DB or parameter-->
+			<command type="java"><![CDATA[
+				 String cycleBeginDate ="";
+				 String cycleEndDate ="";
+				 String bm ="";
+				 String bd ="";
+				 String by ="";
+				 String em ="";
+				 String ed ="";
+				 String ey ="";
+		    	  //If no quarter parameter passed in, get from DB
+				if (script.getProperty("beginDate") == null) {	
+					 cycleBeginDate = script.getProperty("cycle.1");
+					 cycleEndDate = script.getProperty("cycle.2");
+					 
+					if (cycleBeginDate==null || cycleBeginDate.trim().length()==0||
+					    cycleEndDate==null || cycleEndDate.trim().length()==0)
+					{// If invalid info from database throw error
+					 throw new Exception("Processing Cycle Info not found in dma_rbate2.t_rbate_cycle.");
+					}
+					//Make the variables available to other queries below
+					script.setProperty("cycleBeginDate",cycleBeginDate);
+					script.setProperty("cycleEndDate",cycleEndDate);
+					
+				}else { //There is 2 parameters passed in called 'beginDate' and 'endDate
+				     beginDate = script.getProperty("beginDate");
+				     endDate = script.getProperty("endDate");
+		
+				    if (beginDate.trim().length()==8)
+				    {			   
+				       bm = beginDate.substring(0, 2);
+				       bd = beginDate.substring(2, 4);
+				       by = beginDate.substring(4, 8);
+						       
+				      script.setProperty("cycleBeginDate",bm+"/"+bd+"/"+by);
+				     }
+				     else 
+				     {
+				      throw new Exception("Invalid beginDate parameter! Should be in a format as  'MMDDYYYY'.");
+				     }
+				      
+				     if (endDate.trim().length()==8)
+				     {	  		   
+				      em = endDate.substring(0, 2);
+				      ed = endDate.substring(2, 4);
+				      ey = endDate.substring(4, 8);
+		       
+				      script.setProperty("cycleEndDate",em+"/"+ed+"/"+ey);
+		      		     }else {
+				       throw new Exception("Invalid endDate parameter! Should be in a format as  'MMDDYYYY'.");
+				    }
+				}
+
+			]]></command>
+			
+		<!-- delete the current table -->
+		<command type="run" datasource="datamart" transaction="true"><![CDATA[
+					DELETE FROM RPS.TRFSH_LCM3C
+			]]></command>
+				
+		<!-- This is the actual extract and load, extract from source, load into target-->
+		<!--
+		     Get the RBAT_ID as RBATE_ID from VCLAIM_DSC for Discount model	
+		--> 
+		<command type="copy" batch="500">
+			<source type="sql" datasource="gdxdb"><![CDATA[
+			
+			select 
+			 vc.RBAT_ID
+			,c.CLT_NM
+			,vc.MODEL_TYP_CD
+			,vc.QL_CLT_ID
+			,vc.EXTNL_SRC_CD
+			,vc.EXTNL_LVL_1_ID
+			,vc.EXTNL_LVL_2_ID
+			,vc.EXTNL_LVL_3_ID
+			,RTRIM(CHAR(YEAR(FILL_DT))) CONCAT SUBSTR(DIGITS (MONTH(FILL_DT)),9)
+			,COUNT(*) as LCM_CNT
+			from vrap.vclaim vc LEFT OUTER JOIN vrap.tclt c
+			  ON C.CLT_ID = VC.QL_CLT_ID
+			where vc.MODEL_TYP_CD IN ('G','X')
+			  and vc.INV_ELIG_DT between date('${cycleBeginDate}') AND date('${cycleEndDate}') 
+			  and vc.EXTNL_SRC_CD = 'QLC'
+			  and vc.LCM_CD = '3C'
+			  GROUP BY 
+			  vc.RBAT_ID
+			  ,c.CLT_NM
+			  ,vc.MODEL_TYP_CD
+			  ,vc.QL_CLT_ID
+			  ,vc.EXTNL_SRC_CD
+			  ,vc.EXTNL_LVL_1_ID
+			  ,vc.EXTNL_LVL_2_ID
+			  ,vc.EXTNL_LVL_3_ID
+			  ,RTRIM(CHAR(YEAR(FILL_DT))) CONCAT SUBSTR(DIGITS (MONTH(FILL_DT)),9)
+			  WITH UR
+			
+			]]></source>	
+				
+
+			<target
+				type        = "queue"
+				threadCount = "5">
+			
+
+				<target
+					type           = "sql"
+					datasource     = "datamart"
+					transaction    = "true"
+					batch          = "500"
+					reportInterval = "50000"
+					queryTimeout   = "${TIMEOUT}"
+				><![CDATA[
+				
+				INSERT INTO RPS.TRFSH_LCM3C
+					(RBAT_ID,
+					CLT_NM,
+					MODEL_TYP_CD,
+					QL_CLT_ID,
+					EXTL_SRC_CD,
+					EXTNL_LVL_1_ID,
+					EXTNL_LVL_2_ID,
+					EXTNL_LVL_3_ID,
+					DSPN_MTH_VL,
+					LCM_CNT_VL)
+					VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+				
+				]]></target>
+			 </target> 
+		</command>
+		
+	</try>
+	<catch>
+
+	<!-- Send an email on error -->
+		<command
+			type="mail"
+			mailTo="${email_address}"
+			mailFrom="Claims_Extract@caremark.com"
+			subject="[${region}] [ERROR] Load to DM RPS.TRFSH_LCM3C table"
+			contentType="text/html"
+			throwsException="false"
+		><![CDATA[
+			<html>
+			<head>
+			<title>[ERROR] Load to DM RPS.TRFSH_LCM3C table"</title>
+			</head>
+			<body>
+
+			<h3><u>[ERROR] Load to DM RPS.TRFSH_LCM3C table"</u></h3>
+
+			<table cellpadding="2">
+				<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+				<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+				<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+				#if (${system.getProperty('logfile')})
+					<tr>
+						<td><b>Log File:</b></td>
+						<td>
+							${system.getProperty('logfile')}
+						<td>
+					</tr>
+				#end
+			</table>
+
+			<br>			
+			<br>
+
+			#if (${script.getLastStatement()})
+				<h3><u>Last Statement</u></h3>
+				<font style="color: blue; font-size: small">	
+				${script.getLastStatement()}
+				</font>
+
+				<br>
+				<br>
+			#end
+
+			<h3><u>Stack Trace</u></h3>		
+			<pre style="color: red; font-size: small;">${stackTrace}</pre>
+			</body>
+			</html>
+		]]></command>
+
+	</catch>
+	</command>
+</sqml>

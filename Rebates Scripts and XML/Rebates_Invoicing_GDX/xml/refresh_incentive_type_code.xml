@@ -1,0 +1,176 @@
+
+<!-- REFESH INCENTIVE TYPE CODE -->
+
+<sqml>
+	
+	<property name="TIMEOUT" value="0"/>
+	
+	<datasources resource="datasource.xml"/>
+	
+	<!--
+		Set-up a try block to send an email on exception.	
+	-->         
+	<command type="try">
+		<try>
+
+			<!-- Truncate oracle tables -->
+			<command type="run" datasource="silver"><![CDATA[
+				CALL DMA_RBATE2.PK_CYCLE_UTIL.TRUNCATE_TABLE('DMA_RBATE2.TPB_FORMULARY_HIST');
+			]]></command>
+			
+			<command type="copy" batch="2000">
+				<source type="sql" datasource="gdxprd"><![CDATA[
+					SELECT
+						PB_ID,
+						FORMULARY_ID,
+						PB_STATUS_CD,
+						EFFECTIVE_DT,
+						DW_EFFECTIVE_DT,
+						EXPIRATION_DT,
+						DW_EXPIRATION_DT,
+						INCENTIVE_TYPE_CD,
+						GRACE_DAYS_CNT_QY,
+						DRUG_UR_DAY_CNT_QY
+					FROM CLAIMSP.TPB_FORMULARY_HIST
+				]]></source>
+				<target type="queue" threadCount="10">
+					<target
+						type             = "sql"
+						datasource       = "silver"
+						transaction      = "true"
+						batch            = "500"
+						reportInterval   = "500"
+						queryTimeout     = "${TIMEOUT}"
+					><![CDATA[
+						INSERT INTO DMA_RBATE2.TPB_FORMULARY_HIST
+						VALUES (?,?,?,?,?,?,?,?,?,?)
+					]]></target>
+				</target>
+			</command>
+				
+			<!-- Truncate oracle tables -->
+			<command type="run" datasource="silver"><![CDATA[
+				CALL DMA_RBATE2.PK_CYCLE_UTIL.TRUNCATE_TABLE('DMA_RBATE2.TPRESCRIP_BENEFIT');
+			]]></command>
+				
+			<command type="copy" batch="2000">
+				<source type="sql" datasource="gdxprd"><![CDATA[
+					SELECT
+						PB_ID,
+						DW_EFFECTIVE_DT,
+						DW_EXPIRATION_DT,
+						DELIVERY_SYSTEM_CD,
+						MASTER_PB_ID,
+						PB_CLASS_CD,
+						OWNER_CLIENT_ID,
+						PROMOTION_STS_CD,
+						INACTIVE_DT,
+						IN_PRODUCTION_IN,
+						PRIVATE_IN,
+						HYBRID_CD,
+						COB_PB_ID,
+						END_ENTRY_DT,
+						BEGIN_FILL_DT,
+						END_FILL_DT,
+						LONG_TX
+					FROM CLAIMSP.TPRESCRIP_BENEFIT
+				]]></source>
+				<target type="queue" threadCount="10">
+					<target
+						type             = "sql"
+						datasource       = "silver"
+						transaction      = "true"
+						batch            = "500"
+						reportInterval   = "500"
+						queryTimeout     = "${TIMEOUT}"
+					><![CDATA[
+						INSERT INTO DMA_RBATE2.TPRESCRIP_BENEFIT
+						VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+					]]></target>
+				</target>
+			</command>
+			
+			<command type="run" datasource="gdxprd" rowName="gdx_tfh_count"><![CDATA[
+				SELECT COUNT(*) FROM CLAIMSP.TPB_FORMULARY_HIST
+			]]></command>
+						
+			<command type="run" datasource="gdxprd" rowName="gdx_tb_count"><![CDATA[
+				SELECT COUNT(*) FROM CLAIMSP.TPRESCRIP_BENEFIT
+			]]></command>
+				
+			<command type="run" datasource="silver" rowName="rbt_tfh_count"><![CDATA[
+				SELECT COUNT(*) FROM DMA_RBATE2.TPB_FORMULARY_HIST
+			]]></command>
+						
+			<command type="run" datasource="silver" rowName="rbt_tb_count"><![CDATA[
+				SELECT COUNT(*) FROM DMA_RBATE2.TPRESCRIP_BENEFIT
+			]]></command>
+			
+			<command type="java"><![CDATA[
+				int gdxc1 = script.getProperty("gdx_tfh_count.1").intValue();
+				int gdxc2 = script.getProperty("gdx_tb_count.1").intValue();
+				int rbtc1 = script.getProperty("rbt_tfh_count.1").intValue();
+				int rbtc2 = script.getProperty("rbt_tb_count.1").intValue();
+				System.out.println("TPB_FORMULARY_HIST - Oracle Count: " + rbtc1 + "  DB2 Count: " + gdxc1);
+				System.out.println("TPRESCRIP_BENEFIT  - Oracle Count: " + rbtc2 + "  DB2 Count: " + gdxc2);
+				if ((gdxc1 != rbtc1) || (gdxc2 != rbtc2)) {
+					throw new Exception(
+						"Counts do not match:\n" +
+						"TPB_FORMULARY_HIST - Oracle Count: " + rbtc1 + "  DB2 Count: " + gdxc1 + "\n" +
+						"TPRESCRIP_BENEFIT  - Oracle Count: " + rbtc2 + "  DB2 Count: " + gdxc2);
+				}
+			]]></command>
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+			<command
+				type="mail"
+				mailTo="${email_address}"
+				mailFrom="client_model_refesh@caremark.com"
+				subject="[${region}] [ERROR] REFESH INCENTIVE TYPE CODE"
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] REFESH INCENTIVE TYPE CODE</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] REFESH INCENTIVE TYPE CODE</u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		</catch>
+	</command>
+</sqml>

@@ -1,0 +1,133 @@
+
+
+<!-- UPDATE QUARTER_SUMMARY  -->
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        dmt_schema=script.getProperty("dmt_schema");        
+	]]></command>
+			   
+	<command type="try">
+		<try>
+			<command type="copy" batch="1">
+				<source type="sql" datasource="datamart"><![CDATA[		
+  Select  
+	Count(claim_lvl1) as rx_count, 
+	Sum(rbate_access) AS reb_acc,  
+	Sum(rbate_mrkt_shr) AS reb_mkt, 
+	Sum(rbate_admin_fee) AS admin  
+ FROM ${dmt_schema}.tapc_detail_${QPID}  
+ WHERE pmt_sys_elig_cd = '0'
+				]]></source>
+				
+				<target
+					type             = "sql"
+					datasource       = "datamart"
+					transaction      = "true"
+					batch            = "1"
+					reportInterval   = "1"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					UPDATE ${dmt_schema}.quarter_summary 
+					 set CLAIM_COUNT = ?, 
+					     RBATE_ACCESS = ?,
+						 RBATE_MRKT_SHR = ?,
+						 RBATE_ADMIN_FEE = ?,
+						 RPS_ACTIVE_IND = '1' 
+                     WHERE PERIOD_ID = '${QPID}'					 
+			AND   pmt_sys_elig_cd = '0'
+				]]></target>
+				
+			</command>
+
+				 
+			<command type="copy" batch="1">
+				<source type="sql" datasource="datamart"><![CDATA[		
+  Select  
+	Count(claim_lvl1) as rx_count, 
+	Sum(rbate_access) AS reb_acc,  
+	Sum(rbate_mrkt_shr) AS reb_mkt, 
+	Sum(rbate_admin_fee) AS admin  
+ FROM ${dmt_schema}.tapc_detail_${QPID}  
+ WHERE pmt_sys_elig_cd = '1'
+				]]></source>
+				
+				<target
+					type             = "sql"
+					datasource       = "datamart"
+					transaction      = "true"
+					batch            = "1"
+					reportInterval   = "1"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					UPDATE ${dmt_schema}.quarter_summary 
+					 set CLAIM_COUNT = ?, 
+					     RBATE_ACCESS = ?,
+						 RBATE_MRKT_SHR = ?,
+						 RBATE_ADMIN_FEE = ?,
+						 RPS_ACTIVE_IND = '1' 
+                     WHERE PERIOD_ID = '${QPID}'					 
+			AND   pmt_sys_elig_cd = '1'
+				]]></target>
+				
+			</command>
+
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+			<command
+				type="mail"
+				mailTo="${mailto}"
+				mailFrom="RPDM_CALC_QTR_SUM"
+				subject="[ERROR] CALC QTR SUM "
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] CALC QTR SUM</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] CALC QTR SUM </u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		</catch>
+	</command>
+</sqml>

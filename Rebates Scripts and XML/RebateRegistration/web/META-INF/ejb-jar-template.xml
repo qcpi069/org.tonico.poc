@@ -1,0 +1,829 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ejb-jar PUBLIC "-//Sun Microsystems, Inc.//DTD Enterprise JavaBeans 2.0//EN" "http://java.sun.com/dtd/ejb-jar_2_0.dtd">
+<ejb-jar>
+
+    <enterprise-beans>
+
+      <session>
+	<ejb-name>RebatesAuthentication</ejb-name>
+         <home>com.advpcs.rebates.registration.ldap.ejb.RebatesAuthenticationEJBHome</home>
+         <remote>com.advpcs.rebates.registration.ldap.ejb.RebatesAuthenticationEJB</remote>
+         <ejb-class>com.advpcs.rebates.registration.ldap.ejb.RebatesAuthenticationEJBBean</ejb-class>
+      	<session-type>Stateless</session-type>
+	<transaction-type>Container</transaction-type>
+        <env-entry>
+          <env-entry-name>ldap/LdapJndi</env-entry-name>
+          <env-entry-type>java.lang.String</env-entry-type>
+          <env-entry-value>RebateRegLdap</env-entry-value>
+        </env-entry>
+        <env-entry>
+          <env-entry-name>ldap/LdapHost</env-entry-name>
+          <env-entry-type>java.lang.String</env-entry-type>
+          <env-entry-value>#LDAP_HOST#</env-entry-value>
+        </env-entry>
+        <env-entry>
+          <env-entry-name>ldap/LdapPort</env-entry-name>
+          <env-entry-type>java.lang.Integer</env-entry-type>
+          <env-entry-value>#LDAP_PORT#</env-entry-value>
+        </env-entry>
+        <env-entry>
+          <env-entry-name>ldap/LdapEmpDnSuffix</env-entry-name>
+          <env-entry-type>java.lang.String</env-entry-type>
+          <env-entry-value>#LDAP_EMP_DN_SUFFIX#</env-entry-value>
+        </env-entry>
+        <env-entry>
+	  <env-entry-name>ldap/LdapNonempDnSuffix</env-entry-name>
+	  <env-entry-type>java.lang.String</env-entry-type>
+	  <env-entry-value>#LDAP_NONEMP_DN_SUFFIX#</env-entry-value>
+	</env-entry>
+
+      </session>
+
+
+      <session>
+	<ejb-name>Rbate_Reg_StatelessSession</ejb-name>
+         <home>com.advpcs.acube.eventhandler.ejb.ACubeStatelessEventHandlerHome</home>
+         <remote>com.advpcs.acube.eventhandler.ejb.ACubeStatelessEventHandler</remote>
+         <ejb-class>com.advpcs.acube.eventhandler.ejb.ACubeStatelessPOEEJB</ejb-class>
+      	<session-type>Stateless</session-type>
+	<transaction-type>Container</transaction-type>
+
+  <!--  Weblogic Configurations -->
+
+      <env-entry>
+        <env-entry-name>ProviderURL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>#PROVIDER_URL#</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>InitialContextFactory</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>weblogic.jndi.WLInitialContextFactory</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>Datasource</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>RbateReg_datasource</env-entry-value>
+      </env-entry>
+
+	<env-entry>
+        <env-entry-name>ldap/LdapJndi</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>RebateRegLdap</env-entry-value>
+      </env-entry>
+<!--  Events : Login   -->
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.LoginEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.LoginEventHandler</env-entry-value>
+    </env-entry>
+
+<!--  Events : Rac   -->
+
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetRacEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.GetRacEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateRacEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateRacEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.RacClientListingEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.RacClientListingEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetCarrierGroupDetailEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.GetCarrierGroupDetailEventHandler</env-entry-value>
+      </env-entry>
+
+<!-- Distribution/Splits -->
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.RebateDistributionListingEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.RebateDistributionListingEventHandler</env-entry-value>
+      </env-entry>
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateDistributionEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateDistributionEventHandler</env-entry-value>
+      </env-entry>
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.AddDistributionEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.AddDistributionEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.AddSplitEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.AddSplitEventHandler</env-entry-value>
+      </env-entry>
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.DeleteSplitEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.DeleteSplitEventHandler</env-entry-value>
+      </env-entry>
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateSplitEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateSplitEventHandler</env-entry-value>
+      </env-entry>
+
+<!--  Events : System Codes   -->
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.SystemCodeListingEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.SystemCodeListingEventHandler</env-entry-value>
+      </env-entry>
+
+<!--  Events : Client/Rac Listing   -->
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetCompleteClientListEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.GetCompleteClientListEventHandler</env-entry-value>
+      </env-entry>
+
+<!--  Events : Client -->
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetClientEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.GetClientEventHandler</env-entry-value>
+      </env-entry>
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateClientEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateClientEventHandler</env-entry-value>
+      </env-entry>
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.RacsByClientListingEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.RacsByClientListingEventHandler</env-entry-value>
+      </env-entry>
+
+
+<!--  Events : Enrollment   -->
+
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateEnrollmentEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateEnrollmentEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.AddEnrollmentEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.AddEnrollmentEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.RacEnrollmentListingEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.RacEnrollmentListingEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.RacEnrollmentByCarrierListingEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.RacEnrollmentByCarrierListingEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.EnrollmentByCarrierGroupListingEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.EnrollmentByCarrierGroupListingEventHandler</env-entry-value>
+      </env-entry>
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.ClientEnrollmentListingEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.ClientEnrollmentListingEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.ClientEnrollmentByCarrierListingEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.ClientEnrollmentByCarrierListingEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.ClientCarrierListingEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.registration.facade.handler.ClientCarrierListingEventHandler</env-entry-value>
+      </env-entry>
+
+
+<!--  Events : Reports   -->
+     <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.ClientTableReportEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.ClientTableReportEventHandler</env-entry-value>
+    </env-entry>
+     <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.CreateFirSummaryReportEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.CreateFirSummaryReportEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.CreateInvoiceReportEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.CreateInvoiceReportEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.CreateMatrixReportEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.CreateMatrixReportEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.CreateQuarterlyProductReportEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.CreateQuarterlyProductReportEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.CreateQuarterlyEnrollmentReportEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.CreateQuarterlyEnrollmentReportEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.CreateQuarterlyClientTypeReportEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.CreateQuarterlyClientTypeReportEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.CreateQuarterlyTermClientReportEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.CreateQuarterlyTermClientReportEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.CreateMonthlyEnrollmentReportEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.CreateMonthlyEnrollmentReportEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.CreateClientSummaryReportEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.CreateClientSummaryReportEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.CreateQuarterlyEnrollmentUtilReportEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.CreateQuarterlyEnrollmentUtilReportEventHandler</env-entry-value>
+    </env-entry>
+
+<!--  Events : Carrier   -->
+     <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.RacCarrierListingEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.RacCarrierListingEventHandler</env-entry-value>
+    </env-entry>
+
+     <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.PerformanceRxDetailEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.PerformanceRxDetailEventHandler</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.CAGAuditListingEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.CAGAuditListingEventHandler</env-entry-value>
+    </env-entry>
+
+<!--  Events : Dur   -->
+     <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.ClientDurListingEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.ClientDurListingEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateDurEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateDurEventHandler</env-entry-value>
+    </env-entry>
+
+<!--  Events : Client Rebate Invoicing   -->
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.ClientInvoicingListingEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.ClientInvoicingListingEventHandler</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateInvoicingEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateInvoicingEventHandler</env-entry-value>
+    </env-entry>
+
+<!--  Events : Comments   -->
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.CommentListingEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.CommentListingEventHandler</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.AddCommentEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.AddCommentEventHandler</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateCommentEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateCommentEventHandler</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.DeleteCommentEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.DeleteCommentEventHandler</env-entry-value>
+    </env-entry>
+
+<!--  Events : Fir   -->
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.AddFirEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.AddFirEventHandler</env-entry-value>
+    </env-entry>
+
+<!--  Events : Contact   -->
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.CompleteContactListingEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.CompleteContactListingEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.ContactForRacListingEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.ContactForRacListingEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetAddressMapEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.GetAddressMapEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.AddContactEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.AddContactEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateContactEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateContactEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.AddAddressEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.AddAddressEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateAddressEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateAddressEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.AddRacContactEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.AddRacContactEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.DeleteRacContactEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.DeleteRacContactEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.DeleteAddressEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.DeleteAddressEventHandler</env-entry-value>
+    </env-entry>
+
+<!--  Events : Contract   -->
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetContractEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.GetContractEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateContractEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateContractEventHandler</env-entry-value>
+    </env-entry>
+
+<!--  Events : Manage Mail/Retail   -->
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetCompleteRacListingEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.GetCompleteRacListingEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.AddMailRetailRacEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.AddMailRetailRacEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetMailRetailRacEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.GetMailRetailRacEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.DeleteMailRetailRacEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.DeleteMailRetailRacEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateMailRetailRacEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateMailRetailRacEventHandler</env-entry-value>
+    </env-entry>
+    
+ <!-- Events: Advance Payments -->
+    <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.registration.facade.event.AddAdvancePaymentsEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.registration.facade.handler.AddAdvancePaymentsEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+            <env-entry-name>event/com.advpcs.rebates.registration.facade.event.DeleteAdvancePaymentsEvent</env-entry-name>
+            <env-entry-type>java.lang.String</env-entry-type>
+            <env-entry-value>com.advpcs.rebates.registration.facade.handler.DeleteAdvancePaymentsEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+            <env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateAdvancePaymentsEvent</env-entry-name>
+            <env-entry-type>java.lang.String</env-entry-type>
+            <env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateAdvancePaymentsEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+            <env-entry-name>event/com.advpcs.rebates.registration.facade.event.AdvancePaymentsListingEvent</env-entry-name>
+            <env-entry-type>java.lang.String</env-entry-type>
+            <env-entry-value>com.advpcs.rebates.registration.facade.handler.AdvancePaymentsListingEventHandler</env-entry-value>
+    </env-entry>
+   <!--  Pharmacy Exclusions -->
+   <env-entry>
+           <env-entry-name>event/com.advpcs.rebates.registration.facade.event.PharmExclusionsListingEvent</env-entry-name>
+           <env-entry-type>java.lang.String</env-entry-type>
+           <env-entry-value>com.advpcs.rebates.registration.facade.handler.PharmExclusionsListingHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+               <env-entry-name>event/com.advpcs.rebates.registration.facade.event.PharmListingEvent</env-entry-name>
+               <env-entry-type>java.lang.String</env-entry-type>
+               <env-entry-value>com.advpcs.rebates.registration.facade.handler.PharmListingHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+               <env-entry-name>event/com.advpcs.rebates.registration.facade.event.DeletePharmExclusionsEvent</env-entry-name>
+               <env-entry-type>java.lang.String</env-entry-type>
+               <env-entry-value>com.advpcs.rebates.registration.facade.handler.DeletePharmExclusionsHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+                   <env-entry-name>event/com.advpcs.rebates.registration.facade.event.AddPharmExclusionsEvent</env-entry-name>
+                   <env-entry-type>java.lang.String</env-entry-type>
+                   <env-entry-value>com.advpcs.rebates.registration.facade.handler.AddPharmExclusionsHandler</env-entry-value>
+    </env-entry>
+    
+   	<env-entry>
+    	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.NpiListingEvent</env-entry-name>
+    	<env-entry-type>java.lang.String</env-entry-type>
+    	<env-entry-value>com.advpcs.rebates.registration.facade.handler.NpiListingHandler</env-entry-value>
+    </env-entry>
+    
+    <env-entry>
+    	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetNpiEvent</env-entry-name>
+    	<env-entry-type>java.lang.String</env-entry-type>
+    	<env-entry-value>com.advpcs.rebates.registration.facade.handler.GetNpiHandler</env-entry-value>
+    </env-entry>
+    
+    <!--  Settlements -->
+       <env-entry>
+               <env-entry-name>event/com.advpcs.rebates.registration.facade.event.SettlementListingEvent</env-entry-name>
+               <env-entry-type>java.lang.String</env-entry-type>
+               <env-entry-value>com.advpcs.rebates.registration.facade.handler.SettlementListingHandler</env-entry-value>
+        </env-entry>
+       <env-entry>
+                          <env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateSettlementEvent</env-entry-name>
+                          <env-entry-type>java.lang.String</env-entry-type>
+                          <env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateSettlementHandler</env-entry-value>
+        </env-entry>
+        <env-entry>
+                   <env-entry-name>event/com.advpcs.rebates.registration.facade.event.DeleteSettlementEvent</env-entry-name>
+                   <env-entry-type>java.lang.String</env-entry-type>
+                   <env-entry-value>com.advpcs.rebates.registration.facade.handler.DeleteSettlementHandler</env-entry-value>
+        </env-entry>
+        <env-entry>
+                       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.AddSettlementEvent</env-entry-name>
+                       <env-entry-type>java.lang.String</env-entry-type>
+                       <env-entry-value>com.advpcs.rebates.registration.facade.handler.AddSettlementHandler</env-entry-value>
+    </env-entry>
+    
+    <!--  Model Types -->
+   <env-entry>
+	   <env-entry-name>event/com.advpcs.rebates.registration.facade.event.ModelTypeListingEvent</env-entry-name>
+	   <env-entry-type>java.lang.String</env-entry-type>
+	   <env-entry-value>com.advpcs.rebates.registration.facade.handler.ModelTypeListingHandler</env-entry-value>
+    </env-entry>
+   <env-entry>
+		      <env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateModelTypeEvent</env-entry-name>
+		      <env-entry-type>java.lang.String</env-entry-type>
+		      <env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateModelTypeHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+	       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.DeleteModelTypeEvent</env-entry-name>
+	       <env-entry-type>java.lang.String</env-entry-type>
+	       <env-entry-value>com.advpcs.rebates.registration.facade.handler.DeleteModelTypeHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+   <env-entry-name>event/com.advpcs.rebates.registration.facade.event.AddModelTypeEvent</env-entry-name>
+   <env-entry-type>java.lang.String</env-entry-type>
+   <env-entry-value>com.advpcs.rebates.registration.facade.handler.AddModelTypeHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetMasterClientListingForAssocEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.GetMasterClientListingForAssocHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetClientListingForAssocEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.GetClientListingForAssocHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.ClientMasterAssocListingEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.ClientMasterAssocListingEventHandler</env-entry-value>
+    </env-entry>
+    <!--<env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetMasterClientEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.GetMasterClientEventHandler</env-entry-value>
+    </env-entry>
+    -->
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateClientMasterAssocEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateClientMasterAssocEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateMasterClientEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateMasterClientEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.DeleteClientMasterAssocEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.DeleteClientMasterAssocEventHandler</env-entry-value>
+    </env-entry>
+        <env-entry>
+           <env-entry-name>event/com.advpcs.rebates.registration.facade.event.AddMasterClientEvent</env-entry-name>
+           <env-entry-type>java.lang.String</env-entry-type>
+           <env-entry-value>com.advpcs.rebates.registration.facade.handler.AddMasterClientEventHandler</env-entry-value>
+        </env-entry>
+
+    <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.AddClientMasterAssocEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.registration.facade.handler.AddClientMasterAssocEventHandler</env-entry-value>
+    </env-entry>
+     <env-entry>
+           <env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateBrokerEvent</env-entry-name>
+           <env-entry-type>java.lang.String</env-entry-type>
+           <env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateBrokerEventHandler</env-entry-value>
+    </env-entry>
+     <env-entry>
+           <env-entry-name>event/com.advpcs.rebates.registration.facade.event.DeleteClientBrokerAssocEvent</env-entry-name>
+           <env-entry-type>java.lang.String</env-entry-type>
+           <env-entry-value>com.advpcs.rebates.registration.facade.handler.DeleteClientBrokerAssocEventHandler</env-entry-value>
+    </env-entry>
+     <env-entry>
+           <env-entry-name>event/com.advpcs.rebates.registration.facade.event.AddClientBrokerAssocEvent</env-entry-name>
+           <env-entry-type>java.lang.String</env-entry-type>
+           <env-entry-value>com.advpcs.rebates.registration.facade.handler.AddClientBrokerAssocEventHandler</env-entry-value>
+    </env-entry>
+     <env-entry>
+           <env-entry-name>event/com.advpcs.rebates.registration.facade.event.AddBrokerEvent</env-entry-name>
+           <env-entry-type>java.lang.String</env-entry-type>
+           <env-entry-value>com.advpcs.rebates.registration.facade.handler.AddBrokerEventHandler</env-entry-value>
+    </env-entry>
+    
+  
+         <env-entry>
+               <env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetBrokerListingForAssocEvent</env-entry-name>
+               <env-entry-type>java.lang.String</env-entry-type>
+               <env-entry-value>com.advpcs.rebates.registration.facade.handler.GetBrokerListingForAssocEventHandler</env-entry-value>
+    </env-entry>
+   
+         <env-entry>
+               <env-entry-name>event/com.advpcs.rebates.registration.facade.event.AddMasterBrokerAssocEvent</env-entry-name>
+               <env-entry-type>java.lang.String</env-entry-type>
+               <env-entry-value>com.advpcs.rebates.registration.facade.handler.AddMasterBrokerAssocEventHandler</env-entry-value>
+    </env-entry>
+    
+         <env-entry>
+               <env-entry-name>event/com.advpcs.rebates.registration.facade.event.DeleteMasterBrokerAssocEvent</env-entry-name>
+               <env-entry-type>java.lang.String</env-entry-type>
+               <env-entry-value>com.advpcs.rebates.registration.facade.handler.DeleteMasterBrokerAssocEventHandler</env-entry-value>
+    </env-entry>
+  
+         <env-entry>
+               <env-entry-name>event/com.advpcs.rebates.registration.facade.event.ClientBrokerAssocListingEvent</env-entry-name>
+               <env-entry-type>java.lang.String</env-entry-type>
+               <env-entry-value>com.advpcs.rebates.registration.facade.handler.ClientBrokerAssocListingEventHandler</env-entry-value>
+    </env-entry>
+  
+         <env-entry>
+               <env-entry-name>event/com.advpcs.rebates.registration.facade.event.MasterBrokerAssocListingEvent</env-entry-name>
+               <env-entry-type>java.lang.String</env-entry-type>
+               <env-entry-value>com.advpcs.rebates.registration.facade.handler.MasterBrokerAssocListingEventHandler</env-entry-value>
+    </env-entry>
+    
+         <env-entry>
+               <env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetCompleteBrokerListingEvent</env-entry-name>
+               <env-entry-type>java.lang.String</env-entry-type>
+               <env-entry-value>com.advpcs.rebates.registration.facade.handler.GetCompleteBrokerListingEventHandler</env-entry-value>
+    </env-entry>
+    
+             <env-entry>
+                   <env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetBrokerEvent</env-entry-name>
+                   <env-entry-type>java.lang.String</env-entry-type>
+                   <env-entry-value>com.advpcs.rebates.registration.facade.handler.GetBrokerEventHandler</env-entry-value>
+    </env-entry>
+    
+             <env-entry>
+                       <env-entry-name>event/com.advpcs.rebates.registration.facade.event.EffRacListingEvent</env-entry-name>
+                       <env-entry-type>java.lang.String</env-entry-type>
+                       <env-entry-value>com.advpcs.rebates.registration.facade.handler.EffRacListingEventHandler</env-entry-value>
+    </env-entry>
+    
+    
+     <env-entry>
+	   <env-entry-name>event/com.advpcs.rebates.registration.facade.event.PosListingEvent</env-entry-name>
+	   <env-entry-type>java.lang.String</env-entry-type>
+	   <env-entry-value>com.advpcs.rebates.registration.facade.handler.PosListingEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+    	   <env-entry-name>event/com.advpcs.rebates.registration.facade.event.DeletePosEvent</env-entry-name>
+    	   <env-entry-type>java.lang.String</env-entry-type>
+    	   <env-entry-value>com.advpcs.rebates.registration.facade.handler.DeletePosEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+        	   <env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdatePosEvent</env-entry-name>
+        	   <env-entry-type>java.lang.String</env-entry-type>
+        	   <env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdatePosEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+        	   <env-entry-name>event/com.advpcs.rebates.registration.facade.event.AddPosEvent</env-entry-name>
+        	   <env-entry-type>java.lang.String</env-entry-type>
+        	   <env-entry-value>com.advpcs.rebates.registration.facade.handler.AddPosEventHandler</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+            	   <env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateClientBrokerAssocEvent</env-entry-name>
+            	   <env-entry-type>java.lang.String</env-entry-type>
+            	   <env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateClientBrokerAssocEventHandler</env-entry-value>
+    </env-entry>
+    <env-entry>
+		   <env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateMasterBrokerAssocEvent</env-entry-name>
+		   <env-entry-type>java.lang.String</env-entry-type>
+		   <env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateMasterBrokerAssocEventHandler</env-entry-value>
+    </env-entry>
+     <env-entry>
+          	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.AddGuaranteeEvent</env-entry-name>
+          	<env-entry-type>java.lang.String</env-entry-type>
+          	<env-entry-value>com.advpcs.rebates.registration.facade.handler.AddGuaranteeEventHandler</env-entry-value>
+      </env-entry>
+      
+      <env-entry>
+            	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.DeleteGuaranteeEvent</env-entry-name>
+            	<env-entry-type>java.lang.String</env-entry-type>
+            	<env-entry-value>com.advpcs.rebates.registration.facade.handler.DeleteGuaranteeEventHandler</env-entry-value>
+      </env-entry>
+       <env-entry>
+            	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateGuaranteeEvent</env-entry-name>
+            	<env-entry-type>java.lang.String</env-entry-type>
+            	<env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateGuaranteeEventHandler</env-entry-value>
+      </env-entry>
+       <env-entry>
+            	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetCarrierGroupClientAssociationEvent</env-entry-name>
+            	<env-entry-type>java.lang.String</env-entry-type>
+            	<env-entry-value>com.advpcs.rebates.registration.facade.handler.GetCarrierGroupClientAssociationEventHandler</env-entry-value>
+      </env-entry>
+      <env-entry>
+            	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateCarrierGroupClientAssociationEvent</env-entry-name>
+            	<env-entry-type>java.lang.String</env-entry-type>
+            	<env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateCarrierGroupClientAssociationEventHandler</env-entry-value>
+      </env-entry>
+      <env-entry>
+            	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetCarrierGroupClientAssociationOverlapsEvent</env-entry-name>
+            	<env-entry-type>java.lang.String</env-entry-type>
+            	<env-entry-value>com.advpcs.rebates.registration.facade.handler.GetCarrierGroupClientAssociationOverlapsEventHandler</env-entry-value>
+      </env-entry>
+      <env-entry>
+            	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateCarrierGroupRACAssociationEvent</env-entry-name>
+            	<env-entry-type>java.lang.String</env-entry-type>
+            	<env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateCarrierGroupRACAssociationEventHandler</env-entry-value>
+      </env-entry>
+      <env-entry>
+            	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateCarrierGroupClientAssociationOverlapsEvent</env-entry-name>
+            	<env-entry-type>java.lang.String</env-entry-type>
+            	<env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateCarrierGroupClientAssociationOverlapsEventHandler</env-entry-value>
+      </env-entry>
+      <env-entry>
+            	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateCarrierGroupRACAssociationOverlapsEvent</env-entry-name>
+            	<env-entry-type>java.lang.String</env-entry-type>
+            	<env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateCarrierGroupRACAssociationOverlapsEventHandler</env-entry-value>
+      </env-entry>
+	  <env-entry>
+            	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.AllEnrollmentListingEvent</env-entry-name>
+            	<env-entry-type>java.lang.String</env-entry-type>
+            	<env-entry-value>com.advpcs.rebates.registration.facade.handler.AllEnrollmentListingEventHandler</env-entry-value>
+      </env-entry>
+	  <env-entry>
+            	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetDistinctExternalSourceCodeEvent</env-entry-name>
+            	<env-entry-type>java.lang.String</env-entry-type>
+            	<env-entry-value>com.advpcs.rebates.registration.facade.handler.GetDistinctExternalSourceCodeEventHandler</env-entry-value>
+      </env-entry>
+		  
+		  
+		  
+		  <env-entry>
+            	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.MaintCAGAssocSearchEvent</env-entry-name>
+            	<env-entry-type>java.lang.String</env-entry-type>
+            	<env-entry-value>com.advpcs.rebates.registration.facade.handler.MaintCAGAssocSearchEventHandler</env-entry-value>
+      </env-entry>
+		  
+      
+		  
+		  	  <env-entry>
+            	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetCAGCountEvent</env-entry-name>
+            	<env-entry-type>java.lang.String</env-entry-type>
+            	<env-entry-value>com.advpcs.rebates.registration.facade.handler.GetCAGCountEventHandler</env-entry-value>
+      </env-entry>
+		  		  
+		  	  <env-entry>
+            	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetClientBasicEvent</env-entry-name>
+            	<env-entry-type>java.lang.String</env-entry-type>
+            	<env-entry-value>com.advpcs.rebates.registration.facade.handler.GetClientBasicEventHandler</env-entry-value>
+      </env-entry>
+		  
+		  <env-entry>
+            	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetCAGLCMOverlapsEvent</env-entry-name>
+            	<env-entry-type>java.lang.String</env-entry-type>
+            	<env-entry-value>com.advpcs.rebates.registration.facade.handler.GetCAGLCMOverlapsEventHandler</env-entry-value>
+      </env-entry>
+		   <env-entry>
+            	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetCAGClientOverlapsEvent</env-entry-name>
+            	<env-entry-type>java.lang.String</env-entry-type>
+            	<env-entry-value>com.advpcs.rebates.registration.facade.handler.GetCAGClientOverlapsEventHandler</env-entry-value>
+      </env-entry>
+		  
+
+		  
+		  <env-entry>
+            	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetCAGLCMUpdatesEvent</env-entry-name>
+            	<env-entry-type>java.lang.String</env-entry-type>
+            	<env-entry-value>com.advpcs.rebates.registration.facade.handler.GetCAGLCMUpdatesEventHandler</env-entry-value>
+      </env-entry>
+		  <env-entry>
+            	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetCAGClientUpdatesEvent</env-entry-name>
+            	<env-entry-type>java.lang.String</env-entry-type>
+            	<env-entry-value>com.advpcs.rebates.registration.facade.handler.GetCAGClientUpdatesEventHandler</env-entry-value>
+      </env-entry>
+		  
+		   <env-entry>
+            	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateCarrierGroupLCMAssociationEvent</env-entry-name>
+            	<env-entry-type>java.lang.String</env-entry-type>
+            	<env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateCarrierGroupLCMAssociationEventHandler</env-entry-value>
+      </env-entry>
+		  
+		  <env-entry>
+            	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.UpdateCarrierGroupClientAssociationEvent</env-entry-name>
+            	<env-entry-type>java.lang.String</env-entry-type>
+            	<env-entry-value>com.advpcs.rebates.registration.facade.handler.UpdateCarrierGroupClientAssociationEventHandler</env-entry-value>
+      </env-entry>
+		  
+		   <env-entry>
+            	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetCAGLCMGapEvent</env-entry-name>
+            	<env-entry-type>java.lang.String</env-entry-type>
+            	<env-entry-value>com.advpcs.rebates.registration.facade.handler.GetCAGLCMGapEventHandler</env-entry-value>
+      </env-entry>
+		  <env-entry>
+            	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.GetCAGClientGapEvent</env-entry-name>
+            	<env-entry-type>java.lang.String</env-entry-type>
+            	<env-entry-value>com.advpcs.rebates.registration.facade.handler.GetCAGClientGapEventHandler</env-entry-value>
+      </env-entry>
+		  
+		  <env-entry>
+            	<env-entry-name>event/com.advpcs.rebates.registration.facade.event.AddNewCarrierGroupClientLCMAssociationEvent</env-entry-name>
+            	<env-entry-type>java.lang.String</env-entry-type>
+            	<env-entry-value>com.advpcs.rebates.registration.facade.handler.AddNewCarrierGroupClientLCMAssociationEventHandler</env-entry-value>
+      </env-entry>
+		  
+   </session>
+    </enterprise-beans>
+ </ejb-jar>

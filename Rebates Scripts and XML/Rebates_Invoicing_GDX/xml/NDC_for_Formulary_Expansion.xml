@@ -1,0 +1,172 @@
+
+<!-- REFESH NDC for Formulary Expansion -->
+
+<sqml>
+	
+	<property name="TIMEOUT" value="0"/>
+	
+	<datasources resource="datasource.xml"/>
+	
+	<!--
+		Set-up a try block to send an email on exception.
+	-->         
+	<command type="try">
+		<try>
+			<!-- delete existing rows from table -->
+			<command type="run" datasource="gdxdb"><![CDATA[
+ 
+				DELETE FROM VRAP.TDRUG_RBAT
+ 
+			]]></command>
+			
+			<command type="copy" batch="2000">
+				<source type="sql" datasource="gdxdb"><![CDATA[
+
+                                        SELECT (CASE WHEN TD.DRUG_GID IS NULL THEN -1 ELSE TD.DRUG_GID END) AS DRUG_GID,
+                                               TD.BRAND_NAME,
+                                               TD.LBL_NAME,
+                                               DECIMAL(RNDC.NDC_LC11_ID,11) AS NDC_CD,
+                                               TD.END_DT,
+                                               TD.GCN_NBR,
+                                               TD.GPI_CODE   
+                                          FROM (SELECT DISTINCT (SUBSTR(CAST(N11.DRUG_NDC_ID AS CHAR(12)),1,11))
+					               AS NDC_LC11_ID
+						  FROM VRAP.TCNTRCT C,
+					               VRAP.THIERARCHY HI,
+					               VRAP.TDRUG_CLS_NDC11 N11
+					         WHERE C.CNTRCT_ID = HI.CNTRCT_ID
+					           AND C.MODEL_TYP_CD in ('G','X')
+					           AND HI.HRCY_TYP_CD = 3
+					           AND HI.DRUG_CLS_VNDR = N11.DRUG_CLS_ID
+					           AND N11.EXCL_INCL_CD = 1
+					         ORDER BY 1
+                                               ) RNDC 
+                                               LEFT JOIN VRAP.TDRUG_EDW TD 
+                                               ON RNDC.NDC_LC11_ID = TD.NDC_LC11_ID
+                                          WITH UR
+
+				]]></source>
+                                <target type="queue" threadCount="10">
+					<target
+						type             = "sql"
+						datasource       = "gdxdb"
+						transaction      = "true"
+						batch            = "500"
+						reportInterval   = "500"
+						queryTimeout     = "${TIMEOUT}"
+					><![CDATA[
+
+						INSERT 
+                                                  INTO VRAP.TDRUG_RBAT (
+                                                       DRUG_GID,
+                                                       BRND_NAM,
+                                                       LABL_NM,
+                                                       DRUG_NDC_ID,
+                                                       DRUG_END_DT,
+                                                       GCN_CD,
+                                                       GPI_LC10_ID
+                                                       )
+						VALUES (?,?,?,?,?,?,?)
+
+					]]></target>
+                                </target>
+			</command>
+
+                        <!-- Truncate oracle tables -->
+                        <command type="run" datasource="iron"><![CDATA[
+                                DELETE FROM ODS_FRMLY2.S_FRMLY_EXP_DRUG
+                        ]]></command>
+
+                        <command type="copy" batch="500">
+                                <source type="sql" datasource="gdxdb"><![CDATA[
+
+                                        SELECT DRUG_GID,
+                                               BRND_NAM,
+                                               LABL_NM,
+                                               CAST(CAST (DRUG_NDC_ID AS CHAR(11)) AS VARCHAR(11)) AS NDC_CD,
+                                               DRUG_END_DT,
+                                               GCN_CD,
+                                               GPI_LC10_ID
+                                          FROM VRAP.TDRUG_RBAT
+                                         WHERE DRUG_GID != -1 
+                                          WITH UR
+
+                                ]]></source>
+                                <target
+                                                type             = "sql"
+                                                datasource       = "iron"
+                                                transaction      = "true"
+                                                batch            = "500"
+                                                reportInterval   = "500"
+                                                queryTimeout     = "${TIMEOUT}"
+                                ><![CDATA[
+
+                                                INSERT
+                                                  INTO ODS_FRMLY2.S_FRMLY_EXP_DRUG(
+                                                       DRUG_GID,
+                                                       BRAND_NAME,
+                                                       LBL_NAME,
+                                                       NDC_CODE,
+                                                       END_DATE,
+                                                       GCN_NBR,
+                                                       GPI_CODE
+                                                       )
+                                                VALUES (?,?,?,?,?,?,?)
+
+                               ]]></target>
+                        </command>
+			
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+			<command
+				type="mail"
+				mailTo="${email_address}"
+				mailFrom="client_model_refesh@caremark.com"
+				subject="[${region}] [ERROR] Formulary expansion table load"
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] Formulary expansion table load</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] Formulary expansion table load</u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		</catch>
+	</command>
+</sqml>

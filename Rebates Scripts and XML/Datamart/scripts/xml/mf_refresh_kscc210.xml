@@ -1,0 +1,154 @@
+ 
+<!-- REFESH MAINFRAME PAYMENTS BROKER TABLE  -->
+  <!-- UPDATE_USERID,  -->
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+
+		   
+     <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        cli_schema=script.getProperty("dmt_schema");
+        pmt_schema=script.getProperty("pmt_schema");
+	]]></command>
+	
+
+	<command type="try">
+		<try>
+			<!-- delete from DB2. -->
+			<command type="run" datasource="db2p">
+				<![CDATA[
+					DELETE FROM ${pmt_schema}.kscc210_bkr_rebid
+				]]>
+			</command>
+     
+			<!-- Copy from Datamart to mainframe DB2. -->
+			<command type="copy" batch="1000">
+				<source type="sql" datasource="datamart"><![CDATA[
+SELECT substr(digits(brk.BRKR_ID),3,8), substr(digits(cba.RBAT_ID),3,8),
+cba.EFF_DT, cba.TERM_DT, brk.BRKR_NM, coalesce(brk.AP_VEND_NB,
+' '), coalesce(brk.AP_CO_CD, ' '), cba.PMT_HOLD_CD, cba.RATE_BSIS_CD,
+coalesce(cba.RATE_PCT, 0), cba.RATE_PER_CLM_AMT, cba.PMT_TM_CD,
+date(cba.UPDT_TS), cba.UPDT_USER_ID, date(cba.INSRT_TS)
+
+FROM client_reg.crt_brkr brk,
+         client_reg.crt_clnt_brkr_assc cba
+
+WHERE cba.BRKR_ID = brk.BRKR_ID
+
+				]]></source> 
+				<target
+					type             = "sql"
+					datasource       = "db2p"
+					transaction      = "true"
+					batch            = "1000"
+					reportInterval   = "1000"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					INSERT INTO ${pmt_schema}.kscc210_bkr_rebid 
+                    ( BRKR_ID, 
+					 RBAT_ID,  
+					 EFF_DT,
+					 TERM_DT,
+					 BRKR_NM,
+					 AP_VEND_ID,
+					 AP_CO_ID,
+                     CR_HOLD_CD,
+					 RATE_BSIS_CD,
+					 BRKR_FEE_RATE_PCT,
+					 BRKR_PER_CLM_AMT,
+					 PMT_SCHD_CD,
+					 LAST_UPDT_DT,
+					 LAST_UPDT_USER_NB,
+					 INSRT_DT 
+                     ) 
+					VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ) 
+				]]></target>
+			</command>
+    
+	        <!-- compare totals -->
+
+			<command type="run" datasource="datamart" rowName="count1">
+				<![CDATA[ 
+	              SELECT COUNT(*) FROM  ${dmt_schema}.kscc210_bkr_rebid 
+				]]> 
+			</command>
+
+			<command type="run" datasource="db2p" rowName="count2">
+				<![CDATA[
+					SELECT COUNT(*) FROM ${pmt_schema}.kscc210_bkr_rebid
+				]]>
+			</command>
+   
+			<command type="java">
+				count1 = script.getProperty("count1.1").intValue();  
+				count2 = script.getProperty("count2.1").intValue();
+				if (count1 != count2) {
+					logger.error(" kscc210_bkr_rebid counts do NOT match count1=" + count1 + "  count2=" + count2);
+                    throw new Exception(" kscc210_bkr_rebid counts do NOT match count1=" + count1 + " count2=" + count2);
+				} 
+				System.out.println(" *********************************************** ");
+				System.out.println(" * Rows refreshed into KSCC210 is " + count1 + ". ");
+				System.out.println(" *********************************************** ");
+			</command>
+	
+		 
+
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+		<command
+				type="mail"
+				mailTo="${mailto}"
+				mailFrom="RPMF_Refresh_Client"
+				subject="[ERROR] MF REFESH KSCC210 "
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] MF REFRESH KSCC210</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] MF REFRESH KSCC210 </u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		
+		
+		</catch>
+	</command>
+</sqml>

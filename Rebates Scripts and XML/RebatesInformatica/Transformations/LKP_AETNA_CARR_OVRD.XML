@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE POWERMART SYSTEM "powrmart.dtd">
+<POWERMART CREATION_DATE="02/12/2015 06:55:18" REPOSITORY_VERSION="182.91">
+<REPOSITORY NAME="PCRepos_Caremark9_DEV1" VERSION="182" CODEPAGE="MS1252" DATABASETYPE="DB2">
+<FOLDER NAME="Shared_Rebates_RCI" GROUP="" OWNER="rebates_session_operator" SHARED="SHARED" DESCRIPTION="Shared folder for Rebates RCI Objects" PERMISSIONS="rwx---r--" UUID="fdbb6779-70d9-4431-864c-94004c5c8666">
+    <TRANSFORMATION DESCRIPTION ="4/2015 Added as part of ITPR009414 Aetna Project" NAME ="LKP_AETNA_CARR_OVRD" OBJECTVERSION ="1" REUSABLE ="YES" TYPE ="Lookup Procedure" VERSIONNUMBER ="1">
+        <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This is the claims external source code, found on BCI." NAME ="EXTL_SRC_CD" PICTURETEXT ="" PORTTYPE ="LOOKUP/OUTPUT" PRECISION ="5" SCALE ="0"/>
+        <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This is the carrier of the client, the EXTL_LVL1_ID, the first value for the CA" NAME ="EXTL_LVL1_ID" PICTURETEXT ="" PORTTYPE ="LOOKUP/OUTPUT" PRECISION ="20" SCALE ="0"/>
+        <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="EFF_DT" PICTURETEXT ="" PORTTYPE ="LOOKUP/OUTPUT" PRECISION ="29" SCALE ="9"/>
+        <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="END_DT" PICTURETEXT ="" PORTTYPE ="LOOKUP/OUTPUT" PRECISION ="29" SCALE ="9"/>
+        <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="(&apos;RXC  &apos;, &apos;7700&apos;, &apos;2&apos;, &apos;01/01/2013 12:00:00 AM&apos;, &apos;12/31/9999 12:00:00 AM&apos;, &apos;QCPUE98U&apos;, &apos;12/11/2012 9:35:32 PM&apos;, &apos;QCPUE98U&apos;, &apos;12/11/2012 9:35:32 PM&apos;, &apos;0&apos;), &#xD;&#xA;This is the Aetna Risk Code/Option Code value that will be assigned claims matching the EXTL_SRC_CD/EXTL_LVL1_ID/Date range, and will be populated onto the RCIT_BASE_CLM_APC table." NAME ="RISK_CD" PICTURETEXT ="" PORTTYPE ="LOOKUP/RETURN/OUTPUT" PRECISION ="1" SCALE ="0"/>
+        <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="in_EXTL_SRC_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="5" SCALE ="0"/>
+        <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="in_EXTL_LVL1_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="20" SCALE ="0"/>
+        <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="in_DSPN_DT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="29" SCALE ="9"/>
+        <TABLEATTRIBUTE NAME ="Lookup Sql Override" VALUE ="SELECT A.RISK_CD as RISK_CD, RTRIM(A.EXTL_SRC_CD) as EXTL_SRC_CD, A.EXTL_LVL1_ID as EXTL_LVL1_ID, A.EFF_DT as EFF_DT, A.END_DT as END_DT FROM VRAP.RCIT_AETNA_CARR_OVRD A"/>
+        <TABLEATTRIBUTE NAME ="Lookup table name" VALUE ="VRAP.RCIT_AETNA_CARR_OVRD"/>
+        <TABLEATTRIBUTE NAME ="Lookup Source Filter" VALUE =""/>
+        <TABLEATTRIBUTE NAME ="Lookup caching enabled" VALUE ="YES"/>
+        <TABLEATTRIBUTE NAME ="Lookup policy on multiple match" VALUE ="Use Any Value"/>
+        <TABLEATTRIBUTE NAME ="Lookup condition" VALUE ="EXTL_SRC_CD = in_EXTL_SRC_CD AND EXTL_LVL1_ID = in_EXTL_LVL1_ID AND EFF_DT &lt;= in_DSPN_DT AND END_DT &gt;= in_DSPN_DT"/>
+        <TABLEATTRIBUTE NAME ="Connection Information" VALUE ="$Source"/>
+        <TABLEATTRIBUTE NAME ="Source Type" VALUE ="Database"/>
+        <TABLEATTRIBUTE NAME ="Recache if Stale" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+        <TABLEATTRIBUTE NAME ="Lookup cache directory name" VALUE ="$PMCacheDir"/>
+        <TABLEATTRIBUTE NAME ="Lookup cache initialize" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Lookup cache persistent" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Lookup Data Cache Size" VALUE ="Auto"/>
+        <TABLEATTRIBUTE NAME ="Lookup Index Cache Size" VALUE ="Auto"/>
+        <TABLEATTRIBUTE NAME ="Dynamic Lookup Cache" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Synchronize Dynamic Cache" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Output Old Value On Update" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Update Dynamic Cache Condition" VALUE ="TRUE"/>
+        <TABLEATTRIBUTE NAME ="Cache File Name Prefix" VALUE =""/>
+        <TABLEATTRIBUTE NAME ="Re-cache from lookup source" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Insert Else Update" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Update Else Insert" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Datetime Format" VALUE =""/>
+        <TABLEATTRIBUTE NAME ="Thousand Separator" VALUE ="None"/>
+        <TABLEATTRIBUTE NAME ="Decimal Separator" VALUE ="."/>
+        <TABLEATTRIBUTE NAME ="Case Sensitive String Comparison" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Null ordering" VALUE ="Null Is Highest Value"/>
+        <TABLEATTRIBUTE NAME ="Sorted Input" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Lookup source is static" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Pre-build lookup cache" VALUE ="Auto"/>
+        <TABLEATTRIBUTE NAME ="Subsecond Precision" VALUE ="6"/>
+    </TRANSFORMATION>
+</FOLDER>
+</REPOSITORY>
+</POWERMART>

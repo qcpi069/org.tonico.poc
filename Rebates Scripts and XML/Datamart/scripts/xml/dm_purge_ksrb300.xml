@@ -1,0 +1,79 @@
+<sqml>
+        <property name="TIMEOUT" value="0"/>
+        <datasources resource="datasource.xml"/>
+        <properties resource="datamart.properties"/>
+
+     <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        cli_schema=script.getProperty("cli_schema");
+        pmt_schema=script.getProperty("pmt_schema");
+        ]]></command>
+
+
+        <command type="try">
+                <try>
+                        <command type="run" datasource="datamart" batch="3000" >
+                                <![CDATA[
+        delete from rps.tapc_lcm_summary where INV_CCYY='${YEAR}' and INV_QTR='${QPID}'
+                                ]]>
+
+                        </command>
+
+
+
+                </try>
+                <catch>
+                        <!-- Send an email on error -->
+                <command
+                                type="mail"
+                                mailTo="${mailto}"
+                                mailFrom="rpsadm@caremark.com"
+                                subject="[ERROR] DM PURGE KSCC300 "
+                                contentType="text/html"
+                                throwsException="false"
+                        ><![CDATA[
+                                <html>
+                                <head>
+                                <title>[ERROR] DM PURGE KSCC300</title>
+                                </head>
+                                <body>
+
+                                <h3><u>[ERROR] DM PURGE KSCC300 </u></h3>
+
+                                <table cellpadding="2">
+                                        <tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+                                        <tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+                                        <tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+                                        #if (${system.getProperty('logfile')})
+                                                <tr>
+                                                        <td><b>Log File:</b></td>
+                                                        <td>
+                                                                ${system.getProperty('logfile')}
+                                                        <td>
+                                                </tr>
+                                        #end
+                                </table>
+
+                                <br>
+                                <br>
+
+                                #if (${script.getLastStatement()})
+                                        <h3><u>Last Statement</u></h3>
+                                        <font style="color: blue; font-size: small">
+                                        ${script.getLastStatement()}
+                                        </font>
+
+                                        <br>
+                                        <br>
+                                #end
+
+                                <h3><u>Stack Trace</u></h3>
+                                <pre style="color: red; font-size: small;">${stackTrace}</pre>
+                                </body>
+                                </html>
+                        ]]></command>
+
+                </catch>
+        </command>
+</sqml>
+

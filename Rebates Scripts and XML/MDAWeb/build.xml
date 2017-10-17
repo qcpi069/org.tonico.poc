@@ -1,0 +1,100 @@
+<!--
+
+
+	Build script for the MDA war file.
+
+
+-->
+<project name="MDAWeb" default="dist">
+
+	<property name="src"      location="src"/>
+	<property name="web"      location="WebContent"/>
+	<property name="build"    location="${web}/WEB-INF/classes"/>
+	<property name="dist"     location="dist"/>
+	<property name="war.file" location="${dist}/MDAWeb.war"/>
+	<property name="buildLib" location="buildLib"/>
+	
+	<property name="web.lib"    location="${web}/WEB-INF/lib"/>
+	<property name="shared.lib" location="../shared"/>
+
+	<path id="classpath">
+		<fileset dir="${shared.lib}" includes="*.jar"/>
+		<fileset dir="${web.lib}" includes="*.jar"/>
+		<pathelement path="${build}"/>
+		<pathelement path="${buildLib}"/>
+	</path>
+		
+	<target name="dist" depends="clean,war"/>
+	
+	<!-- Create directories for building -->
+	<target name="init">
+		<mkdir dir="${dist}"/>
+		<mkdir dir="${build}"/>
+	</target>
+	
+	<!-- Remove directories and distribution files -->
+	<target name="clean">
+		<delete verbose="true" failonerror="false">
+			<fileset dir="${dist}" includes="*.war,*.zip,*.jar,*.ear"/>
+		</delete>
+		<delete dir="${build}" includeemptydirs="true" failonerror="false"/>
+	</target>
+	
+	<!-- Compile java code, run AspectWerkz and copy resources -->
+	<target name="build" depends="init">
+	
+		<echo message="Compiling files from ${src}."/>
+		<javac
+			srcdir       = "${src}"
+			destdir      = "${build}"
+			classpathref = "classpath"
+			debug        = "on"
+			target       = "1.7"
+			source       = "1.7"
+		/>
+		
+		<delete verbose="false" dir="${build}/com/caremark/psd/datasales/vra2/test"/>
+		
+		<echo message="Copying resource files."/>
+		<copy todir="${build}" overwrite="true" verbose="false">
+			<fileset dir="${src}" includes="**/*.properties,**/*.xml,**/*.html"/>
+		</copy>
+	</target>
+	
+	<!-- Create War file -->
+	<target name="war" depends="build">
+		<java
+			classname="BuildReport"
+			classpathref="classpath"
+			fork="true"
+		>
+			<arg file="${web}/build_report.xml"/>
+			<arg file="${src}"/>
+		</java>
+		<!-- delete verbose="true" file="${build}/com/caremark/psd/datasales/vra2/util/BuildReport.class"/ -->
+		<delete verbose="true" file="${war.file}"/>
+		<delete verbose="true" file="${web}/source_code.zip"/>
+		<zip
+			destfile="${web}/source_code.zip"
+			basedir="${src}"
+			includes="**/*.java"
+			excludes="**/test/*.java"
+		/>
+		<jar
+			destfile="${war.file}"
+			basedir="${web}"
+		>
+		</jar>
+		<delete verbose="false" file="${web}/build_report.xml"/>
+		<delete verbose="true" file="${web}/source_code.zip"/>
+	</target>
+	
+	<target name="compileBuildReportJava">
+		<javac
+			srcdir       = "${buildLib}"
+			destdir      = "${buildLib}"
+			classpathref = "classpath"
+			debug        = "on"
+		/>
+	</target>
+</project>

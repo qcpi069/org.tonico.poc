@@ -1,0 +1,203 @@
+<sqml>
+        <property name="TIMEOUT" value="0"/>
+        <datasources resource="datasource.xml"/>
+        <properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        dmt_schema=script.getProperty("dmt_schema");
+        ]]></command>
+
+        <command type="try">
+                <try>
+                        <command type="copy" batch="1000">
+                                <source type="sql" datasource="datamart"
+                                        ><![CDATA[
+
+with
+
+chks (rebate_id, rac_id, inv_qtr, pmt_amt, pmt_rls_dt, inv_qtr_dt, Pmt_rls_stmt_id,
+         smo,prcs_nb,emo ) as
+   ( select RBID,RAC,INV_QTR,PMT_AMT,PMT_RLS_DT,INV_QTR_DT,stmt_id,
+	SMO,PRCS_NB,EMO
+	from rps.ms_chkln, rps.l_stmt_cycle
+	where pmt_rls_dt between date(stmt_begin_ts) and date(stmt_end_ts)
+--and rbid in ('00030687','00035503')
+),
+
+
+--calculate GN at cg/lcm level
+
+pricing_raw (rac,inv_qr, formula,basis, basis_qual,lcm, rate) as
+(select RAC, c.inv_qtr, FORMULA, BASIS, BASIS_QUAL, LCM, RATE
+from  chks c inner join rps.ms_adv_w_GN a
+        on c.rac_id=a.RAC and inv_qtr_dt between SPLIT_EFF_DT and SPLIT_TERM_DT
+where FORMULA='A'
+union all
+select f.RAC, cc.inv_qtr, formula, basis, basis_qual,lcm,rate
+ from rps.ms_gn_pricing_all f inner join chks cc
+        on cc.rac_id=f.RAC and cc.inv_qtr_dt between SPLIT_EFF_DT and SPLIT_TERM_DT
+),
+
+pricing (rac,inv_qr, formula,basis, basis_qual,lcm, rate) as
+( select distinct rac,inv_qr, formula,basis, basis_qual,lcm, rate
+        from pricing_raw
+),
+
+cnt(rac,rebate_id,cg,inv_qtr,lcm,rbatRx,subRx,rbatBrand,subBrand ) as
+(select RAC_NB, RBAT_ID, CG_NB, INV_CCYY||INV_QTR, SUM_LCM_CD,
+   sum(CASE WHEN CLM_CNT_TYP_CD='01' THEN RBAT_CLM_CNT
+            ELSE 0 END),
+   sum(CASE WHEN CLM_CNT_TYP_CD='01' THEN SUBM_CLM_CNT
+            ELSE 0 END),
+   sum(CASE WHEN CLM_CNT_TYP_CD='03' THEN RBAT_CLM_CNT
+            ELSE 0 END),
+   sum(CASE WHEN CLM_CNT_TYP_CD='03' THEN SUBM_CLM_CNT
+            ELSE 0 END)
+from rps.tapc_lcm_summary c inner join (select distinct rac_id from chks) a
+        on c.RAC_NB=a.rac_id
+group by RAC_NB, RBAT_ID,CG_NB, INV_CCYY||INV_QTR, SUM_LCM_CD
+),
+
+cal (rac, rebate_id, cg, inv_qtr,basis, lcm, rate, count ) as
+(select cnt.rac, cnt.rebate_id,cg, inv_qtr,basis,cnt.lcm, pricing.rate,
+        (CASE WHEN pricing.basis='SUBMITTED' THEN
+                        (CASE WHEN pricing.basis_qual='BRAND' THEN subBrand
+                                ELSE subRx END)
+                WHEN pricing.basis='REBATED' THEN
+                        (CASE WHEN pricing.basis_qual='BRAND' THEN rbatBrand
+                                ELSE rbatRx END)
+                WHEN pricing.basis='BRAND' THEN subBrand
+                WHEN pricing.basis is null THEN -99999
+                ELSE -88888 END)
+from cnt inner join pricing on (cnt.rac=pricing.rac and cnt.inv_qtr=pricing.inv_qr and cnt.lcm=pricing.lcm)
+where basis_qual<>'NONE'
+--all tiers count
+union all
+(select cnt.rac, cnt.rebate_id,cg,inv_qtr,basis,'0', pricing.rate,
+        sum(CASE WHEN pricing.basis='SUBMITTED' THEN subRx
+                WHEN pricing.basis='REBATED' THEN rbatRx
+                WHEN pricing.basis='BRAND' THEN subBrand
+                WHEN pricing.basis is null THEN -99999
+                ELSE -88888 END)
+from cnt inner join pricing on cnt.rac=pricing.rac and cnt.inv_qtr=pricing.inv_qr
+where basis_qual='NONE' and basis<>'ENROLLMENT'
+group by cnt.rac,cnt.rebate_id,cg,inv_qtr,basis,'0',pricing.rate)
+--
+),
+
+--roll up to cg level
+cg_cal(rac, rebate_id,cg,inv_qtr,count,gn_amt ) as
+(select rac, rebate_id,cg,inv_qtr, sum(count), sum(rate*count)
+        from cal
+        group by rac, rebate_id,cg, inv_qtr
+),
+
+--
+otherdist (rac_id, inv_qtr, otherdist, priordist ) as
+(
+   select p.rac_id,  p.inv_qtr,
+    sum(case when f.tran_type_cd in ('MA','A1','A2','A7','A8','A5','O1','O2','O3','MD', 'S1', 'S2', 'S3')
+             and f.stmt_id = p.pmt_rls_stmt_id  then f.amount else 0 end) as otherDist,
+    sum(case when f.tran_type_cd in ('MA','A1','A2','A7','A8','A5','O1','O2','O3','MD', 'S1', 'S2', 'S3','D1','D2','D3')
+             and f.stmt_id < p.pmt_rls_stmt_id then f.amount else 0 end) as priorDist
+
+   from chks p
+   left outer join rps.f_sl_client_sum f on (p.rac_id = f.rac_id and p.inv_qtr = f.inv_qtr )
+   where  (f.stmt_id <= p.pmt_rls_stmt_id )
+--and f.rac_id='34271'
+ group by p.rac_id, p.inv_qtr
+ ),
+
+cutoff ( bod, cod ) as
+ ( select min(stmt_end_ts), max(stmt_end_ts) from rps.l_stmt_cycle, chks
+where chks.emo between  date(stmt_begin_ts) and date(stmt_end_ts)
+     or chks.smo between  date(stmt_begin_ts) and date(stmt_end_ts)
+),
+
+ksrb223 ( rac, inv_qtr, cg, inv_net_cs, CAPs_cs_tot, CAPs_cs) as
+(   select RBAT_AFIL_CD,  RBAT_BILL_PRD_NM, CG_NB,
+    sum(case when f.TRAN_TYP_CD in ('I1', 'M1', 'Q1', 'W1', 'C1' ) then f.FSMR_AMT * -1 else 0 end) as net_inv_cs,
+    sum(case when f.TRAN_TYP_CD in ('P1','P5')  then f.FSMR_AMT else 0 end) as CAPs_cs_tot,
+    sum(case when f.LAST_UPDT_TS >= bod and f.TRAN_TYP_CD in ('P1','P5')  then f.FSMR_AMT else 0 end)
+ as CAPs_cs
+
+   from rps.ksrb223_fesumc f inner join chks c
+                on f.RBAT_AFIL_CD=c.rac_id and f.RBAT_BILL_PRD_NM=c.inv_qtr
+                , cutoff
+        where  (LAST_UPDT_TS <= cod ) and CG_NB not like ' %'
+   group by RBAT_AFIL_CD,  RBAT_BILL_PRD_NM, CG_NB
+),
+
+cap_alloc (rac_id, inv_qtr, elig_struc_id, pmt_amt, inv_net_cs, CAPs_cs_tot, CAPs_cs ) as
+(
+   select c.rac_id,  c.inv_qtr, f.CG,
+    max(c.pmt_amt),inv_net_cs,CAPs_cs_tot,CAPs_cs
+
+   from (chks c inner join ksrb223 f
+                 on (c.rac_id = f.rac and c.inv_qtr = f.inv_qtr ) )
+   group by c.rac_id, c.inv_qtr, f.CG, inv_net_cs,CAPs_cs_tot,CAPs_cs
+),
+
+--Allocation By Guarantee
+
+cal_gn_sum (rac_id, inv_qtr, fd_vol, tot_gt_amt, curr_dist, priordist) as
+(
+   select rac, cg_cal.inv_qtr, sum(count), sum(gn_amt), max(pmt_amt + otherdist), max(priordist)
+   from cg_cal left outer join chks on cg_cal.rac=chks.rac_id and cg_cal.inv_qtr=chks.inv_qtr
+        left outer join otherdist o on cg_cal.rac=o.rac_id and cg_cal.inv_qtr=o.inv_qtr
+   group by rac, cg_cal.inv_qtr
+),
+
+gn_alloc (rac_id, inv_qtr,elig_struc_id,fd_vol, gt_amt,gt_alloc_todate, gt_alloc_curr ) as
+( select dt.rac, dt.inv_qtr, dt.cg, dt.count,dt.gn_amt,
+   case when s.priordist + s.curr_dist >= s.tot_gt_amt then gn_amt
+              when tot_gt_amt=0 then gn_amt
+        else real(s.curr_dist + s.priordist)/ real(tot_gt_amt) * gn_amt
+        end as gt_alloc_todate,
+
+case when tot_gt_amt=0 then gn_amt
+   else   real(s.curr_dist)/real(tot_gt_amt) * gn_amt
+   end  as gt_alloc_curr
+    from cg_cal dt inner join cal_gn_sum s
+                on dt.rac=s.rac_id and dt.inv_qtr=s.inv_qtr
+),
+
+cg_raw (rac_id, inv_qtr, cg, inv_net_cs, CAPs_cs_tot, CAPs_cs, fd_vol, gt_amt, gt_alloc_todate, gt_alloc_curr, pmt_amt ) as
+(
+   select
+      coalesce(ca.rac_id,fd.rac_id), coalesce(ca.inv_qtr,fd.inv_qtr),
+         coalesce(ca.elig_struc_id,fd.elig_struc_id), ca.inv_net_cs, ca.CAPs_cs_tot, ca.CAPs_cs, fd.fd_vol, gt_amt,
+     gt_alloc_todate, gt_alloc_curr, ca.pmt_amt
+     from cap_alloc ca full outer join gn_alloc fd
+--   from gn_alloc fd left outer join cap_alloc ca
+     on ca.rac_id = fd.rac_id and ca.inv_qtr = fd.inv_qtr and ca.elig_struc_id = fd.elig_struc_id
+)
+
+select PRCS_NB, rebate_id, r.rac_id, inv_qtr, cg,fd_vol,gt_amt,gt_alloc_curr,gt_alloc_todate,inv_net_cs,CAPs_cs,CAPs_cs_tot
+from cg_raw r inner join (select distinct prcs_nb,rebate_id,rac_id from chks ) l
+	on r.rac_id=l.rac_id
+
+
+                                ]]></source>
+
+                                <target
+                                        type             = "sql"
+                                        datasource       = "datamart"
+                                        transaction      = "true"
+                                        batch            = "1000"
+                                        reportInterval   = "1000"
+                                        queryTimeout     = "${TIMEOUT}"
+                                ><![CDATA[
+                                              insert into rps.ms_rpt_hierarchy values (?,?,?,?,?,?,?,?,?,?,?,?)
+
+                                ]]></target>
+
+                        </command>
+
+                </try>
+                <catch>
+                </catch>
+        </command>
+</sqml>
+

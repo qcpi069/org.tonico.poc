@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.cvs.caremark.rebates.cash.bff.entities">
+  <class name="BffDetail" table="RCNT_BFF_DEF">
+  
+  	<composite-id name="BffDetailPK" class="BffDetailPK">
+  		<key-property name="BFF_FILE_GID" column="BFF_FILE_GID" type="int"/>
+  		<key-property name="BFF_REC_SEQ_NB" column="BFF_REC_SEQ_NB" type="int"/>
+  	</composite-id>
+  	
+  	
+ 	
+  	<property name="SEG_CD" column="SEG_CD" type="short"/>
+  	<property name="CO_BE_ID" column="CO_BE_ID" type="short"/>
+  	<property name="CLM_TYP_CD" column="CLM_TYP_CD" type="short" />
+  	<property name="DY_SPLY_QTY" column="DY_SPLY_QTY" type="short"/>
+  	<property name="DLVY_SYS_CD" column="DLVY_SYS_CD" type="short"/>
+  	<property name="INCTV_TYP_CD" column="INCTV_TYP_CD" type="short" />
+  	<property name="NEW_REFIL_CD" column="NEW_REFIL_CD" type="short"/>
+  	
+  	
+  	<property name="INV_ID" column="INV_ID" type="string"/>
+  	<property name="PERIOD_ID" column="PERIOD_ID" type="string"/>  	
+  	<property name="PHARM_NM" column="PHARM_NM" type="string"/>
+  	<property name="COMMON_DRUG_NM" column="COMMON_DRUG_NM" type="string"/>
+  	<property name="NABP_ID" column="NABP_ID" type="string"/>
+  	<property name="LCM_CD" column="LCM_CD" type="string"/>
+  	<property name="FRMLY_SRC_CD" column="FRMLY_SRC_CD" type="string"/>
+  	<property name="PMCY_NPI_ID" column="PMCY_NPI_ID" type="string"/>
+  	<property name="RECN_REAS_CD" column="RECN_REAS_CD" type="string"/>
+  	<property name="RX_NB" column="RX_NB" type="string"/>
+  	<property name="FRMLY_ID" column="FRMLY_ID" type="string"/>
+  	<property name="RPT_TITLE" column="RPT_TITLE" type="string"/>
+  	<property name="CLT_NM" column="CLNT_NM" type="string"/> <!-- 10/08 changed column to CLNT_NM -->
+  	<!--  new property added 8/23 MCS -->
+  	<property name="CHNL_NM" column="CHNL_NM" type="string"/>
+  	
+  	<property name="TOT_DISCNT_AMT" column="TOT_DISC_AMT" type="double"/>
+  	<property name="PRC_PTCT_DISCNT_AMT" column="PRC_PTCT_DISCNT_AMT" type="double"/>
+  	<property name="PRFMC_DISCNT_AMT" column="PRFMC_DISCNT_AMT" type="double"/>
+  	<property name="FRMLY_DISCNT_AMT" column="FRMLY_DISCNT_AMT" type="double"/>
+  	<property name="CNTRCT_DISCNT_AMT" column="CNTRCT_DISCNT_AMT" type="double"/>
+  	<property name="BASE_DISCNT_AMT" column="BASE_DISCNT_AMT" type="double"/>
+  	<property name="ADMN_DISCNT_AMT" column="ADMN_DISCNT_AMT" type="double"/>
+  	
+  	<property name="DRUG_PRC_AMT" column="DRUG_PRC_AMT" type="double"/>
+  	<property name="CNTRCT_PRC_AMT" column="CNTRCT_PRC_AMT" type="double"/>
+  	<property name="PRC_PTCT_DISCNT_FCTR" column="PRC_PTCT_DISCNT_FCTR" type="double"/>
+  	<property name="PRFMC_DISCNT_FCTR" column="PRFMC_DISCNT_FCTR" type="double"/>
+  	<property name="FRMLY_DISCNT_FCTR" column="FRMLY_DISCNT_FCTR" type="double"/>
+  	<property name="CNTRC_DISCNT_FCTR" column="CTRC_DISC_PCT" type="double"/>
+  	<property name="BASE_DISCNT_FCTR" column="BASE_DISCNT_FCTR" type="double"/>
+  	<property name="ADMN_DISCNT_FCTR" column="ADMN_DISCNT_FCTR" type="double"/>
+  	<property name="UQ_QTY" column="UQ_QTY" type="double"/>
+  	<property name="NDC_ID" column="NDC_ID" type="double"/>
+  	<!--  new property added 8/23 MCS -->
+  	<property name="GENL_DISC_MTCH_PCT" column="GENL_DISC_MTCH_PCT" type="double"/>
+  	
+  	<property name="HVST_ID" column="HVST_ID" type="int"/>
+  	<property name="RPT_ID" column="RPT_ID" type="int"/>
+  	<property name="RBAT_ID" column="RBAT_ID" type="int"/>
+  	<property name="RX_CNT_QTY" column="RX_CNT_QTY" type="int"/>
+  	<property name="FILL_PRD_MTH_ID" column="FILL_PRD_MTH_ID" type="int"/>
+  	<property name="FILL_PRD_QTR_ID" column="FILL_PRD_QTR_ID" type="int"/>
+  	<!--  new property added 8/23 MCS -->
+  	<property name="RECN_GID" column="RECN_GID" type="int"/>
+  	
+  	<property name="CLM_GID" column="CLM_GID" type="long"/>
+  	
+  	<property name="DSPN_DT" column="DSPN_DT" type="date"/>
+  	<property name="INV_ELIG_DT" column="INV_ELIG_DT" type="date"/>
+  	<!--  new property added for Aetna Phase 2 -->
+  	<property name="CLT_ID" column="CLT_ID" type="int"/>
+  	<property name="BUS_SEG_CD" column="BUS_SEG_CD" type="string"/> 
+  	<property name="CLT_NMS" column="CLT_NM" type="string"/>
+  </class>
+</hibernate-mapping>
+
+
+	

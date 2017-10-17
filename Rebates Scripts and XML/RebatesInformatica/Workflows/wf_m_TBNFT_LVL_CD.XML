@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE POWERMART SYSTEM "powrmart.dtd">
+<POWERMART CREATION_DATE="06/02/2014 13:36:38" REPOSITORY_VERSION="182.91">
+<REPOSITORY NAME="PCRepos_Caremark9_DEV2" VERSION="182" CODEPAGE="MS1252" DATABASETYPE="DB2">
+<FOLDER NAME="Rebates_RCI_Project" GROUP="" OWNER="rebates_session_operator" SHARED="NOTSHARED" DESCRIPTION="Daily RCI (Rebates Claims Invoices) Process" PERMISSIONS="rwx---r--" UUID="09370446-7cc7-456c-99a0-6beec2be4d36">
+    <MAPPING DESCRIPTION ="This mapping is created as part of PDA project ITPT003820, to get the PLAN NAME for the corresponding PLAN ID from EDW T_PLAN_HDR table. This workflow run twice a year and works in SCD logic" ISVALID ="YES" NAME ="m_TBNFT_LVL_CD" OBJECTVERSION ="1" VERSIONNUMBER ="1">
+        <TRANSFORMATION DESCRIPTION ="" NAME ="SQ_T_PLAN_HDR" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Source Qualifier" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="PLAN_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="PLAN_NM" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="200" SCALE ="0"/>
+            <TABLEATTRIBUTE NAME ="Sql Query" VALUE ="select distinct PLAN_ID, PLAN_NM from  DWCORP.T_PLAN_HDR a&#xD;&#xA;where a.rec_chg_ts &gt;=to_date(&apos;$$LOAD_LAST_RUN_TS&apos;, &apos;mm/dd/yyyy hh24:mi:ss&apos;)&#xD;&#xA;and a.PLAN_EFF_DT in (select max(b.PLAN_EFF_DT) from DWCORP.T_PLAN_HDR b where a.plan_id=b.plan_id group by b.plan_id)"/>
+            <TABLEATTRIBUTE NAME ="User Defined Join" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Source Filter" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Number Of Sorted Ports" VALUE ="0"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+            <TABLEATTRIBUTE NAME ="Select Distinct" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Is Partitionable" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Pre SQL" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Post SQL" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Output is deterministic" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Output is repeatable" VALUE ="Never"/>
+        </TRANSFORMATION>
+        <TRANSFORMATION DESCRIPTION ="Lookup VRAP TBNFT_LVL_CD table to check if the EDW data is already existing in the VRAP table or not" NAME ="Lkp_TBNFT_LVL_CD" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Lookup Procedure" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="PLAN_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="BNFT_LVL_CD" PICTURETEXT ="" PORTTYPE ="LOOKUP/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="BNFT_LVL_NM" PICTURETEXT ="" PORTTYPE ="LOOKUP/OUTPUT" PRECISION ="200" SCALE ="0"/>
+            <TABLEATTRIBUTE NAME ="Lookup Sql Override" VALUE ="SELECT trim(VRAP.TBNFT_LVL_CD.BNFT_LVL_NM) as BNFT_LVL_NM, trim(VRAP.TBNFT_LVL_CD.BNFT_LVL_CD) as BNFT_LVL_CD FROM VRAP.TBNFT_LVL_CD"/>
+            <TABLEATTRIBUTE NAME ="Lookup table name" VALUE ="VRAP.TBNFT_LVL_CD"/>
+            <TABLEATTRIBUTE NAME ="Lookup Source Filter" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Lookup caching enabled" VALUE ="YES"/>
+            <TABLEATTRIBUTE NAME ="Lookup policy on multiple match" VALUE ="Report Error"/>
+            <TABLEATTRIBUTE NAME ="Lookup condition" VALUE ="BNFT_LVL_CD = PLAN_ID"/>
+            <TABLEATTRIBUTE NAME ="Connection Information" VALUE ="$Target"/>
+            <TABLEATTRIBUTE NAME ="Source Type" VALUE ="Database"/>
+            <TABLEATTRIBUTE NAME ="Recache if Stale" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+            <TABLEATTRIBUTE NAME ="Lookup cache directory name" VALUE ="$PMCacheDir"/>
+            <TABLEATTRIBUTE NAME ="Lookup cache initialize" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Lookup cache persistent" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Lookup Data Cache Size" VALUE ="Auto"/>
+            <TABLEATTRIBUTE NAME ="Lookup Index Cache Size" VALUE ="Auto"/>
+            <TABLEATTRIBUTE NAME ="Dynamic Lookup Cache" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Synchronize Dynamic Cache" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Output Old Value On Update" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Update Dynamic Cache Condition" VALUE ="TRUE"/>
+            <TABLEATTRIBUTE NAME ="Cache File Name Prefix" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Re-cache from lookup source" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Insert Else Update" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Update Else Insert" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Datetime Format" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Thousand Separator" VALUE ="None"/>
+            <TABLEATTRIBUTE NAME ="Decimal Separator" VALUE ="."/>
+            <TABLEATTRIBUTE NAME ="Case Sensitive String Comparison" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Null ordering" VALUE ="Null Is Highest Value"/>
+            <TABLEATTRIBUTE NAME ="Sorted Input" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Lookup source is static" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Pre-build lookup cache" VALUE ="Auto"/>
+            <TABLEATTRIBUTE NAME ="Subsecond Precision" VALUE ="6"/>
+        </TRANSFORMATION>
+        <TRANSFORMATION DESCRIPTION ="" NAME ="Exp_New_Changed" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Expression" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="PLAN_ID" EXPRESSIONTYPE ="GENERAL" NAME ="PLAN_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="PLAN_NM" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="200" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="To default all NULL to &quot;Unknown Plan Name&quot;" EXPRESSION ="IIF((ISNULL(PLAN_NM) OR IS_SPACES(PLAN_NM)),&apos;UNKNOWN PLAN NAME&apos;,LTRIM(RTRIM(PLAN_NM)))&#xD;&#xA;" EXPRESSIONTYPE ="GENERAL" NAME ="o_PLAN_NM" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="BNFT_LVL_CD" EXPRESSIONTYPE ="GENERAL" NAME ="BNFT_LVL_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="BNFT_LVL_NM" EXPRESSIONTYPE ="GENERAL" NAME ="BNFT_LVL_NM" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="200" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="small integer" DEFAULTVALUE ="" DESCRIPTION ="Identifies if the PLAN ID is not already there in the VRAP table" EXPRESSION ="IIF(ISNULL(BNFT_LVL_CD),1,0)" EXPRESSIONTYPE ="GENERAL" NAME ="New_Flag" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="5" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="small integer" DEFAULTVALUE ="" DESCRIPTION ="Identifies if the PLAN ID is already existing the VRAP table, if so, is there any other change in the other columns between EDW and VRAP" EXPRESSION ="IIF(NOT ISNULL(BNFT_LVL_CD)&#xD;&#xA;and IIF((ISNULL(PLAN_NM) OR IS_SPACES(PLAN_NM)),&apos;UNKNOWN PLAN NAME&apos;,LTRIM(RTRIM(PLAN_NM)))!=LTRIM(RTRIM(BNFT_LVL_NM)),1,0)&#xD;&#xA;&#xD;&#xA;" EXPRESSIONTYPE ="GENERAL" NAME ="Changed_Flag" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="5" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="SETMAXVARIABLE($$LOAD_LAST_RUN_TS,to_char(sysdate ,&apos;mm/dd/yyyy hh24:mi:ss&apos;))" EXPRESSIONTYPE ="GENERAL" NAME ="REC_CHG_TS" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="29" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="$PMMappingName" EXPRESSIONTYPE ="GENERAL" NAME ="CREATE_USER_ID" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="50" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="SYSTIMESTAMP(&apos;US&apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="CREATE_TS" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="29" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="$PMMappingName" EXPRESSIONTYPE ="GENERAL" NAME ="UPDT_USER_ID" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="60" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="SYSTIMESTAMP(&apos;US&apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="UPDT_TS" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="29" SCALE ="9"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+        </TRANSFORMATION>
+        <TRANSFORMATION DESCRIPTION ="" NAME ="Rtr_Insert_Update" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Router" VERSIONNUMBER ="1">
+            <GROUP DESCRIPTION ="" NAME ="INPUT" ORDER ="1" TYPE ="INPUT"/>
+            <GROUP DESCRIPTION ="" EXPRESSION ="New_Flag=1" NAME ="New_Flag" ORDER ="2" TYPE ="OUTPUT"/>
+            <GROUP DESCRIPTION ="Path for the data when none of the group conditions are satisfied." NAME ="DEFAULT1" ORDER ="4" TYPE ="OUTPUT/DEFAULT"/>
+            <GROUP DESCRIPTION ="" EXPRESSION ="Changed_Flag=1" NAME ="Changed_Flag" ORDER ="3" TYPE ="OUTPUT"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="INPUT" NAME ="PLAN_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="INPUT" NAME ="PLAN_NM" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="200" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="INPUT" NAME ="CREATE_USER_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="50" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="INPUT" NAME ="CREATE_TS" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="29" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="INPUT" NAME ="UPDT_USER_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="60" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="INPUT" NAME ="UPDT_TS" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="29" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="small integer" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="INPUT" NAME ="New_Flag" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="5" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="small integer" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="INPUT" NAME ="Changed_Flag" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="5" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="New_Flag" NAME ="PLAN_ID1" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="10" REF_FIELD ="PLAN_ID" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="New_Flag" NAME ="PLAN_NM1" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="200" REF_FIELD ="PLAN_NM" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="New_Flag" NAME ="CREATE_USER_ID1" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="50" REF_FIELD ="CREATE_USER_ID" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="New_Flag" NAME ="CREATE_TS1" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="29" REF_FIELD ="CREATE_TS" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="New_Flag" NAME ="UPDT_USER_ID1" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="60" REF_FIELD ="UPDT_USER_ID" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="New_Flag" NAME ="UPDT_TS1" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="29" REF_FIELD ="UPDT_TS" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="small integer" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="New_Flag" NAME ="New_Flag1" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="5" REF_FIELD ="New_Flag" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="small integer" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="New_Flag" NAME ="Changed_Flag1" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="5" REF_FIELD ="Changed_Flag" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="Changed_Flag" NAME ="PLAN_ID3" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="10" REF_FIELD ="PLAN_ID" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="Changed_Flag" NAME ="PLAN_NM3" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="200" REF_FIELD ="PLAN_NM" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="Changed_Flag" NAME ="CREATE_USER_ID3" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="50" REF_FIELD ="CREATE_USER_ID" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="Changed_Flag" NAME ="CREATE_TS3" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="29" REF_FIELD ="CREATE_TS" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="Changed_Flag" NAME ="UPDT_USER_ID3" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="60" REF_FIELD ="UPDT_USER_ID" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="Changed_Flag" NAME ="UPDT_TS3" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="29" REF_FIELD ="UPDT_TS" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="small integer" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="Changed_Flag" NAME ="New_Flag3" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="5" REF_FIELD ="New_Flag" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="small integer" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="Changed_Flag" NAME ="Changed_Flag3" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="5" REF_FIELD ="Changed_Flag" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="DEFAULT1" NAME ="PLAN_ID2" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="10" REF_FIELD ="PLAN_ID" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="DEFAULT1" NAME ="PLAN_NM2" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="200" REF_FIELD ="PLAN_NM" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="DEFAULT1" NAME ="CREATE_USER_ID2" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="50" REF_FIELD ="CREATE_USER_ID" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="DEFAULT1" NAME ="CREATE_TS2" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="29" REF_FIELD ="CREATE_TS" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="DEFAULT1" NAME ="UPDT_USER_ID2" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="60" REF_FIELD ="UPDT_USER_ID" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="DEFAULT1" NAME ="UPDT_TS2" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="29" REF_FIELD ="UPDT_TS" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="small integer" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="DEFAULT1" NAME ="New_Flag2" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="5" REF_FIELD ="New_Flag" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="small integer" DEFAULTVALUE ="" DESCRIPTION ="" GROUP ="DEFAULT1" NAME ="Changed_Flag2" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="5" REF_FIELD ="Changed_Flag" SCALE ="0"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+        </TRANSFORMATION>
+        <TRANSFORMATION DESCRIPTION ="" NAME ="Upd_TBNFT_LVL_CD" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Update Strategy" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="PLAN_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="PLAN_NM" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="200" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="UPDT_USER_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="60" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="UPDT_TS" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="29" SCALE ="9"/>
+            <TABLEATTRIBUTE NAME ="Update Strategy Expression" VALUE ="DD_UPDATE"/>
+            <TABLEATTRIBUTE NAME ="Forward Rejected Rows" VALUE ="YES"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+        </TRANSFORMATION>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="8" NAME ="TBNFT_LVL_CD_Upd" TRANSFORMATION_NAME ="TBNFT_LVL_CD" TRANSFORMATION_TYPE ="Target Definition" TYPE ="TARGET"/>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="3" NAME ="TBNFT_LVL_CD" TRANSFORMATION_NAME ="TBNFT_LVL_CD" TRANSFORMATION_TYPE ="Target Definition" TYPE ="TARGET"/>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="2" NAME ="SQ_T_PLAN_HDR" REUSABLE ="NO" TRANSFORMATION_NAME ="SQ_T_PLAN_HDR" TRANSFORMATION_TYPE ="Source Qualifier" TYPE ="TRANSFORMATION">
+            <ASSOCIATED_SOURCE_INSTANCE NAME ="T_PLAN_HDR"/>
+        </INSTANCE>
+        <INSTANCE DBDNAME ="EDW_DWCORP" DESCRIPTION ="" INSTANCEID ="1" NAME ="T_PLAN_HDR" TRANSFORMATION_NAME ="T_PLAN_HDR" TRANSFORMATION_TYPE ="Source Definition" TYPE ="SOURCE"/>
+        <INSTANCE DESCRIPTION ="Lookup VRAP TBNFT_LVL_CD table to check if the EDW data is already existing in the VRAP table or not" INSTANCEID ="5" NAME ="Lkp_TBNFT_LVL_CD" REUSABLE ="NO" TRANSFORMATION_NAME ="Lkp_TBNFT_LVL_CD" TRANSFORMATION_TYPE ="Lookup Procedure" TYPE ="TRANSFORMATION"/>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="6" NAME ="Exp_New_Changed" REUSABLE ="NO" TRANSFORMATION_NAME ="Exp_New_Changed" TRANSFORMATION_TYPE ="Expression" TYPE ="TRANSFORMATION"/>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="7" NAME ="Rtr_Insert_Update" REUSABLE ="NO" TRANSFORMATION_NAME ="Rtr_Insert_Update" TRANSFORMATION_TYPE ="Router" TYPE ="TRANSFORMATION"/>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="9" NAME ="Upd_TBNFT_LVL_CD" REUSABLE ="NO" TRANSFORMATION_NAME ="Upd_TBNFT_LVL_CD" TRANSFORMATION_TYPE ="Update Strategy" TYPE ="TRANSFORMATION"/>
+        <CONNECTOR FROMFIELD ="PLAN_ID" FROMINSTANCE ="Upd_TBNFT_LVL_CD" FROMINSTANCETYPE ="Update Strategy" TOFIELD ="BNFT_LVL_CD" TOINSTANCE ="TBNFT_LVL_CD_Upd" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="PLAN_NM" FROMINSTANCE ="Upd_TBNFT_LVL_CD" FROMINSTANCETYPE ="Update Strategy" TOFIELD ="BNFT_LVL_NM" TOINSTANCE ="TBNFT_LVL_CD_Upd" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="UPDT_USER_ID" FROMINSTANCE ="Upd_TBNFT_LVL_CD" FROMINSTANCETYPE ="Update Strategy" TOFIELD ="UPDT_USER_ID" TOINSTANCE ="TBNFT_LVL_CD_Upd" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="UPDT_TS" FROMINSTANCE ="Upd_TBNFT_LVL_CD" FROMINSTANCETYPE ="Update Strategy" TOFIELD ="UPDT_TS" TOINSTANCE ="TBNFT_LVL_CD_Upd" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="PLAN_ID1" FROMINSTANCE ="Rtr_Insert_Update" FROMINSTANCETYPE ="Router" TOFIELD ="BNFT_LVL_CD" TOINSTANCE ="TBNFT_LVL_CD" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="PLAN_NM1" FROMINSTANCE ="Rtr_Insert_Update" FROMINSTANCETYPE ="Router" TOFIELD ="BNFT_LVL_NM" TOINSTANCE ="TBNFT_LVL_CD" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CREATE_USER_ID1" FROMINSTANCE ="Rtr_Insert_Update" FROMINSTANCETYPE ="Router" TOFIELD ="CREATE_USER_ID" TOINSTANCE ="TBNFT_LVL_CD" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CREATE_TS1" FROMINSTANCE ="Rtr_Insert_Update" FROMINSTANCETYPE ="Router" TOFIELD ="CREATE_TS" TOINSTANCE ="TBNFT_LVL_CD" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="UPDT_USER_ID1" FROMINSTANCE ="Rtr_Insert_Update" FROMINSTANCETYPE ="Router" TOFIELD ="UPDT_USER_ID" TOINSTANCE ="TBNFT_LVL_CD" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="UPDT_TS1" FROMINSTANCE ="Rtr_Insert_Update" FROMINSTANCETYPE ="Router" TOFIELD ="UPDT_TS" TOINSTANCE ="TBNFT_LVL_CD" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="PLAN_ID" FROMINSTANCE ="T_PLAN_HDR" FROMINSTANCETYPE ="Source Definition" TOFIELD ="PLAN_ID" TOINSTANCE ="SQ_T_PLAN_HDR" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="PLAN_NM" FROMINSTANCE ="T_PLAN_HDR" FROMINSTANCETYPE ="Source Definition" TOFIELD ="PLAN_NM" TOINSTANCE ="SQ_T_PLAN_HDR" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="PLAN_ID" FROMINSTANCE ="SQ_T_PLAN_HDR" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="PLAN_ID" TOINSTANCE ="Lkp_TBNFT_LVL_CD" TOINSTANCETYPE ="Lookup Procedure"/>
+        <CONNECTOR FROMFIELD ="PLAN_NM" FROMINSTANCE ="SQ_T_PLAN_HDR" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="PLAN_NM" TOINSTANCE ="Exp_New_Changed" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="PLAN_ID" FROMINSTANCE ="SQ_T_PLAN_HDR" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="PLAN_ID" TOINSTANCE ="Exp_New_Changed" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="BNFT_LVL_CD" FROMINSTANCE ="Lkp_TBNFT_LVL_CD" FROMINSTANCETYPE ="Lookup Procedure" TOFIELD ="BNFT_LVL_CD" TOINSTANCE ="Exp_New_Changed" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="BNFT_LVL_NM" FROMINSTANCE ="Lkp_TBNFT_LVL_CD" FROMINSTANCETYPE ="Lookup Procedure" TOFIELD ="BNFT_LVL_NM" TOINSTANCE ="Exp_New_Changed" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="PLAN_ID" FROMINSTANCE ="Exp_New_Changed" FROMINSTANCETYPE ="Expression" TOFIELD ="PLAN_ID" TOINSTANCE ="Rtr_Insert_Update" TOINSTANCETYPE ="Router"/>
+        <CONNECTOR FROMFIELD ="CREATE_USER_ID" FROMINSTANCE ="Exp_New_Changed" FROMINSTANCETYPE ="Expression" TOFIELD ="CREATE_USER_ID" TOINSTANCE ="Rtr_Insert_Update" TOINSTANCETYPE ="Router"/>
+        <CONNECTOR FROMFIELD ="CREATE_TS" FROMINSTANCE ="Exp_New_Changed" FROMINSTANCETYPE ="Expression" TOFIELD ="CREATE_TS" TOINSTANCE ="Rtr_Insert_Update" TOINSTANCETYPE ="Router"/>
+        <CONNECTOR FROMFIELD ="UPDT_USER_ID" FROMINSTANCE ="Exp_New_Changed" FROMINSTANCETYPE ="Expression" TOFIELD ="UPDT_USER_ID" TOINSTANCE ="Rtr_Insert_Update" TOINSTANCETYPE ="Router"/>
+        <CONNECTOR FROMFIELD ="UPDT_TS" FROMINSTANCE ="Exp_New_Changed" FROMINSTANCETYPE ="Expression" TOFIELD ="UPDT_TS" TOINSTANCE ="Rtr_Insert_Update" TOINSTANCETYPE ="Router"/>
+        <CONNECTOR FROMFIELD ="New_Flag" FROMINSTANCE ="Exp_New_Changed" FROMINSTANCETYPE ="Expression" TOFIELD ="New_Flag" TOINSTANCE ="Rtr_Insert_Update" TOINSTANCETYPE ="Router"/>
+        <CONNECTOR FROMFIELD ="Changed_Flag" FROMINSTANCE ="Exp_New_Changed" FROMINSTANCETYPE ="Expression" TOFIELD ="Changed_Flag" TOINSTANCE ="Rtr_Insert_Update" TOINSTANCETYPE ="Router"/>
+        <CONNECTOR FROMFIELD ="o_PLAN_NM" FROMINSTANCE ="Exp_New_Changed" FROMINSTANCETYPE ="Expression" TOFIELD ="PLAN_NM" TOINSTANCE ="Rtr_Insert_Update" TOINSTANCETYPE ="Router"/>
+        <CONNECTOR FROMFIELD ="PLAN_ID3" FROMINSTANCE ="Rtr_Insert_Update" FROMINSTANCETYPE ="Router" TOFIELD ="PLAN_ID" TOINSTANCE ="Upd_TBNFT_LVL_CD" TOINSTANCETYPE ="Update Strategy"/>
+        <CONNECTOR FROMFIELD ="PLAN_NM3" FROMINSTANCE ="Rtr_Insert_Update" FROMINSTANCETYPE ="Router" TOFIELD ="PLAN_NM" TOINSTANCE ="Upd_TBNFT_LVL_CD" TOINSTANCETYPE ="Update Strategy"/>
+        <CONNECTOR FROMFIELD ="UPDT_USER_ID3" FROMINSTANCE ="Rtr_Insert_Update" FROMINSTANCETYPE ="Router" TOFIELD ="UPDT_USER_ID" TOINSTANCE ="Upd_TBNFT_LVL_CD" TOINSTANCETYPE ="Update Strategy"/>
+        <CONNECTOR FROMFIELD ="UPDT_TS3" FROMINSTANCE ="Rtr_Insert_Update" FROMINSTANCETYPE ="Router" TOFIELD ="UPDT_TS" TOINSTANCE ="Upd_TBNFT_LVL_CD" TOINSTANCETYPE ="Update Strategy"/>
+        <TARGETLOADORDER ORDER ="1" TARGETINSTANCE ="TBNFT_LVL_CD_Upd"/>
+        <TARGETLOADORDER ORDER ="1" TARGETINSTANCE ="TBNFT_LVL_CD"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="string" DEFAULTVALUE ="01/01/1111 00:00:00" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$LOAD_LAST_RUN_TS" PRECISION ="29" SCALE ="0" USERDEFINED ="YES"/>
+        <ERPINFO/>
+    </MAPPING>
+    <SHORTCUT COMMENTS ="" DBDNAME ="EDW_DWCORP" FOLDERNAME ="Shared_Rebates_RCI" NAME ="T_PLAN_HDR" OBJECTSUBTYPE ="Source Definition" OBJECTTYPE ="SOURCE" REFERENCEDDBD ="EDW_DWCORP" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="T_PLAN_HDR" REPOSITORYNAME ="PCRepos_Caremark9_DEV2" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="" FOLDERNAME ="Shared_Rebates_RCI" NAME ="TBNFT_LVL_CD" OBJECTSUBTYPE ="Target Definition" OBJECTTYPE ="TARGET" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="TBNFT_LVL_CD" REPOSITORYNAME ="PCRepos_Caremark9_DEV2" VERSIONNUMBER ="1"/>
+    <CONFIG DESCRIPTION ="Default session configuration object" ISDEFAULT ="YES" NAME ="default_session_config" VERSIONNUMBER ="1">
+        <ATTRIBUTE NAME ="Advanced" VALUE =""/>
+        <ATTRIBUTE NAME ="Constraint based load ordering" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Cache LOOKUP() function" VALUE ="YES"/>
+        <ATTRIBUTE NAME ="Default buffer block size" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Line Sequential buffer length" VALUE ="1024"/>
+        <ATTRIBUTE NAME ="Maximum Memory Allowed For Auto Memory Attributes" VALUE ="5000MB"/>
+        <ATTRIBUTE NAME ="Maximum Percentage of Total Memory Allowed For Auto Memory Attributes" VALUE ="50"/>
+        <ATTRIBUTE NAME ="Additional Concurrent Pipelines for Lookup Cache Creation" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Custom Properties" VALUE =""/>
+        <ATTRIBUTE NAME ="Pre-build lookup cache" VALUE ="Always allowed"/>
+        <ATTRIBUTE NAME ="Optimization Level" VALUE ="Medium"/>
+        <ATTRIBUTE NAME ="DateTime Format String" VALUE ="MM/DD/YYYY HH24:MI:SS.US"/>
+        <ATTRIBUTE NAME ="Pre 85 Timestamp Compatibility" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Log Options" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Save session log by" VALUE ="Session runs"/>
+        <ATTRIBUTE NAME ="Save session log for these runs" VALUE ="7"/>
+        <ATTRIBUTE NAME ="Session Log File Max Size" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Session Log File Max Time Period" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Maximum Partial Session Log Files" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Writer Commit Statistics Log Frequency" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Writer Commit Statistics Log Interval" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Error handling" VALUE =""/>
+        <ATTRIBUTE NAME ="Stop on errors" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Override tracing" VALUE ="Normal"/>
+        <ATTRIBUTE NAME ="On Stored Procedure error" VALUE ="Stop"/>
+        <ATTRIBUTE NAME ="On Pre-session command task error" VALUE ="Stop"/>
+        <ATTRIBUTE NAME ="On Pre-Post SQL error" VALUE ="Stop"/>
+        <ATTRIBUTE NAME ="Enable Recovery" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Error Log Type" VALUE ="None"/>
+        <ATTRIBUTE NAME ="Error Log Table Name Prefix" VALUE =""/>
+        <ATTRIBUTE NAME ="Error Log File Name" VALUE ="PMError.log"/>
+        <ATTRIBUTE NAME ="Log Source Row Data" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Data Column Delimiter" VALUE ="|"/>
+        <ATTRIBUTE NAME ="Partitioning Options" VALUE =""/>
+        <ATTRIBUTE NAME ="Dynamic Partitioning" VALUE ="Disabled"/>
+        <ATTRIBUTE NAME ="Number of Partitions" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Multiplication Factor" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Session on Grid" VALUE =""/>
+        <ATTRIBUTE NAME ="Is Enabled" VALUE ="NO"/>
+    </CONFIG>
+    <WORKFLOW DESCRIPTION ="" ISENABLED ="YES" ISRUNNABLESERVICE ="NO" ISSERVICE ="NO" ISVALID ="YES" NAME ="wf_m_TBNFT_LVL_CD" REUSABLE_SCHEDULER ="NO" SCHEDULERNAME ="Scheduler" SERVERNAME ="IntSvc_Rebates_DEV2" SERVER_DOMAINNAME ="DOM_Caremark9_DEV1" SUSPEND_ON_ERROR ="NO" TASKS_MUST_RUN_ON_SERVER ="NO" VERSIONNUMBER ="1">
+        <SCHEDULER DESCRIPTION ="" NAME ="Scheduler" REUSABLE ="NO" VERSIONNUMBER ="1">
+            <SCHEDULEINFO SCHEDULETYPE ="ONDEMAND"/>
+        </SCHEDULER>
+        <TASK DESCRIPTION ="" NAME ="Start" REUSABLE ="NO" TYPE ="Start" VERSIONNUMBER ="1"/>
+        <SESSION DESCRIPTION ="" ISVALID ="YES" MAPPINGNAME ="m_TBNFT_LVL_CD" NAME ="s_m_TBNFT_LVL_CD" REUSABLE ="NO" SORTORDER ="Binary" VERSIONNUMBER ="1">
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="TBNFT_LVL_CD_Upd" STAGE ="1" TRANSFORMATIONNAME ="TBNFT_LVL_CD_Upd" TRANSFORMATIONTYPE ="Target Definition">
+                <ATTRIBUTE NAME ="Table Name Prefix" VALUE ="VRAP"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="TBNFT_LVL_CD" STAGE ="2" TRANSFORMATIONNAME ="TBNFT_LVL_CD" TRANSFORMATIONTYPE ="Target Definition">
+                <ATTRIBUTE NAME ="Table Name Prefix" VALUE ="VRAP"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="0" SINSTANCENAME ="T_PLAN_HDR" STAGE ="0" TRANSFORMATIONNAME ="T_PLAN_HDR" TRANSFORMATIONTYPE ="Source Definition"/>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="SQ_T_PLAN_HDR" STAGE ="3" TRANSFORMATIONNAME ="SQ_T_PLAN_HDR" TRANSFORMATIONTYPE ="Source Qualifier"/>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="Lkp_TBNFT_LVL_CD" STAGE ="3" TRANSFORMATIONNAME ="Lkp_TBNFT_LVL_CD" TRANSFORMATIONTYPE ="Lookup Procedure">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+                <ATTRIBUTE NAME ="Connection Information" VALUE ="GDX"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="Exp_New_Changed" STAGE ="3" TRANSFORMATIONNAME ="Exp_New_Changed" TRANSFORMATIONTYPE ="Expression">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="Rtr_Insert_Update" STAGE ="3" TRANSFORMATIONNAME ="Rtr_Insert_Update" TRANSFORMATIONTYPE ="Router">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="Upd_TBNFT_LVL_CD" STAGE ="3" TRANSFORMATIONNAME ="Upd_TBNFT_LVL_CD" TRANSFORMATIONTYPE ="Update Strategy">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <CONFIGREFERENCE REFOBJECTNAME ="default_session_config" TYPE ="Session config"/>
+            <SESSIONCOMPONENT REFOBJECTNAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Failure Email">
+                <TASK DESCRIPTION ="" NAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Email User Name" VALUE ="$PMFailureEmailUser"/>
+                    <ATTRIBUTE NAME ="Email Subject" VALUE ="FAILURE: TBNFT_LVL_CD - %d."/>
+                    <ATTRIBUTE NAME ="Email Text" VALUE ="The mapping %m ran in the %s session in the %w workflow ran in %d.&#xD;&#xA;&#xD;&#xA;Target Table:  %t&#xD;&#xA;&#xD;&#xA;%l&#xD;&#xA;&#xD;&#xA;%r&#xD;&#xA;&#xD;&#xA;Session Log is attached&#xD;&#xA;%g"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Pre-session variable assignment">
+                <TASK DESCRIPTION ="" NAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Post-session success variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Post-session failure variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONEXTENSION NAME ="Relational Writer" SINSTANCENAME ="TBNFT_LVL_CD_Upd" SUBTYPE ="Relational Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="GDX" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="DB2" CONNECTIONTYPE ="Relational" VARIABLE =""/>
+                <ATTRIBUTE NAME ="Target load type" VALUE ="Normal"/>
+                <ATTRIBUTE NAME ="Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update as Update" VALUE ="YES"/>
+                <ATTRIBUTE NAME ="Update as Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update else Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Delete" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Truncate target table option" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Reject file directory" VALUE ="$PMBadFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Reject filename" VALUE ="tbnft_lvl_cd_upd1.bad"/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION NAME ="Relational Writer" SINSTANCENAME ="TBNFT_LVL_CD" SUBTYPE ="Relational Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="GDX" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="DB2" CONNECTIONTYPE ="Relational" VARIABLE =""/>
+                <ATTRIBUTE NAME ="Target load type" VALUE ="Normal"/>
+                <ATTRIBUTE NAME ="Insert" VALUE ="YES"/>
+                <ATTRIBUTE NAME ="Update as Update" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update as Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update else Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Delete" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Truncate target table option" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Reject file directory" VALUE ="$PMBadFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Reject filename" VALUE ="tbnft_lvl_cd1.bad"/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION DSQINSTNAME ="SQ_T_PLAN_HDR" DSQINSTTYPE ="Source Qualifier" NAME ="Relational Reader" SINSTANCENAME ="T_PLAN_HDR" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Definition" TYPE ="READER"/>
+            <SESSIONEXTENSION NAME ="Relational Reader" SINSTANCENAME ="SQ_T_PLAN_HDR" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Qualifier" TYPE ="READER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="EDW" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="Oracle" CONNECTIONTYPE ="Relational" VARIABLE =""/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION NAME ="Relational Lookup" SINSTANCENAME ="Lkp_TBNFT_LVL_CD" SUBTYPE ="Relational Lookup" TRANSFORMATIONTYPE ="Lookup Procedure" TYPE ="LOOKUPEXTENSION">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="GDX" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="DB2" CONNECTIONTYPE ="Relational" VARIABLE =""/>
+            </SESSIONEXTENSION>
+            <ATTRIBUTE NAME ="General Options" VALUE =""/>
+            <ATTRIBUTE NAME ="Write Backward Compatible Session Log File" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session Log File Name" VALUE ="s_m_TBNFT_LVL_CD.log"/>
+            <ATTRIBUTE NAME ="Session Log File directory" VALUE ="$PMSessionLogDir&#x5c;"/>
+            <ATTRIBUTE NAME ="Parameter Filename" VALUE =""/>
+            <ATTRIBUTE NAME ="Enable Test Load" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="$Source connection value" VALUE =""/>
+            <ATTRIBUTE NAME ="$Target connection value" VALUE =""/>
+            <ATTRIBUTE NAME ="Treat source rows as" VALUE ="Data driven"/>
+            <ATTRIBUTE NAME ="Commit Type" VALUE ="Target"/>
+            <ATTRIBUTE NAME ="Commit Interval" VALUE ="10000"/>
+            <ATTRIBUTE NAME ="Commit On End Of File" VALUE ="YES"/>
+            <ATTRIBUTE NAME ="Rollback Transactions on Errors" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+            <ATTRIBUTE NAME ="Java Classpath" VALUE =""/>
+            <ATTRIBUTE NAME ="Performance" VALUE =""/>
+            <ATTRIBUTE NAME ="DTM buffer size" VALUE ="Auto"/>
+            <ATTRIBUTE NAME ="Collect performance data" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Write performance data to repository" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Incremental Aggregation" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Enable high precision" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session retry on deadlock" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Pushdown Optimization" VALUE ="None"/>
+            <ATTRIBUTE NAME ="Allow Temporary View for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Temporary Sequence for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Pushdown for User Incompatible Connections" VALUE ="NO"/>
+        </SESSION>
+        <TASKINSTANCE DESCRIPTION ="" ISENABLED ="YES" NAME ="Start" REUSABLE ="NO" TASKNAME ="Start" TASKTYPE ="Start"/>
+        <TASKINSTANCE DESCRIPTION ="" FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="YES" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="s_m_TBNFT_LVL_CD" REUSABLE ="NO" TASKNAME ="s_m_TBNFT_LVL_CD" TASKTYPE ="Session" TREAT_INPUTLINK_AS_AND ="NO"/>
+        <WORKFLOWLINK CONDITION ="" FROMTASK ="Start" TOTASK ="s_m_TBNFT_LVL_CD"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TBNFT_LVL_CD.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TBNFT_LVL_CD.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TBNFT_LVL_CD.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TBNFT_LVL_CD.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TBNFT_LVL_CD.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TBNFT_LVL_CD.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TBNFT_LVL_CD.SrcSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TBNFT_LVL_CD.SrcFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully loaded" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TBNFT_LVL_CD.TgtSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to load" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TBNFT_LVL_CD.TgtFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Total number of transformation errors" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TBNFT_LVL_CD.TotalTransErrors" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="First error code" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TBNFT_LVL_CD.FirstErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="First error message" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TBNFT_LVL_CD.FirstErrorMsg" USERDEFINED ="NO"/>
+        <ATTRIBUTE NAME ="Parameter Filename" VALUE =""/>
+        <ATTRIBUTE NAME ="Write Backward Compatible Workflow Log File" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Workflow Log File Name" VALUE ="wf_s_m_TBNFT_LVL_CD.log"/>
+        <ATTRIBUTE NAME ="Workflow Log File Directory" VALUE ="$PMWorkflowLogDir&#x5c;"/>
+        <ATTRIBUTE NAME ="Save Workflow log by" VALUE ="By runs"/>
+        <ATTRIBUTE NAME ="Save workflow log for these runs" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Service Name" VALUE =""/>
+        <ATTRIBUTE NAME ="Service Timeout" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Is Service Visible" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Is Service Protected" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Fail task after wait time" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Enable HA recovery" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Automatically recover terminated tasks" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Service Level Name" VALUE ="Default"/>
+        <ATTRIBUTE NAME ="Allow concurrent run with unique run instance name" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Allow concurrent run with same run instance name" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Maximum number of concurrent runs" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Assigned Web Services Hubs" VALUE =""/>
+        <ATTRIBUTE NAME ="Maximum number of concurrent runs per Hub" VALUE ="1000"/>
+        <ATTRIBUTE NAME ="Expected Service Time" VALUE ="1"/>
+        <METADATAEXTENSION DATATYPE ="STRING" DESCRIPTION ="" DOMAINNAME ="User Defined Metadata Domain" ISCLIENTEDITABLE ="YES" ISCLIENTVISIBLE ="YES" ISREUSABLE ="YES" ISSHAREREAD ="NO" ISSHAREWRITE ="NO" MAXLENGTH ="256" NAME ="Creation_date" VALUE ="18-dec-2012" VENDORNAME ="INFORMATICA"/>
+        <METADATAEXTENSION DATATYPE ="STRING" DESCRIPTION ="" DOMAINNAME ="User Defined Metadata Domain" ISCLIENTEDITABLE ="YES" ISCLIENTVISIBLE ="YES" ISREUSABLE ="YES" ISSHAREREAD ="NO" ISSHAREWRITE ="NO" MAXLENGTH ="256" NAME ="Workflow_author" VALUE ="Arpit Mishra" VENDORNAME ="INFORMATICA"/>
+    </WORKFLOW>
+</FOLDER>
+</REPOSITORY>
+</POWERMART>

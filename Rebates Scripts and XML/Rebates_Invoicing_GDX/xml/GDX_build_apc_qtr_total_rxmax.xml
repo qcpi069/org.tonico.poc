@@ -1,0 +1,208 @@
+<!--
+     Loads VRAP.TAPC_QTR_TOTALS information for a specific quarter
+     Datasource definition file datasource.xml is in the ./java/Common_java_db_interface/conf.
+     The XML file should reside under ./xml directory
+
+     Parameter 1 : Optional, has year and quarter info. format: "hyphenhyphenquarter  YYYY0Q"  'YYYY': 4 digit year,
+                  'Q':quarter number ('1', '2', '3', '4'). Example: hyphenhyphenquarter  200502 ,
+                   this should be the parameter passed into XML.
+                   Note: hyphenhyphen means the two characters. xml does not allow it in the comments, it is part
+                   of the reserved symbols.
+
+     Maestro Command with parameter:
+              ./scripts/Common_java_db_interface.ksh dashdashquarter 200701 <xml file name>
+              ./scripts/Common_java_db_interface.ksh dashdashquarter <xml file name>
+-->
+<sqml>
+        <property name="TIMEOUT" value="0"/>
+
+        <!-- datasource.xml defines DB connection info. It should be under ./java/Common_java_db_interface/conf-->
+        <datasources resource="datasource.xml"/>
+
+        <!-- Set-up a try block to send an email on exception -->
+        <command type="try">
+        <try>
+
+        <!-- Query DB for current processing quarter info -->
+        <command type="run" datasource="gdxdb" rowName="rowQuarter"><![CDATA[
+
+                SELECT CAST(QUARTER_ID AS CHAR(6)) FROM VRAP.TCUR_INV_PRD WITH UR
+
+        ]]></command>
+
+        <!-- Command to set quarter, model parameters, either from DB or parameter-->
+        <command type="java"><![CDATA[
+
+                 String quarter ="";
+
+                 //quarter for GDX
+                 if (script.getProperty("quarter") == null) {
+                     quarter = script.getProperty("rowQuarter.1");
+                     if (quarter == null || quarter.trim().length() == 0){
+                         // If invalid info from database throw error
+                         throw new Exception("Processing quarter info not found in database ");
+                     }
+                 }
+                 else { //There is parameter 'quarter' passed in
+                     quarter = script.getProperty("quarter");
+                     if (quarter == null || quarter.trim().length() == 0 || quarter.trim().length() != 6){
+                         // If invalid info from database throw error
+                         throw new Exception("Invalid quarter ");
+                     }
+                 }
+                 script.setProperty("quarter", quarter);
+
+        ]]></command>
+
+        <!-- delete existing rows for GPO in GDX  -->
+        <command type="run" datasource="gdxdb" transaction="false"><![CDATA[
+
+                 DELETE
+                   FROM VRAP.TAPC_QTR_TOTALS_RXMAX
+                  WHERE QUARTER_ID = ${quarter}
+
+        ]]></command>
+
+        <!-- Load data  -->
+        <command type="copy" batch="5000">
+                 <source type="sql" datasource="gdxdb"><![CDATA[
+
+                         SELECT
+                              TCR.QUARTER_ID,
+                              TCR.AP_COMPNY_CD,
+                              TCR.PICO_NO,
+                              SUM(TCR.ITEM_COUNT_QY) AS NET_CLM_CNT_RBAT ,
+                              SUM(TCR.PMT_ACC_DISCNT_AMT) AS RBAT_ACC_DISCNT_AMT,
+                              SUM(TCR.PMT_PRFMC_DISCNT_AMT) AS RBAT_PRFMC_DISCNT_AMT,
+                              SUM(TCR.PMT_ADMN_DISCNT_AMT) AS  RBAT_ADMN_DISCNT_AMT ,
+                              SUM(TCR.PMT_ACC_DISCNT_AMT+PMT_PRFMC_DISCNT_AMT+PMT_ADMN_DISCNT_AMT) AS RBAT_DISCNT_AMT,
+                              SUM(TCR.DSPNSD_QTY) AS DSPNSD_QTY_RBAT
+                         FROM VRAP.TAPC_CLAIMS_RXMAX TCR
+                        WHERE TCR.QUARTER_ID = ${quarter}
+                        GROUP BY
+                              TCR.QUARTER_ID,
+                              TCR.AP_COMPNY_CD,
+                              TCR.PICO_NO
+                         WITH UR
+
+                 ]]></source>
+
+                 <target
+                          type           = "sql"
+                          datasource     = "gdxdb"
+                          transaction    = "false"
+                          batch          = "5000"
+                          reportInterval = "50000"
+                          queryTimeout   = "${TIMEOUT}"
+                 ><![CDATA[
+
+                           INSERT INTO VRAP.TAPC_QTR_TOTALS_RXMAX
+                                  (
+                                   QUARTER_ID,
+                                   AP_COMPNY_CD,
+                                   PICO_NO,
+                                   NET_CLM_CNT_RBAT,
+                                   RBAT_ACC_DISCNT_AMT,
+                                   RBAT_PRFMC_DISCNT_AMT,
+                                   RBAT_ADMN_DISCNT_AMT,
+                                   RBAT_DISCNT_AMT,
+                                   DSPNSD_QTY_RBAT,
+                                   CREATE_TS
+                                  )
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT TIMESTAMP)
+
+                  ]]></target>
+        </command>
+
+            <!-- Command to set user_email_address if not specified in the command line-->
+            <command type="java"><![CDATA[
+
+                if (script.getProperty("user_email_address") == null || script.getProperty("user_email_address").trim().length()== 0) {
+                   //If user email address is not passed in the command line,
+                   //Make the variable available to other queries/commands below
+                   script.setProperty("user_email_address","GDXITD@caremark.com,GDXAPC@caremark.com");
+                }
+
+            ]]></command>
+
+            <!-- Send completion email to the users -->
+            <command
+                type="mail"
+                mailTo="${user_email_address}"
+                mailFrom="${email_address}"
+                subject="[${region}] ${quarter} RxMax APC Quarter totals ready"
+                contentType="text/html"
+                throwsException="false"
+            ><![CDATA[
+                <html>
+                <head>
+                <title> APC Quarter totals ready </title>
+                </head>
+                <body>
+
+                <font style="color: blue; font-size: small">
+                <h3> RxMax received APC quarter totals for ${quarter} are in available the VRAP.TAPC_QTR_TOTALS_RXMAX table. </h3>
+                <h3> If you any questions, please contact ${email_address} </h3>
+                </font>
+
+                </body>
+                </html>
+            ]]></command>
+
+        </try>
+        <catch>
+
+        <!-- Send an email on error -->
+                <command
+                        type="mail"
+                        mailTo="${email_address}"
+                        mailFrom="GDX_build_apc_qtr_total_rxmax.xml@caremark.com"
+                        subject="[${region}] [ERROR] RxMax APC Quarter Totals Error"
+                        contentType="text/html"
+                        throwsException="false"
+                ><![CDATA[
+                        <html>
+                        <head>
+                        <title>[ERROR] GDX APC Quarter Totals</title>
+                        </head>
+                        <body>
+                        <h3><u>[ERROR] GDX APC Quarter Totals</u></h3>
+
+                        <table cellpadding="2">
+                                <tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+                                <tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+                                <tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+                                #if (${system.getProperty('logfile')})
+                                        <tr>
+                                                <td><b>Log File:</b></td>
+                                                <td>
+                                                        ${system.getProperty('logfile')}
+                                                <td>
+                                        </tr>
+                                #end
+                        </table>
+
+                        <br>
+                        <br>
+
+                        #if (${script.getLastStatement()})
+                                <h3><u>Last Statement</u></h3>
+                                <font style="color: blue; font-size: small">
+                                ${script.getLastStatement()}
+                                </font>
+
+                                <br>
+                                <br>
+                        #end
+
+                        <h3><u>Stack Trace</u></h3>
+                        <pre style="color: red; font-size: small;">${stackTrace}</pre>
+                        </body>
+                        </html>
+                ]]></command>
+
+        </catch>
+        </command>
+</sqml>
+
+

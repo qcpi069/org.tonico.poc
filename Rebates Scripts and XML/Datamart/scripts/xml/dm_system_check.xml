@@ -1,0 +1,267 @@
+<!-- DATAMART SYSTEM CHECK  -->
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+		statusto=script.getProperty("statusto");
+		cli_schema=script.getProperty("cli_schema");
+		pmt_schema=script.getProperty("pmt_schema");
+		dmt_schema=script.getProperty("dmt_schema");
+	]]></command>
+	<command type="try">
+		<try>
+			<command type="run" datasource="datamart" rowName="count1">
+				<![CDATA[
+					SELECT COUNT(*) FROM ${cli_schema}.crt_clnt
+				]]>
+			</command>
+
+			<command type="run" datasource="datamart" rowName="count2">
+				<![CDATA[
+					SELECT COUNT(*) FROM ${dmt_schema}.vpos_claims
+				]]>
+			</command>
+			<command type="run" datasource="datamart" rowName="count3">
+				<![CDATA[
+					select count(*), sum(pos_rebate_total), 
+                     decimal(round(avg(ingrd_cost_amt),2),6,2),
+                     decimal(round(avg(pos_rebate_total),2),6,2)
+                     from ${dmt_schema}.vpos_claims 
+                     where feed_source = 'F' and process_date = (CURRENT_DATE - 1 DAY) 
+				]]>
+			</command>
+			<command type="run" datasource="datamart" rowName="count4">
+				<![CDATA[
+					select count(*), sum(pos_rebate_total), 
+                     decimal(round(avg(ingrd_cost_amt),2),6,2),
+                     decimal(round(avg(pos_rebate_total),2),6,2)
+                     from ${dmt_schema}.vpos_claims 
+                     where feed_source = 'Q' and process_date = (CURRENT_DATE - 1 DAY) 
+				]]>
+			</command>
+			<command type="run" datasource="datamart" rowName="count5">
+				<![CDATA[
+					select  count(distinct(pico_id_nb))
+                      from ${dmt_schema}.ksrb222_fesump 
+                   where pico_id_nb not in ( select  pico_id_nb from  ${dmt_schema}.cpaa106) WITH UR 
+				]]>
+			</command>
+			<command type="run" datasource="datamart" rowName="count6">
+				<![CDATA[
+					SELECT COUNT(*) FROM  ${dmt_schema}.cpaa106
+				]]>
+			</command>
+			<command type="run" datasource="datamart" rowName="count7">
+				<![CDATA[
+					select  count(distinct(be_id))
+                      from ${pmt_schema}.ksrb223_fesumc 
+                   where integer(be_id) not in ( select RBAT_ID from  ${cli_schema}.crt_clnt)
+				     and be_typ_cd = 'R'  WITH UR 
+				]]>
+			</command>
+
+
+			<command type="run" datasource="datamart" rowName="count8">
+				<![CDATA[ 
+		 select count(cnt) from (
+           select count(*) as cnt
+             from ${dmt_schema}.vpos_claims          
+            group by ext_source_cd, claim_lvl1, claim_lvl2, claim_lvl3 
+             having count(*) > 1
+            ) as t1
+				]]>
+			</command>
+
+			<command type="java">
+				count1 = script.getProperty("count1.1").intValue();	
+				
+				countR = script.getProperty("count3.1").intValue() + script.getProperty("count4.1").intValue();	
+				script.setProperty("countR", countR);
+				
+			//	logger.warn("RBATE_REG.CLIENT COUNT = " + count1);				
+			//	if (! (count1 > 0)) {
+			//		logger.error(" CLIENT REG IS NOT AVAILABLE");
+            //        throw new Exception(" CLIENT REG IS NOT AVAILABLE ");
+			//	} 
+			</command> 
+
+ 
+	       <!-- Send an informational email with results -->
+			<command
+				type="mail"
+				mailTo="${statusto}" 
+				mailFrom="ITD_Rebates@caremark.com"
+				subject="Datamart System Status "
+				contentType="text/html"
+				throwsException="true"
+			><![CDATA[
+				<html> 
+				<head>
+				<title>Datamart System Status</title>
+				<STYLE>
+   BODY {  background-color: yellow; color: black;  }
+   H1 {  font: 8pt Arial bold;  }
+   P  {  font: 8pt Arial; text-indent: 0.5in;  }
+   A  {  text-decoration: none; color: blue;  }
+   TD {  font: 8pt Arial; text-indent: 0.5in;  }
+               </STYLE>
+
+				</head>
+				<body>			
+				<h3><u>Datamart System Status</u></h3>
+				<table cellpadding="1" cellspacing="1" width="100%" border="1" >
+				 <COL width=95>
+                 <COL width=300>
+					<tr><td align="right"><b>Host:</b></td><td align="left">${localhost}</td><td> &nbsp; </td></tr>
+					<tr><td align="right"><b>Started:</b></td><td align="left">${startTime}</td><td> &nbsp; </td></tr>
+				   <tr><td align="right"><b>Script:</b></td><td align="left">${scriptName}</td><td> &nbsp; </td></tr>  
+
+					<tr><td> &nbsp; </td><td> &nbsp; </td><td> &nbsp; </td></tr>
+
+		            <tr><td colspan="3">
+
+					<table border="2" width="98%" >
+					   <COL WIDTH="150">
+						<tr>
+						  <td align="right" NOWRAP ><b>Client Count:</b></td>
+						  <td align="left">  ${script.getProperty("count1.1").intValue()}</td>
+						  <td> &nbsp; </td>
+						</tr>
+
+						<tr>
+						  <td align="right" NOWRAP ><b>Vendor Count:</b></td>
+						  <td align="left">  ${script.getProperty("count6.1").intValue()}</td>
+						  <td> &nbsp; </td>
+						</tr>
+
+						<tr>
+						  <td align="right" NOWRAP ><b>Missing Clients:</b></td>
+						  <td align="left">  ${script.getProperty("count7.1").intValue()}</td>
+						  <td> &nbsp; </td>
+						</tr>
+
+						<tr>
+						  <td align="right" NOWRAP ><b>Missing Vendors:</b></td>
+						  <td align="left">  ${script.getProperty("count5.1").intValue()}</td>
+						  <td> &nbsp; </td>
+						</tr>
+
+						<tr>
+						  <td  align="right" NOWRAP ><b>Total RTMD Claim Count:</b></td>
+						  <td align="left">  ${script.getProperty("count2.1").intValue()}</td>
+						  <td> &nbsp; </td>
+						</tr>
+                        <tr><td> &nbsp; </td><td> &nbsp;</td><td> &nbsp; </td></tr>
+						
+                     </table>
+
+					 <table border="2" width="98%" >
+						#if ( ${script.getProperty("count8.1").intValue()} > 0)
+						<tr>
+						  <td  align="left"><font color='red'><b>${script.getProperty("count8.1").intValue()} Duplicate RTMD Claims Found  </font></b></td>	
+						  <td  align="left"><font color='red'><b>Please Investigate! </font></b></td>	
+						</tr>							
+						#else
+						<tr>
+						  <td align="left">No duplicate RTMD claims found. </td>	
+						</tr>							
+						#end
+                     </table>
+
+					 <table border="2" width="98%" >
+					   <tr><td nowrap><b> Yesterday's RTMD: </b></td><td> </td></tr>
+						#if ( ${script.getProperty("count3.1").intValue()} > 0)
+						<tr>
+						  <td nowrap align="right"><b>FEDB Count:</b></td>						 
+						  <td align="right">  ${script.getProperty("count3.1").intValue()}</td>
+						  <td nowrap align="right"><b>Rebate Total:</b></td>
+						  <td align="right">  ${script.getProperty("count3.2")}</td>
+					      <td nowrap align="right"><b>Avg Cost:</b></td>
+						  <td align="right">  ${script.getProperty("count3.3")}</td>
+						  <td nowrap align="right"><b>Avg Rebate:</b></td>
+						  <td align="right">  ${script.getProperty("count3.4")}</td>
+						</tr>
+						#else
+						<tr>
+						  <td  align="right"><font color='red'><b>FEDB RTMD Claims were not received by ${startTime} </font></b></td>	
+						  <td  align="right"><font color='red'><b>Please Investigate! </font></b></td>	
+						</tr>							
+						#end
+
+
+
+						<tr>   
+						  <td nowrap align="right"><b> &nbsp; Total Claims:</b></td>
+						  <td align="right"> ${script.getProperty("countR")}</td>
+						</tr>
+
+					</table>
+					</td></tr>
+
+					<tr><td> &nbsp; </td><td> &nbsp; </td><td> &nbsp; </td></tr>
+					
+
+				</table>
+				
+				
+				</body>
+				</html>
+			]]>
+			</command>
+				 
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+			<command
+				type="mail"
+				mailTo="${mailto}"
+				mailFrom="ITD_Rebates@caremark.com"
+				subject="Datamart System Status WARNING! "
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] DATAMART SYSTEM CHECK</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR]  DATAMART SYSTEM CHECK</u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		</catch>
+	</command>
+</sqml>

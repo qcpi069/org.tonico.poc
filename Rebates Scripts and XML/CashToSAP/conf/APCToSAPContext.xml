@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Spring configuration -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+xmlns:security="http://www.springframework.org/schema/security"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+
+ 	<!-- JPA support -->
+ 	<bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
+ 	<!-- entity manager factory -->
+    <bean id="entityManagerFactory"  class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">     
+    	<property name="dataSource" ref="dataSource" />
+	    <property name="jpaVendorAdapter">        
+	    	<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">           
+	    		<property name="showSql" value= "${showSql}" />                 
+	    		<property name="databasePlatform" value="${hibernate.dialect}" /> 
+			</bean>     
+		</property>  
+	</bean>
+  <!-- DataSource Property -->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName">
+            <value>${jdbc.driver}</value>
+        </property>
+        <property name="url">
+            <value>${JDBC_URL}</value>
+        </property>
+        <property name="username">
+            <value>${jdbc.user}</value>
+        </property>
+        <property name="password">
+            <value>${jdbc.password}</value>
+        </property>
+    </bean>
+    <!-- transaction manager -->
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+    </bean>
+    
+    <!--  transaction annotation using transaction manager --> 
+   <tx:annotation-driven transaction-manager="transactionManager" /> 
+	
+	<!-- DAOs -->
+    <bean id="gltxndao" class="com.caremark.cash.apctosap.dao.impl.GlTxnDAOImpl" >
+<!--	   <property name="entityManagerFactory" ref="entityManagerFactory" />  -->
+	</bean>	
+ 	<!-- Services -->
+	<bean id="gltxnservice" class="com.caremark.cash.apctosap.service.impl.GlTxnServiceImpl">
+		<property name="glTxnDAO" ref="gltxndao"/>
+	</bean>
+	<bean id="apctosapservice" class="com.caremark.cash.apctosap.service.APCToSAPService">
+		<property name="glTxnService" ref="gltxnservice"/>
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="sapTransactionUtil" ref="saptransactionsutil"/>
+	</bean>
+	<bean id="properties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>file:/${CONFIG_DIR}/APCToSAP.properties</value>
+			</list>
+		</property>
+		<property name="ignoreResourceNotFound" value="true"/>
+		<property name="ignoreUnresolvablePlaceholders" value="false"/>
+		<property name="searchSystemEnvironment" value="true"/>
+	</bean>
+	<bean id="propertiesbean" class="com.caremark.cash.apctosap.util.PropertiesBean">
+		<property name="sapJcoClient" value="${sapJcoClient}"></property>
+		<property name="sapJcoHost" value="${sapJcoHost}"></property>
+		<property name="sapJcoLang" value="${sapJcoLang}"></property>
+		<property name="sapJcoMaxCon" value="${sapJcoMaxCon}"></property>
+		<property name="sapJcoPass" value="${sapJcoPass}"></property>
+		<property name="sapJcoSysNb" value="${sapJcoSysNb}"></property>
+		<property name="sapJcoUser" value="${sapJcoUser}"></property>
+	</bean>
+	<bean id="saptransactionsutil" class="com.caremark.cash.apctosap.util.SAPTransactionUtil">
+		<property name="propertiesBean" ref="propertiesbean"/>
+	</bean>
+	<bean id="log4jDirectConfigurer" class="com.caremark.cash.apctosap.util.Log4jConfigurator">
+		<property name="location">
+			<value>file:/${CONFIG_DIR}/APCToSAPLog4j.xml</value>
+		</property>
+		<property name="refreshInterval" value="0"></property>
+	</bean>		
+</beans>

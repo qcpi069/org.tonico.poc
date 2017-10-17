@@ -1,0 +1,1084 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--**********************************************************************************************-->
+<!--**********************************************************************************************-->
+<!--                               C H A N G E   L O G                                            -->
+<!--**********************************************************************************************-->
+<!-- change            proj/prob                                                				  -->
+<!--  date   developer  number    enhancement description                          				  -->
+<!-- *********************************************************************************************-->
+<!-- 03/19/10 is31701   CaRe 2010 Added entries for recnHdrService				 				  -->
+<!-- 06/18/10 is31701   CaRe 2010 Added recnActnStatService to rbatRecnSummaryBean 				  -->
+<!-- 06/24/10 is31701   CaRe 2010 Added recnAprvHdrService  to rbatRecnSummaryBean 				  -->
+<!-- 06/30/10 is31701   CaRe 2010 Added recnAprvDtlService  to rbatRecnSummaryBean 				  -->
+<!-- 08/06/10 is31701   CaRe 2010 Added recnDstrHdrService  to rbatRecnSummaryBean 				  -->
+<!--  																							  -->
+<!--**********************************************************************************************-->
+
+<!-- JSF configuration -->
+<faces-config xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd"
+	version="2.0">
+
+	<!-- =========== FULL CONFIGURATION FILE ================================== -->
+
+	<application>
+		<!-- <view-handler>
+			com.icesoft.faces.facelets.D2DFaceletViewHandler
+		</view-handler>
+		 -->
+		 
+		<el-resolver>org.springframework.web.jsf.el.SpringBeanFacesELResolver</el-resolver>  
+		<variable-resolver>  
+			org.springframework.web.jsf.DelegatingVariableResolver  
+		</variable-resolver> 
+		<default-render-kit-id>org.apache.myfaces.trinidad.core</default-render-kit-id> 
+<!--		
+		<variable-resolver>
+			org.springframework.web.jsf.SpringBeanVariableResolver
+		</variable-resolver>
+-->
+		<!-- defines messages -->
+		<message-bundle>
+			com.cvs.caremark.rebates.cash.resources.messages
+		</message-bundle>
+		
+		<locale-config>
+			<default-locale>en</default-locale>
+			<supported-locale>en</supported-locale>
+		</locale-config>
+	</application>
+
+	<!-- managed beans -->
+
+	<!-- BEGIN application level beans.  These are NOT screen specific -->
+<!--  	
+	<managed-bean>
+		<managed-bean-name>outOfBalancePanelPopup</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.helper.OutOfBalancePanelPopup
+		</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+-->
+	<managed-bean>
+		<managed-bean-name>exceptionDetail</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.exception.ExceptionDetail
+		</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>messageDetail</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.exception.ExceptionDetail
+		</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>nonExceptionMessageDetail</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.helper.NonExceptionMessageDetail
+		</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>rebateAppContext</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.web.helper.RebateAppContext
+		</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+		<managed-property>
+        	<property-name>appRoleName</property-name>
+            <value>ROLE_REBCASH</value>
+        </managed-property>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>exceptionHandler</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.exception.ExceptionHandler
+		</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>logoutBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.web.controller.LogoutBean
+		</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+
+	<!-- END of application level beans.  -->
+
+	<!--  BEGIN screen specific beans.  -->
+  	
+	<managed-bean>
+		<managed-bean-name>rbatRecnCompareBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.RbatRecnCompareBean
+		</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+			<property-name>rbatMfgInvHdrService</property-name>
+			<value>#{rbatMfgInvHdrService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnHdrService</property-name>
+			<value>#{recnHdrService}</value>
+		</managed-property>
+
+		<managed-property>
+			<property-name>colMtchSpecService</property-name>
+			<value>#{colMtchSpecService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>rbatPayrService</property-name>
+			<value>#{rbatPayrService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>discntPeriodService</property-name>
+			<value>#{discntPeriodService}</value>
+		</managed-property>
+
+		<managed-property>
+			<property-name>recnDsptService</property-name>
+			<value>#{recnDsptService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnVarReasService</property-name>
+			<value>#{recnVarReasService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>inclExclRuleService</property-name>
+			<value>#{inclExclRuleService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnClmAsscService</property-name>
+			<value>#{recnClmAsscService}</value>
+		</managed-property>
+
+		<managed-property>
+			<property-name>recnAprvDtlService</property-name>
+			<value>#{recnAprvDtlService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnDstrSummService</property-name>
+			<value>#{recnDstrSummService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>extnClmService</property-name>
+			<value>#{extnClmService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnDstrHdrService</property-name>
+			<value>#{recnDstrHdrService}</value>
+		</managed-property>
+
+		<managed-property>
+			<property-name>recnDstrReasAsscService</property-name>
+			<value>#{recnDstrReasAsscService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnActnStatService</property-name>
+			<value>#{recnActnStatService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>vndrRebtCdService</property-name>
+			<value>#{vndrRebtCdService}</value>
+		</managed-property>
+
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>rbatRecnSummaryBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.RbatRecnSummaryBean
+		</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+			<property-name>bffHdrService</property-name>
+			<value>#{bffHdrService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnMtchScrbMetricsService</property-name>
+			<value>#{recnMtchScrbMetricsService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnActnStatService</property-name>
+			<value>#{recnActnStatService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnDstrHdrService</property-name>
+			<value>#{recnDstrHdrService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnDstrSummService</property-name>
+			<value>#{recnDstrSummService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnAprvDtlService</property-name>
+			<value>#{recnAprvDtlService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnInvService</property-name>
+			<value>#{recnInvService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>scrubService</property-name>
+			<value>#{scrubService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>matchService</property-name>
+			<value>#{matchService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnHdrService</property-name>
+			<value>#{recnHdrService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnDstrReasAsscService</property-name>
+			<value>#{recnDstrReasAsscService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>extnClmService</property-name>
+			<value>#{extnClmService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnDsptService</property-name>
+			<value>#{recnDsptService}</value>
+		</managed-property>
+
+		<!-- added on 16-Nov-2012 as part of CR-40 --> 
+  
+		<managed-property>
+			<property-name>vndrRebtCdService</property-name>
+			<value>#{vndrRebtCdService}</value>
+		</managed-property>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>advancedFilterBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.AdvancedFilterBean
+		</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>cashDimensionFilterBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.CashDimensionFilterBean
+		</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+			<property-name>dimensionFilterControlService</property-name>
+			<value>#{dimensionFilterControlService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>extnClmService</property-name>
+			<value>#{extnClmService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>lazyTableService</property-name>
+			<value>#{lazyTableService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>colMtchSpecService</property-name>
+			<value>#{colMtchSpecService}</value>
+		</managed-property>
+
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>matchDetailsBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.MatchDetailsBean
+		</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+			<property-name>dimensionFilterControlService</property-name>
+			<value>#{dimensionFilterControlService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>colMtchSpecService</property-name>
+			<value>#{colMtchSpecService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnBffApplService</property-name>
+			<value>#{recnBffApplService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>inclExclRuleService</property-name>
+			<value>#{inclExclRuleService}</value>
+		</managed-property>
+
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>matchBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.MatchBean
+		</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+			<property-name>matchService</property-name>
+			<value>#{matchService}</value>
+		</managed-property>
+
+		<managed-property>
+			<property-name>bffHdrService</property-name>
+			<value>#{bffHdrService}</value>
+		</managed-property>
+
+		<managed-property>
+			<property-name>recnMtchScrbMetricsService</property-name>
+			<value>#{recnMtchScrbMetricsService}</value>
+		</managed-property>
+
+		<managed-property>
+			<property-name>recnHdrService</property-name>
+			<value>#{recnHdrService}</value>
+		</managed-property>
+
+		<managed-property>
+			<property-name>recnBffApplService</property-name>
+			<value>#{recnBffApplService}</value>
+		</managed-property>
+
+		<managed-property>
+			<property-name>colMtchSpecService</property-name>
+			<value>#{colMtchSpecService}</value>
+		</managed-property>
+
+		<managed-property>
+			<property-name>inclExclRuleService</property-name>
+			<value>#{inclExclRuleService}</value>
+		</managed-property>
+
+		<managed-property>
+			<property-name>recnActnStatService</property-name>
+			<value>#{recnActnStatService}</value>
+		</managed-property>
+
+		<managed-property>
+			<property-name>extnClmService</property-name>
+			<value>#{extnClmService}</value>
+		</managed-property>
+
+		<managed-property>
+			<property-name>recnDstrHdrService</property-name>
+			<value>#{recnDstrHdrService}</value>
+		</managed-property>
+
+
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>processControllerBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.ProcessControllerBean
+		</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+			<property-name>processControlService</property-name>
+			<value>#{processControlService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>vndrRebtCdService</property-name>
+			<value>#{vndrRebtCdService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>advFilterBean</property-name>
+			<value>#{advancedFilterBean}</value>
+		</managed-property>
+
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>processControlDetailBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.ProcessControlDetailBean
+		</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+			<property-name>processControlDetailService</property-name>
+			<value>#{processControlDetailService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>processControlCodeService</property-name>
+			<value>#{processControlCodeService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>vndrRebtCdService</property-name>
+			<value>#{vndrRebtCdService}</value>
+		</managed-property>
+
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>vndrRebtCdBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.VndrRebtCdBean
+		</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+		<managed-property>
+			<property-name>vndrRebtCdService</property-name>
+			<value>#{vndrRebtCdService}</value>
+		</managed-property>
+
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>rbatMfgInvHdrCdBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.RbatMfgInvHdrCdBean
+		</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+		<managed-property>
+			<property-name>tvndrService</property-name>
+			<value>#{tvndrService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>discntPeriodService</property-name>
+			<value>#{discntPeriodService}</value>
+		</managed-property>
+
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>rbatMfgPmtSearchBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.RbatMfgPmtSearchBean
+		</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+			<property-name>rbatMfgPmtService</property-name>
+			<value>#{rbatMfgPmtService}</value>
+		</managed-property>
+
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>splashBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.SplashBean
+		</managed-bean-class>
+
+		<managed-bean-scope>request</managed-bean-scope>
+		<managed-property>
+			<property-name>snapLockService</property-name>
+			<value>#{snapLockService}</value>
+		</managed-property>
+		
+		<managed-property>
+			<property-name>vndrRebtCdService</property-name>
+			<value>#{vndrRebtCdService}</value>
+		</managed-property>
+
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>rbatMfgInvHdrSearchBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.RbatMfgInvHdrSearchBean
+		</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+			<property-name>rbatMfgInvHdrService</property-name>
+			<value>#{rbatMfgInvHdrService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>rbatMfgInvDtlService</property-name>
+			<value>#{rbatMfgInvDtlService}</value>
+		</managed-property>		
+		<managed-property>
+			<property-name>discntPeriodService</property-name>
+			<value>#{discntPeriodService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>coBeInvLogoAsscService</property-name>
+			<value>#{coBeInvLogoAsscService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>coBeRemitMthdAssocService</property-name>
+			<value>#{coBeRemitMthdAssocService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>snapLockService</property-name>
+			<value>#{snapLockService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnHdrService</property-name>
+			<value>#{recnHdrService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>vndrRebtCdService</property-name>
+			<value>#{vndrRebtCdService}</value>
+		</managed-property>
+	</managed-bean>
+
+	<!-- ITPR001971 --> 
+  
+	<managed-bean>
+   		<managed-bean-name>userBean</managed-bean-name>
+   		<managed-bean-class>
+   			com.cvs.caremark.rebates.cash.web.controller.UserBean
+   		</managed-bean-class>
+   		<managed-bean-scope>view</managed-bean-scope>
+   		<managed-property>
+            <property-name>userService</property-name>
+            <value>#{userService}</value>
+        </managed-property>
+   	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>searchUserBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.SearchUserBean
+		</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+			<managed-property> 
+				<property-name>userService</property-name>
+				<value>#{userService}</value> 
+			</managed-property>
+		<managed-property>
+			<property-name>vndrRebtCdService</property-name>
+			<value>#{vndrRebtCdService}</value>
+		</managed-property>
+	</managed-bean>
+
+	<!-- END --> 
+ 
+
+	<managed-bean>
+		<managed-bean-name>rbatMfgPmtApplBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.RbatMfgPmtApplBean
+		</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+			<property-name>rbatPayrService</property-name>
+			<value>#{rbatPayrService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>vndrRebtCdService</property-name>
+			<value>#{vndrRebtCdService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>discntPeriodService</property-name>
+			<value>#{discntPeriodService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>coGlAcctService</property-name>
+			<value>#{coGlAcctService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>rbatMfgPmtService</property-name>
+			<value>#{rbatMfgPmtService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>rbatMfgPmtApplService</property-name>
+			<value>#{rbatMfgPmtApplService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>modelCoBeAsscService</property-name>
+			<value>#{modelCoBeAsscService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>snapLockService</property-name>
+			<value>#{snapLockService}</value>
+		</managed-property>
+
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>rbatMfgPmtBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.RbatMfgPmtBean
+		</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+			<property-name>rbatMfgPmtService</property-name>
+			<value>#{rbatMfgPmtService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>coGlAcctService</property-name>
+			<value>#{coGlAcctService}</value>
+		</managed-property>
+
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>rbatGlTxnSearchBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.RbatGlTxnSearchBean
+		</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+			<property-name>vndrRebtCdService</property-name>
+			<value>#{vndrRebtCdService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>rbatPayrService</property-name>
+			<value>#{rbatPayrService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>discntPeriodService</property-name>
+			<value>#{discntPeriodService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>modelCoBeAsscService</property-name>
+			<value>#{modelCoBeAsscService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>rbatMfgPmtApplService</property-name>
+			<value>#{rbatMfgPmtApplService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>rbatGlTxnRqstDtlService</property-name>
+			<value>#{rbatGlTxnRqstDtlService}</value>
+		</managed-property>
+
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>
+			rbatGlPendTxnRqstSearchBean
+		</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.RbatGlPendTxnRqstSearchBean
+		</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+			<property-name>rbatGlTxnRqstService</property-name>
+			<value>#{rbatGlTxnRqstService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>rbatPayrService</property-name>
+			<value>#{rbatPayrService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>vndrRebtCdService</property-name>
+			<value>#{vndrRebtCdService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>discntPeriodService</property-name>
+			<value>#{discntPeriodService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>coGlAcctService</property-name>
+			<value>#{coGlAcctService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>modelCoBeAsscService</property-name>
+			<value>#{modelCoBeAsscService}</value>
+		</managed-property>
+
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>rbatGlTxnRqstDtlBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.RbatGlTxnRqstDtlBean
+		</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+			<property-name>rbatGlTxnRqstService</property-name>
+			<value>#{rbatGlTxnRqstService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>rbatGlTxnRqstDtlService</property-name>
+			<value>#{rbatGlTxnRqstDtlService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>rbatPayrService</property-name>
+			<value>#{rbatPayrService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>vndrRebtCdService</property-name>
+			<value>#{vndrRebtCdService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>discntPeriodService</property-name>
+			<value>#{discntPeriodService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>coGlAcctService</property-name>
+			<value>#{coGlAcctService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>modelCoBeAsscService</property-name>
+			<value>#{modelCoBeAsscService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>rbatMfgPmtApplService</property-name>
+			<value>#{rbatMfgPmtApplService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>snapLockService</property-name>
+			<value>#{snapLockService}</value>
+		</managed-property>
+
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>rbatInvoiceAcutateBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.RbatMfgInvActuateBean
+		</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>rbatMfgInvDtlBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.RbatMfgInvDtlBean
+		</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+			<property-name>rbatMfgInvHdrService</property-name>
+			<value>#{rbatMfgInvHdrService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>rbatMfgInvDtlService</property-name>
+			<value>#{rbatMfgInvDtlService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>tvndrService</property-name>
+			<value>#{tvndrService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>discntPeriodService</property-name>
+			<value>#{discntPeriodService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>snapInvDtlService</property-name>
+			<value>#{snapInvDtlService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>snapLockService</property-name>
+			<value>#{snapLockService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnHdrService</property-name>
+			<value>#{recnHdrService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnActnStatService</property-name>
+			<value>#{recnActnStatService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnDstrHdrService</property-name>
+			<value>#{recnDstrHdrService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>vndrRebtCdService</property-name>
+			<value>#{vndrRebtCdService}</value>
+		</managed-property>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>rbatReconSearchBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.RbatReconSearchBean
+		</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+			<property-name>discntPeriodService</property-name>
+			<value>#{discntPeriodService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnHdrService</property-name>
+			<value>#{recnHdrService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnDstrHdrService</property-name>
+			<value>#{recnDstrHdrService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnAprvDtlService</property-name>
+			<value>#{recnAprvDtlService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>recnActnStatService</property-name>
+			<value>#{recnActnStatService}</value>
+		</managed-property>
+
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>cashFilterBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.CashFilterBean
+		</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>lazyTableFilterBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.LazyTableFilterBean
+		</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>scrubBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.ScrubBean
+		</managed-bean-class>
+
+		<managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+			<property-name>scrubService</property-name>
+			<value>#{scrubService}</value>
+		</managed-property>
+
+		<managed-property>
+			<property-name>bffHdrService</property-name>
+			<value>#{bffHdrService}</value>
+		</managed-property>
+
+		<managed-property>
+			<property-name>recnMtchScrbMetricsService</property-name>
+			<value>#{recnMtchScrbMetricsService}</value>
+		</managed-property>
+
+		<managed-property>
+			<property-name>recnHdrService</property-name>
+			<value>#{recnHdrService}</value>
+		</managed-property>
+
+		<managed-property>
+			<property-name>recnBffApplService</property-name>
+			<value>#{recnBffApplService}</value>
+		</managed-property>
+
+		<managed-property>
+			<property-name>colMtchSpecService</property-name>
+			<value>#{colMtchSpecService}</value>
+		</managed-property>
+
+		<managed-property>
+			<property-name>inclExclRuleService</property-name>
+			<value>#{inclExclRuleService}</value>
+		</managed-property>
+
+		<managed-property>
+			<property-name>recnActnStatService</property-name>
+			<value>#{recnActnStatService}</value>
+		</managed-property>
+
+		<managed-property>
+			<property-name>extnClmService</property-name>
+			<value>#{extnClmService}</value>
+		</managed-property>
+
+		<managed-property>
+			<property-name>recnDstrHdrService</property-name>
+			<value>#{recnDstrHdrService}</value>
+		</managed-property>
+
+
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>roleCodesBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.RoleCodesBean
+		</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+
+	</managed-bean>
+
+	<!-- ITPR001971- BI Re-engineering User Vendor Entity added  --> 
+ 
+	<managed-bean>
+		<managed-bean-name>userVendorEntityBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.UserVendorEntityBean
+		</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+			<managed-property> 
+			<property-name>userVendorEntityService</property-name>
+			<value>#{userVendorEntityService}</value> 
+			</managed-property>
+	</managed-bean>
+
+<!-- entries started for ITPR004674 -Defect-1599 (Requirement (7.1)) multiple login-->
+	<managed-bean>
+		<managed-bean-name>loginBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.web.controller.LoginBean
+		</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+		<managed-property>
+		<property-name>rebateAppContextBean</property-name>
+			<value>#{rebateAppContext}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>roleDisplayMap</property-name>
+				<value>#{roleDisplayMap}</value>
+		</managed-property>
+	</managed-bean>
+<!-- entries stoped for ITPR004674 -Defect-1599 (Requirement (7.1)) multiple login-->
+
+<!--  FR8.1 added entry for LockBean start-->	
+ 
+	<managed-bean>
+		<managed-bean-name>lockBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cash.web.controller.LockBean
+		</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+			<property-name>discntPeriodService</property-name>
+			<value>#{discntPeriodService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>snapLockService</property-name>
+			<value>#{snapLockService}</value>
+		</managed-property>
+	</managed-bean> 
+
+<!--  FR8.1 added entry for LockBean stop-->
+
+
+	<!-- END of screen specific beans. -->
+
+	<!-- BEGIN navigation rules, each top level page need to be defined -->
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>home</from-outcome>
+			<to-view-id>/secure/page/index.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+	</navigation-rule>
+
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>login</from-outcome>
+			<to-view-id>/non_secure/page/loginMain.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+	</navigation-rule>
+	
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>logout</from-outcome>
+			<to-view-id>/unprotected/logout.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+	</navigation-rule>
+	
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>loggedOut</from-outcome>
+			<to-view-id>/unprotected/loggedOut.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+	</navigation-rule>
+
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>error</from-outcome>
+			<to-view-id>/non_secure/page/error.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+	</navigation-rule>
+<!--  
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>pricing</from-outcome>
+			<to-view-id>/secure/page/pricing.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+	</navigation-rule>
+
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>client</from-outcome>
+			<to-view-id>/secure/page/client.xhtml</to-view-id>
+			<redirect />
+		</navigation-case> 
+	</navigation-rule>
+
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>invoices</from-outcome>
+			<to-view-id>/secure/page/invoices.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+	</navigation-rule>
+-->
+
+	<!-- END of navigation rules -->
+
+	<!-- BEGIN converters -->
+
+	<converter>
+		<converter-id>dateTimeConverter</converter-id>
+		<converter-class>
+			com.cvs.caremark.rebates.cash.web.helper.CashDateTimeConverter
+		</converter-class>
+	</converter>
+
+	<converter>
+		<converter-id>rebatesSelectDateConverter</converter-id>
+		<converter-class>
+			com.cvs.caremark.rebates.cash.web.helper.RebatesSelectInputDateConverter
+		</converter-class>
+	</converter>
+
+	<converter>
+		<converter-id>matchDoubleConverter</converter-id>
+		<converter-class>
+			com.cvs.caremark.rebates.cash.web.helper.CashMatchDoubleConverter
+		</converter-class>
+	</converter>
+	
+	<converter>
+		<converter-id>phoneNumberConverter</converter-id>
+		<converter-class>
+			com.cvs.caremark.rebates.cash.web.helper.PhoneNumberConverter
+		</converter-class>
+	</converter>
+	<!-- The following entry has been included for reference:
+		<converter>
+		<converter-id>checkBoxCodeConverter</converter-id>
+		<converter-class>com.cvs.caremark.rebates.cr.web.helper.CheckBoxCodeConverter</converter-class>
+		</converter> 
+	-->
+	<!-- END of converters -->
+<!--  
+	<component>
+		<component-type>RebatesSelectInputDate</component-type>
+		<component-class>
+			com.cvs.caremark.rebates.cash.tags.component.RebatesSelectInputDate
+		</component-class>
+	</component>
+
+	<render-kit>
+		<renderer>
+			<component-family>javax.faces.Input</component-family>
+			<renderer-type>
+				RebatesSelectInputDateRenderer
+			</renderer-type>
+			<renderer-class>
+				com.cvs.caremark.rebates.cash.tags.renderer.RebatesSelectInputDateRenderer
+			</renderer-class>
+		</renderer>
+	</render-kit>
+-->
+
+<converter>
+    <converter-id>clientDateTimeConverter</converter-id>
+    <converter-class>com.cvs.caremark.rebates.cash.web.helper.ClientDateTimeConverter</converter-class>
+</converter>
+
+</faces-config>

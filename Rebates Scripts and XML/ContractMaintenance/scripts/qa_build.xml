@@ -1,0 +1,421 @@
+<project name="rebates" default="dist" basedir="../">
+
+  <!-- set global properties for this build -->
+  <property name="acube" value="acube"/>
+  <property name="acubeTarget" value="acube/target"/>
+  <property name="conf" value="conf"/>
+  <property name="dist"  value="deploy"/>
+  <property name="images" value="images"/>
+  <property name="keystore" value="${conf}/myKeystore"/>
+  <property name="libs" value="libs"/>
+  <property name="scripts" value="scripts"/>
+  <property name="src" value="src"/>
+  <property name="stage" value="target"/>
+  <property name="web" value="web"/>
+  <property name="build.sysclasspath" value="last"/>
+  <property name="config_ejb" value="${web}/META-INF"/>
+  <property name="config_web" value="${web}/WEB-INF"/>
+  <property name="build" value="${stage}/classes"/>
+  <property name="clientjar_stage" value="${stage}/CLIENT-JAR"/>
+  <property name="ejbclientjar_stage" value="${stage}/EJB-CLIENT-JAR"/>
+  <property name="ejbclientunjar_stage" value="${stage}/EJB-CLIENT-UNJAR"/>
+  <property name="ejbjar_stage" value="${stage}/EJB-JAR"/>
+  <property name="war_stage" value="${stage}/WAR"/>
+
+  <!-- Properties for the deployable files -->
+  <property name="basic_ejbjar" value="basic_ejb.jar"/>
+  <property name="client_jar" value="${ant.project.name}Client.jar"/>
+  <property name="deployable_ejbjar" value="${ant.project.name}EJB.jar"/>
+  <property name="deployable_war" value="advpcsrx_${ant.project.name}.war"/>
+  <property name="dtstamp" value="${conf}/version.ini"/>
+  <property name="ejb_client_jar" value="${ant.project.name}EJBClient.jar"/>
+  <property name="library_jar" value="${ant.project.name}.jar"/>
+  <property name="rebates_properties" value="${conf}/Rebates.properties"/>
+
+  <property name="ejb-jar_xml" value="${config_ejb}/ejb-jar.xml" />
+  <property name="rebates_jnlp" value="${web}/rebates.jnlp" />
+
+  <!-- Grab the system properties here  -->
+  <property environment="env"/>
+
+  <!-- Classpath for the compilations-->
+  <path id="project.classpath">
+    <pathelement location="${acube}/acube.jar"/>
+    <pathelement location="${libs}/jbcl.jar"/>
+    <pathelement location="${libs}/jcfield450K.jar"/>
+    <pathelement location="${libs}/kunststoff.jar"/>
+    <pathelement location="${env.WL_HOME}/wlserver6.1/lib/weblogic.jar"/>
+  </path>
+
+  <path id="xmltask.classpath">
+    <pathelement location="${libs}/xmltask.jar"/>
+  </path>
+
+  <taskdef name="xmltask"
+           classname="com.oopsconsultancy.xmltask.ant.XmlTask"
+           classpathref="xmltask.classpath" />
+  <target name="init">
+
+    <!-- create date/time stamp file -->
+    <delete file="${dtstamp}"/>
+
+    <propertyfile file="${dtstamp}" comment="Rebate Billing Release" >
+      <entry key="version" value="${version}" />
+      <entry key="builtBy" value="${who}" />
+      <entry key="dateTime" type="date" value="now"
+             pattern="MM/dd/yyyy hh:mm "/>
+    </propertyfile>
+
+    <!-- Create the staging directory structure  -->
+    <mkdir dir="${dist}"/>
+    <mkdir dir="${stage}"/>
+    <mkdir dir="${stage}/classes"/>
+
+   <!-- set up property files for appropriate platform (Production) -->
+    <xmltask source="${ejb-jar_xml}" dest="${ejb-jar_xml}2"
+             public="-//Sun Microsystems, Inc.//DTD Enterprise JavaBeans 2.0//EN"
+             system="http://java.sun.com/dtd/ejb-jar_2_0.dtd" >
+         <replace path="/*/*/*/env-entry[env-entry-name='ProviderURL']/env-entry-value/text()" withText="t3://10.24.16.46:8311" />
+         <replace path="/*/*/*/env-entry[env-entry-name='ldap/LdapPort']/env-entry-value/text()" withText="3299" />
+         <replace path="/*/*/*/env-entry[env-entry-name='ldap/LdapHost']/env-entry-value/text()" withText="172.19.5.132" />
+         <replace path="/*/*/*/env-entry[env-entry-name='ldap/LdapDnSuffix']/env-entry-value/text()" withText="ou=Employees,ou=Internal,ou=DEV,o=People,o=Corp,c=US" />    </xmltask>
+    <move file="${config_ejb}/ejb-jar.xml2" tofile="${ejb-jar_xml}" />
+
+    <delete file="${rebates_properties}" />
+    <copy file="${conf}/Rebates.properties.qa" tofile="${rebates_properties}" />
+
+    <delete file="${rebates_jnlp}" />
+    <copy file="${web}/rebates.jnlp.qa" tofile="${rebates_jnlp}" />
+  </target>
+
+  <target name="compile" depends="init">
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}"
+           classpathref="project.classpath" />
+  </target>
+
+
+  <target name="ejbjar" depends="compile">
+
+    <!-- Delete the old JAR working file -->
+    <delete file="${stage}/${deployable_ejbjar}"/>
+
+    <!-- Delete and rebuild the working dir -->
+    <delete dir="${ejbjar_stage}"/>
+    <mkdir  dir="${ejbjar_stage}"/>
+    <mkdir  dir="${ejbjar_stage}/META-INF"/>
+
+    <!-- Make the JAR file here -->
+
+    <!-- Unjar the acube jar file  -->
+    <unjar src="${acube}/acube.jar" dest="${acubeTarget}"/>
+
+    <!-- copy the relevant classes from acube -->
+    <copy todir="${ejbjar_stage}/com/advpcs/acube/event">
+      <fileset dir="${acubeTarget}/com/advpcs/acube/event"/>
+    </copy>
+
+    <copy todir="${ejbjar_stage}/com/advpcs/acube/eventhandler">
+      <fileset dir="${acubeTarget}/com/advpcs/acube/eventhandler"/>
+    </copy>
+
+    <copy todir="${ejbjar_stage}/com/advpcs/acube/eventhandler/ejb">
+      <fileset dir="${acubeTarget}/com/advpcs/acube/eventhandler/ejb"/>
+    </copy>
+
+    <copy todir="${ejbjar_stage}/com/advpcs/acube/exception">
+      <fileset dir="${acubeTarget}/com/advpcs/acube/exception"/>
+    </copy>
+
+    <copy todir="${ejbjar_stage}/com/advpcs/acube/util"
+          file="${acubeTarget}/com/advpcs/acube/util/Logger.class"/>
+
+    <copy todir="${ejbjar_stage}/com/advpcs/acube/util"
+          file="${acubeTarget}/com/advpcs/acube/util/Helper.class"/>
+
+    <copy todir="${ejbjar_stage}/com/advpcs/acube/util"
+          file="${acubeTarget}/com/advpcs/acube/util/ACubeServiceLocator.class"/>
+
+   <!-- copy the relevant classes from rebate -->
+    <copy todir="${ejbjar_stage}/com/advpcs/rebates/common">
+      <fileset dir="${build}/com/advpcs/rebates/common"/>
+    </copy>
+
+    <copy todir="${ejbjar_stage}/com/advpcs/rebates/domain">
+      <fileset dir="${build}/com/advpcs/rebates/domain"/>
+    </copy>
+
+    <copy todir="${ejbjar_stage}/com/advpcs/rebates/facade">
+      <fileset dir="${build}/com/advpcs/rebates/facade"/>
+    </copy>
+
+    <copy todir="${ejbjar_stage}/com/advpcs/rebates/util">
+      <fileset dir="${build}/com/advpcs/rebates/util"/>
+    </copy>
+
+    <!-- LDAP EJB classes -->
+    <echo>Copying LDAP classes</echo>
+    <copy todir="${ejbjar_stage}/com/advpcs/rebates/ldap/ejb"
+          file="${build}/com/advpcs/rebates/ldap/ejb/RebatesAuthenticationEJB.class"/>
+    <copy todir="${ejbjar_stage}/com/advpcs/rebates/ldap/ejb"
+          file="${build}/com/advpcs/rebates/ldap/ejb/RebatesAuthenticationEJBHome.class"/>
+    <copy todir="${ejbjar_stage}/com/advpcs/rebates/ldap/ejb"
+          file="${build}/com/advpcs/rebates/ldap/ejb/RebatesAuthenticationEJBBean.class"/>
+    <copy todir="${ejbjar_stage}/com/advpcs/rebates/ldap/dao"
+          file="${build}/com/advpcs/rebates/ldap/dao/RebatesAuthenticationLdapDao.class"/>
+
+    <!-- Gather the ejb descriptor files -->
+    <copy todir="${ejbjar_stage}/META-INF">
+      <fileset dir="${config_ejb}" />
+    </copy>
+
+
+    <!-- jar the files from ejb stage -->
+    <jar jarfile="${stage}/${basic_ejbjar}" basedir="${ejbjar_stage}"/>
+
+    <!-- run the external command to generate the EJBs here -->
+    <!--
+    <exec dir="${stage}"
+          executable="../scripts/build_ejb.bat"
+          output="${stage}/ejbc.log">
+      <arg line="${basic_ejbjar} ${deployable_ejbjar}"/>
+    </exec>  -->
+
+    <java classname="weblogic.ejbc" classpathref="project.classpath" fork="yes">
+      <arg value="${stage}/${basic_ejbjar}"/>
+      <arg value="${stage}/${deployable_ejbjar}"/>
+    </java>
+
+    <copy file="${stage}/${deployable_ejbjar}" todir="${dist}"/>
+  </target>
+
+
+  <target name="ejbclientjar" >
+
+    <!-- Delete the old JAR file -->
+    <delete file="${stage}/${ejb_client_jar}"/>
+
+    <!-- Delete and rebuild the working dir -->
+    <delete dir="${ejbclientjar_stage}"/>
+    <mkdir  dir="${ejbclientjar_stage}"/>
+
+    <delete dir="${ejbclientunjar_stage}"/>
+    <mkdir  dir="${ejbclientunjar_stage}"/>
+
+    <!-- Unjar the EJB jar file  -->
+    <unjar src="${dist}/${deployable_ejbjar}" dest="${ejbclientunjar_stage}"/>
+
+    <!-- copy the relevant classes from acube  -->
+    <copy todir="${ejbclientjar_stage}/com/advpcs/acube/exception">
+       <fileset dir="${ejbclientunjar_stage}/com/advpcs/acube/exception"/>
+    </copy>
+<!--
+    <copy file="${ejbclientunjar_stage}/com/advpcs/acube/event/IACubeEvent.class"
+          todir="${ejbclientjar_stage}/com/advpcs/acube/event" />
+
+    <copy file="${ejbclientunjar_stage}/com/advpcs/acube/util/ACubeServiceLocator.class"
+          todir="${ejbclientjar_stage}/com/advpcs/acube/util" />
+
+    <copy file="${ejbclientunjar_stage}/com/advpcs/acube/util/Helper.class"
+          todir="${ejbclientjar_stage}/com/advpcs/acube/util" />
+
+    <copy file="${ejbclientunjar_stage}/com/advpcs/acube/util/Logger.class"
+          todir="${ejbclientjar_stage}/com/advpcs/acube/util" />
+
+    <copy file="${ejbclientunjar_stage}/com/advpcs/acube/eventhandler/IACubeEventHandler.class"
+          todir="${ejbclientjar_stage}/com/advpcs/acube/eventhandler" />
+
+    <copy file="${ejbclientunjar_stage}/com/advpcs/acube/eventhandler/ejb/ACubeStatelessEventHandler.class"
+          todir="${ejbclientjar_stage}/com/advpcs/acube/eventhandler/ejb" />
+    <copy file="${ejbclientunjar_stage}/com/advpcs/acube/eventhandler/ejb/ACubeStatelessEventHandlerHome.class"
+          todir="${ejbclientjar_stage}/com/advpcs/acube/eventhandler/ejb" />
+    <copy file="${ejbclientunjar_stage}/com/advpcs/acube/eventhandler/ejb/ACubeStatelessPOEEJBEOImpl_WLStub.class"
+          todir="${ejbclientjar_stage}/com/advpcs/acube/eventhandler/ejb" />
+-->
+    <copy todir="${ejbclientjar_stage}/com/advpcs/acube/event">
+       <fileset dir="${ejbclientunjar_stage}/com/advpcs/acube/event"/>
+    </copy>
+    <copy todir="${ejbclientjar_stage}/com/advpcs/acube/util">
+       <fileset dir="${ejbclientunjar_stage}/com/advpcs/acube/util"/>
+    </copy>
+    <copy todir="${ejbclientjar_stage}/com/advpcs/acube/eventhandler">
+       <fileset dir="${ejbclientunjar_stage}/com/advpcs/acube/eventhandler"/>
+    </copy>
+    <copy todir="${ejbclientjar_stage}/com/advpcs/acube/eventhandler/ejb">
+       <fileset dir="${ejbclientunjar_stage}/com/advpcs/acube/eventhandler/ejb"/>
+    </copy>
+    <!-- copy the relevant classes from rebates  -->
+    <copy todir="${ejbclientjar_stage}/com/advpcs/rebates/common">
+       <fileset dir="${ejbclientunjar_stage}/com/advpcs/rebates/common"/>
+    </copy>
+
+    <copy todir="${ejbclientjar_stage}/com/advpcs/rebates/domain">
+       <fileset dir="${ejbclientunjar_stage}/com/advpcs/rebates/domain"/>
+    </copy>
+
+    <copy todir="${ejbclientjar_stage}/com/advpcs/rebates/facade"
+          file="${ejbclientunjar_stage}/com/advpcs/rebates/facade/AcubeLiason.class"/>
+    <copy todir="${ejbclientjar_stage}/com/advpcs/rebates/facade"
+          file="${ejbclientunjar_stage}/com/advpcs/rebates/facade/AcubeLiasonException.class"/>
+    <copy todir="${ejbclientjar_stage}/com/advpcs/rebates/facade"
+          file="${ejbclientunjar_stage}/com/advpcs/rebates/facade/RebatesFacade.class"/>
+    <copy todir="${ejbclientjar_stage}/com/advpcs/rebates/facade"
+          file="${ejbclientunjar_stage}/com/advpcs/rebates/facade/RebatesFacadeException.class"/>
+
+    <copy todir="${ejbclientjar_stage}/com/advpcs/rebates/facade/event">
+       <fileset dir="${ejbclientunjar_stage}/com/advpcs/rebates/facade/event"/>
+    </copy>
+
+    <copy todir="${ejbclientjar_stage}/com/advpcs/rebates/util">
+       <fileset dir="${ejbclientunjar_stage}/com/advpcs/rebates/util"/>
+    </copy>
+
+    <!-- jar the files from ejb client jar stage -->
+    <jar jarfile="${stage}/${ejb_client_jar}" basedir="${ejbclientjar_stage}"/>
+
+    <copy file="${stage}/${ejb_client_jar}" todir="${dist}"/>
+
+  </target>
+
+
+  <target name="clientjar" depends="compile, init">
+
+    <!-- Delete the old JAR file -->
+    <delete file="${stage}/${client_jar}"/>
+
+    <!-- Delete and rebuild the working dir -->
+    <delete dir="${clientjar_stage}"/>
+    <mkdir  dir="${clientjar_stage}"/>
+
+    <!-- copy rebates client classes  -->
+    <copy todir="${clientjar_stage}/com/advpcs/rebates">
+    	<fileset dir="${build}/com/advpcs/rebates"/>
+    </copy>
+
+    <copy todir="${clientjar_stage}/com/advpcs/rebates/ui">
+    	<fileset dir="${build}/com/advpcs/rebates/ui"/>
+    </copy>
+
+    <!-- copy client itambou package  -->
+    <copy todir="${clientjar_stage}/com/itambou">
+    	<fileset dir="${build}/com/itambou"/>
+    </copy>
+
+    <!-- copy image files -->
+    <copy todir="${clientjar_stage}/${images}">
+    	<fileset dir="${images}"/>
+    </copy>
+
+    <!-- copy timestamp file -->
+    <copy file="${dtstamp}" todir="${clientjar_stage}" />
+
+    <!-- copy properties file -->
+    <copy file="${rebates_properties}" todir="${clientjar_stage}" />
+
+    <!-- Make the JAR file here -->
+    <jar jarfile="${stage}/${client_jar}" basedir="${clientjar_stage}"/>
+
+    <copy file="${stage}/${client_jar}" todir="${dist}"/>
+
+  </target>
+
+
+  <target name="war">
+
+    <!-- Delete the old WAR file -->
+    <delete file="${stage}/${deployable_war}"/>
+
+    <!-- Delete and rebuild the working dir -->
+    <delete dir="${war_stage}"/>
+
+    <mkdir dir="${war_stage}"/>
+    <mkdir dir="${war_stage}/WEB-INF"/>
+    <mkdir dir="${war_stage}/WEB-INF/classes"/>
+    <mkdir dir="${war_stage}/WEB-INF/lib"/>
+    <mkdir dir="${war_stage}/WEB-INF/tlds"/>
+
+    <!-- copy the jsp, html and other web related files -->
+    <copy todir="${war_stage}">
+      <fileset dir="${web}">
+        <exclude name="dependency cache/**"/>
+        <exclude name="META-INF/**"/>
+        <exclude name="WEB-INF/properties/**"/>
+      </fileset>
+    </copy>
+
+    <!-- copy ejb client jar file -->
+    <copy file="${dist}/${ejb_client_jar}"
+          todir="${war_stage}" />
+
+    <!-- sign the jar with certificate -->
+    <signjar jar="${war_stage}/${ejb_client_jar}"
+             alias="myself"
+             storepass="password"
+             keystore="${keystore}" />
+
+    <!-- copy client jar file -->
+    <copy file="${dist}/${client_jar}"
+          todir="${war_stage}" />
+
+    <!-- sign the jar with certificate -->
+    <signjar jar="${war_stage}/${client_jar}"
+             alias="myself"
+             storepass="password"
+             keystore="${keystore}" />
+
+    <!-- copy 3rd party jar files -->
+    <copy file="${libs}/jbcl.jar"
+	        todir="${war_stage}" />
+    <copy file="${libs}/jcfield450K.jar"
+	        todir="${war_stage}" />
+    <copy file="${libs}/kunststoff.jar"
+	        todir="${war_stage}" />
+
+    <!-- sign the jar with certificate -->
+    <signjar jar="${war_stage}/jbcl.jar"
+             alias="myself"
+             storepass="password"
+             keystore="${keystore}" />
+    <signjar jar="${war_stage}/jcfield450K.jar"
+             alias="myself"
+             storepass="password"
+             keystore="${keystore}" />
+    <signjar jar="${war_stage}/kunststoff.jar"
+             alias="myself"
+             storepass="password"
+             keystore="${keystore}" />
+
+    <!-- copy weblogic jar file -->
+    <copy file="${libs}/weblogicClient.jar"
+	        todir="${war_stage}" />
+
+    <!-- sign the jar with certificate -->
+    <signjar jar="${war_stage}/weblogicClient.jar"
+             alias="myself"
+             storepass="password"
+             keystore="${keystore}" />
+
+    <!-- jar the WAR file here -->
+    <jar jarfile="${stage}/${deployable_war}" basedir="${war_stage}"/>
+    <copy file="${stage}/${deployable_war}" todir="${dist}"/>
+
+  </target>
+
+  <target name="dist" depends="ejbjar, ejbclientjar, clientjar, war ">
+    <copy file="${stage}/${deployable_ejbjar}" todir="${dist}"/>
+    <!-- copy file="${stage}/${ejb_client_jar}" todir="${dist}"/ -->
+    <!-- copy file="${stage}/${client_jar}" todir="${dist}"/ -->
+    <copy file="${stage}/${deployable_war}" todir="${dist}"/>
+    <delete file="${dist}/${ejb_client_jar}" />
+    <delete file="${dist}/${client_jar}" />
+    <echo> This is the qa_build.xml file </echo>
+  </target>
+
+  <target name="clean" description="Clean build and distribution directories">
+    <delete dir="${stage}"/>
+    <delete dir="${dist}"/>
+  </target>
+
+</project>
+
+

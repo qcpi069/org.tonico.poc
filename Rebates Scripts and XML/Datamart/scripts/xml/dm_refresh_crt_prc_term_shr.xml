@@ -1,0 +1,161 @@
+
+<!-- REFRESH crt_prc_term_shr  -->
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        cli_schema=script.getProperty("cli_schema");        
+	]]></command>
+		       
+	<command type="try">
+		<try>
+            <!-- *************** crt_prc_term_shr ********************* -->
+			<command type="run" datasource="gdx" rowName="count1">
+				<![CDATA[
+					SELECT COUNT(*) FROM ${cli_schema}.crt_prc_term_shr
+				]]>
+			</command>
+
+			<!-- Copy crt_prc_term_shr info from GDX to RPSDM. -->
+			<command type="copy" batch="1000">
+				<source type="sql" datasource="gdx"><![CDATA[
+					SELECT 
+                                          PRC_TERM_SHR_ID,
+                                          PRC_POOL_ID,
+                                          FRMA_TYP_CD,
+                                          CLNT_MIN_AMT,
+                                          CLNT_MAX_AMT,
+                                          CLNT_MIN_TYP_CD,
+                                          CLNT_MAX_TYP_CD,
+                                          PMPM_CD,
+                                          CO_1_AMT,
+                                          CO_2_AMT,
+                                          CLNT_1_AMT,
+                                          CLNT_2_AMT,
+                                          CO_SPLT_PCT,
+                                          CLNT_SPLT_PCT,
+                                          OTHR_SPLT_PCT,
+                                          CLM_TYP_CD,
+                                          CLM_TYP_QLFR_CD,
+                                          INSRT_USER_ID,
+                                          INSRT_TS,
+                                          UPDT_USER_ID,
+                                          UPDT_TS
+                                         ,PRC_TYP_CD
+                                         ,MAF_IN
+					FROM ${cli_schema}.crt_prc_term_shr 
+				]]></source>
+				<target
+					type             = "sql"
+					datasource       = "datamart"
+					transaction      = "true"
+					batch            = "1000"
+					reportInterval   = "1000"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					INSERT INTO ${cli_schema}.crt_prc_term_shr
+                                         (PRC_TERM_SHR_ID,
+                                          PRC_POOL_ID,
+                                          FRMA_TYP_CD,
+                                          CLNT_MIN_AMT,
+                                          CLNT_MAX_AMT,
+                                          CLNT_MIN_TYP_CD,
+                                          CLNT_MAX_TYP_CD,
+                                          PMPM_CD,
+                                          CO_1_AMT,
+                                          CO_2_AMT,
+                                          CLNT_1_AMT,
+                                          CLNT_2_AMT,
+                                          CO_SPLT_PCT,
+                                          CLNT_SPLT_PCT,
+                                          OTHR_SPLT_PCT,
+                                          CLM_TYP_CD,
+                                          CLM_TYP_QLFR_CD,
+                                          INSRT_USER_ID,
+                                          INSRT_TS,
+                                          UPDT_USER_ID,
+                                          UPDT_TS
+                                         ,PRC_TYP_CD
+                                         ,MAF_IN
+					  ) 
+					VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+				]]></target>
+			</command>
+	        <!-- compare totals -->
+
+			<command type="run" datasource="datamart" rowName="count2">
+				<![CDATA[
+					SELECT COUNT(*) FROM ${cli_schema}.crt_prc_term_shr
+				]]>
+			</command>
+			<command type="java">
+				count1 = script.getProperty("count1.1").intValue();
+				count2 = script.getProperty("count2.1").intValue();
+				logger.warn("GDX crt_prc_term_shr COUNT = " + count1);
+				logger.warn("RPSDM crt_prc_term_shr COUNT = " + count2);
+				if (count1 != count2) {
+					logger.error(" crt_prc_term_shr counts do NOT match count1=" + count1 + "  count2=" + count2);
+                    throw new Exception(" crt_prc_term_shr counts do NOT match count1=" + count1 + " count2=" + count2);
+				} 
+			</command> 
+				 
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+			<command
+				type="mail"
+				mailTo="${mailto}"
+				mailFrom="DM_Refresh_Client"
+				subject="[ERROR] GDX -> DM REFRESH - crt_prc_term_shr "
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] GDX -> DM REFRESH - crt_prc_term_shr</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] GDX -> DM REFRESH - crt_prc_term_shr </u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		</catch>
+		
+        </command>
+</sqml>
+

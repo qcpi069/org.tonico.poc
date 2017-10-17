@@ -1,0 +1,38 @@
+<project name="jboot" default="dist" basedir="..">
+
+	<property name="src"      location="src"/>
+	<property name="build"    location="classes"/>
+	<property name="dist"     location="dist"/>
+	<property name="jar"      location="${dist}/jboot.jar"/>
+
+	<path id="classpath">
+		<pathelement path="${build}"/>
+	</path>
+	
+	<target name="init" depends="clean">
+		<mkdir dir="${build}"/>
+	</target>
+	
+	<target name="clean">
+		<delete dir="${build}"/>
+	</target>
+
+	<target name="compile" depends="init">
+		<javac
+			srcdir="${src}"
+			destdir="${build}"
+			debug="true"
+			classpathref="classpath"
+			source="1.3"
+		/>
+	</target>
+
+	<target name="dist" depends="compile">
+		<jar destfile="${jar}" manifest="MANIFEST.MF">
+			<fileset dir="${build}"/>
+			<fileset dir="${src}"/>
+			<fileset dir="." includes="jboot.config"/>
+		</jar>
+	</target>
+	
+</project>

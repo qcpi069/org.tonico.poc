@@ -1,0 +1,126 @@
+<!-- COPIES DATA FROM IRON DMA_RBATE2.v_rxclaim_plan_lcm TO GDXPRD VRAP.trxclaim_plan_lcm  -->
+<!-- THE SCHEDULE THAT EXECUTES THIS LOADS Saaturday AND IS RUN Sunday dependent upon EDW jobs - see maestro list -->
+<!-- If ABEND, the job can be restarted from beginning with no issues. -->
+
+
+<sqml>
+    <property name="TIMEOUT" value="0"/>
+    <datasources resource="datasource.xml"/>
+    
+    <!--
+        Set-up a try block to send an email on exception.   
+    -->         
+    <command type="try">
+        <try>
+            <!-- Clear out the table on GDXPRD. --> 
+            <command type="run" datasource="gdxprd" transaction="false">
+                <![CDATA[
+                    DELETE FROM vrap.trxclaim_plan_lcm
+                ]]>
+            </command>
+            <!-- Copy data from SILVER to GDXPRD -->
+                <command type="copy" batch="500">
+    <!--
+    old - removed for 51343
+            <source type="sql" datasource="silver"><![CDATA[
+    -->         
+            <source type="sql" datasource="edwdb"><![CDATA[
+                SELECT a.rxclaim_plan_lcm_gid
+                      ,a.clnt_id
+                      ,a.carr_id
+                      ,a.acct_id
+                      ,a.grp_id
+                      ,a.plan_id
+                      ,a.plan_eff_date
+                      ,a.lcm_code
+                      ,a.algn_lvl_gid
+                      ,a.eff_date
+                      ,a.end_date
+                      ,to_date(to_char(a.load_tstmp,'yyyy-mm-dd'),'yyyy-mm-dd')
+                  FROM DWCORP.MV_RXCLAIM_PLAN_LCM a
+                ]]></source>
+    <!--
+    old - changed for 51343, was using SILVER.
+                  FROM dma_rbate2.v_rxclaim_plan_lcm a
+    -->         
+                <target type="queue" threadCount="5">
+                <target
+                type             = "sql"
+                datasource       = "gdxprd"
+                transaction      = "false"
+                batch            = "500"
+                reportInterval   = "500"
+                queryTimeout     = "${TIMEOUT}"
+                ><![CDATA[
+                     INSERT INTO vrap.trxclaim_plan_lcm 
+                    (rxclaim_plan_lcm_gid
+                    ,clnt_id
+                    ,carr_id
+                    ,acct_id
+                    ,grp_id
+                    ,plan_id
+                    ,plan_eff_date
+                    ,lcm_code
+                    ,algn_lvl_gid
+                    ,eff_date
+                    ,end_date
+                    ,load_tstmp
+                     )
+                    VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?  )
+                ]]></target>
+                                   </target>
+            </command>               
+        </try>
+        <catch>
+            <!-- Send an email on error -->
+            <command
+                type="mail"
+                mailTo="gdxitd@caremark.com"
+                mailFrom="TRXCLAIM_PLAN_LCM@caremark.com"
+                subject="[ERROR] GDX_GD_Extract_and_Load_TRXCLAIM_PLAN_LCM.xml"
+                contentType="text/html"
+                throwsException="false"
+            ><![CDATA[
+                <html>
+                <head>
+                <title>[ERROR] GDX_GD_Extract_and_Load_TRXCLAIM_PLAN_LCM.xml</title>
+                </head>
+                <body>
+            
+                <h3><u>[ERROR] GDX_GD_Extract_and_Load_TRXCLAIM_PLAN_LCM.xml</u></h3>
+            
+                <table cellpadding="2">
+                    <tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+                    <tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+                    <tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+                    #if (${system.getProperty('logfile')})
+                        <tr>
+                            <td><b>Log File:</b></td>
+                            <td>
+                                ${system.getProperty('logfile')}
+                            <td>
+                        </tr>
+                    #end
+                </table>
+
+                <br>            
+                <br>
+                
+                #if (${script.getLastStatement()})
+                    <h3><u>Last Statement</u></h3>
+                    <font style="color: blue; font-size: small">    
+                    ${script.getLastStatement()}
+                    </font>
+                
+                    <br>
+                    <br>
+                #end
+            
+                <h3><u>Stack Trace</u></h3>     
+                <pre style="color: red; font-size: small;">${stackTrace}</pre>
+                </body>
+                </html>
+            ]]></command>
+        </catch>
+    </command>
+</sqml>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE POWERMART SYSTEM "powrmart.dtd">
+<POWERMART CREATION_DATE="01/26/2016 14:12:24" REPOSITORY_VERSION="182.91">
+<REPOSITORY NAME="PCRepos_Caremark9_DEV1" VERSION="182" CODEPAGE="MS1252" DATABASETYPE="DB2">
+<FOLDER NAME="Shared_Rebates_RCI" GROUP="" OWNER="rebates_session_operator" SHARED="SHARED" DESCRIPTION="Shared folder for Rebates RCI Objects" PERMISSIONS="rwx---r--" UUID="fdbb6779-70d9-4431-864c-94004c5c8666">
+    <TARGET BUSINESSNAME ="" CONSTRAINT ="" DATABASETYPE ="Teradata" DESCRIPTION ="This object is a view and is used to load data to EDM DWT_RBTS database/schema in order to be able to " NAME ="V_CLNT_CDD_LKP" OBJECTVERSION ="1" TABLEOPTIONS ="" VERSIONNUMBER ="1">
+        <TARGETFIELD BUSINESSNAME ="" DATATYPE ="integer" DESCRIPTION ="This is the RPS reporting process number from the KSZ6020_RPT_PRCS_CNTL and is unique per request. &#xD;&#xA;Deletes will be executed using this field." FIELDNUMBER ="1" KEYTYPE ="NOT A KEY" NAME ="RPT_PRCS_NB" NULLABLE ="NOTNULL" PICTURETEXT ="" PRECISION ="10" SCALE ="0"/>
+        <TARGETFIELD BUSINESSNAME ="" DATATYPE ="bigint" DESCRIPTION ="This is the CLM_GID originally from the GDX system and is not used for the EDM lookup, but for merging the CDD data extracted back into the claim that was pulled from the RPSDM RPS.TCLAIM_RPT_DTL data." FIELDNUMBER ="2" KEYTYPE ="NOT A KEY" NAME ="CLM_GID" NULLABLE ="NOTNULL" PICTURETEXT ="" PRECISION ="19" SCALE ="0"/>
+        <TARGETFIELD BUSINESSNAME ="" DATATYPE ="varchar" DESCRIPTION ="This is the claim id from the adjudication system." FIELDNUMBER ="3" KEYTYPE ="NOT A KEY" NAME ="EXTL_CLAIM_ID" NULLABLE ="NOTNULL" PICTURETEXT ="" PRECISION ="30" SCALE ="0"/>
+        <TARGETFIELD BUSINESSNAME ="" DATATYPE ="integer" DESCRIPTION ="This is the claim sequence number from the adjudication system." FIELDNUMBER ="4" KEYTYPE ="NOT A KEY" NAME ="EXTL_CLAIM_SEQ" NULLABLE ="NOTNULL" PICTURETEXT ="" PRECISION ="10" SCALE ="0"/>
+        <TARGETFIELD BUSINESSNAME ="" DATATYPE ="char" DESCRIPTION ="This is an EDM value representing the adjudication system that the claim was received from.&#xD;&#xA;X=RxClaim&#xD;&#xA;R=Recap&#xD;&#xA;Q=QL" FIELDNUMBER ="5" KEYTYPE ="NOT A KEY" NAME ="SRC_CD" NULLABLE ="NOTNULL" PICTURETEXT ="" PRECISION ="10" SCALE ="0"/>
+    </TARGET>
+</FOLDER>
+</REPOSITORY>
+</POWERMART>

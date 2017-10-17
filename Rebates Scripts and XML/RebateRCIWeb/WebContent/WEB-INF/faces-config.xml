@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<faces-config xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd"
+	version="2.0">
+	<application>
+		<el-resolver>org.springframework.web.jsf.el.SpringBeanFacesELResolver</el-resolver>
+
+		<default-render-kit-id>org.apache.myfaces.trinidad.core</default-render-kit-id>
+
+
+		<!-- defines messages -->
+		<message-bundle>com.cvs.caremark.rebates.rci.resources.messages</message-bundle>
+
+		<locale-config>
+			<default-locale>en</default-locale>
+			<supported-locale>en</supported-locale>
+		</locale-config>
+	</application>
+
+
+	<managed-bean>
+		<managed-bean-name>exceptionDetail</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.exception.ExceptionDetail</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+
+
+	<managed-bean>
+		<managed-bean-name>messageDetail</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.exception.ExceptionDetail</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>rebateAppContext</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.web.helper.RebateAppContext</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>exceptionHandler</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.exception.ExceptionHandler</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>logoutBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.web.controller.LogoutBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+
+
+	<managed-bean>
+		<managed-bean-name>advancedFilterBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.rci.web.controller.AdvancedFilterBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>processControllerBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.rci.web.controller.ProcessControllerBean</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+			<property-name>processControlService</property-name>
+			<value>#{processControlService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>rebateCodeService</property-name>
+			<value>#{rebateCodeService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>advFilterBean</property-name>
+			<value>#{advancedFilterBean}</value>
+		</managed-property>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>processControlDetailBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.rci.web.controller.ProcessControlDetailBean</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+			<property-name>processControlDetailService</property-name>
+			<value>#{processControlDetailService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>processControlCodeService</property-name>
+			<value>#{processControlCodeService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>rebateCodeService</property-name>
+			<value>#{rebateCodeService}</value>
+		</managed-property>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>availablePeriodController</managed-bean-name>
+		<managed-bean-class>com.cvs.caremark.rebates.rci.web.controller.AvailablePeriodController</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+		<managed-property>
+			<property-name>periodMaintenanceService</property-name>
+			<value>#{periodMaintenanceService}</value>
+		</managed-property>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>overrideRuleEditController</managed-bean-name>
+		<managed-bean-class>com.cvs.caremark.rebates.rci.web.controller.OverrideRuleEditController</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+		<managed-property>
+			<property-name>ruleMaintenanceService</property-name>
+			<value>#{ruleMaintenanceService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>codeService</property-name>
+			<value>#{rebateCodeService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>rebateIdService</property-name>
+			<value>#{rebateIdService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>claimService</property-name>
+			<value>#{claimMaintenanceService}</value>
+		</managed-property>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>overrideRuleSummaryController</managed-bean-name>
+		<managed-bean-class>com.cvs.caremark.rebates.rci.web.controller.OverrideRuleSummaryController</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+		<managed-property>
+			<property-name>ruleMaintenanceService</property-name>
+			<value>#{ruleMaintenanceService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>periodMaintenanceService</property-name>
+			<value>#{periodMaintenanceService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>rebateCodeService</property-name>
+			<value>#{rebateCodeService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>advFilterBean</property-name>
+			<value>#{advancedFilterBean}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>claimService</property-name>
+			<value>#{claimMaintenanceService}</value>
+		</managed-property>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>batchAssignmentSummaryController</managed-bean-name>
+		<managed-bean-class>com.cvs.caremark.rebates.rci.web.controller.BatchAssignmentSummaryController</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+		<managed-property>
+			<property-name>periodMaintenanceService</property-name>
+			<value>#{periodMaintenanceService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>codeService</property-name>
+			<value>#{rebateCodeService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>advBatchFilterBean</property-name>
+			<value>#{advancedFilterBean}</value>
+		</managed-property>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>lockMaintenanceController</managed-bean-name>
+		<managed-bean-class>com.cvs.caremark.rebates.rci.web.controller.LockMaintenanceController</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+		<managed-property>
+			<property-name>periodMaintenanceService</property-name>
+			<value>#{periodMaintenanceService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>rebateCodeService</property-name>
+			<value>#{rebateCodeService}</value>
+		</managed-property>
+	</managed-bean>
+	<managed-bean>
+		<managed-bean-name>updateInPlaceController</managed-bean-name>
+		<managed-bean-class>com.cvs.caremark.rebates.rci.web.controller.UpdateInPlaceController</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+		<managed-property>
+			<property-name>periodMaintenanceService</property-name>
+			<value>#{periodMaintenanceService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>rebateIdService</property-name>
+			<value>#{rebateIdService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>codeService</property-name>
+			<value>#{rebateCodeService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>claimService</property-name>
+			<value>#{claimMaintenanceService}</value>
+		</managed-property>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>apcSummaryController</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.rci.web.controller.ApcSummaryController</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+		<managed-property>
+			<property-name>processControlService</property-name>
+			<value>#{processControlService}</value>
+		</managed-property>
+	</managed-bean>
+
+
+	<managed-bean>
+		<managed-bean-name>claimPreviewController</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.rci.web.controller.ClaimPreviewController</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+		<managed-property>
+			<property-name>clmPreviewService</property-name>
+			<value>#{clmPreviewService}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>utilityService</property-name>
+			<value>#{utilityService}</value>
+		</managed-property>
+	</managed-bean>
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>login</from-outcome>
+			<to-view-id>/non_secure/page/loginMain.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+	</navigation-rule>
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>home</from-outcome>
+			<to-view-id>/secure/page/index.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+	</navigation-rule>
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>claimMaint</from-outcome>
+			<to-view-id>/secure/page/rule_maint.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+	</navigation-rule>
+
+
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>error</from-outcome>
+			<to-view-id>/non_secure/page/error.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+	</navigation-rule>
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>process-detail</from-outcome>
+			<to-view-id>/secure/page/process-control.xhtml</to-view-id>
+			<redirect />
+		</navigation-case>
+	</navigation-rule>
+	<converter>
+		<converter-id>dateTimeConverter</converter-id>
+		<converter-class>com.cvs.caremark.rebates.rci.util.DateValidator</converter-class>
+	</converter>
+	<converter>
+		<converter-id>rciDateTimeConverter</converter-id>
+		<converter-class>com.cvs.caremark.rebates.rci.web.helper.RciDateTimeConverter</converter-class>
+	</converter>
+	<converter>
+		<converter-id>rciIntegerConverter</converter-id>
+		<converter-class>com.cvs.caremark.rebates.rci.web.helper.RciIntegerConverter</converter-class>
+	</converter>
+	<converter>
+		<converter-id>CTIDIntegerConverter</converter-id>
+		<converter-class>com.cvs.caremark.rebates.rci.web.helper.CTIDIntegerConverter</converter-class>
+	</converter>
+	<validator>
+		<validator-id>dateValidate</validator-id>
+		<validator-class>com.cvs.caremark.rebates.rci.util.ValidateDate</validator-class>
+	</validator>
+</faces-config>

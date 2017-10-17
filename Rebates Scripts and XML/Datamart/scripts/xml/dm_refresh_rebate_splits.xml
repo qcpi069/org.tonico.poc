@@ -1,0 +1,173 @@
+
+<!-- REFRESH REBATE_SPLITS  -->
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        cli_schema=script.getProperty("cli_schema");        
+	]]></command>
+		       
+	<command type="try">
+		<try>
+            <!-- *************** REBATE_SPLITS ********************* -->
+			<command type="run" datasource="rebates" rowName="count1">
+				<![CDATA[
+					SELECT COUNT(*) FROM ${cli_schema}.rebate_splits
+				]]>
+			</command>
+			<!-- Copy rebate_splits info from Oracle to DB2. -->
+			<command type="copy" batch="1000">
+				<source type="sql" datasource="rebates"><![CDATA[
+					SELECT 
+					  PCS_SYSTEM_ID,
+					  REBATE_SPLIT_ID,
+					  REBATE_FORMULA,
+					  CLIENT_MIN,
+					  CLIENT_MAX,
+					  CLIENT_MAX_TYPE,
+					  CLIENT_MIN_TYPE,
+					  PMPM_IND,
+					  PCS_AMT_1,
+					  PCS_AMT_2,
+					  PCS_SPLIT,
+					  CLIENT_AMT_1,
+					  CLIENT_AMT_2,
+					  CLIENT_SPLIT,
+					  OTHER1_SPLIT,
+					  OTHER2_SPLIT,
+					  REBATE_ENROLL_DEPENDANT,
+					  DATE_RCVD,
+					  TERM_DT,
+					  EFF_DT,
+					  LAST_UPDATE_DT,
+					  UPDATE_USERID,
+					  INSRT_DATE,
+					  CLM_TYP_CD,
+					  CLM_TYP_QLFR_CD,
+					  GUARANTEE_BASIS,
+					  GUARANTEE_AMT,
+					  ADMIN_CMX_SHR,
+					  ADMIN_CLIENT_SHR,
+					  GUAR_IND
+					FROM ${cli_schema}.rebate_splits 
+						ORDER BY 1,2
+				]]></source>
+				<target
+					type             = "sql"
+					datasource       = "datamart"
+					transaction      = "true"
+					batch            = "1000"
+					reportInterval   = "1000"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					INSERT INTO ${cli_schema}.rebate_splits  
+					 (PCS_SYSTEM_ID,
+					  REBATE_SPLIT_ID,
+					  REBATE_FORMULA,
+					  CLIENT_MIN,
+					  CLIENT_MAX,
+					  CLIENT_MAX_TYPE,
+					  CLIENT_MIN_TYPE,
+					  PMPM_IND,
+					  PCS_AMT_1,
+					  PCS_AMT_2,
+					  PCS_SPLIT,
+					  CLIENT_AMT_1,
+					  CLIENT_AMT_2,
+					  CLIENT_SPLIT,
+					  OTHER1_SPLIT,
+					  OTHER2_SPLIT,
+					  REBATE_ENROLL_DEPENDANT,
+					  DATE_RCVD,
+					  TERM_DT,
+					  EFF_DT,
+					  LAST_UPDATE_DT,
+					  UPDATE_USERID,
+					  INSRT_DATE,
+					  CLM_TYP_CD,
+					  CLM_TYP_QLFR_CD,
+					  GUARANTEE_BASIS,
+					  GUARANTEE_AMT,
+					  ADMIN_CMX_SHR,
+					  ADMIN_CLIENT_SHR,
+					  GUAR_IND
+					  ) 
+					VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )
+				]]></target>
+			</command>
+	        <!-- compare totals -->
+
+			<command type="run" datasource="datamart" rowName="count2">
+				<![CDATA[
+					SELECT COUNT(*) FROM ${cli_schema}.rebate_splits
+				]]>
+			</command>
+			<command type="java">
+				count1 = script.getProperty("count1.1").intValue();
+				count2 = script.getProperty("count2.1").intValue();
+				logger.warn("Silver RBATE_REG.REBATE_SPLITS COUNT = " + count1);
+				logger.warn("RPS RBATE_REG.REBATE_SPLITS COUNT = " + count2);
+				if (count1 != count2) {
+					logger.error(" REBATE_SPLITS counts do NOT match count1=" + count1 + "  count2=" + count2);
+                    throw new Exception(" REBATE_SPLITS counts do NOT match count1=" + count1 + " count2=" + count2);
+				} 
+			</command> 
+				 
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+			<command
+				type="mail"
+				mailTo="${mailto}"
+				mailFrom="RPDM_Client_Refresh"
+				subject="[ERROR] REFESH CLIENT - REBATE_SPLITS "
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] REFRESH CLIENT - REBATE_SPLITS</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] REFRESH CLIENT - REBATE_SPLITS </u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		</catch>
+	</command>
+</sqml>

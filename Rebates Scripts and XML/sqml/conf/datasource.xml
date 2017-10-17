@@ -1,0 +1,33 @@
+<datasources>
+
+	<datasource name="silver" type="dbcp">
+		<defaultAutoCommit>true</defaultAutoCommit>
+		<defaultReadOnly>false</defaultReadOnly>
+		<driverClassName>oracle.jdbc.driver.OracleDriver</driverClassName>
+		<initialSize>1</initialSize>
+		<maxActive>15</maxActive>
+		<maxIdle>2</maxIdle>
+		<poolPreparedStatements>true</poolPreparedStatements>
+		<testOnBorrow>true</testOnBorrow>
+		<url>jdbc:oracle:thin:@qadom2:1521:slate</url>
+		<username>dma_rbate2_app</username>
+		<password>dma_rbate2_app</password>
+		<validationQuery>SELECT 1 FROM DUAL</validationQuery>
+	</datasource>
+	
+	<datasource name="gdxprd" type="dbcp">
+		<defaultAutoCommit>true</defaultAutoCommit>
+		<defaultReadOnly>false</defaultReadOnly>
+		<driverClassName>com.ibm.db2.jcc.DB2Driver</driverClassName>
+		<initialSize>1</initialSize>
+		<maxActive>15</maxActive>
+		<maxIdle>2</maxIdle>
+		<poolPreparedStatements>true</poolPreparedStatements>
+		<testOnBorrow>true</testOnBorrow>
+		<url>jdbc:db2://r07tst07:50002/GDXUAT</url>
+		<username>vactuate</username>
+		<password>mkcrosson</password>
+		<validationQuery>SELECT 1 FROM SYSIBM.SYSDUMMY1</validationQuery>
+	</datasource>
+
+</datasources>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<!--
+	This is the spring configuration file for discount client split conversion process
+	-->																																				 
+																																					 <!--  - Application context definition for "springapp" DispatcherServlet.  -->
+<beans>    
+	<!--  transaction manager -->
+	
+	<!--  the driver class -->
+	<bean id="main" class="com.caremark.rebates.registration.batch.main.SAPAddrFeedMain">	
+		<property name="service">
+    			<ref bean="SAPAddrFeedService"/>
+    		</property>		
+		<property name="SAPAddrFeedEmailTemplate">
+    			<value>SAPAddrFeedEmailTemplate.txt</value>
+    		</property>		
+		<property name="mailFrom">
+    			<value>SAPAddrFeed@caremark.com</value>
+    		</property>	
+<!--
+		<property name="mailTo">
+    			<value>yanping.zhao@caremark.com</value>
+    		</property>	
+ -->
+		<property name="mailTo">
+    			<value>gdxitd@caremark.com</value>
+    		</property>	
+
+    </bean>
+	<bean id="SAPAddrFeedService" class="com.caremark.rebates.registration.batch.service.SAPAddrFeedService">	
+		<property name="dataSource">
+            <ref bean="rbateRegDataSource"/>
+        </property>	
+		<property name="transactionTemplate">
+            <ref bean="transactionTemplate"/>
+        </property> 
+		<property name="archivePrefix">
+    			<value>SAP_ADDRESS_FEED</value>
+    		</property>	
+		<property name="inputDir">
+    			<value>data/incoming</value>
+    		</property>		
+		<property name="dataFileName">
+			<value>LOAD_SAP_ADDRESS.txt</value>
+    		</property>	
+		<property name="archiveDir">
+    			<value>data/completed</value>
+    		</property>	
+		<property name="errorDir">
+    			<value>data/errors</value>
+    		</property>	
+		<property name="logDir">
+    			<value>logs</value>
+    		</property>
+    	<property name="sapAddrFeedParser">
+    			<value>SAPAddrFeedParser.xml</value>
+    	</property>		
+		<property name="clntDAO">
+    			<ref bean="clntDAO"/>
+    	</property>	
+    	<property name="addrDAO">
+    			<ref bean="addrDAO"/>
+    	</property>			
+    	<property name="beAddrAsscDAO">
+    			<ref bean="beAddrAsscDAO"/>
+    	</property>			    		
+    </bean>	
+	
+</beans>

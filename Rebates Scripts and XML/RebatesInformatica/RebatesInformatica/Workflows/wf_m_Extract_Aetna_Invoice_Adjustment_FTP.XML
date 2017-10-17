@@ -1,0 +1,537 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE POWERMART SYSTEM "powrmart.dtd">
+<POWERMART CREATION_DATE="04/16/2015 09:42:43" REPOSITORY_VERSION="182.91">
+<REPOSITORY NAME="PCRepos_Caremark9_DEV1" VERSION="182" CODEPAGE="MS1252" DATABASETYPE="DB2">
+<FOLDER NAME="Rebates_CASH" GROUP="" OWNER="rebates_session_operator" SHARED="NOTSHARED" DESCRIPTION="" PERMISSIONS="rwx---r--" UUID="ecf62a5f-fe3e-48e5-a766-41399b9e8a86">
+    <MAPPING DESCRIPTION ="3/20/2015 - Mike Jones (qcpi2bw)&#xD;&#xA;Read DEX flat file and update the DEX table and workflow variables for seperate workflow" ISVALID ="YES" NAME ="m_Extract_Aetna_Invoice_Adj_Cleanup" OBJECTVERSION ="1" VERSIONNUMBER ="1">
+        <TRANSFORMATION DESCRIPTION ="" NAME ="SQ_Shortcut_to_F_Invoice_Cleanup_Src" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Source Qualifier" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="DEX_GID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RCRD_CNT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="File_Nm" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Reads values to be passed to the DEX table or declaried as Mapping variables using SETVARIABLE() function" NAME ="Quarter" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="TXN_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="PRCS_CRTE_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TABLEATTRIBUTE NAME ="Sql Query" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="User Defined Join" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Source Filter" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Number Of Sorted Ports" VALUE ="0"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+            <TABLEATTRIBUTE NAME ="Select Distinct" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Is Partitionable" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Pre SQL" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Post SQL" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Output is deterministic" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Output is repeatable" VALUE ="Never"/>
+        </TRANSFORMATION>
+        <TRANSFORMATION DESCRIPTION ="use to pass values to DEX table&#xD;&#xA;also set variables for file name and quarter" NAME ="EXP_SET_VARS" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Expression" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="DEX_GID" EXPRESSIONTYPE ="GENERAL" NAME ="DEX_GID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="RCRD_CNT" EXPRESSIONTYPE ="GENERAL" NAME ="RCRD_CNT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Reads values to be passed to the DEX table or declaried as Mapping variables using SETVARIABLE() function" NAME ="Quarter" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CMN_FILE_NM" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="TXN_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="PRCS_CRTE_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="SETVARIABLE($$TXN_GID,TXN_ID)" EXPRESSIONTYPE ="GENERAL" NAME ="var_ASSIGN_TXN_ID" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable is used to assign quarter value (var_QTR) to mapping variable to use in the success email body text and subject." EXPRESSION ="SETVARIABLE($$QUARTER,Quarter)" EXPRESSIONTYPE ="GENERAL" NAME ="var_ASSIGN_QTR" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="SETVARIABLE($$Filename,CMN_FILE_NM)" EXPRESSIONTYPE ="GENERAL" NAME ="var_ASSIGN_FILE_NM" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="SETVARIABLE($$PRCS_CRTE_ID,PRCS_CRTE_ID)" EXPRESSIONTYPE ="GENERAL" NAME ="var_PRCS_CRTE_ID" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+        </TRANSFORMATION>
+        <TRANSFORMATION DESCRIPTION ="" NAME ="Upd_RCNT_DEX_CNTL" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Update Strategy" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Left pad record count with 0 if length is less than 10." NAME ="RCRD_CNT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="DEX_GID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TABLEATTRIBUTE NAME ="Update Strategy Expression" VALUE ="DD_UPDATE"/>
+            <TABLEATTRIBUTE NAME ="Forward Rejected Rows" VALUE ="YES"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+        </TRANSFORMATION>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="16" NAME ="RCNT_DEX_CNTL" TRANSFORMATION_NAME ="RCNT_DEX_CNTL" TRANSFORMATION_TYPE ="Target Definition" TYPE ="TARGET"/>
+        <INSTANCE DBDNAME ="FlatFile" DESCRIPTION ="Flat File created by m_Extract_Aenta_Invoice_Adjustment mapping to create fields for DEX table and workflow variables for File Name and Quarter" INSTANCEID ="14" NAME ="F_Invoice_Cleanup_Src" TRANSFORMATION_NAME ="F_Invoice_Cleanup_Src" TRANSFORMATION_TYPE ="Source Definition" TYPE ="SOURCE"/>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="15" NAME ="SQ_Shortcut_to_F_Invoice_Cleanup_Src" REUSABLE ="NO" TRANSFORMATION_NAME ="SQ_Shortcut_to_F_Invoice_Cleanup_Src" TRANSFORMATION_TYPE ="Source Qualifier" TYPE ="TRANSFORMATION">
+            <ASSOCIATED_SOURCE_INSTANCE NAME ="F_Invoice_Cleanup_Src"/>
+        </INSTANCE>
+        <INSTANCE DESCRIPTION ="use to pass values to DEX table&#xD;&#xA;also set variables for file name and quarter" INSTANCEID ="6" NAME ="EXP_SET_VARS" REUSABLE ="NO" TRANSFORMATION_NAME ="EXP_SET_VARS" TRANSFORMATION_TYPE ="Expression" TYPE ="TRANSFORMATION"/>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="13" NAME ="Upd_RCNT_DEX_CNTL" REUSABLE ="NO" TRANSFORMATION_NAME ="Upd_RCNT_DEX_CNTL" TRANSFORMATION_TYPE ="Update Strategy" TYPE ="TRANSFORMATION"/>
+        <CONNECTOR FROMFIELD ="DEX_GID" FROMINSTANCE ="Upd_RCNT_DEX_CNTL" FROMINSTANCETYPE ="Update Strategy" TOFIELD ="DEX_GID" TOINSTANCE ="RCNT_DEX_CNTL" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="RCRD_CNT" FROMINSTANCE ="Upd_RCNT_DEX_CNTL" FROMINSTANCETYPE ="Update Strategy" TOFIELD ="REC_CNT_VL" TOINSTANCE ="RCNT_DEX_CNTL" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="DEX_GID" FROMINSTANCE ="F_Invoice_Cleanup_Src" FROMINSTANCETYPE ="Source Definition" TOFIELD ="DEX_GID" TOINSTANCE ="SQ_Shortcut_to_F_Invoice_Cleanup_Src" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="RCRD_CNT" FROMINSTANCE ="F_Invoice_Cleanup_Src" FROMINSTANCETYPE ="Source Definition" TOFIELD ="RCRD_CNT" TOINSTANCE ="SQ_Shortcut_to_F_Invoice_Cleanup_Src" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="File_Nm" FROMINSTANCE ="F_Invoice_Cleanup_Src" FROMINSTANCETYPE ="Source Definition" TOFIELD ="File_Nm" TOINSTANCE ="SQ_Shortcut_to_F_Invoice_Cleanup_Src" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="Quarter" FROMINSTANCE ="F_Invoice_Cleanup_Src" FROMINSTANCETYPE ="Source Definition" TOFIELD ="Quarter" TOINSTANCE ="SQ_Shortcut_to_F_Invoice_Cleanup_Src" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="TXN_ID" FROMINSTANCE ="F_Invoice_Cleanup_Src" FROMINSTANCETYPE ="Source Definition" TOFIELD ="TXN_ID" TOINSTANCE ="SQ_Shortcut_to_F_Invoice_Cleanup_Src" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="PRCS_CRTE_ID" FROMINSTANCE ="F_Invoice_Cleanup_Src" FROMINSTANCETYPE ="Source Definition" TOFIELD ="PRCS_CRTE_ID" TOINSTANCE ="SQ_Shortcut_to_F_Invoice_Cleanup_Src" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="File_Nm" FROMINSTANCE ="SQ_Shortcut_to_F_Invoice_Cleanup_Src" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="CMN_FILE_NM" TOINSTANCE ="EXP_SET_VARS" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="DEX_GID" FROMINSTANCE ="SQ_Shortcut_to_F_Invoice_Cleanup_Src" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="DEX_GID" TOINSTANCE ="EXP_SET_VARS" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="RCRD_CNT" FROMINSTANCE ="SQ_Shortcut_to_F_Invoice_Cleanup_Src" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="RCRD_CNT" TOINSTANCE ="EXP_SET_VARS" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="Quarter" FROMINSTANCE ="SQ_Shortcut_to_F_Invoice_Cleanup_Src" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="Quarter" TOINSTANCE ="EXP_SET_VARS" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="TXN_ID" FROMINSTANCE ="SQ_Shortcut_to_F_Invoice_Cleanup_Src" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="TXN_ID" TOINSTANCE ="EXP_SET_VARS" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="PRCS_CRTE_ID" FROMINSTANCE ="SQ_Shortcut_to_F_Invoice_Cleanup_Src" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="PRCS_CRTE_ID" TOINSTANCE ="EXP_SET_VARS" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="DEX_GID" FROMINSTANCE ="EXP_SET_VARS" FROMINSTANCETYPE ="Expression" TOFIELD ="DEX_GID" TOINSTANCE ="Upd_RCNT_DEX_CNTL" TOINSTANCETYPE ="Update Strategy"/>
+        <CONNECTOR FROMFIELD ="RCRD_CNT" FROMINSTANCE ="EXP_SET_VARS" FROMINSTANCETYPE ="Expression" TOFIELD ="RCRD_CNT" TOINSTANCE ="Upd_RCNT_DEX_CNTL" TOINSTANCETYPE ="Update Strategy"/>
+        <TARGETLOADORDER ORDER ="1" TARGETINSTANCE ="RCNT_DEX_CNTL"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$TXN_GID" PRECISION ="10" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$QUARTER" PRECISION ="10" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$Filename" PRECISION ="255" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$PRCS_CRTE_ID" PRECISION ="10" SCALE ="0" USERDEFINED ="YES"/>
+        <ERPINFO/>
+    </MAPPING>
+    <SHORTCUT COMMENTS ="" DBDNAME ="FlatFile" FOLDERNAME ="Shared_Rebates_RCI" NAME ="F_Invoice_Cleanup_Src" OBJECTSUBTYPE ="Source Definition" OBJECTTYPE ="SOURCE" REFERENCEDDBD ="FlatFile" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="F_Invoice_Cleanup_Src" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="" FOLDERNAME ="Shared_Rebates_RCI" NAME ="RCNT_DEX_CNTL" OBJECTSUBTYPE ="Target Definition" OBJECTTYPE ="TARGET" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="RCNT_DEX_CNTL" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="Created by Pooja on 03/20/2013 for Invoice Claim Extract.&#xD;&#xA;&#xD;&#xA;This is a dummy mapping to update the execution status in RCNT_DEX_CNTL." FOLDERNAME ="Shared_Rebates_RCI" NAME ="m_AET_Extract_Upd_Stat_RCNT_DEX_CNTL" OBJECTTYPE ="MAPPING" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="m_AET_Extract_Upd_Stat_RCNT_DEX_CNTL" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <CONFIG DESCRIPTION ="Default session configuration object" ISDEFAULT ="YES" NAME ="default_session_config" VERSIONNUMBER ="1">
+        <ATTRIBUTE NAME ="Advanced" VALUE =""/>
+        <ATTRIBUTE NAME ="Constraint based load ordering" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Cache LOOKUP() function" VALUE ="YES"/>
+        <ATTRIBUTE NAME ="Default buffer block size" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Line Sequential buffer length" VALUE ="1024"/>
+        <ATTRIBUTE NAME ="Maximum Memory Allowed For Auto Memory Attributes" VALUE ="512MB"/>
+        <ATTRIBUTE NAME ="Maximum Percentage of Total Memory Allowed For Auto Memory Attributes" VALUE ="5"/>
+        <ATTRIBUTE NAME ="Additional Concurrent Pipelines for Lookup Cache Creation" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Custom Properties" VALUE =""/>
+        <ATTRIBUTE NAME ="Pre-build lookup cache" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Optimization Level" VALUE ="Medium"/>
+        <ATTRIBUTE NAME ="DateTime Format String" VALUE ="MM/DD/YYYY HH24:MI:SS.US"/>
+        <ATTRIBUTE NAME ="Pre 85 Timestamp Compatibility" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Log Options" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Save session log by" VALUE ="Session runs"/>
+        <ATTRIBUTE NAME ="Save session log for these runs" VALUE ="7"/>
+        <ATTRIBUTE NAME ="Session Log File Max Size" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Session Log File Max Time Period" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Maximum Partial Session Log Files" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Writer Commit Statistics Log Frequency" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Writer Commit Statistics Log Interval" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Error handling" VALUE =""/>
+        <ATTRIBUTE NAME ="Stop on errors" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Override tracing" VALUE ="Normal"/>
+        <ATTRIBUTE NAME ="On Stored Procedure error" VALUE ="Stop"/>
+        <ATTRIBUTE NAME ="On Pre-session command task error" VALUE ="Stop"/>
+        <ATTRIBUTE NAME ="On Pre-Post SQL error" VALUE ="Stop"/>
+        <ATTRIBUTE NAME ="Enable Recovery" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Error Log Type" VALUE ="None"/>
+        <ATTRIBUTE NAME ="Error Log Table Name Prefix" VALUE =""/>
+        <ATTRIBUTE NAME ="Error Log File Name" VALUE ="PMError.log"/>
+        <ATTRIBUTE NAME ="Log Source Row Data" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Data Column Delimiter" VALUE ="|"/>
+        <ATTRIBUTE NAME ="Partitioning Options" VALUE =""/>
+        <ATTRIBUTE NAME ="Dynamic Partitioning" VALUE ="Disabled"/>
+        <ATTRIBUTE NAME ="Number of Partitions" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Multiplication Factor" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Session on Grid" VALUE =""/>
+        <ATTRIBUTE NAME ="Is Enabled" VALUE ="NO"/>
+    </CONFIG>
+    <WORKFLOW DESCRIPTION ="" ISENABLED ="YES" ISRUNNABLESERVICE ="NO" ISSERVICE ="NO" ISVALID ="YES" NAME ="wf_m_Extract_Aetna_Invoice_Adjustment_FTP" REUSABLE_SCHEDULER ="NO" SCHEDULERNAME ="Scheduler" SERVERNAME ="IntSvc_Rebates_DEV1" SERVER_DOMAINNAME ="DOM_Caremark9_DEV1" SUSPEND_ON_ERROR ="NO" TASKS_MUST_RUN_ON_SERVER ="NO" VERSIONNUMBER ="1">
+        <SCHEDULER DESCRIPTION ="" NAME ="Scheduler" REUSABLE ="NO" VERSIONNUMBER ="1">
+            <SCHEDULEINFO SCHEDULETYPE ="ONDEMAND"/>
+        </SCHEDULER>
+        <TASK DESCRIPTION ="Send an email to notify that no file created because no rows were found to process" NAME ="Send_No_Row_Processed_Email" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+            <ATTRIBUTE NAME ="Email User Name" VALUE ="$PMFailureEmailUser"/>
+            <ATTRIBUTE NAME ="Email Subject" VALUE ="Aetna Invoiced Claim Extract - no rows were found to process for Invoiced Adjustment Claims file"/>
+            <ATTRIBUTE NAME ="Email Text" VALUE ="File not generated for Invoiced Adjustment Claims because no rows were found to process."/>
+        </TASK>
+        <TASK DESCRIPTION ="Send email to Aetna on successfully creation of file" NAME ="Send_Success_Email" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+            <ATTRIBUTE NAME ="Email User Name" VALUE ="$PMSuccessEmailUser, GDXAETOps@caremark.com, AetnaINV@Aetna.com, GDXWIPRO@cvscaremark.com"/>
+            <ATTRIBUTE NAME ="Email Subject" VALUE ="Aetna Invoice Claim Extract - Invoiced Adjustment Claims file has been generated for $$Quarter"/>
+            <ATTRIBUTE NAME ="Email Text" VALUE ="The Invoiced Adjustment Claims File for $$Quarter has been generated"/>
+        </TASK>
+        <TASK DESCRIPTION ="" NAME ="Start" REUSABLE ="NO" TYPE ="Start" VERSIONNUMBER ="1"/>
+        <TASK DESCRIPTION ="Send an email to notify the File merge/FTP failure." NAME ="Send_FTP_Fail_Email" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+            <ATTRIBUTE NAME ="Email User Name" VALUE ="$PMFailureEmailUser"/>
+            <ATTRIBUTE NAME ="Email Subject" VALUE ="Aetna Invoice Claim Extract - Invoiced Adjustment Claims file FTP to staging server has failed"/>
+            <ATTRIBUTE NAME ="Email Text" VALUE ="FTP to staging server has failed for Invoiced Adjustment Claims file."/>
+        </TASK>
+        <TASK DESCRIPTION ="Added to merge header, details and trailer files from previous session into 1 and FTP the final file to staging server." NAME ="Merge_And_FTP_To_Staging" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+            <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="YES"/>
+            <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+            <VALUEPAIR EXECORDER ="1" NAME ="Merge_And_FTP_File_To_Staging_Server" REVERSEASSIGNMENT ="NO" VALUE ="$PMRootDir/scripts/invoice_Extract_Files_ftp.ksh $$File_Nm"/>
+        </TASK>
+        <SESSION DESCRIPTION ="Added to update table VRAP.RCNT_DEX_CNTL with status =90" ISVALID ="YES" MAPPINGNAME ="m_AET_Extract_Upd_Stat_RCNT_DEX_CNTL" NAME ="s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL" REUSABLE ="NO" SORTORDER ="Binary" VERSIONNUMBER ="1">
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="RCNT_DEX_CNTL" STAGE ="1" TRANSFORMATIONNAME ="RCNT_DEX_CNTL" TRANSFORMATIONTYPE ="Target Definition">
+                <ATTRIBUTE NAME ="Table Name Prefix" VALUE ="VRAP"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="0" SINSTANCENAME ="SYSDUMMY1" STAGE ="0" TRANSFORMATIONNAME ="SYSDUMMY1" TRANSFORMATIONTYPE ="Source Definition"/>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="SQ_SYSDUMMY1" STAGE ="2" TRANSFORMATIONNAME ="SQ_SYSDUMMY1" TRANSFORMATIONTYPE ="Source Qualifier"/>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="UPD_RCNT_DEX_CNTL" STAGE ="2" TRANSFORMATIONNAME ="UPD_RCNT_DEX_CNTL" TRANSFORMATIONTYPE ="Update Strategy">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+                <ATTRIBUTE NAME ="Tracing Level" VALUE ="Verbose Data"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="EXPTRANS" STAGE ="2" TRANSFORMATIONNAME ="EXPTRANS" TRANSFORMATIONTYPE ="Expression">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+                <ATTRIBUTE NAME ="Tracing Level" VALUE ="Verbose Data"/>
+            </SESSTRANSFORMATIONINST>
+            <CONFIGREFERENCE REFOBJECTNAME ="default_session_config" TYPE ="Session config">
+                <ATTRIBUTE NAME ="Save session log for these runs" VALUE ="7"/>
+                <ATTRIBUTE NAME ="Stop on errors" VALUE ="1"/>
+            </CONFIGREFERENCE>
+            <SESSIONCOMPONENT REFOBJECTNAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Failure Email">
+                <TASK DESCRIPTION ="" NAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Email User Name" VALUE =""/>
+                    <ATTRIBUTE NAME ="Email Subject" VALUE ="FAILURE: %w %d"/>
+                    <ATTRIBUTE NAME ="Email Text" VALUE ="The mapping %m ran in the %s session in the %w workflow ran in %d.&#xD;&#xA;&#xD;&#xA;%t&#xD;&#xA;&#xD;&#xA;%l&#xD;&#xA;&#xD;&#xA;%r&#xD;&#xA;&#xD;&#xA;Session Log is attached&#xD;&#xA;%g"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Pre-session variable assignment">
+                <TASK DESCRIPTION ="" NAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+                <VALUEPAIR EXECORDER ="1" NAME ="$$STATUS" REVERSEASSIGNMENT ="NO" VALUE ="$$Status_Success"/>
+                <VALUEPAIR EXECORDER ="2" NAME ="$$PRCS_CRTE_ID" REVERSEASSIGNMENT ="NO" VALUE ="$$Prcs_Crte_Id_Success"/>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Post-session success variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Post-session failure variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONEXTENSION NAME ="Relational Writer" SINSTANCENAME ="RCNT_DEX_CNTL" SUBTYPE ="Relational Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="Relational" VARIABLE ="$Target"/>
+                <ATTRIBUTE NAME ="Target load type" VALUE ="Normal"/>
+                <ATTRIBUTE NAME ="Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update as Update" VALUE ="YES"/>
+                <ATTRIBUTE NAME ="Update as Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update else Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Delete" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Truncate target table option" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Reject file directory" VALUE ="$PMBadFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Reject filename" VALUE ="rcnt_dex_cntl1.bad"/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION DSQINSTNAME ="SQ_SYSDUMMY1" DSQINSTTYPE ="Source Qualifier" NAME ="Relational Reader" SINSTANCENAME ="SYSDUMMY1" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Definition" TYPE ="READER"/>
+            <SESSIONEXTENSION NAME ="Relational Reader" SINSTANCENAME ="SQ_SYSDUMMY1" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Qualifier" TYPE ="READER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="Relational" VARIABLE ="$Source"/>
+            </SESSIONEXTENSION>
+            <ATTRIBUTE NAME ="General Options" VALUE =""/>
+            <ATTRIBUTE NAME ="Write Backward Compatible Session Log File" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session Log File Name" VALUE ="s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.log"/>
+            <ATTRIBUTE NAME ="Session Log File directory" VALUE ="$PMSessionLogDir&#x5c;"/>
+            <ATTRIBUTE NAME ="Parameter Filename" VALUE =""/>
+            <ATTRIBUTE NAME ="Enable Test Load" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="$Source connection value" VALUE ="Relational:GDX"/>
+            <ATTRIBUTE NAME ="$Target connection value" VALUE ="Relational:GDX"/>
+            <ATTRIBUTE NAME ="Treat source rows as" VALUE ="Data driven"/>
+            <ATTRIBUTE NAME ="Commit Type" VALUE ="Target"/>
+            <ATTRIBUTE NAME ="Commit Interval" VALUE ="10000"/>
+            <ATTRIBUTE NAME ="Commit On End Of File" VALUE ="YES"/>
+            <ATTRIBUTE NAME ="Rollback Transactions on Errors" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+            <ATTRIBUTE NAME ="Java Classpath" VALUE =""/>
+            <ATTRIBUTE NAME ="Performance" VALUE =""/>
+            <ATTRIBUTE NAME ="DTM buffer size" VALUE ="Auto"/>
+            <ATTRIBUTE NAME ="Collect performance data" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Write performance data to repository" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Incremental Aggregation" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Enable high precision" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session retry on deadlock" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Pushdown Optimization" VALUE ="None"/>
+            <ATTRIBUTE NAME ="Allow Temporary View for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Temporary Sequence for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Pushdown for User Incompatible Connections" VALUE ="NO"/>
+        </SESSION>
+        <SESSION DESCRIPTION ="Added to update table VRAP.RCNT_DEX_CNTL with status =99" ISVALID ="YES" MAPPINGNAME ="m_AET_Extract_Upd_Stat_RCNT_DEX_CNTL" NAME ="s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL" REUSABLE ="NO" SORTORDER ="Binary" VERSIONNUMBER ="1">
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="RCNT_DEX_CNTL" STAGE ="1" TRANSFORMATIONNAME ="RCNT_DEX_CNTL" TRANSFORMATIONTYPE ="Target Definition">
+                <ATTRIBUTE NAME ="Table Name Prefix" VALUE ="VRAP"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="0" SINSTANCENAME ="SYSDUMMY1" STAGE ="0" TRANSFORMATIONNAME ="SYSDUMMY1" TRANSFORMATIONTYPE ="Source Definition"/>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="SQ_SYSDUMMY1" STAGE ="2" TRANSFORMATIONNAME ="SQ_SYSDUMMY1" TRANSFORMATIONTYPE ="Source Qualifier"/>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="UPD_RCNT_DEX_CNTL" STAGE ="2" TRANSFORMATIONNAME ="UPD_RCNT_DEX_CNTL" TRANSFORMATIONTYPE ="Update Strategy">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="EXPTRANS" STAGE ="2" TRANSFORMATIONNAME ="EXPTRANS" TRANSFORMATIONTYPE ="Expression">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <CONFIGREFERENCE REFOBJECTNAME ="default_session_config" TYPE ="Session config">
+                <ATTRIBUTE NAME ="Save session log for these runs" VALUE ="7"/>
+                <ATTRIBUTE NAME ="Stop on errors" VALUE ="1"/>
+            </CONFIGREFERENCE>
+            <SESSIONCOMPONENT REFOBJECTNAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Failure Email">
+                <TASK DESCRIPTION ="" NAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Email User Name" VALUE =""/>
+                    <ATTRIBUTE NAME ="Email Subject" VALUE ="FAILURE: %w %d"/>
+                    <ATTRIBUTE NAME ="Email Text" VALUE ="The mapping %m ran in the %s session in the %w workflow ran in %d.&#xD;&#xA;&#xD;&#xA;%t&#xD;&#xA;&#xD;&#xA;%l&#xD;&#xA;&#xD;&#xA;%r&#xD;&#xA;&#xD;&#xA;Session Log is attached&#xD;&#xA;%g"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Pre-session variable assignment">
+                <TASK DESCRIPTION ="" NAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+                <VALUEPAIR EXECORDER ="1" NAME ="$$STATUS" REVERSEASSIGNMENT ="NO" VALUE ="$$Status_Fail"/>
+                <VALUEPAIR EXECORDER ="2" NAME ="$$PRCS_CRTE_ID" REVERSEASSIGNMENT ="NO" VALUE ="$$Prcs_Crte_Id_Fail"/>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Post-session success variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Post-session failure variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONEXTENSION NAME ="Relational Writer" SINSTANCENAME ="RCNT_DEX_CNTL" SUBTYPE ="Relational Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="Relational" VARIABLE ="$Target"/>
+                <ATTRIBUTE NAME ="Target load type" VALUE ="Normal"/>
+                <ATTRIBUTE NAME ="Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update as Update" VALUE ="YES"/>
+                <ATTRIBUTE NAME ="Update as Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update else Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Delete" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Truncate target table option" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Reject file directory" VALUE ="$PMBadFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Reject filename" VALUE ="rcnt_dex_cntl1.bad"/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION DSQINSTNAME ="SQ_SYSDUMMY1" DSQINSTTYPE ="Source Qualifier" NAME ="Relational Reader" SINSTANCENAME ="SYSDUMMY1" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Definition" TYPE ="READER"/>
+            <SESSIONEXTENSION NAME ="Relational Reader" SINSTANCENAME ="SQ_SYSDUMMY1" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Qualifier" TYPE ="READER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="Relational" VARIABLE ="$Source"/>
+            </SESSIONEXTENSION>
+            <ATTRIBUTE NAME ="General Options" VALUE =""/>
+            <ATTRIBUTE NAME ="Write Backward Compatible Session Log File" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session Log File Name" VALUE ="s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.log"/>
+            <ATTRIBUTE NAME ="Session Log File directory" VALUE ="$PMSessionLogDir&#x5c;"/>
+            <ATTRIBUTE NAME ="Parameter Filename" VALUE =""/>
+            <ATTRIBUTE NAME ="Enable Test Load" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="$Source connection value" VALUE ="Relational:GDX"/>
+            <ATTRIBUTE NAME ="$Target connection value" VALUE ="Relational:GDX"/>
+            <ATTRIBUTE NAME ="Treat source rows as" VALUE ="Data driven"/>
+            <ATTRIBUTE NAME ="Commit Type" VALUE ="Target"/>
+            <ATTRIBUTE NAME ="Commit Interval" VALUE ="10000"/>
+            <ATTRIBUTE NAME ="Commit On End Of File" VALUE ="YES"/>
+            <ATTRIBUTE NAME ="Rollback Transactions on Errors" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+            <ATTRIBUTE NAME ="Java Classpath" VALUE =""/>
+            <ATTRIBUTE NAME ="Performance" VALUE =""/>
+            <ATTRIBUTE NAME ="DTM buffer size" VALUE ="Auto"/>
+            <ATTRIBUTE NAME ="Collect performance data" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Write performance data to repository" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Incremental Aggregation" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Enable high precision" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session retry on deadlock" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Pushdown Optimization" VALUE ="None"/>
+            <ATTRIBUTE NAME ="Allow Temporary View for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Temporary Sequence for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Pushdown for User Incompatible Connections" VALUE ="NO"/>
+        </SESSION>
+        <SESSION DESCRIPTION ="" ISVALID ="YES" MAPPINGNAME ="m_Extract_Aetna_Invoice_Adj_Cleanup" NAME ="s_m_Extract_Aetna_Invoice_Adj_Cleanup" REUSABLE ="NO" SORTORDER ="Binary" VERSIONNUMBER ="1">
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="RCNT_DEX_CNTL" STAGE ="1" TRANSFORMATIONNAME ="RCNT_DEX_CNTL" TRANSFORMATIONTYPE ="Target Definition">
+                <ATTRIBUTE NAME ="Table Name Prefix" VALUE ="VRAP"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="0" SINSTANCENAME ="F_Invoice_Cleanup_Src" STAGE ="0" TRANSFORMATIONNAME ="F_Invoice_Cleanup_Src" TRANSFORMATIONTYPE ="Source Definition">
+                <FLATFILE CODEPAGE ="US-ASCII" CONSECDELIMITERSASONE ="NO" DELIMITED ="YES" DELIMITERS ="," ESCAPE_CHARACTER ="" KEEPESCAPECHAR ="NO" LINESEQUENTIAL ="NO" MULTIDELIMITERSASAND ="NO" NULLCHARTYPE ="ASCII" NULL_CHARACTER ="*" PADBYTES ="1" QUOTE_CHARACTER ="NONE" REPEATABLE ="NO" ROWDELIMITER ="0" SKIPROWS ="0" STRIPTRAILINGBLANKS ="NO"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="SQ_Shortcut_to_F_Invoice_Cleanup_Src" STAGE ="2" TRANSFORMATIONNAME ="SQ_Shortcut_to_F_Invoice_Cleanup_Src" TRANSFORMATIONTYPE ="Source Qualifier"/>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="EXP_SET_VARS" STAGE ="2" TRANSFORMATIONNAME ="EXP_SET_VARS" TRANSFORMATIONTYPE ="Expression">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="Upd_RCNT_DEX_CNTL" STAGE ="2" TRANSFORMATIONNAME ="Upd_RCNT_DEX_CNTL" TRANSFORMATIONTYPE ="Update Strategy">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <CONFIGREFERENCE REFOBJECTNAME ="default_session_config" TYPE ="Session config"/>
+            <SESSIONCOMPONENT REFOBJECTNAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Failure Email">
+                <TASK DESCRIPTION ="" NAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Email User Name" VALUE ="$PMFailureEmailUser"/>
+                    <ATTRIBUTE NAME ="Email Subject" VALUE ="FAILURE: %w %d"/>
+                    <ATTRIBUTE NAME ="Email Text" VALUE ="The mapping %m ran in the %s session in the %w workflow ran in %d.&#xD;&#xA;&#xD;&#xA;%t&#xD;&#xA;&#xD;&#xA;%l&#xD;&#xA;&#xD;&#xA;%r&#xD;&#xA;&#xD;&#xA;Session Log is attached&#xD;&#xA;%g"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Pre-session variable assignment">
+                <TASK DESCRIPTION ="" NAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Post-session success variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+                <VALUEPAIR EXECORDER ="1" NAME ="$$Prcs_Crte_Id_Success" REVERSEASSIGNMENT ="NO" VALUE ="$$PRCS_CRTE_ID"/>
+                <VALUEPAIR EXECORDER ="2" NAME ="$$Prcs_Crte_Id_Fail" REVERSEASSIGNMENT ="NO" VALUE ="$$PRCS_CRTE_ID"/>
+                <VALUEPAIR EXECORDER ="3" NAME ="$$File_Nm" REVERSEASSIGNMENT ="NO" VALUE ="$$Filename"/>
+                <VALUEPAIR EXECORDER ="4" NAME ="$$Quarter" REVERSEASSIGNMENT ="NO" VALUE ="$$QUARTER"/>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Post-session failure variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+                <VALUEPAIR EXECORDER ="1" NAME ="$$Prcs_Crte_Id_Fail" REVERSEASSIGNMENT ="NO" VALUE ="$$PRCS_CRTE_ID"/>
+                <VALUEPAIR EXECORDER ="2" NAME ="$$Prcs_Crte_Id_Success" REVERSEASSIGNMENT ="NO" VALUE ="$$PRCS_CRTE_ID"/>
+            </SESSIONCOMPONENT>
+            <SESSIONEXTENSION NAME ="Relational Writer" SINSTANCENAME ="RCNT_DEX_CNTL" SUBTYPE ="Relational Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="Relational" VARIABLE ="$Target"/>
+                <ATTRIBUTE NAME ="Target load type" VALUE ="Normal"/>
+                <ATTRIBUTE NAME ="Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update as Update" VALUE ="YES"/>
+                <ATTRIBUTE NAME ="Update as Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update else Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Delete" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Truncate target table option" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Reject file directory" VALUE ="$PMBadFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Reject filename" VALUE ="rcnt_dex_cntl_cleanup.bad"/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION DSQINSTNAME ="SQ_Shortcut_to_F_Invoice_Cleanup_Src" DSQINSTTYPE ="Source Qualifier" NAME ="File Reader" SINSTANCENAME ="F_Invoice_Cleanup_Src" SUBTYPE ="File Reader" TRANSFORMATIONTYPE ="Source Definition" TYPE ="READER">
+                <CONNECTIONREFERENCE CNXREFNAME ="Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="" VARIABLE =""/>
+                <ATTRIBUTE NAME ="Input Type" VALUE ="File"/>
+                <ATTRIBUTE NAME ="Concurrent read partitioning" VALUE ="Optimize throughput"/>
+                <ATTRIBUTE NAME ="Command Type" VALUE ="Command Generating Data"/>
+                <ATTRIBUTE NAME ="Source filetype" VALUE ="Direct"/>
+                <ATTRIBUTE NAME ="Source file directory" VALUE ="$PMTargetFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Source filename" VALUE ="f_invoice_adj_cleanup.csv"/>
+                <ATTRIBUTE NAME ="Command" VALUE =""/>
+                <ATTRIBUTE NAME ="File Reader Truncate String Null" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Codepage Parameter" VALUE =""/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION NAME ="File Reader" SINSTANCENAME ="SQ_Shortcut_to_F_Invoice_Cleanup_Src" SUBTYPE ="File Reader" TRANSFORMATIONTYPE ="Source Qualifier" TYPE ="READER"/>
+            <ATTRIBUTE NAME ="General Options" VALUE =""/>
+            <ATTRIBUTE NAME ="Write Backward Compatible Session Log File" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session Log File Name" VALUE ="s_m_Extract_Aetna_Invoice_Adj_Cleanup.log"/>
+            <ATTRIBUTE NAME ="Session Log File directory" VALUE ="$PMSessionLogDir&#x5c;"/>
+            <ATTRIBUTE NAME ="Parameter Filename" VALUE =""/>
+            <ATTRIBUTE NAME ="Enable Test Load" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="$Source connection value" VALUE =""/>
+            <ATTRIBUTE NAME ="$Target connection value" VALUE ="Relational:GDX"/>
+            <ATTRIBUTE NAME ="Treat source rows as" VALUE ="Data driven"/>
+            <ATTRIBUTE NAME ="Commit Type" VALUE ="Target"/>
+            <ATTRIBUTE NAME ="Commit Interval" VALUE ="10000"/>
+            <ATTRIBUTE NAME ="Commit On End Of File" VALUE ="YES"/>
+            <ATTRIBUTE NAME ="Rollback Transactions on Errors" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+            <ATTRIBUTE NAME ="Java Classpath" VALUE =""/>
+            <ATTRIBUTE NAME ="Performance" VALUE =""/>
+            <ATTRIBUTE NAME ="DTM buffer size" VALUE ="Auto"/>
+            <ATTRIBUTE NAME ="Collect performance data" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Write performance data to repository" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Incremental Aggregation" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Enable high precision" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session retry on deadlock" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Pushdown Optimization" VALUE ="None"/>
+            <ATTRIBUTE NAME ="Allow Temporary View for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Temporary Sequence for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Pushdown for User Incompatible Connections" VALUE ="NO"/>
+        </SESSION>
+        <TASKINSTANCE DESCRIPTION ="Send an email to notify that no file created because no rows were found to process" FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="NO" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="Send_No_Row_Processed_Email" REUSABLE ="NO" TASKNAME ="Send_No_Row_Processed_Email" TASKTYPE ="Email" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <TASKINSTANCE DESCRIPTION ="Send email to Aetna on successfully creation of file" FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="NO" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="Send_Success_Email" REUSABLE ="NO" TASKNAME ="Send_Success_Email" TASKTYPE ="Email" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <TASKINSTANCE DESCRIPTION ="" ISENABLED ="YES" NAME ="Start" REUSABLE ="NO" TASKNAME ="Start" TASKTYPE ="Start"/>
+        <TASKINSTANCE DESCRIPTION ="Send an email to notify the File merge/FTP failure." FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="NO" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="Send_FTP_Fail_Email" REUSABLE ="NO" TASKNAME ="Send_FTP_Fail_Email" TASKTYPE ="Email" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <TASKINSTANCE DESCRIPTION ="Added to update table VRAP.RCNT_DEX_CNTL with status =90" FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="NO" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL" REUSABLE ="NO" TASKNAME ="s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL" TASKTYPE ="Session" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <TASKINSTANCE DESCRIPTION ="Added to update table VRAP.RCNT_DEX_CNTL with status =99" FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="NO" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL" REUSABLE ="NO" TASKNAME ="s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL" TASKTYPE ="Session" TREAT_INPUTLINK_AS_AND ="NO"/>
+        <TASKINSTANCE DESCRIPTION ="Added to merge header, details and trailer files from previous session into 1 and FTP the final file to staging server." FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="NO" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="Merge_And_FTP_To_Staging" REUSABLE ="NO" TASKNAME ="Merge_And_FTP_To_Staging" TASKTYPE ="Command" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <TASKINSTANCE DESCRIPTION ="" FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="NO" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="s_m_Extract_Aetna_Invoice_Adj_Cleanup" REUSABLE ="NO" TASKNAME ="s_m_Extract_Aetna_Invoice_Adj_Cleanup" TASKTYPE ="Session" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <WORKFLOWLINK CONDITION ="$s_m_Extract_Aetna_Invoice_Adj_Cleanup.Status=SUCCEEDED &#xD;&#xA;AND&#xD;&#xA;$s_m_Extract_Aetna_Invoice_Adj_Cleanup.TgtSuccessRows=0" FROMTASK ="s_m_Extract_Aetna_Invoice_Adj_Cleanup" TOTASK ="Send_No_Row_Processed_Email"/>
+        <WORKFLOWLINK CONDITION ="$Merge_And_FTP_To_Staging.ErrorCode=0" FROMTASK ="Merge_And_FTP_To_Staging" TOTASK ="Send_Success_Email"/>
+        <WORKFLOWLINK CONDITION ="$Merge_And_FTP_To_Staging.ErrorCode!=0" FROMTASK ="Merge_And_FTP_To_Staging" TOTASK ="Send_FTP_Fail_Email"/>
+        <WORKFLOWLINK CONDITION ="$Merge_And_FTP_To_Staging.ErrorCode=0" FROMTASK ="Merge_And_FTP_To_Staging" TOTASK ="s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL"/>
+        <WORKFLOWLINK CONDITION ="$Merge_And_FTP_To_Staging.ErrorCode!=0" FROMTASK ="Merge_And_FTP_To_Staging" TOTASK ="s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL"/>
+        <WORKFLOWLINK CONDITION ="($s_m_Extract_Aetna_Invoice_Adj_Cleanup.TgtSuccessRows=0&#xD;&#xA;AND&#xD;&#xA;$s_m_Extract_Aetna_Invoice_Adj_Cleanup.Status=SUCCEEDED)&#xD;&#xA;OR &#xD;&#xA;$s_m_Extract_Aetna_Invoice_Adj_Cleanup.Status= FAILED" FROMTASK ="s_m_Extract_Aetna_Invoice_Adj_Cleanup" TOTASK ="s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL"/>
+        <WORKFLOWLINK CONDITION ="$s_m_Extract_Aetna_Invoice_Adj_Cleanup.Status=SUCCEEDED&#xD;&#xA;AND&#xD;&#xA;$s_m_Extract_Aetna_Invoice_Adj_Cleanup.TgtSuccessRows&gt;0" FROMTASK ="s_m_Extract_Aetna_Invoice_Adj_Cleanup" TOTASK ="Merge_And_FTP_To_Staging"/>
+        <WORKFLOWLINK CONDITION ="" FROMTASK ="Start" TOTASK ="s_m_Extract_Aetna_Invoice_Adj_Cleanup"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_No_Row_Processed_Email.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_No_Row_Processed_Email.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_No_Row_Processed_Email.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_No_Row_Processed_Email.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_No_Row_Processed_Email.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_No_Row_Processed_Email.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_Success_Email.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_Success_Email.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_Success_Email.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_Success_Email.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_Success_Email.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_Success_Email.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_FTP_Fail_Email.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_FTP_Fail_Email.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_FTP_Fail_Email.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_FTP_Fail_Email.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_FTP_Fail_Email.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_FTP_Fail_Email.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.SrcSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.SrcFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully loaded" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.TgtSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to load" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.TgtFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Total number of transformation errors" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.TotalTransErrors" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="First error code" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.FirstErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="First error message" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.FirstErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.SrcSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.SrcFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully loaded" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.TgtSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to load" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.TgtFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Total number of transformation errors" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.TotalTransErrors" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="First error code" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.FirstErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="First error message" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.FirstErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Merge_And_FTP_To_Staging.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Merge_And_FTP_To_Staging.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Merge_And_FTP_To_Staging.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Merge_And_FTP_To_Staging.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Merge_And_FTP_To_Staging.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Merge_And_FTP_To_Staging.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Adj_Cleanup.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Adj_Cleanup.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Adj_Cleanup.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Adj_Cleanup.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Adj_Cleanup.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Adj_Cleanup.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Adj_Cleanup.SrcSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Adj_Cleanup.SrcFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully loaded" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Adj_Cleanup.TgtSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to load" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Adj_Cleanup.TgtFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Total number of transformation errors" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Adj_Cleanup.TotalTransErrors" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="First error code" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Adj_Cleanup.FirstErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="First error message" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Adj_Cleanup.FirstErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="0" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$Default" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="90" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$Status_Success" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="99" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$Status_Fail" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="0" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$dex_gid" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$File_Nm" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$Prcs_Crte_Id_Fail" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="nstring" DEFAULTVALUE ="&apos; &apos;" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$Str_Default" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$Prcs_Crte_Id_Success" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$Quarter" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="0" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$Status" USERDEFINED ="YES"/>
+        <ATTRIBUTE NAME ="Parameter Filename" VALUE =""/>
+        <ATTRIBUTE NAME ="Write Backward Compatible Workflow Log File" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Workflow Log File Name" VALUE ="adjustment_new_ftp.log"/>
+        <ATTRIBUTE NAME ="Workflow Log File Directory" VALUE ="$PMWorkflowLogDir&#x5c;"/>
+        <ATTRIBUTE NAME ="Save Workflow log by" VALUE ="By runs"/>
+        <ATTRIBUTE NAME ="Save workflow log for these runs" VALUE ="7"/>
+        <ATTRIBUTE NAME ="Service Name" VALUE =""/>
+        <ATTRIBUTE NAME ="Service Timeout" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Is Service Visible" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Is Service Protected" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Fail task after wait time" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Enable HA recovery" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Automatically recover terminated tasks" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Service Level Name" VALUE ="Default"/>
+        <ATTRIBUTE NAME ="Allow concurrent run with unique run instance name" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Allow concurrent run with same run instance name" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Maximum number of concurrent runs" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Assigned Web Services Hubs" VALUE =""/>
+        <ATTRIBUTE NAME ="Maximum number of concurrent runs per Hub" VALUE ="1000"/>
+        <ATTRIBUTE NAME ="Expected Service Time" VALUE ="1"/>
+        <METADATAEXTENSION DATATYPE ="STRING" DESCRIPTION ="" DOMAINNAME ="User Defined Metadata Domain" ISCLIENTEDITABLE ="YES" ISCLIENTVISIBLE ="YES" ISREUSABLE ="YES" ISSHAREREAD ="NO" ISSHAREWRITE ="NO" MAXLENGTH ="256" NAME ="Creation_date" VALUE ="March 13 2015" VENDORNAME ="INFORMATICA"/>
+        <METADATAEXTENSION DATATYPE ="STRING" DESCRIPTION ="" DOMAINNAME ="User Defined Metadata Domain" ISCLIENTEDITABLE ="YES" ISCLIENTVISIBLE ="YES" ISREUSABLE ="YES" ISSHAREREAD ="NO" ISSHAREWRITE ="NO" MAXLENGTH ="256" NAME ="Workflow_author" VALUE ="Mike Jones - qcpi2bw" VENDORNAME ="INFORMATICA"/>
+    </WORKFLOW>
+</FOLDER>
+</REPOSITORY>
+</POWERMART>

@@ -1,0 +1,160 @@
+<statements>
+	
+	<property name="schema" value="VRAP"/>
+
+	<!-- Statements used by com.caremark.gdx.rateload.dao.FileExportConfigDAOOracle -->
+	
+	<group name="Mstar">
+		<statement name="DELETE"><![CDATA[
+		
+			DELETE 
+			  FROM VRAP.TDISCNT_MSTAR_SMRY 
+			 WHERE MODEL_TYP_CD = '#MODEL_TYP_CD#'
+			   AND QUARTER_ID <> (SELECT QUARTER_ID FROM VRAP.TCUR_INV_PRD)
+			
+		]]></statement>
+		<statement name="INSERT"><![CDATA[
+		
+			INSERT INTO VRAP.TDISCNT_MSTAR_SMRY
+			      (
+			        QUARTER_ID,
+			        MODEL_TYP_CD,
+                                RPT_ID,
+                                PERIOD_ID  ,
+                                DISCNT_RUN_MODE_CD,
+    				HVST_ID,
+    				MKSR_RPT_ID ,
+    				MKSR_RT_BASIS_TYP_CD ,
+    				BASE_RATE_BSIS_CD,
+    				CLT_ID,
+    				FRMLY_SRC_CD ,
+    				FRMLY_ID ,
+    				DRUG_NDC_ID ,
+    				NHU_TYP_CD  ,
+    				RPT_DRUG_ID ,
+    				RT_BASIS_TYP_CD ,    
+    				BASE_DISCNT_FCTR,
+    				BASE_PRC_AMT ,
+    				PRFMC_DISCNT_FCTR ,
+    				PRFMC_PRC_AMT ,
+    				TOT_CLM_CNT_QTY,                            
+    				SUM_ITEM_CNT_QTY , 
+    				SUM_DSPN_QTY,
+    				SUM_BASE_DISCNT_AMT,
+    				SUM_PRFMC_DISCNT_AMT
+			      ) 
+                        SELECT #QUARTER#,
+                               '#MODEL_TYP_CD#',
+		               TE.RPT_ID,
+		               TE.PERIOD_ID,
+		               TE.DISCNT_RUN_MODE_CD,
+		               TE.HVST_ID,
+		               TE.MKSR_RPT_ID,
+		               TD.MKSR_RT_BASIS_TYP_CD,
+		               TD.BASE_RATE_BSIS_CD,
+		               VC.CLT_ID,
+		               VC.FRMLY_SRC_CD,
+			       VC.FRMLY_ID,
+			       VC.DRUG_NDC_ID,
+			       VC.NHU_TYP_CD,
+			       TD.RPT_DRUG_ID,
+			       TD.RT_BASIS_TYP_CD,
+			       TE.BASE_DISCNT_FCTR,
+			       TE.BASE_DRUG_PRC_AMT, 
+			       TE.PRFMC_DISCNT_FCTR,
+			       TE.PRFMC_DRUG_PRC_AMT,  
+
+			       COUNT(VC.CLAIM_ID),
+			       SUM(VC.ITEM_COUNT_QY),
+			       SUM(VC.DSPNSD_QTY),
+			       SUM(TE.BASE_DISCNT_AMT),
+              	               SUM(TE.PRFMC_DISCNT_AMT)
+
+                          FROM VRAP.TDISCNT_EXT_CLAIM_#MODEL# TE,
+          		       VRAP.TDISCNT_MKSR_PCT_#MODEL# TP,
+          		       VRAP.VCLAIM_#MODEL# VC,
+          		       VRAP.TDISCNT_RPT_DRUG_#MODEL# TD
+
+                         WHERE TE.HVST_ID =#HVST_ID#
+        	           AND TE.MKSR_RPT_ID IS NOT NULL
+                           AND TE.PERIOD_ID IN (SELECT PERIOD_ID 
+                                                  FROM VRAP.TDISCNT_PERIOD 
+                                                 WHERE QUARTER_ID = (SELECT QUARTER_ID FROM VRAP.TCUR_INV_PRD)) 
+                           AND TE.DISCNT_RUN_MODE_CD IN ('PROD', 'MPRD')
+      
+                           AND VC.CLAIM_ID = TE.CLAIM_ID
+    		           AND VC.EXTNL_SRC_CD = TE.EXTNL_SRC_CD  		   
+        	           AND VC.INV_ELIG_DT BETWEEN '#START_DATE#' AND '#END_DATE#' 
+        		   
+        	           AND TD.HVST_ID = TE.HVST_ID
+        		   
+        	           AND TD.DRUG_NDC_ID = VC.DRUG_NDC_ID
+   			   AND TD.NHU_TYP_CD = VC.NHU_TYP_CD
+   			       
+   		   	   AND TP.HVST_ID = TD.HVST_ID
+			   AND TP.MKSR_RPT_ID = TD.MKSR_RPT_ID
+                           AND COALESCE(TP.SPLT_ID,-1) = COALESCE(TD.SPLT_ID,-1)	       
+        		   
+        	           AND TP.CLT_ID = VC.CLT_ID
+                           AND (TP.MKSR_AGGR_LVL_CD = 65536 OR 
+                                (TP.MKSR_AGGR_LVL_CD = 73728
+                                 AND TP.FRMLY_ID = VC.FRMLY_ID
+                                 AND TP.FRMLY_SRC_CD = VC.FRMLY_SRC_CD)
+                                ) -- client/formulary level
+			   AND TP.GRP_ID IS NULL            -- client not in group
+
+                     GROUP BY 
+		           TE.RPT_ID,
+		           TE.PERIOD_ID,
+		           TE.DISCNT_RUN_MODE_CD,
+		           TE.HVST_ID,
+		           TE.MKSR_RPT_ID,
+		           TD.MKSR_RT_BASIS_TYP_CD,
+		           TD.BASE_RATE_BSIS_CD,
+		           VC.CLT_ID,
+		           VC.FRMLY_SRC_CD,
+			   VC.FRMLY_ID,
+		           VC.DRUG_NDC_ID,
+		           VC.NHU_TYP_CD,
+		           TD.RPT_DRUG_ID,
+		           TD.RT_BASIS_TYP_CD,
+		           TE.BASE_DISCNT_FCTR,
+		           TE.BASE_DRUG_PRC_AMT,
+		           TE.PRFMC_DISCNT_FCTR,
+		           TE.PRFMC_DRUG_PRC_AMT
+                      WITH UR
+
+		]]></statement>
+
+	</group>
+	<!-- ...........................COMMON_DATA.................................................. -->
+	<group name="Common">
+		<statement name="GET_COMMON_DATA"><![CDATA[
+			       
+	                   SELECT TAR.QUARTER_ID, TAR.HVST_ID,
+        			  TAR.PERIOD_BEGIN_DT, TAR.PERIOD_END_DT
+		             FROM VRAP.TDISCNT_APC_RPT TAR, VRAP.VRPT_CD VR
+		            WHERE TAR.QUARTER_ID = (SELECT QUARTER_ID FROM VRAP.TCUR_INV_PRD)
+                       	      AND TAR.MODEL_TYP_CD = ?
+                              AND TAR.PMT_SYS_ELIG_CD = '1' 
+			      AND VR.RPT_CD_NM LIKE 'R%'  
+			      AND VR.RPT_CD = TAR.RPT_TYP_CD
+		              AND TAR.HVST_ID NOT IN
+                                        (
+					 SELECT HVST_ID
+				           FROM VRAP.TDISCNT_MSTAR_SMRY
+                                          WHERE QUARTER_ID =  (SELECT QUARTER_ID FROM VRAP.TCUR_INV_PRD)
+                                            AND MODEL_TYP_CD = ?
+				        )  -- only for not completed report, if rerun
+             	            WITH UR   
+			          	
+		]]></statement>
+                <statement name="GET_QUARTER"><![CDATA[
+        
+            		SELECT QUARTER_ID
+              		  FROM VRAP.TCUR_INV_PRD
+                          WITH UR
+              
+                ]]></statement>
+	</group>
+</statements>

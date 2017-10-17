@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<webSphere-memento-map
+   CONFIG_MEMENTO_MAP_FILE_KEY_ID="WebSphere V5.1 Configuration Memento Map File"
+   CONFIG_NAME_KEY_ID="MyServer" server-type="14">
+   <memento-map>
+      <memento-map-entry key="ClientStaticWeb.war" value="com.ibm.etools.webtools.server:ClientStaticWeb"/>
+      <memento-map-entry key="MDA" value="com.ibm.etools.server.j2ee.ear13:MDA"/>
+      <memento-map-entry key="MDAWeb.war" value="com.ibm.etools.webtools.server:MDAWeb"/>
+      <memento-map-entry key="LoginWeb.war" value="com.ibm.etools.webtools.server:LoginWeb"/>
+      <memento-map-entry key="ClientStatic" value="com.ibm.etools.server.j2ee.ear13:ClientStatic"/>
+      <memento-map-entry key="Login" value="com.ibm.etools.server.j2ee.ear13:Login"/>
+      <memento-map-entry key="adminconsole.war" value="NON_DEPLOY_PROJECT:admin"/>
+   </memento-map>
+</webSphere-memento-map>

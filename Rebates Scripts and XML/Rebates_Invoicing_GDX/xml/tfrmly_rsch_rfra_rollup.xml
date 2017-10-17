@@ -1,0 +1,160 @@
+
+<!-- This xml will load DATA FROM THE VRAP.RFRA table into the VRAP.RFRA_SUM table on GDX 
+     
+     Datasource definition file datasource.xml is in the ./java/Common_java_db_interface/conf.
+     Input Parameters: N/A
+		   
+     Maestro Command to execute: ./scripts/Common_java_db_interface.ksh tfrmly_rsch_rfra_rollup.xml
+
+-->
+<sqml>
+	
+	<property name="TIMEOUT" value="0"/>
+	<!-- datasource.xml defines DB connection info. It should be under ./java/Common_java_db_interface/conf-->
+
+	<datasources resource="datasource.xml"/>
+	
+	<!--
+		Set-up a try block to send an email on exception.	
+	-->         
+	<command type="try">
+	<try>		
+		
+				
+		<!-- This is step 1 to select the rfra data and insert it into the vrap.trfra_sum table-->
+		
+		<command type="copy" batch="500">
+			<source type="sql" datasource="gdxdb"><![CDATA[
+			
+			 SELECT
+				count(distinct t.NDC_LC11_ID),
+				c.QTR_YYYY,
+				c.QTR_QQ,
+				c.RUN_DT,
+				t.FRMLY_ID,
+				t.FRMLY_SRC_CD,
+				case when t.FRMLY_PRCS_CD = ' ' then null else t.frmly_PRCS_CD end, 
+				case when t.FRMLY_CLOS_TYP_CD = ' ' then null else t.FRMLY_CLOS_TYP_CD end,
+				t.FRMLY_DRUG_STAT_CD,
+				case when t.RBAT_PREF_STAT_CD = ' ' then null else t.RBAT_PREF_STAT_CD end,
+				case when t.LOCK_CD = ' ' then null else t.LOCK_CD end,
+				case when t.MSG_NB = '     ' then null else t.MSG_NB end ,
+				RTRIM(t.BRND_DRUG_NM),
+				t.DUM_MSG_CD,
+				RTRIM(t.MSG_TXT)
+			 FROM VRAP.TRFRA_RSP t,
+			      VRAP.TRFRA_PRD_CNTL c,
+			      VRAP.TRFRA_RSP_HDR h
+			  WHERE C.RUN_STAT_CD = 'N'
+			    AND C.RUN_DT = (H.HDR_MM||H.HDR_DD||H.HDR_YYYY)
+			  GROUP BY
+			        c.QTR_YYYY,
+				c.QTR_QQ,
+				c.RUN_DT,
+				t.FRMLY_ID,
+				t.FRMLY_SRC_CD,
+				case when t.FRMLY_PRCS_CD = ' ' then null else t.frmly_PRCS_CD end, 
+				case when t.FRMLY_CLOS_TYP_CD = ' ' then null else t.FRMLY_CLOS_TYP_CD end,
+				t.FRMLY_DRUG_STAT_CD,
+				case when t.RBAT_PREF_STAT_CD = ' ' then null else t.RBAT_PREF_STAT_CD end,
+				case when t.LOCK_CD = ' ' then null else t.LOCK_CD end,
+				case when t.MSG_NB = '     ' then null else t.MSG_NB end,
+				RTRIM(t.BRND_DRUG_NM),
+				t.DUM_MSG_CD,
+				RTRIM(t.MSG_TXT)
+				
+			]]></source>	
+				
+
+			<target
+				type        = "queue"
+				threadCount = "5">
+			
+
+				<target
+					type           = "sql"
+					datasource     = "gdxdb"
+					transaction    = "true"
+					batch          = "500"
+					reportInterval = "50000"
+					queryTimeout   = "${TIMEOUT}"
+				><![CDATA[
+				
+			INSERT INTO VRAP.TRFRA_SUM
+				(NDC_CNT,
+				 QTR_YYYY,
+				 QTR_QQ,
+				 RUN_DT,
+				 FRMLY_ID,
+				 FRMLY_SRC_CD,
+				 FRMLY_PRCS_CD,
+				 FRMLY_CLOS_TYP_CD,
+				 FRMLY_DRUG_STAT_CD,
+				 RBAT_PREF_STAT_CD,
+				 LOCK_CD,
+				  MSG_NB,
+				 BRND_DRUG_NM,
+				 DUM_MSG_CD,
+				 MSG_TXT)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+				
+				]]></target>
+			 </target> 
+		</command>
+		
+	</try>
+	<catch>
+
+	<!-- Send an email on error -->
+		<command
+			type="mail"
+			mailTo="${email_address}"
+			mailFrom="tfrmly_rsch_rfra_rollup@caremark.com"
+			subject="[${region}] [ERROR] Load to VRAP.TRFRA_SUM table"
+			contentType="text/html"
+			throwsException="false"
+		><![CDATA[
+			<html>
+			<head>
+			<title>[ERROR] Load to VRAP.TRFRA_SUM table</title>
+			</head>
+			<body>
+
+			<h3><u>[ERROR] Load to VRAP.TRFRA_SUM table</u></h3>
+
+			<table cellpadding="2">
+				<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+				<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+				<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+				#if (${system.getProperty('logfile')})
+					<tr>
+						<td><b>Log File:</b></td>
+						<td>
+							${system.getProperty('logfile')}
+						<td>
+					</tr>
+				#end
+			</table>
+
+			<br>			
+			<br>
+
+			#if (${script.getLastStatement()})
+				<h3><u>Last Statement</u></h3>
+				<font style="color: blue; font-size: small">	
+				${script.getLastStatement()}
+				</font>
+
+				<br>
+				<br>
+			#end
+
+			<h3><u>Stack Trace</u></h3>		
+			<pre style="color: red; font-size: small;">${stackTrace}</pre>
+			</body>
+			</html>
+		]]></command>
+
+	</catch>
+	</command>
+</sqml>

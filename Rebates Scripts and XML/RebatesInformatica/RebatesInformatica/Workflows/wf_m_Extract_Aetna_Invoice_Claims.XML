@@ -1,0 +1,1087 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE POWERMART SYSTEM "powrmart.dtd">
+<POWERMART CREATION_DATE="07/17/2015 16:19:42" REPOSITORY_VERSION="182.91">
+<REPOSITORY NAME="PCRepos_Caremark9_DEV1" VERSION="182" CODEPAGE="MS1252" DATABASETYPE="DB2">
+<FOLDER NAME="Rebates_APC" GROUP="" OWNER="rebates_session_operator" SHARED="NOTSHARED" DESCRIPTION="Runs the Quarterly APC Process" PERMISSIONS="rwx---r--" UUID="a570492b-eaa4-4ad9-9a9b-4e8d63d726c7">
+    <MAPPING DESCRIPTION ="Created by Pooja on 03/11/2013 for ITPR004713 Invoice Claim Extract project--&#xD;&#xA;This mapping creates three files namely Header, Detail and Trailer for Invoiced Aetna Claims." ISVALID ="YES" NAME ="m_Extract_Aetna_Invoice_Claims" OBJECTVERSION ="1" VERSIONNUMBER ="1">
+        <TRANSFORMATION DESCRIPTION ="For Alpha Numeric Fields:&#xD;&#xA;Should be left-justified and then space-filled.&#xD;&#xA;If no value is provided for a given field, the field should be space-filled.&#xD;&#xA;&#xD;&#xA;For Numeric Fields:&#xD;&#xA;Should be right-justified and left zero-padded to the length of the field.&#xD;&#xA;E.g. a six digit negative 99.95 would be represented as &apos;?09995&apos;.&#xD;&#xA;a positive 99.95 would be represented as &apos;+09995&apos; or &apos;009995&apos;, since use of the positive sign is optional.&#xD;&#xA;If no value is provided for a given field, the field should be zero filled (&apos;000000?).&#xD;&#xA;" NAME ="Exp_Evaluate_Detail_Fields" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Expression" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="This port is used to get the first date of the appropriate quarter for dynamic file name of detail file." EXPRESSION ="QTR_PERIOD_END_DT" EXPRESSIONTYPE ="GENERAL" NAME ="QTR_PERIOD_END_DT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="29" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="This port is used to get the end date of the appropriate quarter for dynamic file name of detail file." EXPRESSION ="QTR_PERIOD_BEGIN_DT" EXPRESSIONTYPE ="GENERAL" NAME ="QTR_PERIOD_BEGIN_DT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="29" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This port is used to get the appropriate quarter in format &lt;Q0&gt;&lt;Quarter&gt; to be used in email text." EXPRESSION ="PERIOD_PARENT_ID" EXPRESSIONTYPE ="GENERAL" NAME ="PERIOD_PARENT_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="6" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="IC_AMT" EXPRESSIONTYPE ="GENERAL" NAME ="IC_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="11" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="QUARTER_ID" EXPRESSIONTYPE ="GENERAL" NAME ="QUARTER_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="DSPN_DT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="29" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="bigint" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLM_GID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="19" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RBAT_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="EXTL_LVL1_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="EXTL_LVL2_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="EXTL_LVL3_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CTRC_FEE_PD_AMT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="9" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="TAX_AMT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="9" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="MBR_RBAT_DISC_AMT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="11" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="INSRD_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CNTRCT_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="13" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="FRMLY_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="13" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="PRC_PTCT_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="13" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="ADMN_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="13" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="BASE_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="13" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="PRFMC_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="13" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="EXTL_SRC_CD" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="5" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLM_LVL1_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLM_LVL2_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="small integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLM_TYP_CD" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="5" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="MED_PYBL_CD" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="1" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="AP_CO_CD" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable is used to assign space to EXTL_LVL1_ID in case of null value." EXPRESSION ="IIF(ISNULL(EXTL_LVL1_ID),&apos; &apos;,EXTL_LVL1_ID)" EXPRESSIONTYPE ="GENERAL" NAME ="var_EXTL_LVL1_ID" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable is used to assign space to EXTL_LVL2_ID in case of null value." EXPRESSION ="IIF(ISNULL(EXTL_LVL2_ID),&apos; &apos;,EXTL_LVL2_ID)" EXPRESSIONTYPE ="GENERAL" NAME ="var_EXTL_LVL2_ID" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable is used to assign space to EXTL_LVL3_ID in case of null value." EXPRESSION ="IIF(ISNULL(EXTL_LVL3_ID),&apos; &apos;,EXTL_LVL3_ID)" EXPRESSIONTYPE ="GENERAL" NAME ="var_EXTL_LVL3_ID" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable is used to remove decimal point (&apos;.&apos;) from CNTRCT_DISCNT_AMT value." EXPRESSION ="IIF(ISNULL(CNTRCT_DISCNT_AMT),&apos;0&apos;,REPLACECHR(1,TO_CHAR(CNTRCT_DISCNT_AMT),&apos;.&apos;,&apos;&apos;))" EXPRESSIONTYPE ="GENERAL" NAME ="var_CNTRCT_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="15" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable is used to remove decimal point (&apos;.&apos;)." EXPRESSION ="IIF(ISNULL(FRMLY_DISCNT_AMT),&apos;0&apos;,REPLACECHR(1,TO_CHAR(FRMLY_DISCNT_AMT),&apos;.&apos;,&apos;&apos;))" EXPRESSIONTYPE ="GENERAL" NAME ="var_FRMLY_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="15" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable is used to remove decimal point (&apos;.&apos;)." EXPRESSION ="IIF(ISNULL(PRC_PTCT_DISCNT_AMT),&apos;0&apos;,REPLACECHR(1,TO_CHAR(PRC_PTCT_DISCNT_AMT),&apos;.&apos;,&apos;&apos;))" EXPRESSIONTYPE ="GENERAL" NAME ="var_PRC_PTCT_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="15" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable is used to remove decimal point (&apos;.&apos;)." EXPRESSION ="IIF(ISNULL(BASE_DISCNT_AMT),&apos;0&apos;,REPLACECHR(1,TO_CHAR(BASE_DISCNT_AMT),&apos;.&apos;,&apos;&apos;))" EXPRESSIONTYPE ="GENERAL" NAME ="var_BASE_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="15" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable is used to remove decimal point (&apos;.&apos;)." EXPRESSION ="IIF(ISNULL(ADMN_DISCNT_AMT),&apos;0&apos;,REPLACECHR(1,TO_CHAR(ADMN_DISCNT_AMT),&apos;.&apos;,&apos;&apos;))" EXPRESSIONTYPE ="GENERAL" NAME ="var_ADMN_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="15" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable is used to remove decimal point (&apos;.&apos;)." EXPRESSION ="IIF(ISNULL(PRFMC_DISCNT_AMT),&apos;0&apos;,REPLACECHR(1,TO_CHAR(PRFMC_DISCNT_AMT),&apos;.&apos;,&apos;&apos;))" EXPRESSIONTYPE ="GENERAL" NAME ="var_PRFMC_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="15" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable is used to remove decimal point (&apos;.&apos;)." EXPRESSION ="IIF(ISNULL(IC_AMT),&apos;0&apos;,REPLACECHR(1,TO_CHAR(IC_AMT),&apos;.&apos;,&apos;&apos;))" EXPRESSIONTYPE ="GENERAL" NAME ="var_IC_AMT" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="14" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable is used to remove decimal point (&apos;.&apos;)." EXPRESSION ="IIF(ISNULL(TAX_AMT),&apos;0&apos;,REPLACECHR(1,TO_CHAR(TAX_AMT),&apos;.&apos;,&apos;&apos;))" EXPRESSIONTYPE ="GENERAL" NAME ="var_TAX_AMT" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="12" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable is used to remove decimal point (&apos;.&apos;)." EXPRESSION ="IIF(ISNULL(CTRC_FEE_PD_AMT),&apos;0&apos;,REPLACECHR(1,TO_CHAR(CTRC_FEE_PD_AMT),&apos;.&apos;,&apos;&apos;))" EXPRESSIONTYPE ="GENERAL" NAME ="var_CTRC_FEE_PD_AMT" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="12" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable is used to remove decimal point (&apos;.&apos;)." EXPRESSION ="IIF(ISNULL(MBR_RBAT_DISC_AMT),&apos;0&apos;,REPLACECHR(1,TO_CHAR(MBR_RBAT_DISC_AMT),&apos;.&apos;,&apos;&apos;))" EXPRESSIONTYPE ="GENERAL" NAME ="var_MBR_RBAT_DISC_AMT" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="14" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable is used to assign default value (space) to INSRD_ID." EXPRESSION ="IIF(ISNULL(INSRD_ID),&apos; &apos;,INSRD_ID)" EXPRESSIONTYPE ="GENERAL" NAME ="var_INSRD_ID" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This output only port formats the QTR_PERIOD_BEGIN_DT as YYYYMMDD to get the first date for appropriate quarter to evaluate filename of detail file." EXPRESSION ="SUBSTR(TO_CHAR(QTR_PERIOD_BEGIN_DT),7,4)||SUBSTR(TO_CHAR(QTR_PERIOD_BEGIN_DT),1,2)||SUBSTR(TO_CHAR(QTR_PERIOD_BEGIN_DT),4,2)" EXPRESSIONTYPE ="GENERAL" NAME ="var_QTR_START_DT" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="8" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This output only port formats the QTR_PERIOD_END_DT as YYYYMMDD to get the end date for appropriate quarter to evaluate filename of detail file." EXPRESSION ="SUBSTR(TO_CHAR(QTR_PERIOD_END_DT),7,4)||SUBSTR(TO_CHAR(QTR_PERIOD_END_DT),1,2)||SUBSTR(TO_CHAR(QTR_PERIOD_END_DT),4,2)" EXPRESSIONTYPE ="GENERAL" NAME ="var_QTR_END_DT" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="8" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable holds space." EXPRESSION ="&apos; &apos;" EXPRESSIONTYPE ="GENERAL" NAME ="var_FILLER" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="1" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="&apos;INVCLMEXTRACT.&apos;|| var_QTR_START_DT|| &apos;.&apos;||var_QTR_END_DT" EXPRESSIONTYPE ="GENERAL" NAME ="var_CMN_FILE_NM" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="IIF(ISNULL(CLM_LVL1_ID),&apos; &apos;,CLM_LVL1_ID)" EXPRESSIONTYPE ="GENERAL" NAME ="var_CLM_LVL1_ID" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="IIF(ISNULL(CLM_LVL2_ID),&apos; &apos;,CLM_LVL2_ID)" EXPRESSIONTYPE ="GENERAL" NAME ="var_CLM_LVL2_ID" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="IIF(ISNULL(CLM_TYP_CD),&apos; &apos;,TO_CHAR(CLM_TYP_CD))" EXPRESSIONTYPE ="GENERAL" NAME ="var_CLM_TYP_CD" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="5" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="IIF(ISNULL(MED_PYBL_CD),&apos; &apos;,MED_PYBL_CD)" EXPRESSIONTYPE ="GENERAL" NAME ="var_MED_PYBL_CD" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="1" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="IIF(ISNULL(AP_CO_CD),&apos; &apos;,AP_CO_CD)" EXPRESSIONTYPE ="GENERAL" NAME ="var_AP_CO_CD" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port formats the QTR_PERIOD_END_DT as YYYYMMDD." EXPRESSION ="var_QTR_END_DT" EXPRESSIONTYPE ="GENERAL" NAME ="out_QTR_PERIOD_END_DT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="8" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port formats the DSPN_DT as YYYYMMDD." EXPRESSION ="SUBSTR(TO_CHAR(DSPN_DT),7,4)||SUBSTR(TO_CHAR(DSPN_DT),1,2)||SUBSTR(TO_CHAR(DSPN_DT),4,2)" EXPRESSIONTYPE ="GENERAL" NAME ="out_DSPN_DT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="8" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to right pad EXTL_SRC_CD with spaces if length is less than 5." EXPRESSION ="IIF(LENGTH(EXTL_SRC_CD)&lt;5,RPAD(EXTL_SRC_CD,5,&apos; &apos;),EXTL_SRC_CD)" EXPRESSIONTYPE ="GENERAL" NAME ="out_EXTL_SRC_CD" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="5" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to right pad RBAT_ID with spaces if length is less than 8." EXPRESSION ="IIF(LENGTH(TO_CHAR(RBAT_ID))&lt;8,rpad(TO_CHAR(RBAT_ID),8,&apos; &apos;),TO_CHAR(RBAT_ID))" EXPRESSIONTYPE ="GENERAL" NAME ="out_RBAT_ID" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="8" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to right pad EXTL_LVL1_ID with spaces if length is less than 20." EXPRESSION ="IIF(LENGTH(EXTL_LVL1_ID)&lt;20,rpad(EXTL_LVL1_ID,20,&apos; &apos;),EXTL_LVL1_ID)" EXPRESSIONTYPE ="GENERAL" NAME ="out_EXTL_LVL1_ID" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to right pad EXTL_LVL2_ID with spaces if length is less than 20." EXPRESSION ="IIF(LENGTH(var_EXTL_LVL2_ID)&lt;20,rpad(var_EXTL_LVL2_ID,20,&apos; &apos;),var_EXTL_LVL2_ID)" EXPRESSIONTYPE ="GENERAL" NAME ="out_EXTL_LVL2_ID" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to right pad EXTL_LVL3_ID with spaces if length is less than 20." EXPRESSION ="IIF(LENGTH(var_EXTL_LVL3_ID)&lt;20,rpad(var_EXTL_LVL3_ID,20,&apos; &apos;),var_EXTL_LVL3_ID)" EXPRESSIONTYPE ="GENERAL" NAME ="out_EXTL_LVL3_ID" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to left pad the CNTRCT_DISCNT_AMT values with 0 if length is less than 15. For e.g. value -9999 will become -00000000009999 and 9999 will become 000000000009999." EXPRESSION ="iif(length(var_CNTRCT_DISCNT_AMT)&lt;15,decode(substr(var_CNTRCT_DISCNT_AMT,1,1),&apos;-&apos;,&apos;-&apos;||LPAD(substr(var_CNTRCT_DISCNT_AMT,2,14),14,0),LPAD(var_CNTRCT_DISCNT_AMT,15,0)),var_CNTRCT_DISCNT_AMT)" EXPRESSIONTYPE ="GENERAL" NAME ="out_CNTRCT_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="15" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to left pad the FRMLY_DISCNT_AMT values with 0 if length is less than 15. For e.g. value -9999 will become -00000000009999 and 9999 will become 000000000009999." EXPRESSION ="iif(length(var_FRMLY_DISCNT_AMT)&lt;15,decode(substr(var_FRMLY_DISCNT_AMT,1,1),&apos;-&apos;,&apos;-&apos;||LPAD(substr(var_FRMLY_DISCNT_AMT,2,14),14,0),LPAD(var_FRMLY_DISCNT_AMT,15,0)),var_FRMLY_DISCNT_AMT)" EXPRESSIONTYPE ="GENERAL" NAME ="out_FRMLY_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="15" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to left pad the PRC_PTCT_DISCNT_AMT values with 0 if length is less than 15. For e.g. value -9999 will become -00000000009999 and 9999 will become 000000000009999." EXPRESSION ="iif(length(var_PRC_PTCT_DISCNT_AMT)&lt;15,decode(substr(var_PRC_PTCT_DISCNT_AMT,1,1),&apos;-&apos;,&apos;-&apos;||LPAD(substr(var_PRC_PTCT_DISCNT_AMT,2,14),14,0),LPAD(var_PRC_PTCT_DISCNT_AMT,15,0)),var_PRC_PTCT_DISCNT_AMT)" EXPRESSIONTYPE ="GENERAL" NAME ="out_PRC_PTCT_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="15" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to left pad the ADMN_DISCNT_AMT values with 0 if length is less than 15. For e.g. value -9999 will become -00000000009999 and 9999 will become 000000000009999." EXPRESSION ="iif(length(var_ADMN_DISCNT_AMT)&lt;15,decode(substr(var_ADMN_DISCNT_AMT,1,1),&apos;-&apos;,&apos;-&apos;||LPAD(substr(var_ADMN_DISCNT_AMT,2,14),14,0),LPAD(var_ADMN_DISCNT_AMT,15,0)),var_ADMN_DISCNT_AMT)" EXPRESSIONTYPE ="GENERAL" NAME ="out_ADMN_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="15" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to left pad the BASE_DISCNT_AMT values with 0 if length is less than 15. For e.g. value -9999 will become -00000000009999 and 9999 will become 000000000009999." EXPRESSION ="iif(length(var_BASE_DISCNT_AMT)&lt;15,decode(substr(var_BASE_DISCNT_AMT,1,1),&apos;-&apos;,&apos;-&apos;||LPAD(substr(var_BASE_DISCNT_AMT,2,14),14,0),LPAD(var_BASE_DISCNT_AMT,15,0)),var_BASE_DISCNT_AMT)" EXPRESSIONTYPE ="GENERAL" NAME ="out_BASE_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="15" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to left pad the PRFMC_DISCNT_AMT values with 0 if length is less than 15. For e.g. value -9999 will become -00000000009999 and 9999 will become 000000000009999." EXPRESSION ="iif(length(var_PRFMC_DISCNT_AMT)&lt;15,decode(substr(var_PRFMC_DISCNT_AMT,1,1),&apos;-&apos;,&apos;-&apos;||LPAD(substr(var_PRFMC_DISCNT_AMT,2,14),14,0),LPAD(var_PRFMC_DISCNT_AMT,15,0)),var_PRFMC_DISCNT_AMT)" EXPRESSIONTYPE ="GENERAL" NAME ="out_PRFMC_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="15" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to left pad the IC_AMT values with 0 if length is less than 14. For e.g. value -9999 will become -0000000009999 and 9999 will become 00000000009999." EXPRESSION ="iif(length(var_IC_AMT)&lt;14,decode(substr(var_IC_AMT,1,1),&apos;-&apos;,&apos;-&apos;||LPAD(substr(var_IC_AMT,2,13),13,0),LPAD(var_IC_AMT,14,0)),var_IC_AMT)" EXPRESSIONTYPE ="GENERAL" NAME ="out_IC_AMT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="14" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to left pad the TAX_AMT values with 0 if length is less than 12. For e.g. value -9999 will become -00000009999 and 9999 will become 000000009999." EXPRESSION ="iif(length(var_TAX_AMT)&lt;12,decode(substr(var_TAX_AMT,1,1),&apos;-&apos;,&apos;-&apos;||LPAD(substr(var_TAX_AMT,2,11),11,0),LPAD(var_TAX_AMT,12,0)),var_TAX_AMT)" EXPRESSIONTYPE ="GENERAL" NAME ="out_TAX_AMT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="12" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to left pad the CTRC_FEE_PD_AMT values with 0 if length is less than 12. For e.g. value -9999 will become -00000009999 and 9999 will become 000000009999." EXPRESSION ="iif(length(var_CTRC_FEE_PD_AMT)&lt;12,decode(substr(var_CTRC_FEE_PD_AMT,1,1),&apos;-&apos;,&apos;-&apos;||LPAD(substr(var_CTRC_FEE_PD_AMT,2,11),11,0),LPAD(var_CTRC_FEE_PD_AMT,12,0)),var_CTRC_FEE_PD_AMT)" EXPRESSIONTYPE ="GENERAL" NAME ="out_CTRC_FEE_PD_AMT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="12" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to left pad the MBR_RBAT_DISC_AMT values with 0 if length is less than 14. For e.g. value -9999 will become -0000000009999 and 9999 will become 00000000009999." EXPRESSION ="iif(length(var_MBR_RBAT_DISC_AMT)&lt;14,decode(substr(var_MBR_RBAT_DISC_AMT,1,1),&apos;-&apos;,&apos;-&apos;||LPAD(substr(var_MBR_RBAT_DISC_AMT,2,13),13,0),LPAD(var_MBR_RBAT_DISC_AMT,14,0)),var_MBR_RBAT_DISC_AMT)" EXPRESSIONTYPE ="GENERAL" NAME ="out_MBR_RBAT_DISC_AMT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="14" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to right pad INSRD_ID with spaces if length is less than 20." EXPRESSION ="IIF(LENGTH(var_INSRD_ID)&lt;20,&#xD;&#xA;RPAD(var_INSRD_ID,20,&apos; &apos;), INSRD_ID)" EXPRESSIONTYPE ="GENERAL" NAME ="out_INSRD_ID" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to right pad CLM_GID with spaces if length is less than 15." EXPRESSION ="IIF(LENGTH(TO_CHAR(CLM_GID))&lt;15,RPAD(TO_CHAR(CLM_GID),15,&apos; &apos;),TO_CHAR(CLM_GID))" EXPRESSIONTYPE ="GENERAL" NAME ="out_CLM_GID" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="15" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to RPAD FILLER with spaces upto 78 digits." EXPRESSION ="RPAD(var_FILLER,78,&apos; &apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="out_FILLER" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="78" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to craete the file name of the Detail file." EXPRESSION ="var_CMN_FILE_NM||&apos;_DETAIL&apos;" EXPRESSIONTYPE ="GENERAL" NAME ="out_FILE_NM_DTL" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="var_CMN_FILE_NM" EXPRESSIONTYPE ="GENERAL" NAME ="out_CMN_FILE_NM" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="small integer" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only flag is used to store the value returned from LKP_TCORP_EXTL_LVL1_ID to identify specific Aetna carriers which needs to be processed." EXPRESSION =":LKP.LKP_TCORP_EXTL_LVL1_ID(EXTL_SRC_CD,EXTL_LVL1_ID,2)" EXPRESSIONTYPE ="GENERAL" NAME ="CARRIER_FLAG" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="5" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to right pad CLM_LVL1_ID with spaces if length is less than 20" EXPRESSION ="RPAD(var_CLM_LVL1_ID,20,&apos; &apos;)" EXPRESSIONTYPE ="GENERAL" EXPRESSION_DESCRIPTION ="This output only port is used to right pad CLM_LVL1_ID with spaces if length is less than 20" NAME ="out_CLM_LVL1_ID" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to right pad CLM_LVL2_ID with spaces if length is less than 20" EXPRESSION ="RPAD(var_CLM_LVL2_ID,20,&apos; &apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="out_CLM_LVL2_ID" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to right pad CLM_TYP_CD with spaces if length is less than 5" EXPRESSION ="RPAD(var_CLM_TYP_CD,5,&apos; &apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="out_CLM_TYP_CD" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="5" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="var_MED_PYBL_CD" EXPRESSIONTYPE ="GENERAL" NAME ="out_MED_PYBL_CD" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="1" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to right pad AP_CO_CD with spaces if length is less than 10" EXPRESSION ="RPAD(var_AP_CO_CD,10,&apos; &apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="out_AP_CO_CD" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+        </TRANSFORMATION>
+        <TRANSFORMATION DESCRIPTION ="Added to aggregate the input rows to get total count and SUM(IC_AMT) for trailer file." NAME ="Agg_Header_Trailer" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Aggregator" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="Added for Trailer file to get the total record count." EXPRESSION ="count(*)" EXPRESSIONTYPE ="GENERAL" NAME ="RECORD_COUNT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="IC_AMT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="11" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port holda the SUM (IC_AMT) for Trailer file." EXPRESSION ="sum(IC_AMT)" EXPRESSIONTYPE ="GENERAL" NAME ="out_IC_AMT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="13" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="This port is used to evalaute dataset name for header file." EXPRESSION ="QTR_PERIOD_BEGIN_DT" EXPRESSIONTYPE ="GENERAL" NAME ="QTR_PERIOD_BEGIN_DT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="29" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="This port is used to evalaute dataset name for header file." EXPRESSION ="QTR_PERIOD_END_DT" EXPRESSIONTYPE ="GENERAL" NAME ="QTR_PERIOD_END_DT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="29" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This port is used to evaluate the appropriate quarter in the format &lt;Q0&gt;&lt;Quarter&gt; to be used in email text. " EXPRESSION ="PERIOD_PARENT_ID" EXPRESSIONTYPE ="GENERAL" NAME ="PERIOD_PARENT_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="6" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="CMN_FILE_NM" EXPRESSIONTYPE ="GENERAL" NAME ="CMN_FILE_NM" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Added to update Quarter information in log table RCNT_DEX_CNTL." EXPRESSION ="QUARTER_ID" EXPRESSIONTYPE ="GENERAL" NAME ="QUARTER_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TABLEATTRIBUTE NAME ="Cache Directory" VALUE ="$PMCacheDir"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+            <TABLEATTRIBUTE NAME ="Sorted Input" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Aggregator Data Cache Size" VALUE ="Auto"/>
+            <TABLEATTRIBUTE NAME ="Aggregator Index Cache Size" VALUE ="Auto"/>
+            <TABLEATTRIBUTE NAME ="Transformation Scope" VALUE ="All Input"/>
+        </TRANSFORMATION>
+        <TRANSFORMATION DESCRIPTION ="This expression is used to evaluate Header and Trailer fields.&#xD;&#xA;&#xD;&#xA;For Alpha Numeric Fields:&#xD;&#xA;Should be left-justified and then space-filled.&#xD;&#xA;If no value is provided for a given field, the field should be space-filled.&#xD;&#xA;&#xD;&#xA;For Numeric Fields:&#xD;&#xA;Should be right-justified and left zero-padded to the length of the field.&#xD;&#xA;E.g. a six digit negative 99.95 would be represented as &apos;?09995&apos;.&#xD;&#xA;a positive 99.95 would be represented as &apos;+09995&apos; or &apos;009995&apos;, since use of the positive sign is optional.&#xD;&#xA;If no value is provided for a given field, the field should be zero filled (&apos;000000?).&#xD;&#xA;" NAME ="Exp_Header_Trailer" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Expression" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="in_RECORD_COUNT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="in_IC_AMT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="13" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="in_QTR_PERIOD_BEGIN_DT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="29" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="in_QTR_PERIOD_END_DT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="29" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="in_PERIOD_PARENT_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="6" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="in_CMN_FILE_NM" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="QUARTER_ID" EXPRESSIONTYPE ="GENERAL" NAME ="QUARTER_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="This variable holds the total row counts (detail rows+header rows+trailer rows)" EXPRESSION ="in_RECORD_COUNT+2" EXPRESSIONTYPE ="GENERAL" NAME ="var_COUNT" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Added to evaluate dataset name - the start date part in format YYYYMMDD" EXPRESSION ="SUBSTR(TO_CHAR(in_QTR_PERIOD_BEGIN_DT),7,4)||SUBSTR(TO_CHAR(in_QTR_PERIOD_BEGIN_DT),1,2)||SUBSTR(TO_CHAR(in_QTR_PERIOD_BEGIN_DT),4,2)" EXPRESSIONTYPE ="GENERAL" NAME ="var_QTR_STRT_DT" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="8" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Added to evaluate dataset name - the end date part in format YYYYMMDD" EXPRESSION ="SUBSTR(TO_CHAR(in_QTR_PERIOD_END_DT),7,4)||SUBSTR(TO_CHAR(in_QTR_PERIOD_END_DT),1,2)||SUBSTR(TO_CHAR(in_QTR_PERIOD_END_DT),4,2)" EXPRESSIONTYPE ="GENERAL" NAME ="var_QTR_END_DT" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="8" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable is used to the time part of sysdate." EXPRESSION ="to_char(SYSDATE,&apos;HH24:MI:SS.US&apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="var_CREATE_TM" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable holds space." EXPRESSION ="&apos; &apos;" EXPRESSIONTYPE ="GENERAL" NAME ="var_FILE_FORMAT" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable holds the hard coded value of Receiver Id." EXPRESSION ="&apos;Aetna&apos;" EXPRESSIONTYPE ="GENERAL" NAME ="var_RCV_ID" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="25" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable holds space for Header Filler." EXPRESSION ="&apos; &apos;" EXPRESSIONTYPE ="GENERAL" NAME ="var_HDR_FILR" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable holds space for Trailer Filler." EXPRESSION ="&apos; &apos;" EXPRESSIONTYPE ="GENERAL" NAME ="var_TRLR_FILR" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable holds space for Version." EXPRESSION ="&apos; &apos;" EXPRESSIONTYPE ="GENERAL" NAME ="var_VERSION" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable holds the dataset name." EXPRESSION ="&apos;CVSCM-RB.INV-CLM-EXT.&apos;|| var_QTR_STRT_DT|| &apos;.&apos;||var_QTR_END_DT" EXPRESSIONTYPE ="GENERAL" NAME ="var_DATASET_NM" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="50" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable is used to remove the decimal character(&apos;.&apos;) from the IC_AMT value." EXPRESSION ="REPLACECHR(1,TO_CHAR(in_IC_AMT),&apos;.&apos;,&apos;&apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="var_IC_AMT" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="16" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable holds the quarter information in the format Q0&lt;Quarter&gt; &lt;Year&gt; for e.g. Q01 2013 to be used in the success email subject." EXPRESSION ="SUBSTR(TO_CHAR(in_QTR_PERIOD_BEGIN_DT),7,4)||&apos; &apos;||SUBSTR(in_PERIOD_PARENT_ID,1,3)" EXPRESSIONTYPE ="GENERAL" NAME ="var_QTR" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This variable is used to assign quarter value (var_QTR) to mapping variable to use in the success email body text and subject." EXPRESSION ="SETVARIABLE($$QUARTER,var_QTR)" EXPRESSIONTYPE ="GENERAL" NAME ="var_ASSIGN_QTR" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="SETVARIABLE($$Filename,in_CMN_FILE_NM)" EXPRESSIONTYPE ="GENERAL" NAME ="var_ASSIGN_FILE_NM" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="This variable holds the sequentially incremented value (by 1) for Transaction Id (Number needed for file reference)" EXPRESSION =":LKP.LKP_RCNT_DEX_CNTL(3)" EXPRESSIONTYPE ="GENERAL" NAME ="var_TXN_ID" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="SETVARIABLE($$DEX_GID,var_TXN_ID)" EXPRESSIONTYPE ="GENERAL" NAME ="var_ASSIGN_DEX_GID" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port formats the SYSDATE as YYYYMMDD." EXPRESSION ="SUBSTR(to_char(SYSDATE),7,4)||SUBSTR(to_char(SYSDATE),1,2)||SUBSTR(to_char(SYSDATE),4,2)" EXPRESSIONTYPE ="GENERAL" NAME ="out_CREATE_DT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port formats the CREATE_TM variable as HHMISS." EXPRESSION ="SUBSTR(TO_CHAR(var_CREATE_TM),1,2)||SUBSTR(TO_CHAR(var_CREATE_TM),4,2)||SUBSTR(TO_CHAR(var_CREATE_TM),7,2)" EXPRESSIONTYPE ="GENERAL" NAME ="out_CRT_TM" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="6" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This variable holds the hard coded value of Header Heading." EXPRESSION ="&apos;HEADER&apos;" EXPRESSIONTYPE ="GENERAL" NAME ="out_HEADER_HEADING" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="7" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This variable holds the hard coded value of Header Heading." EXPRESSION ="&apos;TRAILER&apos;" EXPRESSIONTYPE ="GENERAL" NAME ="out_TRAILER_HEADING" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="7" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port holds &apos;T&apos; for SIT and &apos;P&apos; for PROD." EXPRESSION ="DECODE(UPPER(SUBSTR($PMRepositoryServiceName,-4,3)),&apos;SIT&apos;,&apos;T&apos;,&apos;PRD&apos;,&apos;P&apos;,&apos;T&apos;)&#xD;&#xA;" EXPRESSIONTYPE ="GENERAL" NAME ="out_INDICATOR" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="1" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to RPAD the variable var_FILE_FORMAT with spaces upto 25 digits." EXPRESSION ="RPAD(var_FILE_FORMAT,25,&apos; &apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="out_FILE_FORMAT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="25" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to RPAD the variable var_VERSION with spaces upto 10 digits." EXPRESSION ="RPAD(var_VERSION,10,&apos; &apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="out_VERSION" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port holds the hard coded value of Submission Id." EXPRESSION ="&apos;CVSCM-RB.INV-CLM-EXT&apos;" EXPRESSIONTYPE ="GENERAL" NAME ="out_SUBMISSION_ID" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to RPAD the variable var_HDR_FILR with spaces upto 233 digits." EXPRESSION ="RPAD(var_HDR_FILR,233,&apos; &apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="out_HDR_FILR" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="233" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to RPAD the variable var_TRLR_FILR with spaces upto 343 digits." EXPRESSION ="RPAD(var_TRLR_FILR,343,&apos; &apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="out_TRLR_FILR" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="343" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port holds the hardcoded value of transaction count." EXPRESSION ="&apos;0000000000&apos;" EXPRESSIONTYPE ="GENERAL" NAME ="out_TXN_CNT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This ouput only port holds the dataset name right padded with spaces upto 50 digits if length is less than 50. " EXPRESSION ="IIF(LENGTH(var_DATASET_NM)&lt;50,RPAD(var_DATASET_NM,50,&apos; &apos;),var_DATASET_NM)" EXPRESSIONTYPE ="GENERAL" NAME ="out_DATASET_NM" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="50" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This port holds the Reciever Id right padded with spaces upto 25 length if length is less than 25." EXPRESSION ="IIF(LENGTH(var_RCV_ID)&lt;25,RPAD(var_RCV_ID,25,&apos; &apos;),var_RCV_ID)" EXPRESSIONTYPE ="GENERAL" NAME ="out_RCV_ID" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="25" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This port holds the Record count left padded with 0 if length is less than 10." EXPRESSION ="IIF(LENGTH(TO_CHAR(var_COUNT))&lt;10,LPAD(TO_CHAR(var_COUNT),10,&apos;0&apos;),TO_CHAR(var_COUNT))" EXPRESSIONTYPE ="GENERAL" NAME ="out_RCRD_CNT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port is used to left pad the IC_AMT values with 0 if length is less than 16. For e.g. value -9999 will become -000000000009999 and 9999 will become 0000000000009999." EXPRESSION ="iif(length(var_IC_AMT)&lt;16,decode(substr(var_IC_AMT,1,1),&apos;-&apos;,&apos;-&apos;||LPAD(substr(var_IC_AMT,2,15),15,0),LPAD(var_IC_AMT,16,0)),var_IC_AMT)" EXPRESSIONTYPE ="GENERAL" NAME ="out_IC_AMT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="16" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port holds the right padded value (with spaces) of transaction id (var_TXN_ID) if length is less than 25." EXPRESSION ="IIF(length(TO_CHAR(var_TXN_ID))&lt;15,RPAD(TO_CHAR(var_TXN_ID),15,&apos; &apos;),TO_CHAR(var_TXN_ID))" EXPRESSIONTYPE ="GENERAL" NAME ="out_TXN_ID" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="25" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="To be used to update the record in  RCNT_DEX_CNTL." EXPRESSION ="var_TXN_ID" EXPRESSIONTYPE ="GENERAL" NAME ="out_DEX_GID" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="in_CMN_FILE_NM||&apos;_HEADER&apos;" EXPRESSIONTYPE ="GENERAL" NAME ="out_FILE_NM_HDR" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="in_CMN_FILE_NM||&apos;_TRAILER&apos;" EXPRESSIONTYPE ="GENERAL" NAME ="out_FILE_NM_TRLR" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="255" SCALE ="0"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+        </TRANSFORMATION>
+        <TRANSFORMATION DESCRIPTION ="" NAME ="Upd_RCNT_DEX_CNTL" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Update Strategy" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Left pad record count with 0 if length is less than 10." NAME ="RCRD_CNT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Added to update Quarter information in log table RCNT_DEX_CNTL." NAME ="QUARTER_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="DEX_GID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TABLEATTRIBUTE NAME ="Update Strategy Expression" VALUE ="DD_UPDATE"/>
+            <TABLEATTRIBUTE NAME ="Forward Rejected Rows" VALUE ="YES"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+        </TRANSFORMATION>
+        <TRANSFORMATION DESCRIPTION ="&#xD;&#xA;" NAME ="SQTRANS" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Source Qualifier" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="QTR_PERIOD_BEGIN_DT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="29" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="QTR_PERIOD_END_DT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="29" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="Fill date" NAME ="DSPN_DT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="29" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rebate Id" NAME ="RBAT_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="External Source Code" NAME ="EXTL_SRC_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="5" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Carrier ID" NAME ="EXTL_LVL1_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="PSU" NAME ="EXTL_LVL2_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="GROUP" NAME ="EXTL_LVL3_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="Base Amount" NAME ="BASE_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="18" SCALE ="5"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="Market Share Amount" NAME ="PRFMC_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="18" SCALE ="5"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="Contract Amount" NAME ="CNTRCT_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="18" SCALE ="5"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="Formulary Amount" NAME ="FRMLY_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="18" SCALE ="5"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="Price Protection Amount" NAME ="PRC_PTCT_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="18" SCALE ="5"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="Admin Amount" NAME ="ADMN_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="18" SCALE ="5"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="Calc Ing Cost" NAME ="IC_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="11" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="Prof Fee" NAME ="CTRC_FEE_PD_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="9" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="SalesTax" NAME ="TAX_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="9" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="Copay" NAME ="MBR_RBAT_DISC_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="11" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Member GID" NAME ="INSRD_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="bigint" DEFAULTVALUE ="" DESCRIPTION ="Transaction Number" NAME ="CLM_GID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="19" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="PERIOD_PARENT_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="6" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="QUARTER_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="MODEL_TYP_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="1" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="INV_ELIG_DT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="29" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="PRD_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="6" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="HVST_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="MNTH_PERIOD_END_DT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="29" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLM_LVL1_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLM_LVL2_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="small integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLM_TYP_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="5" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This is an Aetna only field, populated for Aetnas Z clms which indicate a Medicare Part B claim when it is determined that drug is Med B; also for Aetnas I clms processed through a pharmacy to RxCLAIM but is covered under the mbrs medical benefit." NAME ="MED_PYBL_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="1" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="AP_CO_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TABLEATTRIBUTE NAME ="Sql Query" VALUE ="SELECT MAX (PRD.QTR_PERIOD_BEGIN_DT) AS QTR_PERIOD_BEGIN_DT,&#xD;&#xA;       MAX (PRD.QTR_PERIOD_END_DT) AS QTR_PERIOD_END_DT,&#xD;&#xA;       MAX (BCI.DSPN_DT) AS DSPN_DT,&#xD;&#xA;       MAX (BCI.RBAT_ID) AS RBAT_ID,&#xD;&#xA;       MAX (BCI.EXTL_SRC_CD) AS EXTL_SRC_CD,&#xD;&#xA;       MAX (BCI.EXTL_LVL1_ID) AS EXTL_LVL1_ID,&#xD;&#xA;       MAX (BCI.EXTL_LVL2_ID) AS EXTL_LVL2_ID,&#xD;&#xA;       MAX (BCI.EXTL_LVL3_ID) AS EXTL_LVL3_ID,&#xD;&#xA;       SUM (EXT.BASE_DISCNT_AMT) AS BASE_DISCNT_AMT,&#xD;&#xA;       SUM (EXT.PRFMC_DISCNT_AMT) AS PRFMC_DISCNT_AMT,&#xD;&#xA;       SUM (EXT.CNTRCT_DISCNT_AMT) AS CNTRCT_DISCNT_AMT,&#xD;&#xA;       SUM (EXT.FRMLY_DISCNT_AMT) AS FRMLY_DISCNT_AMT,&#xD;&#xA;       SUM (EXT.PRC_PTCT_DISCNT_AMT) AS PRC_PTCT_DISCNT_AMT,&#xD;&#xA;       SUM (EXT.ADMN_DISCNT_AMT) AS ADMN_DISCNT_AMT,&#xD;&#xA;       SUM (BCI.IC_AMT) AS IC_AMT,&#xD;&#xA;       SUM (BCA.CTRC_FEE_PD_AMT) AS CTRC_FEE_PD_AMT,&#xD;&#xA;       MAX (BCA.TAX_AMT) AS TAX_AMT,&#xD;&#xA;       MAX (BCI.MBR_RBAT_DISC_AMT) AS MBR_RBAT_DISC_AMT,&#xD;&#xA;       MAX (BCA.INSRD_ID) AS INSRD_ID,&#xD;&#xA;       BCI.CLM_GID AS CLM_GID,&#xD;&#xA;       MAX (PRD.PERIOD_PARENT_ID) AS PERIOD_PARENT_ID,&#xD;&#xA;       MAX (PRD.QUARTER_ID) AS QUARTER_ID,&#xD;&#xA;       BCI.CLM_LVL1_ID AS CLM_LVL1_ID,&#xD;&#xA;       BCI.CLM_LVL2_ID AS CLM_LVL2_ID,&#xD;&#xA;       BCI.CLM_TYP_CD AS CLM_TYP_CD,&#xD;&#xA;       BCI.MED_PYBL_CD AS MED_PYBL_CD,&#xD;&#xA;       BCI.AP_CO_CD AS AP_CO_CD&#xD;&#xA;  FROM VRAP.TCUR_INV_PRD CUR&#xD;&#xA;       INNER JOIN VRAP.VRCIT_MODEL_PRD_STUS PRD&#xD;&#xA;          ON CUR.QUARTER_ID = PRD.QUARTER_ID AND PRD.MODEL_TYP_CD = &apos;T&apos;&#xD;&#xA;       INNER JOIN VRAP.RCIT_BASE_CLM_INV BCI&#xD;&#xA;          ON BCI.INV_ELIG_DT = PRD.MNTH_PERIOD_END_DT&#xD;&#xA;             AND BCI.MODEL_TYP_CD = PRD.MODEL_TYP_CD&#xD;&#xA;       INNER JOIN VRAP.TAPC_CLAIMS_AET AET&#xD;&#xA;          ON BCI.CLM_GID = AET.CLAIM_ID AND AET.QUARTER_ID = PRD.QUARTER_ID&#xD;&#xA;       INNER JOIN VRAP.RCIT_BASE_CLM_APC BCA&#xD;&#xA;          ON AET.CLAIM_ID = BCA.CLM_GID&#xD;&#xA;       LEFT OUTER JOIN VRAP.TDISCNT_EXT_CLAIM_AET EXT&#xD;&#xA;          ON AET.HVST_ID = EXT.HVST_ID AND AET.CLAIM_ID = EXT.CLAIM_ID&#xD;&#xA;GROUP BY BCI.CLM_GID, BCI.CLM_LVL1_ID, BCI.CLM_LVL2_ID, BCI.CLM_TYP_CD, BCI.MED_PYBL_CD, BCI.AP_CO_CD&#xD;&#xA;  WITH UR"/>
+            <TABLEATTRIBUTE NAME ="User Defined Join" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Source Filter" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Number Of Sorted Ports" VALUE ="0"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+            <TABLEATTRIBUTE NAME ="Select Distinct" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Is Partitionable" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Pre SQL" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Post SQL" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Output is deterministic" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Output is repeatable" VALUE ="Never"/>
+        </TRANSFORMATION>
+        <TRANSFORMATION DESCRIPTION ="Claims are filtered based on Aetna Carriers." NAME ="Fil_Claims" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Filter" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="small integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CARRIER_FLAG" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="5" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="EXTL_SRC_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="5" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RBAT_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="8" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="EXTL_LVL1_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="EXTL_LVL2_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="EXTL_LVL3_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CNTRCT_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="15" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="FRMLY_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="15" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="PRC_PTCT_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="15" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="ADMN_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="15" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="BASE_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="15" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="PRFMC_DISCNT_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="15" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="TAX_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="12" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CTRC_FEE_PD_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="12" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="MBR_RBAT_DISC_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="14" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="INSRD_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLM_GID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="15" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="FILLER" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="78" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="FILE_NM" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="DATE" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="8" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="DSPN_DT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="8" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="IC_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="11" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="QTR_PERIOD_BEGIN_DT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="29" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="QTR_PERIOD_END_DT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="29" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="IC_AMT_DTL" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="14" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="PERIOD_PARENT_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="6" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CMN_FILE_NM" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="QUARTER_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLM_LVL1_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLM_LVL2_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLM_TYP_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="5" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="MED_PYBL_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="1" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="AP_CO_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TABLEATTRIBUTE NAME ="Filter Condition" VALUE ="CARRIER_FLAG=0"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+        </TRANSFORMATION>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="1" NAME ="F_Invoice_Extract_Trailer" TRANSFORMATION_NAME ="F_Invoice_Extract_Trailer" TRANSFORMATION_TYPE ="Target Definition" TYPE ="TARGET"/>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="3" NAME ="F_Invoice_Extract_Header" TRANSFORMATION_NAME ="F_Invoice_Extract_Header" TRANSFORMATION_TYPE ="Target Definition" TYPE ="TARGET"/>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="4" NAME ="RCNT_DEX_CNTL" TRANSFORMATION_NAME ="RCNT_DEX_CNTL" TRANSFORMATION_TYPE ="Target Definition" TYPE ="TARGET"/>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="2" NAME ="F_Invoice_Extract_Detail" TRANSFORMATION_NAME ="F_Invoice_Extract_Detail" TRANSFORMATION_TYPE ="Target Definition" TYPE ="TARGET"/>
+        <INSTANCE DESCRIPTION ="For Alpha Numeric Fields:&#xD;&#xA;Should be left-justified and then space-filled.&#xD;&#xA;If no value is provided for a given field, the field should be space-filled.&#xD;&#xA;&#xD;&#xA;For Numeric Fields:&#xD;&#xA;Should be right-justified and left zero-padded to the length of the field.&#xD;&#xA;E.g. a six digit negative 99.95 would be represented as &apos;?09995&apos;.&#xD;&#xA;a positive 99.95 would be represented as &apos;+09995&apos; or &apos;009995&apos;, since use of the positive sign is optional.&#xD;&#xA;If no value is provided for a given field, the field should be zero filled (&apos;000000?).&#xD;&#xA;" INSTANCEID ="5" NAME ="Exp_Evaluate_Detail_Fields" REUSABLE ="NO" TRANSFORMATION_NAME ="Exp_Evaluate_Detail_Fields" TRANSFORMATION_TYPE ="Expression" TYPE ="TRANSFORMATION"/>
+        <INSTANCE DESCRIPTION ="Added to aggregate the input rows to get total count and SUM(IC_AMT) for trailer file." INSTANCEID ="6" NAME ="Agg_Header_Trailer" REUSABLE ="NO" TRANSFORMATION_NAME ="Agg_Header_Trailer" TRANSFORMATION_TYPE ="Aggregator" TYPE ="TRANSFORMATION"/>
+        <INSTANCE DBDNAME ="GDX_VRAP" DESCRIPTION ="" INSTANCEID ="9" NAME ="TDISCNT_EXT_CLAIM_AET" TRANSFORMATION_NAME ="TDISCNT_EXT_CLAIM_AET" TRANSFORMATION_TYPE ="Source Definition" TYPE ="SOURCE"/>
+        <INSTANCE DBDNAME ="GDX_VRAP" DESCRIPTION ="" INSTANCEID ="12" NAME ="TAPC_CLAIMS_AET" TRANSFORMATION_NAME ="TAPC_CLAIMS_AET" TRANSFORMATION_TYPE ="Source Definition" TYPE ="SOURCE"/>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="11" NAME ="Lkp_TCORP_EXTL_LVL1_ID" REUSABLE ="YES" TRANSFORMATION_NAME ="Lkp_TCORP_EXTL_LVL1_ID" TRANSFORMATION_TYPE ="Lookup Procedure" TYPE ="TRANSFORMATION">
+            <TABLEATTRIBUTE NAME ="Lookup table name" VALUE ="VRAP.TCORP_EXTL_LVL1_ID"/>
+        </INSTANCE>
+        <INSTANCE DESCRIPTION ="This expression is used to evaluate Header and Trailer fields.&#xD;&#xA;&#xD;&#xA;For Alpha Numeric Fields:&#xD;&#xA;Should be left-justified and then space-filled.&#xD;&#xA;If no value is provided for a given field, the field should be space-filled.&#xD;&#xA;&#xD;&#xA;For Numeric Fields:&#xD;&#xA;Should be right-justified and left zero-padded to the length of the field.&#xD;&#xA;E.g. a six digit negative 99.95 would be represented as &apos;?09995&apos;.&#xD;&#xA;a positive 99.95 would be represented as &apos;+09995&apos; or &apos;009995&apos;, since use of the positive sign is optional.&#xD;&#xA;If no value is provided for a given field, the field should be zero filled (&apos;000000?).&#xD;&#xA;" INSTANCEID ="13" NAME ="Exp_Header_Trailer" REUSABLE ="NO" TRANSFORMATION_NAME ="Exp_Header_Trailer" TRANSFORMATION_TYPE ="Expression" TYPE ="TRANSFORMATION"/>
+        <INSTANCE DBDNAME ="GDX_VRAP" DESCRIPTION ="" INSTANCEID ="10" NAME ="RCIT_BASE_CLM_INV" TRANSFORMATION_NAME ="RCIT_BASE_CLM_INV" TRANSFORMATION_TYPE ="Source Definition" TYPE ="SOURCE"/>
+        <INSTANCE DBDNAME ="GDX_VRAP" DESCRIPTION ="" INSTANCEID ="14" NAME ="RCIT_BASE_CLM_APC" TRANSFORMATION_NAME ="RCIT_BASE_CLM_APC" TRANSFORMATION_TYPE ="Source Definition" TYPE ="SOURCE"/>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="15" NAME ="Upd_RCNT_DEX_CNTL" REUSABLE ="NO" TRANSFORMATION_NAME ="Upd_RCNT_DEX_CNTL" TRANSFORMATION_TYPE ="Update Strategy" TYPE ="TRANSFORMATION"/>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="16" NAME ="LKP_RCNT_DEX_CNTL" REUSABLE ="YES" TRANSFORMATION_NAME ="LKP_RCNT_DEX_CNTL" TRANSFORMATION_TYPE ="Lookup Procedure" TYPE ="TRANSFORMATION"/>
+        <INSTANCE DESCRIPTION ="&#xD;&#xA;" INSTANCEID ="8" NAME ="SQTRANS" REUSABLE ="NO" TRANSFORMATION_NAME ="SQTRANS" TRANSFORMATION_TYPE ="Source Qualifier" TYPE ="TRANSFORMATION">
+            <ASSOCIATED_SOURCE_INSTANCE NAME ="RCIT_BASE_CLM_APC"/>
+            <ASSOCIATED_SOURCE_INSTANCE NAME ="VRCIT_MODEL_PRD_STUS"/>
+            <ASSOCIATED_SOURCE_INSTANCE NAME ="TDISCNT_EXT_CLAIM_AET"/>
+            <ASSOCIATED_SOURCE_INSTANCE NAME ="TAPC_CLAIMS_AET"/>
+            <ASSOCIATED_SOURCE_INSTANCE NAME ="RCIT_BASE_CLM_INV"/>
+        </INSTANCE>
+        <INSTANCE DESCRIPTION ="Claims are filtered based on Aetna Carriers." INSTANCEID ="17" NAME ="Fil_Claims" REUSABLE ="NO" TRANSFORMATION_NAME ="Fil_Claims" TRANSFORMATION_TYPE ="Filter" TYPE ="TRANSFORMATION"/>
+        <INSTANCE DBDNAME ="GDX_VRAP" DESCRIPTION ="" INSTANCEID ="7" NAME ="VRCIT_MODEL_PRD_STUS" TRANSFORMATION_NAME ="VRCIT_MODEL_PRD_STUS" TRANSFORMATION_TYPE ="Source Definition" TYPE ="SOURCE"/>
+        <CONNECTOR FROMFIELD ="out_CRT_TM" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="CREATE_TM" TOINSTANCE ="F_Invoice_Extract_Trailer" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_FILE_NM_TRLR" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="FileName" TOINSTANCE ="F_Invoice_Extract_Trailer" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_TRLR_FILR" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="FILLER" TOINSTANCE ="F_Invoice_Extract_Trailer" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_RCRD_CNT" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="RECORD_CNT" TOINSTANCE ="F_Invoice_Extract_Trailer" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_IC_AMT" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="TRANS_AMT" TOINSTANCE ="F_Invoice_Extract_Trailer" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_TXN_CNT" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="TRANS_CNT" TOINSTANCE ="F_Invoice_Extract_Trailer" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_TRAILER_HEADING" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="TRAILER_TXT" TOINSTANCE ="F_Invoice_Extract_Trailer" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_CREATE_DT" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="CREATE_DT" TOINSTANCE ="F_Invoice_Extract_Trailer" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_VERSION" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="VERSION" TOINSTANCE ="F_Invoice_Extract_Header" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_HDR_FILR" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="FILLER" TOINSTANCE ="F_Invoice_Extract_Header" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_DATASET_NM" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="DATASET_NM" TOINSTANCE ="F_Invoice_Extract_Header" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_HEADER_HEADING" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="HEADER_TXT" TOINSTANCE ="F_Invoice_Extract_Header" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_INDICATOR" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="INDICATOR" TOINSTANCE ="F_Invoice_Extract_Header" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_SUBMISSION_ID" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="SUBMISSION_ID" TOINSTANCE ="F_Invoice_Extract_Header" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_RCV_ID" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="RCVR_ID" TOINSTANCE ="F_Invoice_Extract_Header" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_CREATE_DT" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="CREATE_DT" TOINSTANCE ="F_Invoice_Extract_Header" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_FILE_FORMAT" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="FILE_FRMT" TOINSTANCE ="F_Invoice_Extract_Header" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_CRT_TM" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="CREATE_TM" TOINSTANCE ="F_Invoice_Extract_Header" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_TXN_ID" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="TRANS_ID" TOINSTANCE ="F_Invoice_Extract_Header" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_FILE_NM_HDR" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="FileName" TOINSTANCE ="F_Invoice_Extract_Header" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="RCRD_CNT" FROMINSTANCE ="Upd_RCNT_DEX_CNTL" FROMINSTANCETYPE ="Update Strategy" TOFIELD ="REC_CNT_VL" TOINSTANCE ="RCNT_DEX_CNTL" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="QUARTER_ID" FROMINSTANCE ="Upd_RCNT_DEX_CNTL" FROMINSTANCETYPE ="Update Strategy" TOFIELD ="OBJ_GID" TOINSTANCE ="RCNT_DEX_CNTL" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="DEX_GID" FROMINSTANCE ="Upd_RCNT_DEX_CNTL" FROMINSTANCETYPE ="Update Strategy" TOFIELD ="DEX_GID" TOINSTANCE ="RCNT_DEX_CNTL" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CLM_GID" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="CLM_GID" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="FILLER" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="FILLER" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CLM_LVL2_ID" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="CLM_LVL2_ID" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CLM_TYP_CD" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="CLM_TYP_CD" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="MED_PYBL_CD" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="MED_PYBL_CD" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="FILE_NM" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="FileName" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CNTRCT_DISCNT_AMT" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="CNTRCT_DISCNT_AMT" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="FRMLY_DISCNT_AMT" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="FRMLY_DISCNT_AMT" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="PRC_PTCT_DISCNT_AMT" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="PRC_PTCT_DISCNT_AMT" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="IC_AMT_DTL" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="IC_AMT" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="EXTL_SRC_CD" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="EXTL_SRC_CD" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="RBAT_ID" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="RBAT_ID" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CLM_LVL1_ID" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="CLM_LVL1_ID" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="AP_CO_CD" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="AP_CO_CD" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="DATE" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="DATE" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="DSPN_DT" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="FILL_DT" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="PRFMC_DISCNT_AMT" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="PRFMC_DISCNT_AMT" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="EXTL_LVL1_ID" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="EXTL_LVL1_ID" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="EXTL_LVL2_ID" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="EXTL_LVL2_ID" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="EXTL_LVL3_ID" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="EXTL_LVL3_ID" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="BASE_DISCNT_AMT" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="BASE_DISCNT_AMT" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="ADMN_DISCNT_AMT" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="ADMN_DISCNT_AMT" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CTRC_FEE_PD_AMT" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="CTRC_FEE_PD_AMT" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="TAX_AMT" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="TAX_AMT" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="MBR_RBAT_DISC_AMT" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="MBR_RBAT_DISC_AMT" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="INSRD_ID" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="INSRD_ID" TOINSTANCE ="F_Invoice_Extract_Detail" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_CLM_LVL1_ID" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="CLM_LVL1_ID" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_CLM_LVL2_ID" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="CLM_LVL2_ID" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_CMN_FILE_NM" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="CMN_FILE_NM" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="QUARTER_ID" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="QUARTER_ID" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="QTR_PERIOD_END_DT" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="QTR_PERIOD_END_DT" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="PERIOD_PARENT_ID" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="PERIOD_PARENT_ID" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_QTR_PERIOD_END_DT" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="DATE" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_DSPN_DT" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="DSPN_DT" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="IC_AMT" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="IC_AMT" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="CARRIER_FLAG" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="CARRIER_FLAG" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_EXTL_LVL1_ID" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="EXTL_LVL1_ID" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_BASE_DISCNT_AMT" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="BASE_DISCNT_AMT" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_PRFMC_DISCNT_AMT" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="PRFMC_DISCNT_AMT" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_TAX_AMT" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="TAX_AMT" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="ADMN_DISCNT_AMT" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="ADMN_DISCNT_AMT" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="DSPN_DT" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="DSPN_DT" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="CLM_GID" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="CLM_GID" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="CTRC_FEE_PD_AMT" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="CTRC_FEE_PD_AMT" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="TAX_AMT" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="TAX_AMT" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="RBAT_ID" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="RBAT_ID" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="EXTL_LVL1_ID" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="EXTL_LVL1_ID" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="EXTL_LVL3_ID" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="EXTL_LVL3_ID" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="IC_AMT" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="IC_AMT" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="BASE_DISCNT_AMT" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="BASE_DISCNT_AMT" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="PRFMC_DISCNT_AMT" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="PRFMC_DISCNT_AMT" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="EXTL_SRC_CD" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="EXTL_SRC_CD" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="QTR_PERIOD_END_DT" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="QTR_PERIOD_END_DT" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="CLM_LVL1_ID" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="CLM_LVL1_ID" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="CLM_LVL2_ID" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="CLM_LVL2_ID" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="CLM_TYP_CD" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="CLM_TYP_CD" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="MED_PYBL_CD" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="MED_PYBL_CD" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="AP_CO_CD" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="AP_CO_CD" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="EXTL_LVL2_ID" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="EXTL_LVL2_ID" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="QTR_PERIOD_BEGIN_DT" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="QTR_PERIOD_BEGIN_DT" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="PERIOD_PARENT_ID" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="PERIOD_PARENT_ID" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="QUARTER_ID" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="QUARTER_ID" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="MBR_RBAT_DISC_AMT" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="MBR_RBAT_DISC_AMT" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="INSRD_ID" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="INSRD_ID" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="CNTRCT_DISCNT_AMT" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="CNTRCT_DISCNT_AMT" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="FRMLY_DISCNT_AMT" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="FRMLY_DISCNT_AMT" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="PRC_PTCT_DISCNT_AMT" FROMINSTANCE ="SQTRANS" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="PRC_PTCT_DISCNT_AMT" TOINSTANCE ="Exp_Evaluate_Detail_Fields" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="out_CLM_TYP_CD" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="CLM_TYP_CD" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_MED_PYBL_CD" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="MED_PYBL_CD" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_AP_CO_CD" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="AP_CO_CD" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_EXTL_SRC_CD" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="EXTL_SRC_CD" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_EXTL_LVL2_ID" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="EXTL_LVL2_ID" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_PRC_PTCT_DISCNT_AMT" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="PRC_PTCT_DISCNT_AMT" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="QTR_PERIOD_BEGIN_DT" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="QTR_PERIOD_BEGIN_DT" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_CTRC_FEE_PD_AMT" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="CTRC_FEE_PD_AMT" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_MBR_RBAT_DISC_AMT" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="MBR_RBAT_DISC_AMT" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_ADMN_DISCNT_AMT" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="ADMN_DISCNT_AMT" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_RBAT_ID" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="RBAT_ID" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_INSRD_ID" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="INSRD_ID" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_CLM_GID" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="CLM_GID" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_FILE_NM_DTL" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="FILE_NM" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_EXTL_LVL3_ID" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="EXTL_LVL3_ID" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_CNTRCT_DISCNT_AMT" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="CNTRCT_DISCNT_AMT" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_FRMLY_DISCNT_AMT" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="FRMLY_DISCNT_AMT" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_FILLER" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="FILLER" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="out_IC_AMT" FROMINSTANCE ="Exp_Evaluate_Detail_Fields" FROMINSTANCETYPE ="Expression" TOFIELD ="IC_AMT_DTL" TOINSTANCE ="Fil_Claims" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="IC_AMT" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="IC_AMT" TOINSTANCE ="Agg_Header_Trailer" TOINSTANCETYPE ="Aggregator"/>
+        <CONNECTOR FROMFIELD ="QTR_PERIOD_BEGIN_DT" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="QTR_PERIOD_BEGIN_DT" TOINSTANCE ="Agg_Header_Trailer" TOINSTANCETYPE ="Aggregator"/>
+        <CONNECTOR FROMFIELD ="QTR_PERIOD_END_DT" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="QTR_PERIOD_END_DT" TOINSTANCE ="Agg_Header_Trailer" TOINSTANCETYPE ="Aggregator"/>
+        <CONNECTOR FROMFIELD ="PERIOD_PARENT_ID" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="PERIOD_PARENT_ID" TOINSTANCE ="Agg_Header_Trailer" TOINSTANCETYPE ="Aggregator"/>
+        <CONNECTOR FROMFIELD ="CMN_FILE_NM" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="CMN_FILE_NM" TOINSTANCE ="Agg_Header_Trailer" TOINSTANCETYPE ="Aggregator"/>
+        <CONNECTOR FROMFIELD ="QUARTER_ID" FROMINSTANCE ="Fil_Claims" FROMINSTANCETYPE ="Filter" TOFIELD ="QUARTER_ID" TOINSTANCE ="Agg_Header_Trailer" TOINSTANCETYPE ="Aggregator"/>
+        <CONNECTOR FROMFIELD ="out_IC_AMT" FROMINSTANCE ="Agg_Header_Trailer" FROMINSTANCETYPE ="Aggregator" TOFIELD ="in_IC_AMT" TOINSTANCE ="Exp_Header_Trailer" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="QTR_PERIOD_BEGIN_DT" FROMINSTANCE ="Agg_Header_Trailer" FROMINSTANCETYPE ="Aggregator" TOFIELD ="in_QTR_PERIOD_BEGIN_DT" TOINSTANCE ="Exp_Header_Trailer" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="QTR_PERIOD_END_DT" FROMINSTANCE ="Agg_Header_Trailer" FROMINSTANCETYPE ="Aggregator" TOFIELD ="in_QTR_PERIOD_END_DT" TOINSTANCE ="Exp_Header_Trailer" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="PERIOD_PARENT_ID" FROMINSTANCE ="Agg_Header_Trailer" FROMINSTANCETYPE ="Aggregator" TOFIELD ="in_PERIOD_PARENT_ID" TOINSTANCE ="Exp_Header_Trailer" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="CMN_FILE_NM" FROMINSTANCE ="Agg_Header_Trailer" FROMINSTANCETYPE ="Aggregator" TOFIELD ="in_CMN_FILE_NM" TOINSTANCE ="Exp_Header_Trailer" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="QUARTER_ID" FROMINSTANCE ="Agg_Header_Trailer" FROMINSTANCETYPE ="Aggregator" TOFIELD ="QUARTER_ID" TOINSTANCE ="Exp_Header_Trailer" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="RECORD_COUNT" FROMINSTANCE ="Agg_Header_Trailer" FROMINSTANCETYPE ="Aggregator" TOFIELD ="in_RECORD_COUNT" TOINSTANCE ="Exp_Header_Trailer" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="ADMN_DISCNT_AMT" FROMINSTANCE ="TDISCNT_EXT_CLAIM_AET" FROMINSTANCETYPE ="Source Definition" TOFIELD ="ADMN_DISCNT_AMT" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="BASE_DISCNT_AMT" FROMINSTANCE ="TDISCNT_EXT_CLAIM_AET" FROMINSTANCETYPE ="Source Definition" TOFIELD ="BASE_DISCNT_AMT" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="PRFMC_DISCNT_AMT" FROMINSTANCE ="TDISCNT_EXT_CLAIM_AET" FROMINSTANCETYPE ="Source Definition" TOFIELD ="PRFMC_DISCNT_AMT" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CNTRCT_DISCNT_AMT" FROMINSTANCE ="TDISCNT_EXT_CLAIM_AET" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CNTRCT_DISCNT_AMT" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="FRMLY_DISCNT_AMT" FROMINSTANCE ="TDISCNT_EXT_CLAIM_AET" FROMINSTANCETYPE ="Source Definition" TOFIELD ="FRMLY_DISCNT_AMT" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="PRC_PTCT_DISCNT_AMT" FROMINSTANCE ="TDISCNT_EXT_CLAIM_AET" FROMINSTANCETYPE ="Source Definition" TOFIELD ="PRC_PTCT_DISCNT_AMT" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="HVST_ID" FROMINSTANCE ="TAPC_CLAIMS_AET" FROMINSTANCETYPE ="Source Definition" TOFIELD ="HVST_ID" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="out_RCRD_CNT" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="RCRD_CNT" TOINSTANCE ="Upd_RCNT_DEX_CNTL" TOINSTANCETYPE ="Update Strategy"/>
+        <CONNECTOR FROMFIELD ="out_DEX_GID" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="DEX_GID" TOINSTANCE ="Upd_RCNT_DEX_CNTL" TOINSTANCETYPE ="Update Strategy"/>
+        <CONNECTOR FROMFIELD ="QUARTER_ID" FROMINSTANCE ="Exp_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="QUARTER_ID" TOINSTANCE ="Upd_RCNT_DEX_CNTL" TOINSTANCETYPE ="Update Strategy"/>
+        <CONNECTOR FROMFIELD ="IC_AMT" FROMINSTANCE ="RCIT_BASE_CLM_INV" FROMINSTANCETYPE ="Source Definition" TOFIELD ="IC_AMT" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="MBR_RBAT_DISC_AMT" FROMINSTANCE ="RCIT_BASE_CLM_INV" FROMINSTANCETYPE ="Source Definition" TOFIELD ="MBR_RBAT_DISC_AMT" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CLM_GID" FROMINSTANCE ="RCIT_BASE_CLM_INV" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CLM_GID" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="DSPN_DT" FROMINSTANCE ="RCIT_BASE_CLM_INV" FROMINSTANCETYPE ="Source Definition" TOFIELD ="DSPN_DT" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="MODEL_TYP_CD" FROMINSTANCE ="RCIT_BASE_CLM_INV" FROMINSTANCETYPE ="Source Definition" TOFIELD ="MODEL_TYP_CD" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="RBAT_ID" FROMINSTANCE ="RCIT_BASE_CLM_INV" FROMINSTANCETYPE ="Source Definition" TOFIELD ="RBAT_ID" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="EXTL_LVL1_ID" FROMINSTANCE ="RCIT_BASE_CLM_INV" FROMINSTANCETYPE ="Source Definition" TOFIELD ="EXTL_LVL1_ID" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CLM_LVL1_ID" FROMINSTANCE ="RCIT_BASE_CLM_INV" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CLM_LVL1_ID" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CLM_LVL2_ID" FROMINSTANCE ="RCIT_BASE_CLM_INV" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CLM_LVL2_ID" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="EXTL_SRC_CD" FROMINSTANCE ="RCIT_BASE_CLM_INV" FROMINSTANCETYPE ="Source Definition" TOFIELD ="EXTL_SRC_CD" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="INV_ELIG_DT" FROMINSTANCE ="RCIT_BASE_CLM_INV" FROMINSTANCETYPE ="Source Definition" TOFIELD ="INV_ELIG_DT" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="PRD_ID" FROMINSTANCE ="RCIT_BASE_CLM_INV" FROMINSTANCETYPE ="Source Definition" TOFIELD ="PRD_ID" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="EXTL_LVL2_ID" FROMINSTANCE ="RCIT_BASE_CLM_INV" FROMINSTANCETYPE ="Source Definition" TOFIELD ="EXTL_LVL2_ID" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="EXTL_LVL3_ID" FROMINSTANCE ="RCIT_BASE_CLM_INV" FROMINSTANCETYPE ="Source Definition" TOFIELD ="EXTL_LVL3_ID" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CLM_TYP_CD" FROMINSTANCE ="RCIT_BASE_CLM_INV" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CLM_TYP_CD" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="MED_PYBL_CD" FROMINSTANCE ="RCIT_BASE_CLM_INV" FROMINSTANCETYPE ="Source Definition" TOFIELD ="MED_PYBL_CD" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="AP_CO_CD" FROMINSTANCE ="RCIT_BASE_CLM_INV" FROMINSTANCETYPE ="Source Definition" TOFIELD ="AP_CO_CD" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CTRC_FEE_PD_AMT" FROMINSTANCE ="RCIT_BASE_CLM_APC" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CTRC_FEE_PD_AMT" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="INSRD_ID" FROMINSTANCE ="RCIT_BASE_CLM_APC" FROMINSTANCETYPE ="Source Definition" TOFIELD ="INSRD_ID" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="TAX_AMT" FROMINSTANCE ="RCIT_BASE_CLM_APC" FROMINSTANCETYPE ="Source Definition" TOFIELD ="TAX_AMT" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="PERIOD_PARENT_ID" FROMINSTANCE ="VRCIT_MODEL_PRD_STUS" FROMINSTANCETYPE ="Source Definition" TOFIELD ="PERIOD_PARENT_ID" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="MNTH_PERIOD_END_DT" FROMINSTANCE ="VRCIT_MODEL_PRD_STUS" FROMINSTANCETYPE ="Source Definition" TOFIELD ="MNTH_PERIOD_END_DT" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="QUARTER_ID" FROMINSTANCE ="VRCIT_MODEL_PRD_STUS" FROMINSTANCETYPE ="Source Definition" TOFIELD ="QUARTER_ID" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="QTR_PERIOD_BEGIN_DT" FROMINSTANCE ="VRCIT_MODEL_PRD_STUS" FROMINSTANCETYPE ="Source Definition" TOFIELD ="QTR_PERIOD_BEGIN_DT" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="QTR_PERIOD_END_DT" FROMINSTANCE ="VRCIT_MODEL_PRD_STUS" FROMINSTANCETYPE ="Source Definition" TOFIELD ="QTR_PERIOD_END_DT" TOINSTANCE ="SQTRANS" TOINSTANCETYPE ="Source Qualifier"/>
+        <TARGETLOADORDER ORDER ="1" TARGETINSTANCE ="F_Invoice_Extract_Trailer"/>
+        <TARGETLOADORDER ORDER ="1" TARGETINSTANCE ="F_Invoice_Extract_Header"/>
+        <TARGETLOADORDER ORDER ="1" TARGETINSTANCE ="RCNT_DEX_CNTL"/>
+        <TARGETLOADORDER ORDER ="1" TARGETINSTANCE ="F_Invoice_Extract_Detail"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$Filename" PRECISION ="255" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$QUARTER" PRECISION ="10" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$DEX_GID" PRECISION ="10" SCALE ="0" USERDEFINED ="YES"/>
+        <ERPINFO/>
+    </MAPPING>
+    <SHORTCUT COMMENTS ="Created by Pooja on 03/20/2013 for Invoice Claim Extract.&#xD;&#xA;&#xD;&#xA;This is a dummy mapping to update the execution status in RCNT_DEX_CNTL." FOLDERNAME ="Shared_Rebates_RCI" NAME ="m_AET_Extract_Upd_Stat_RCNT_DEX_CNTL" OBJECTTYPE ="MAPPING" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="m_AET_Extract_Upd_Stat_RCNT_DEX_CNTL" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="" DBDNAME ="GDX_VRAP" FOLDERNAME ="Shared_Rebates_RCI" NAME ="TAPC_CLAIMS_AET" OBJECTSUBTYPE ="Source Definition" OBJECTTYPE ="SOURCE" REFERENCEDDBD ="GDX_VRAP" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="TAPC_CLAIMS_AET" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="" DBDNAME ="GDX_VRAP" FOLDERNAME ="Shared_Rebates_RCI" NAME ="TDISCNT_EXT_CLAIM_AET" OBJECTSUBTYPE ="Source Definition" OBJECTTYPE ="SOURCE" REFERENCEDDBD ="GDX_VRAP" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="TDISCNT_EXT_CLAIM_AET" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="" DBDNAME ="GDX_VRAP" FOLDERNAME ="Shared_Rebates_RCI" NAME ="RCIT_BASE_CLM_APC" OBJECTSUBTYPE ="Source Definition" OBJECTTYPE ="SOURCE" REFERENCEDDBD ="GDX_VRAP" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="RCIT_BASE_CLM_APC" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="" DBDNAME ="GDX_VRAP" FOLDERNAME ="Shared_Rebates_RCI" NAME ="VRCIT_MODEL_PRD_STUS" OBJECTSUBTYPE ="Source Definition" OBJECTTYPE ="SOURCE" REFERENCEDDBD ="GDX_VRAP" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="VRCIT_MODEL_PRD_STUS" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="" DBDNAME ="GDX_VRAP" FOLDERNAME ="Shared_Rebates_RCI" NAME ="RCIT_BASE_CLM_INV" OBJECTSUBTYPE ="Source Definition" OBJECTTYPE ="SOURCE" REFERENCEDDBD ="GDX_VRAP" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="RCIT_BASE_CLM_INV" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="" FOLDERNAME ="Shared_Rebates_RCI" NAME ="F_Invoice_Extract_Detail" OBJECTSUBTYPE ="Target Definition" OBJECTTYPE ="TARGET" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="F_Invoice_Extract_Detail" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="" FOLDERNAME ="Shared_Rebates_RCI" NAME ="F_Invoice_Extract_Trailer" OBJECTSUBTYPE ="Target Definition" OBJECTTYPE ="TARGET" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="F_Invoice_Extract_Trailer" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="" FOLDERNAME ="Shared_Rebates_RCI" NAME ="F_Invoice_Extract_Header" OBJECTSUBTYPE ="Target Definition" OBJECTTYPE ="TARGET" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="F_Invoice_Extract_Header" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="" FOLDERNAME ="Shared_Rebates_RCI" NAME ="RCNT_DEX_CNTL" OBJECTSUBTYPE ="Target Definition" OBJECTTYPE ="TARGET" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="RCNT_DEX_CNTL" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="Added by Pooja on 03/20/2013 for Invoice Claim Extract project to get max DEX_GID as Transaction Id based on OBJ_TYP_Cd and DEX_TXN_STAT_CD=1" FOLDERNAME ="Shared_Rebates_RCI" NAME ="LKP_RCNT_DEX_CNTL" OBJECTSUBTYPE ="Lookup Procedure" OBJECTTYPE ="TRANSFORMATION" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="LKP_RCNT_DEX_CNTL" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="" FOLDERNAME ="Shared_Rebates_RCI" NAME ="Lkp_TCORP_EXTL_LVL1_ID" OBJECTSUBTYPE ="Lookup Procedure" OBJECTTYPE ="TRANSFORMATION" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="Lkp_TCORP_EXTL_LVL1_ID" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="Created by Pooja for Invoice Claim Extract Project.&#xD;&#xA;This is a dummy mapping to make an initial entry in RCNT_DEX_CNTL table with status=1(New)" FOLDERNAME ="Shared_Rebates_RCI" NAME ="m_Insert_RCNT_DEX_CNTL" OBJECTTYPE ="MAPPING" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="m_Insert_RCNT_DEX_CNTL" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <CONFIG DESCRIPTION ="Default session configuration object" ISDEFAULT ="YES" NAME ="default_session_config" VERSIONNUMBER ="1">
+        <ATTRIBUTE NAME ="Advanced" VALUE =""/>
+        <ATTRIBUTE NAME ="Constraint based load ordering" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Cache LOOKUP() function" VALUE ="YES"/>
+        <ATTRIBUTE NAME ="Default buffer block size" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Line Sequential buffer length" VALUE ="1024"/>
+        <ATTRIBUTE NAME ="Maximum Memory Allowed For Auto Memory Attributes" VALUE ="512MB"/>
+        <ATTRIBUTE NAME ="Maximum Percentage of Total Memory Allowed For Auto Memory Attributes" VALUE ="5"/>
+        <ATTRIBUTE NAME ="Additional Concurrent Pipelines for Lookup Cache Creation" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Custom Properties" VALUE =""/>
+        <ATTRIBUTE NAME ="Pre-build lookup cache" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Optimization Level" VALUE ="Medium"/>
+        <ATTRIBUTE NAME ="DateTime Format String" VALUE ="MM/DD/YYYY HH24:MI:SS.US"/>
+        <ATTRIBUTE NAME ="Pre 85 Timestamp Compatibility" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Log Options" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Save session log by" VALUE ="Session runs"/>
+        <ATTRIBUTE NAME ="Save session log for these runs" VALUE ="7"/>
+        <ATTRIBUTE NAME ="Session Log File Max Size" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Session Log File Max Time Period" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Maximum Partial Session Log Files" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Writer Commit Statistics Log Frequency" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Writer Commit Statistics Log Interval" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Error handling" VALUE =""/>
+        <ATTRIBUTE NAME ="Stop on errors" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Override tracing" VALUE ="Normal"/>
+        <ATTRIBUTE NAME ="On Stored Procedure error" VALUE ="Stop"/>
+        <ATTRIBUTE NAME ="On Pre-session command task error" VALUE ="Stop"/>
+        <ATTRIBUTE NAME ="On Pre-Post SQL error" VALUE ="Stop"/>
+        <ATTRIBUTE NAME ="Enable Recovery" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Error Log Type" VALUE ="None"/>
+        <ATTRIBUTE NAME ="Error Log Table Name Prefix" VALUE =""/>
+        <ATTRIBUTE NAME ="Error Log File Name" VALUE ="PMError.log"/>
+        <ATTRIBUTE NAME ="Log Source Row Data" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Data Column Delimiter" VALUE ="|"/>
+        <ATTRIBUTE NAME ="Partitioning Options" VALUE =""/>
+        <ATTRIBUTE NAME ="Dynamic Partitioning" VALUE ="Disabled"/>
+        <ATTRIBUTE NAME ="Number of Partitions" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Multiplication Factor" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Session on Grid" VALUE =""/>
+        <ATTRIBUTE NAME ="Is Enabled" VALUE ="NO"/>
+    </CONFIG>
+    <WORKFLOW DESCRIPTION ="" ISENABLED ="YES" ISRUNNABLESERVICE ="NO" ISSERVICE ="NO" ISVALID ="YES" NAME ="wf_m_Extract_Aetna_Invoice_Claims" REUSABLE_SCHEDULER ="NO" SCHEDULERNAME ="Scheduler" SERVERNAME ="IntSvc_Rebates_DEV1" SERVER_DOMAINNAME ="DOM_Caremark9_DEV1" SUSPEND_ON_ERROR ="NO" TASKS_MUST_RUN_ON_SERVER ="NO" VERSIONNUMBER ="1">
+        <SCHEDULER DESCRIPTION ="" NAME ="Scheduler" REUSABLE ="NO" VERSIONNUMBER ="1">
+            <SCHEDULEINFO SCHEDULETYPE ="ONDEMAND"/>
+        </SCHEDULER>
+        <TASK DESCRIPTION ="Send an email to notify the File merge/SFTP failure." NAME ="Send_SFTP_Fail_Email" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+            <ATTRIBUTE NAME ="Email User Name" VALUE ="$PMFailureEmailUser"/>
+            <ATTRIBUTE NAME ="Email Subject" VALUE ="Aetna Invoiced Claim Extract - Invoiced Claims file SFTP to staging server has failed"/>
+            <ATTRIBUTE NAME ="Email Text" VALUE ="SFTP to staging server has failed for Invoiced Claims file."/>
+        </TASK>
+        <TASK DESCRIPTION ="Merge Header, Detail and Trailer files from previous session into 1 and SFTP the final file to staging server" NAME ="Merge_And_SFTP_To_Staging" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+            <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="YES"/>
+            <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+            <VALUEPAIR EXECORDER ="1" NAME ="Merge_And_SFTP_Extract_Files" REVERSEASSIGNMENT ="NO" VALUE ="$PMRootDir/scripts/invoice_Extract_Files_Sftp.ksh $$FILE_NM"/>
+        </TASK>
+        <TASK DESCRIPTION ="Send an email to notify that no file created because no rows were found to process" NAME ="Send_No_Row_Processed_Email" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+            <ATTRIBUTE NAME ="Email User Name" VALUE ="$PMFailureEmailUser"/>
+            <ATTRIBUTE NAME ="Email Subject" VALUE ="Aetna Invoiced Claim Extract - no rows were found to process for Invoiced Claims file"/>
+            <ATTRIBUTE NAME ="Email Text" VALUE ="File not generated for Invoiced Claims because no rows were found to process."/>
+        </TASK>
+        <TASK DESCRIPTION ="" NAME ="Start" REUSABLE ="NO" TYPE ="Start" VERSIONNUMBER ="1"/>
+        <TASK DESCRIPTION ="Added to send a success email to Aetna." NAME ="Send_Success_Email" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+            <ATTRIBUTE NAME ="Email User Name" VALUE ="$PMSuccessEmailUser, GDXAETOps@caremark.com, AetnaINV@Aetna.com"/>
+            <ATTRIBUTE NAME ="Email Subject" VALUE ="Aetna Invoiced Claim Extract - Invoiced Claims file has been generated for $$Quarter"/>
+            <ATTRIBUTE NAME ="Email Text" VALUE ="The Invoiced Claims File for $$Quarter has been generated"/>
+        </TASK>
+        <SESSION DESCRIPTION ="Insert an initial entry in RCNT_DEX_CNTL table " ISVALID ="YES" MAPPINGNAME ="m_Insert_RCNT_DEX_CNTL" NAME ="s_m_Insert_RCNT_DEX_CNTL" REUSABLE ="NO" SORTORDER ="Binary" VERSIONNUMBER ="1">
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="Tgt_RCNT_DEX_CNTL" STAGE ="1" TRANSFORMATIONNAME ="Tgt_RCNT_DEX_CNTL" TRANSFORMATIONTYPE ="Target Definition">
+                <ATTRIBUTE NAME ="Table Name Prefix" VALUE ="VRAP"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="0" SINSTANCENAME ="RCNT_DEX_CNTL" STAGE ="0" TRANSFORMATIONNAME ="RCNT_DEX_CNTL" TRANSFORMATIONTYPE ="Source Definition"/>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="SQ_RCNT_DEX_CNTL" STAGE ="2" TRANSFORMATIONNAME ="SQ_RCNT_DEX_CNTL" TRANSFORMATIONTYPE ="Source Qualifier"/>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="EXP_RCNT_DEX_CNTL" STAGE ="2" TRANSFORMATIONNAME ="EXP_RCNT_DEX_CNTL" TRANSFORMATIONTYPE ="Expression">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <CONFIGREFERENCE REFOBJECTNAME ="default_session_config" TYPE ="Session config"/>
+            <SESSIONCOMPONENT REFOBJECTNAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Failure Email">
+                <TASK DESCRIPTION ="" NAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Email User Name" VALUE ="$PMFailureEmailUser"/>
+                    <ATTRIBUTE NAME ="Email Subject" VALUE ="FAILURE: %w %d"/>
+                    <ATTRIBUTE NAME ="Email Text" VALUE ="The mapping %m ran in the %s session in the %w workflow ran in %d.&#xD;&#xA;&#xD;&#xA;%t&#xD;&#xA;&#xD;&#xA;%l&#xD;&#xA;&#xD;&#xA;%r&#xD;&#xA;&#xD;&#xA;Session Log is attached&#xD;&#xA;%g"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Pre-session variable assignment">
+                <TASK DESCRIPTION ="" NAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+                <VALUEPAIR EXECORDER ="1" NAME ="$$PRCS_CRTE_ID" REVERSEASSIGNMENT ="NO" VALUE ="$$DEFAULT"/>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Post-session success variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+                <VALUEPAIR EXECORDER ="1" NAME ="$$PRCS_CRTE_ID_FAIL" REVERSEASSIGNMENT ="NO" VALUE ="$$PRCS_CRTE_ID"/>
+                <VALUEPAIR EXECORDER ="2" NAME ="$$PRCS_CRTE_ID_SUCCESS" REVERSEASSIGNMENT ="NO" VALUE ="$$PRCS_CRTE_ID"/>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Post-session failure variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONEXTENSION NAME ="Relational Writer" SINSTANCENAME ="Tgt_RCNT_DEX_CNTL" SUBTYPE ="Relational Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="Relational" VARIABLE ="$Target"/>
+                <ATTRIBUTE NAME ="Target load type" VALUE ="Normal"/>
+                <ATTRIBUTE NAME ="Insert" VALUE ="YES"/>
+                <ATTRIBUTE NAME ="Update as Update" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update as Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update else Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Delete" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Truncate target table option" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Reject file directory" VALUE ="$PMBadFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Reject filename" VALUE ="tgt_rcnt_dex_cntl1.bad"/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION DSQINSTNAME ="SQ_RCNT_DEX_CNTL" DSQINSTTYPE ="Source Qualifier" NAME ="Relational Reader" SINSTANCENAME ="RCNT_DEX_CNTL" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Definition" TYPE ="READER"/>
+            <SESSIONEXTENSION NAME ="Relational Reader" SINSTANCENAME ="SQ_RCNT_DEX_CNTL" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Qualifier" TYPE ="READER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="Relational" VARIABLE ="$Source"/>
+            </SESSIONEXTENSION>
+            <ATTRIBUTE NAME ="General Options" VALUE =""/>
+            <ATTRIBUTE NAME ="Write Backward Compatible Session Log File" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session Log File Name" VALUE ="s_m_Insert_RCNT_DEX_CNTL.log"/>
+            <ATTRIBUTE NAME ="Session Log File directory" VALUE ="$PMSessionLogDir&#x5c;"/>
+            <ATTRIBUTE NAME ="Parameter Filename" VALUE =""/>
+            <ATTRIBUTE NAME ="Enable Test Load" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="$Source connection value" VALUE ="Relational:GDX"/>
+            <ATTRIBUTE NAME ="$Target connection value" VALUE ="Relational:GDX"/>
+            <ATTRIBUTE NAME ="Treat source rows as" VALUE ="Insert"/>
+            <ATTRIBUTE NAME ="Commit Type" VALUE ="Target"/>
+            <ATTRIBUTE NAME ="Commit Interval" VALUE ="10000"/>
+            <ATTRIBUTE NAME ="Commit On End Of File" VALUE ="YES"/>
+            <ATTRIBUTE NAME ="Rollback Transactions on Errors" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+            <ATTRIBUTE NAME ="Java Classpath" VALUE =""/>
+            <ATTRIBUTE NAME ="Performance" VALUE =""/>
+            <ATTRIBUTE NAME ="DTM buffer size" VALUE ="Auto"/>
+            <ATTRIBUTE NAME ="Collect performance data" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Write performance data to repository" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Incremental Aggregation" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Enable high precision" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session retry on deadlock" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Pushdown Optimization" VALUE ="None"/>
+            <ATTRIBUTE NAME ="Allow Temporary View for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Temporary Sequence for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Pushdown for User Incompatible Connections" VALUE ="NO"/>
+        </SESSION>
+        <SESSION DESCRIPTION ="" ISVALID ="YES" MAPPINGNAME ="m_Extract_Aetna_Invoice_Claims" NAME ="s_m_Extract_Aetna_Invoice_Claims" REUSABLE ="NO" SORTORDER ="Binary" VERSIONNUMBER ="1">
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="F_Invoice_Extract_Trailer" STAGE ="1" TRANSFORMATIONNAME ="F_Invoice_Extract_Trailer" TRANSFORMATIONTYPE ="Target Definition">
+                <FLATFILE CODEPAGE ="MS1252" CONSECDELIMITERSASONE ="NO" DELIMITED ="NO" DELIMITERS ="," ESCAPE_CHARACTER ="" KEEPESCAPECHAR ="NO" LINESEQUENTIAL ="NO" MULTIDELIMITERSASAND ="NO" NULLCHARTYPE ="ASCII" NULL_CHARACTER ="*" PADBYTES ="1" QUOTE_CHARACTER ="NONE" REPEATABLE ="NO" ROWDELIMITER ="0" SKIPROWS ="0" STRIPTRAILINGBLANKS ="NO"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="F_Invoice_Extract_Detail" STAGE ="2" TRANSFORMATIONNAME ="F_Invoice_Extract_Detail" TRANSFORMATIONTYPE ="Target Definition">
+                <FLATFILE CODEPAGE ="MS1252" CONSECDELIMITERSASONE ="NO" DELIMITED ="NO" DELIMITERS ="," ESCAPE_CHARACTER ="" KEEPESCAPECHAR ="NO" LINESEQUENTIAL ="NO" MULTIDELIMITERSASAND ="NO" NULLCHARTYPE ="ASCII" NULL_CHARACTER ="*" PADBYTES ="1" QUOTE_CHARACTER ="NONE" REPEATABLE ="NO" ROWDELIMITER ="0" SKIPROWS ="0" STRIPTRAILINGBLANKS ="NO"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="F_Invoice_Extract_Header" STAGE ="3" TRANSFORMATIONNAME ="F_Invoice_Extract_Header" TRANSFORMATIONTYPE ="Target Definition">
+                <FLATFILE CODEPAGE ="MS1252" CONSECDELIMITERSASONE ="NO" DELIMITED ="NO" DELIMITERS ="," ESCAPE_CHARACTER ="" KEEPESCAPECHAR ="NO" LINESEQUENTIAL ="NO" MULTIDELIMITERSASAND ="NO" NULLCHARTYPE ="ASCII" NULL_CHARACTER ="*" PADBYTES ="1" QUOTE_CHARACTER ="NONE" REPEATABLE ="NO" ROWDELIMITER ="0" SKIPROWS ="0" STRIPTRAILINGBLANKS ="NO"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="Exp_Evaluate_Detail_Fields" STAGE ="4" TRANSFORMATIONNAME ="Exp_Evaluate_Detail_Fields" TRANSFORMATIONTYPE ="Expression">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="0" SINSTANCENAME ="Lkp_TCORP_EXTL_LVL1_ID" STAGE ="0" TRANSFORMATIONNAME ="Lkp_TCORP_EXTL_LVL1_ID" TRANSFORMATIONTYPE ="Lookup Procedure"/>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="Fil_Claims" STAGE ="4" TRANSFORMATIONNAME ="Fil_Claims" TRANSFORMATIONTYPE ="Filter">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="0" SINSTANCENAME ="TAPC_CLAIMS_AET" STAGE ="0" TRANSFORMATIONNAME ="TAPC_CLAIMS_AET" TRANSFORMATIONTYPE ="Source Definition">
+                <ATTRIBUTE NAME ="Owner Name" VALUE ="VRAP"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="Exp_Header_Trailer" STAGE ="5" TRANSFORMATIONNAME ="Exp_Header_Trailer" TRANSFORMATIONTYPE ="Expression">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="0" SINSTANCENAME ="VRCIT_MODEL_PRD_STUS" STAGE ="0" TRANSFORMATIONNAME ="VRCIT_MODEL_PRD_STUS" TRANSFORMATIONTYPE ="Source Definition">
+                <ATTRIBUTE NAME ="Owner Name" VALUE ="VRAP"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="SQTRANS" STAGE ="4" TRANSFORMATIONNAME ="SQTRANS" TRANSFORMATIONTYPE ="Source Qualifier"/>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="0" SINSTANCENAME ="TDISCNT_EXT_CLAIM_AET" STAGE ="0" TRANSFORMATIONNAME ="TDISCNT_EXT_CLAIM_AET" TRANSFORMATIONTYPE ="Source Definition">
+                <ATTRIBUTE NAME ="Owner Name" VALUE ="VRAP"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="0" SINSTANCENAME ="RCIT_BASE_CLM_INV" STAGE ="0" TRANSFORMATIONNAME ="RCIT_BASE_CLM_INV" TRANSFORMATIONTYPE ="Source Definition">
+                <ATTRIBUTE NAME ="Owner Name" VALUE ="VRAP"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="0" SINSTANCENAME ="RCIT_BASE_CLM_APC" STAGE ="0" TRANSFORMATIONNAME ="RCIT_BASE_CLM_APC" TRANSFORMATIONTYPE ="Source Definition">
+                <ATTRIBUTE NAME ="Owner Name" VALUE ="VRAP"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="HASH AUTO KEYS" PIPELINE ="1" SINSTANCENAME ="Agg_Header_Trailer" STAGE ="5" TRANSFORMATIONNAME ="Agg_Header_Trailer" TRANSFORMATIONTYPE ="Aggregator">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="RCNT_DEX_CNTL" STAGE ="6" TRANSFORMATIONNAME ="RCNT_DEX_CNTL" TRANSFORMATIONTYPE ="Target Definition">
+                <ATTRIBUTE NAME ="Table Name Prefix" VALUE ="VRAP"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="Upd_RCNT_DEX_CNTL" STAGE ="5" TRANSFORMATIONNAME ="Upd_RCNT_DEX_CNTL" TRANSFORMATIONTYPE ="Update Strategy">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="0" SINSTANCENAME ="LKP_RCNT_DEX_CNTL" STAGE ="0" TRANSFORMATIONNAME ="LKP_RCNT_DEX_CNTL" TRANSFORMATIONTYPE ="Lookup Procedure">
+                <ATTRIBUTE NAME ="Lookup table name" VALUE ="VRAP.RCNT_DEX_CNTL"/>
+                <ATTRIBUTE NAME ="Connection Information" VALUE ="$Target"/>
+            </SESSTRANSFORMATIONINST>
+            <CONFIGREFERENCE REFOBJECTNAME ="default_session_config" TYPE ="Session config">
+                <ATTRIBUTE NAME ="Maximum Memory Allowed For Auto Memory Attributes" VALUE ="5000MB"/>
+                <ATTRIBUTE NAME ="Maximum Percentage of Total Memory Allowed For Auto Memory Attributes" VALUE ="50"/>
+                <ATTRIBUTE NAME ="Save session log for these runs" VALUE ="7"/>
+                <ATTRIBUTE NAME ="Stop on errors" VALUE ="1"/>
+                <ATTRIBUTE NAME ="Override tracing" VALUE ="Normal"/>
+                <ATTRIBUTE NAME ="Error Log Type" VALUE ="Flat File"/>
+            </CONFIGREFERENCE>
+            <SESSIONCOMPONENT REFOBJECTNAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Failure Email">
+                <TASK DESCRIPTION ="" NAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Email User Name" VALUE =""/>
+                    <ATTRIBUTE NAME ="Email Subject" VALUE ="FAILURE: %w %d"/>
+                    <ATTRIBUTE NAME ="Email Text" VALUE ="The mapping %m ran in the %s session in the %w workflow ran in %d.&#xD;&#xA;&#xD;&#xA;%t&#xD;&#xA;&#xD;&#xA;%l&#xD;&#xA;&#xD;&#xA;%r&#xD;&#xA;&#xD;&#xA;Session Log is attached&#xD;&#xA;%g"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Pre-session variable assignment">
+                <TASK DESCRIPTION ="" NAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+                <VALUEPAIR EXECORDER ="1" NAME ="$$DEX_GID" REVERSEASSIGNMENT ="NO" VALUE ="$$DEFAULT"/>
+                <VALUEPAIR EXECORDER ="2" NAME ="$$Filename" REVERSEASSIGNMENT ="NO" VALUE ="$$STR_DEFAULT"/>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Post-session success variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+                <VALUEPAIR EXECORDER ="1" NAME ="$$Quarter" REVERSEASSIGNMENT ="NO" VALUE ="$$QUARTER"/>
+                <VALUEPAIR EXECORDER ="2" NAME ="$$DEX_GID" REVERSEASSIGNMENT ="NO" VALUE ="$$DEX_GID"/>
+                <VALUEPAIR EXECORDER ="3" NAME ="$$FILE_NM" REVERSEASSIGNMENT ="NO" VALUE ="$$Filename"/>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Post-session failure variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONEXTENSION NAME ="File Writer" SINSTANCENAME ="F_Invoice_Extract_Trailer" SUBTYPE ="File Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+                <CONNECTIONREFERENCE CNXREFNAME ="Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="" VARIABLE =""/>
+                <ATTRIBUTE NAME ="Merge Type" VALUE ="No Merge"/>
+                <ATTRIBUTE NAME ="Merge File Directory" VALUE ="$PMTargetFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Merge File Name" VALUE ="f_invoice_extract_trailer.out"/>
+                <ATTRIBUTE NAME ="Append if Exists" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Create Target Directory" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Header Options" VALUE ="No Header"/>
+                <ATTRIBUTE NAME ="Header Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Footer Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Output Type" VALUE ="File"/>
+                <ATTRIBUTE NAME ="Merge Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Output file directory" VALUE ="$PMTargetFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Output filename" VALUE ="F_Invoice_Claims_Trailer.txt"/>
+                <ATTRIBUTE NAME ="Reject file directory" VALUE ="$PMBadFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Reject filename" VALUE ="F_Invoice_Claims_Trailer.bad"/>
+                <ATTRIBUTE NAME ="Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Codepage Parameter" VALUE =""/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION NAME ="File Writer" SINSTANCENAME ="F_Invoice_Extract_Detail" SUBTYPE ="File Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+                <CONNECTIONREFERENCE CNXREFNAME ="Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="" VARIABLE =""/>
+                <ATTRIBUTE NAME ="Merge Type" VALUE ="No Merge"/>
+                <ATTRIBUTE NAME ="Merge File Directory" VALUE ="$PMTargetFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Merge File Name" VALUE ="f_invoice_extract_detail.out"/>
+                <ATTRIBUTE NAME ="Append if Exists" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Create Target Directory" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Header Options" VALUE ="No Header"/>
+                <ATTRIBUTE NAME ="Header Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Footer Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Output Type" VALUE ="File"/>
+                <ATTRIBUTE NAME ="Merge Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Output file directory" VALUE ="$PMTargetFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Output filename" VALUE ="F_Invoice_Extract_Detail.txt"/>
+                <ATTRIBUTE NAME ="Reject file directory" VALUE ="$PMBadFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Reject filename" VALUE ="F_Invoice_Extract_Detail.bad"/>
+                <ATTRIBUTE NAME ="Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Codepage Parameter" VALUE =""/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION NAME ="File Writer" SINSTANCENAME ="F_Invoice_Extract_Header" SUBTYPE ="File Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+                <CONNECTIONREFERENCE CNXREFNAME ="Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="" VARIABLE =""/>
+                <ATTRIBUTE NAME ="Merge Type" VALUE ="No Merge"/>
+                <ATTRIBUTE NAME ="Merge File Directory" VALUE ="$PMTargetFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Merge File Name" VALUE ="f_invoice_extract_header.out"/>
+                <ATTRIBUTE NAME ="Append if Exists" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Create Target Directory" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Header Options" VALUE ="No Header"/>
+                <ATTRIBUTE NAME ="Header Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Footer Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Output Type" VALUE ="File"/>
+                <ATTRIBUTE NAME ="Merge Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Output file directory" VALUE ="$PMTargetFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Output filename" VALUE ="F_Invoice_Claims_Header.txt"/>
+                <ATTRIBUTE NAME ="Reject file directory" VALUE ="$PMBadFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Reject filename" VALUE ="F_Invoice_Claims_Header.bad"/>
+                <ATTRIBUTE NAME ="Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Codepage Parameter" VALUE =""/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION NAME ="Relational Lookup" SINSTANCENAME ="Lkp_TCORP_EXTL_LVL1_ID" SUBTYPE ="Relational Lookup" TRANSFORMATIONTYPE ="Lookup Procedure" TYPE ="LOOKUPEXTENSION">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="Relational" VARIABLE ="$Source"/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION DSQINSTNAME ="SQTRANS" DSQINSTTYPE ="Source Qualifier" NAME ="Relational Reader" SINSTANCENAME ="TAPC_CLAIMS_AET" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Definition" TYPE ="READER"/>
+            <SESSIONEXTENSION DSQINSTNAME ="SQTRANS" DSQINSTTYPE ="Source Qualifier" NAME ="Relational Reader" SINSTANCENAME ="VRCIT_MODEL_PRD_STUS" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Definition" TYPE ="READER"/>
+            <SESSIONEXTENSION NAME ="Relational Reader" SINSTANCENAME ="SQTRANS" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Qualifier" TYPE ="READER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="Relational" VARIABLE ="$Source"/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION DSQINSTNAME ="SQTRANS" DSQINSTTYPE ="Source Qualifier" NAME ="Relational Reader" SINSTANCENAME ="TDISCNT_EXT_CLAIM_AET" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Definition" TYPE ="READER"/>
+            <SESSIONEXTENSION DSQINSTNAME ="SQTRANS" DSQINSTTYPE ="Source Qualifier" NAME ="Relational Reader" SINSTANCENAME ="RCIT_BASE_CLM_INV" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Definition" TYPE ="READER"/>
+            <SESSIONEXTENSION DSQINSTNAME ="SQTRANS" DSQINSTTYPE ="Source Qualifier" NAME ="Relational Reader" SINSTANCENAME ="RCIT_BASE_CLM_APC" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Definition" TYPE ="READER"/>
+            <SESSIONEXTENSION NAME ="Relational Writer" SINSTANCENAME ="RCNT_DEX_CNTL" SUBTYPE ="Relational Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="Relational" VARIABLE ="$Target"/>
+                <ATTRIBUTE NAME ="Target load type" VALUE ="Normal"/>
+                <ATTRIBUTE NAME ="Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update as Update" VALUE ="YES"/>
+                <ATTRIBUTE NAME ="Update as Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update else Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Delete" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Truncate target table option" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Reject file directory" VALUE ="$PMBadFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Reject filename" VALUE ="rcnt_dex_cntl1.bad"/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION NAME ="Relational Lookup" SINSTANCENAME ="LKP_RCNT_DEX_CNTL" SUBTYPE ="Relational Lookup" TRANSFORMATIONTYPE ="Lookup Procedure" TYPE ="LOOKUPEXTENSION">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="Relational" VARIABLE ="$Target"/>
+            </SESSIONEXTENSION>
+            <ATTRIBUTE NAME ="General Options" VALUE =""/>
+            <ATTRIBUTE NAME ="Write Backward Compatible Session Log File" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session Log File Name" VALUE ="s_m_Extract_Aetna_Invoice_Claims.log"/>
+            <ATTRIBUTE NAME ="Session Log File directory" VALUE ="$PMSessionLogDir&#x5c;"/>
+            <ATTRIBUTE NAME ="Parameter Filename" VALUE =""/>
+            <ATTRIBUTE NAME ="Enable Test Load" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="$Source connection value" VALUE ="Relational:GDX"/>
+            <ATTRIBUTE NAME ="$Target connection value" VALUE ="Relational:GDX"/>
+            <ATTRIBUTE NAME ="Treat source rows as" VALUE ="Data driven"/>
+            <ATTRIBUTE NAME ="Commit Type" VALUE ="Target"/>
+            <ATTRIBUTE NAME ="Commit Interval" VALUE ="10000"/>
+            <ATTRIBUTE NAME ="Commit On End Of File" VALUE ="YES"/>
+            <ATTRIBUTE NAME ="Rollback Transactions on Errors" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+            <ATTRIBUTE NAME ="Java Classpath" VALUE =""/>
+            <ATTRIBUTE NAME ="Performance" VALUE =""/>
+            <ATTRIBUTE NAME ="DTM buffer size" VALUE ="Auto"/>
+            <ATTRIBUTE NAME ="Collect performance data" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Write performance data to repository" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Incremental Aggregation" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Enable high precision" VALUE ="YES"/>
+            <ATTRIBUTE NAME ="Session retry on deadlock" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Pushdown Optimization" VALUE ="None"/>
+            <ATTRIBUTE NAME ="Allow Temporary View for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Temporary Sequence for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Pushdown for User Incompatible Connections" VALUE ="NO"/>
+        </SESSION>
+        <SESSION DESCRIPTION ="Added to update table VRAP.RCNT_DEX_CNTL with status =99" ISVALID ="YES" MAPPINGNAME ="m_AET_Extract_Upd_Stat_RCNT_DEX_CNTL" NAME ="s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL" REUSABLE ="NO" SORTORDER ="Binary" VERSIONNUMBER ="1">
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="RCNT_DEX_CNTL" STAGE ="1" TRANSFORMATIONNAME ="RCNT_DEX_CNTL" TRANSFORMATIONTYPE ="Target Definition">
+                <ATTRIBUTE NAME ="Table Name Prefix" VALUE ="VRAP"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="0" SINSTANCENAME ="SYSDUMMY1" STAGE ="0" TRANSFORMATIONNAME ="SYSDUMMY1" TRANSFORMATIONTYPE ="Source Definition"/>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="SQ_SYSDUMMY1" STAGE ="2" TRANSFORMATIONNAME ="SQ_SYSDUMMY1" TRANSFORMATIONTYPE ="Source Qualifier"/>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="UPD_RCNT_DEX_CNTL" STAGE ="2" TRANSFORMATIONNAME ="UPD_RCNT_DEX_CNTL" TRANSFORMATIONTYPE ="Update Strategy">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="EXPTRANS" STAGE ="2" TRANSFORMATIONNAME ="EXPTRANS" TRANSFORMATIONTYPE ="Expression">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <CONFIGREFERENCE REFOBJECTNAME ="default_session_config" TYPE ="Session config"/>
+            <SESSIONCOMPONENT REFOBJECTNAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Failure Email">
+                <TASK DESCRIPTION ="" NAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Email User Name" VALUE =""/>
+                    <ATTRIBUTE NAME ="Email Subject" VALUE ="FAILURE: %w %d"/>
+                    <ATTRIBUTE NAME ="Email Text" VALUE ="The mapping %m ran in the %s session in the %w workflow ran in %d.&#xD;&#xA;&#xD;&#xA;%t&#xD;&#xA;&#xD;&#xA;%l&#xD;&#xA;&#xD;&#xA;%r&#xD;&#xA;&#xD;&#xA;Session Log is attached&#xD;&#xA;%g"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Pre-session variable assignment">
+                <TASK DESCRIPTION ="" NAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+                <VALUEPAIR EXECORDER ="1" NAME ="$$PRCS_CRTE_ID" REVERSEASSIGNMENT ="NO" VALUE ="$$PRCS_CRTE_ID_FAIL"/>
+                <VALUEPAIR EXECORDER ="2" NAME ="$$STATUS" REVERSEASSIGNMENT ="NO" VALUE ="$$STATUS_FAIL"/>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Post-session success variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Post-session failure variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONEXTENSION NAME ="Relational Writer" SINSTANCENAME ="RCNT_DEX_CNTL" SUBTYPE ="Relational Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="Relational" VARIABLE ="$Target"/>
+                <ATTRIBUTE NAME ="Target load type" VALUE ="Normal"/>
+                <ATTRIBUTE NAME ="Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update as Update" VALUE ="YES"/>
+                <ATTRIBUTE NAME ="Update as Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update else Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Delete" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Truncate target table option" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Reject file directory" VALUE ="$PMBadFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Reject filename" VALUE ="rcnt_dex_cntl1.bad"/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION DSQINSTNAME ="SQ_SYSDUMMY1" DSQINSTTYPE ="Source Qualifier" NAME ="Relational Reader" SINSTANCENAME ="SYSDUMMY1" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Definition" TYPE ="READER"/>
+            <SESSIONEXTENSION NAME ="Relational Reader" SINSTANCENAME ="SQ_SYSDUMMY1" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Qualifier" TYPE ="READER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="Relational" VARIABLE ="$Source"/>
+            </SESSIONEXTENSION>
+            <ATTRIBUTE NAME ="General Options" VALUE =""/>
+            <ATTRIBUTE NAME ="Write Backward Compatible Session Log File" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session Log File Name" VALUE ="s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.log"/>
+            <ATTRIBUTE NAME ="Session Log File directory" VALUE ="$PMSessionLogDir&#x5c;"/>
+            <ATTRIBUTE NAME ="Parameter Filename" VALUE =""/>
+            <ATTRIBUTE NAME ="Enable Test Load" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="$Source connection value" VALUE ="Relational:GDX"/>
+            <ATTRIBUTE NAME ="$Target connection value" VALUE ="Relational:GDX"/>
+            <ATTRIBUTE NAME ="Treat source rows as" VALUE ="Data driven"/>
+            <ATTRIBUTE NAME ="Commit Type" VALUE ="Target"/>
+            <ATTRIBUTE NAME ="Commit Interval" VALUE ="10000"/>
+            <ATTRIBUTE NAME ="Commit On End Of File" VALUE ="YES"/>
+            <ATTRIBUTE NAME ="Rollback Transactions on Errors" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+            <ATTRIBUTE NAME ="Java Classpath" VALUE =""/>
+            <ATTRIBUTE NAME ="Performance" VALUE =""/>
+            <ATTRIBUTE NAME ="DTM buffer size" VALUE ="Auto"/>
+            <ATTRIBUTE NAME ="Collect performance data" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Write performance data to repository" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Incremental Aggregation" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Enable high precision" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session retry on deadlock" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Pushdown Optimization" VALUE ="None"/>
+            <ATTRIBUTE NAME ="Allow Temporary View for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Temporary Sequence for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Pushdown for User Incompatible Connections" VALUE ="NO"/>
+        </SESSION>
+        <SESSION DESCRIPTION ="Added to update table VRAP.RCNT_DEX_CNTL with status =90 (Success)" ISVALID ="YES" MAPPINGNAME ="m_AET_Extract_Upd_Stat_RCNT_DEX_CNTL" NAME ="s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL" REUSABLE ="NO" SORTORDER ="Binary" VERSIONNUMBER ="1">
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="RCNT_DEX_CNTL" STAGE ="1" TRANSFORMATIONNAME ="RCNT_DEX_CNTL" TRANSFORMATIONTYPE ="Target Definition">
+                <ATTRIBUTE NAME ="Table Name Prefix" VALUE ="VRAP"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="0" SINSTANCENAME ="SYSDUMMY1" STAGE ="0" TRANSFORMATIONNAME ="SYSDUMMY1" TRANSFORMATIONTYPE ="Source Definition"/>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="SQ_SYSDUMMY1" STAGE ="2" TRANSFORMATIONNAME ="SQ_SYSDUMMY1" TRANSFORMATIONTYPE ="Source Qualifier"/>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="UPD_RCNT_DEX_CNTL" STAGE ="2" TRANSFORMATIONNAME ="UPD_RCNT_DEX_CNTL" TRANSFORMATIONTYPE ="Update Strategy">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="EXPTRANS" STAGE ="2" TRANSFORMATIONNAME ="EXPTRANS" TRANSFORMATIONTYPE ="Expression">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <CONFIGREFERENCE REFOBJECTNAME ="default_session_config" TYPE ="Session config"/>
+            <SESSIONCOMPONENT REFOBJECTNAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Failure Email">
+                <TASK DESCRIPTION ="" NAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Email User Name" VALUE =""/>
+                    <ATTRIBUTE NAME ="Email Subject" VALUE ="FAILURE: %w %d"/>
+                    <ATTRIBUTE NAME ="Email Text" VALUE ="The mapping %m ran in the %s session in the %w workflow ran in %d.&#xD;&#xA;&#xD;&#xA;%t&#xD;&#xA;&#xD;&#xA;%l&#xD;&#xA;&#xD;&#xA;%r&#xD;&#xA;&#xD;&#xA;Session Log is attached&#xD;&#xA;%g"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Pre-session variable assignment">
+                <TASK DESCRIPTION ="" NAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+                <VALUEPAIR EXECORDER ="1" NAME ="$$PRCS_CRTE_ID" REVERSEASSIGNMENT ="NO" VALUE ="$$PRCS_CRTE_ID_SUCCESS"/>
+                <VALUEPAIR EXECORDER ="2" NAME ="$$STATUS" REVERSEASSIGNMENT ="NO" VALUE ="$$STATUS_SUCCESS"/>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Post-session success variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Post-session failure variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONEXTENSION NAME ="Relational Writer" SINSTANCENAME ="RCNT_DEX_CNTL" SUBTYPE ="Relational Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="Relational" VARIABLE ="$Target"/>
+                <ATTRIBUTE NAME ="Target load type" VALUE ="Normal"/>
+                <ATTRIBUTE NAME ="Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update as Update" VALUE ="YES"/>
+                <ATTRIBUTE NAME ="Update as Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update else Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Delete" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Truncate target table option" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Reject file directory" VALUE ="$PMBadFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Reject filename" VALUE ="rcnt_dex_cntl1.bad"/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION DSQINSTNAME ="SQ_SYSDUMMY1" DSQINSTTYPE ="Source Qualifier" NAME ="Relational Reader" SINSTANCENAME ="SYSDUMMY1" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Definition" TYPE ="READER"/>
+            <SESSIONEXTENSION NAME ="Relational Reader" SINSTANCENAME ="SQ_SYSDUMMY1" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Qualifier" TYPE ="READER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="Relational" VARIABLE ="$Source"/>
+            </SESSIONEXTENSION>
+            <ATTRIBUTE NAME ="General Options" VALUE =""/>
+            <ATTRIBUTE NAME ="Write Backward Compatible Session Log File" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session Log File Name" VALUE ="s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.log"/>
+            <ATTRIBUTE NAME ="Session Log File directory" VALUE ="$PMSessionLogDir&#x5c;"/>
+            <ATTRIBUTE NAME ="Parameter Filename" VALUE =""/>
+            <ATTRIBUTE NAME ="Enable Test Load" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="$Source connection value" VALUE ="Relational:GDX"/>
+            <ATTRIBUTE NAME ="$Target connection value" VALUE ="Relational:GDX"/>
+            <ATTRIBUTE NAME ="Treat source rows as" VALUE ="Data driven"/>
+            <ATTRIBUTE NAME ="Commit Type" VALUE ="Target"/>
+            <ATTRIBUTE NAME ="Commit Interval" VALUE ="10000"/>
+            <ATTRIBUTE NAME ="Commit On End Of File" VALUE ="YES"/>
+            <ATTRIBUTE NAME ="Rollback Transactions on Errors" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+            <ATTRIBUTE NAME ="Java Classpath" VALUE =""/>
+            <ATTRIBUTE NAME ="Performance" VALUE =""/>
+            <ATTRIBUTE NAME ="DTM buffer size" VALUE ="Auto"/>
+            <ATTRIBUTE NAME ="Collect performance data" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Write performance data to repository" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Incremental Aggregation" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Enable high precision" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session retry on deadlock" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Pushdown Optimization" VALUE ="None"/>
+            <ATTRIBUTE NAME ="Allow Temporary View for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Temporary Sequence for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Pushdown for User Incompatible Connections" VALUE ="NO"/>
+        </SESSION>
+        <TASKINSTANCE DESCRIPTION ="Insert an initial entry in RCNT_DEX_CNTL table " FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="YES" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="s_m_Insert_RCNT_DEX_CNTL" REUSABLE ="NO" TASKNAME ="s_m_Insert_RCNT_DEX_CNTL" TASKTYPE ="Session" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <TASKINSTANCE DESCRIPTION ="Send an email to notify the File merge/SFTP failure." FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="NO" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="Send_SFTP_Fail_Email" REUSABLE ="NO" TASKNAME ="Send_SFTP_Fail_Email" TASKTYPE ="Email" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <TASKINSTANCE DESCRIPTION ="Merge Header, Detail and Trailer files from previous session into 1 and SFTP the final file to staging server" FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="NO" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="Merge_And_SFTP_To_Staging" REUSABLE ="NO" TASKNAME ="Merge_And_SFTP_To_Staging" TASKTYPE ="Command" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <TASKINSTANCE DESCRIPTION ="" FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="NO" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="s_m_Extract_Aetna_Invoice_Claims" REUSABLE ="NO" TASKNAME ="s_m_Extract_Aetna_Invoice_Claims" TASKTYPE ="Session" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <TASKINSTANCE DESCRIPTION ="Added to update table VRAP.RCNT_DEX_CNTL with status =99" FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="NO" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL" REUSABLE ="NO" TASKNAME ="s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL" TASKTYPE ="Session" TREAT_INPUTLINK_AS_AND ="NO"/>
+        <TASKINSTANCE DESCRIPTION ="Added to update table VRAP.RCNT_DEX_CNTL with status =90 (Success)" FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="NO" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL" REUSABLE ="NO" TASKNAME ="s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL" TASKTYPE ="Session" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <TASKINSTANCE DESCRIPTION ="Send an email to notify that no file created because no rows were found to process" FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="NO" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="Send_No_Row_Processed_Email" REUSABLE ="NO" TASKNAME ="Send_No_Row_Processed_Email" TASKTYPE ="Email" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <TASKINSTANCE DESCRIPTION ="" ISENABLED ="YES" NAME ="Start" REUSABLE ="NO" TASKNAME ="Start" TASKTYPE ="Start"/>
+        <TASKINSTANCE DESCRIPTION ="Added to send a success email to Aetna." FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="NO" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="Send_Success_Email" REUSABLE ="NO" TASKNAME ="Send_Success_Email" TASKTYPE ="Email" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <WORKFLOWLINK CONDITION ="" FROMTASK ="Start" TOTASK ="s_m_Insert_RCNT_DEX_CNTL"/>
+        <WORKFLOWLINK CONDITION ="$Merge_And_SFTP_To_Staging.ErrorCode!=0" FROMTASK ="Merge_And_SFTP_To_Staging" TOTASK ="Send_SFTP_Fail_Email"/>
+        <WORKFLOWLINK CONDITION ="$s_m_Extract_Aetna_Invoice_Claims.Status=SUCCEEDED AND $s_m_Extract_Aetna_Invoice_Claims.TgtSuccessRows&gt;0" FROMTASK ="s_m_Extract_Aetna_Invoice_Claims" TOTASK ="Merge_And_SFTP_To_Staging"/>
+        <WORKFLOWLINK CONDITION ="$s_m_Insert_RCNT_DEX_CNTL.Status=SUCCEEDED" FROMTASK ="s_m_Insert_RCNT_DEX_CNTL" TOTASK ="s_m_Extract_Aetna_Invoice_Claims"/>
+        <WORKFLOWLINK CONDITION ="$Merge_And_SFTP_To_Staging.ErrorCode!=0" FROMTASK ="Merge_And_SFTP_To_Staging" TOTASK ="s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL"/>
+        <WORKFLOWLINK CONDITION ="($s_m_Extract_Aetna_Invoice_Claims.TgtSuccessRows=0 AND $s_m_Extract_Aetna_Invoice_Claims.Status=SUCCEEDED)&#xD;&#xA;OR&#xD;&#xA;$s_m_Extract_Aetna_Invoice_Claims.Status=FAILED" FROMTASK ="s_m_Extract_Aetna_Invoice_Claims" TOTASK ="s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL"/>
+        <WORKFLOWLINK CONDITION ="$Merge_And_SFTP_To_Staging.ErrorCode=0" FROMTASK ="Merge_And_SFTP_To_Staging" TOTASK ="s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL"/>
+        <WORKFLOWLINK CONDITION ="$s_m_Extract_Aetna_Invoice_Claims.Status=SUCCEEDED AND $s_m_Extract_Aetna_Invoice_Claims.TgtSuccessRows=0" FROMTASK ="s_m_Extract_Aetna_Invoice_Claims" TOTASK ="Send_No_Row_Processed_Email"/>
+        <WORKFLOWLINK CONDITION ="$Merge_And_SFTP_To_Staging.ErrorCode=0" FROMTASK ="Merge_And_SFTP_To_Staging" TOTASK ="Send_Success_Email"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Insert_RCNT_DEX_CNTL.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Insert_RCNT_DEX_CNTL.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Insert_RCNT_DEX_CNTL.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Insert_RCNT_DEX_CNTL.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Insert_RCNT_DEX_CNTL.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Insert_RCNT_DEX_CNTL.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Insert_RCNT_DEX_CNTL.SrcSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Insert_RCNT_DEX_CNTL.SrcFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully loaded" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Insert_RCNT_DEX_CNTL.TgtSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to load" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Insert_RCNT_DEX_CNTL.TgtFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Total number of transformation errors" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Insert_RCNT_DEX_CNTL.TotalTransErrors" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="First error code" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Insert_RCNT_DEX_CNTL.FirstErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="First error message" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Insert_RCNT_DEX_CNTL.FirstErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_SFTP_Fail_Email.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_SFTP_Fail_Email.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_SFTP_Fail_Email.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_SFTP_Fail_Email.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_SFTP_Fail_Email.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_SFTP_Fail_Email.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Merge_And_SFTP_To_Staging.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Merge_And_SFTP_To_Staging.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Merge_And_SFTP_To_Staging.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Merge_And_SFTP_To_Staging.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Merge_And_SFTP_To_Staging.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Merge_And_SFTP_To_Staging.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Claims.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Claims.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Claims.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Claims.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Claims.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Claims.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Claims.SrcSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Claims.SrcFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully loaded" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Claims.TgtSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to load" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Claims.TgtFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Total number of transformation errors" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Claims.TotalTransErrors" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="First error code" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Claims.FirstErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="First error message" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Extract_Aetna_Invoice_Claims.FirstErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.SrcSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.SrcFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully loaded" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.TgtSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to load" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.TgtFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Total number of transformation errors" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.TotalTransErrors" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="First error code" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.FirstErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="First error message" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Fail_RCNT_DEX_CNTL.FirstErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.SrcSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.SrcFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully loaded" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.TgtSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to load" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.TgtFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Total number of transformation errors" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.TotalTransErrors" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="First error code" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.FirstErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="First error message" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_AET_Extract_Upd_Stat_Success_RCNT_DEX_CNTL.FirstErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_No_Row_Processed_Email.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_No_Row_Processed_Email.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_No_Row_Processed_Email.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_No_Row_Processed_Email.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_No_Row_Processed_Email.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_No_Row_Processed_Email.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_Success_Email.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_Success_Email.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_Success_Email.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_Success_Email.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_Success_Email.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Send_Success_Email.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$PRCS_CRTE_ID_SUCCESS" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$Quarter" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="99" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$STATUS_FAIL" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="0" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$DEFAULT" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="nstring" DEFAULTVALUE ="&apos; &apos;" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$STR_DEFAULT" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$FILE_NM" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$DEX_GID" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="90" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$STATUS_SUCCESS" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$PRCS_CRTE_ID_FAIL" USERDEFINED ="YES"/>
+        <ATTRIBUTE NAME ="Parameter Filename" VALUE =""/>
+        <ATTRIBUTE NAME ="Write Backward Compatible Workflow Log File" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Workflow Log File Name" VALUE ="wf_s_m_INVOICED_CLAIM_EXTRACT.log"/>
+        <ATTRIBUTE NAME ="Workflow Log File Directory" VALUE ="$PMWorkflowLogDir&#x5c;"/>
+        <ATTRIBUTE NAME ="Save Workflow log by" VALUE ="By runs"/>
+        <ATTRIBUTE NAME ="Save workflow log for these runs" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Service Name" VALUE =""/>
+        <ATTRIBUTE NAME ="Service Timeout" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Is Service Visible" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Is Service Protected" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Fail task after wait time" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Enable HA recovery" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Automatically recover terminated tasks" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Service Level Name" VALUE ="Default"/>
+        <ATTRIBUTE NAME ="Allow concurrent run with unique run instance name" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Allow concurrent run with same run instance name" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Maximum number of concurrent runs" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Assigned Web Services Hubs" VALUE =""/>
+        <ATTRIBUTE NAME ="Maximum number of concurrent runs per Hub" VALUE ="1000"/>
+        <ATTRIBUTE NAME ="Expected Service Time" VALUE ="1"/>
+        <METADATAEXTENSION DATATYPE ="STRING" DESCRIPTION ="" DOMAINNAME ="User Defined Metadata Domain" ISCLIENTEDITABLE ="YES" ISCLIENTVISIBLE ="YES" ISREUSABLE ="YES" ISSHAREREAD ="NO" ISSHAREWRITE ="NO" MAXLENGTH ="256" NAME ="Creation_date" VALUE ="18-dec-2012" VENDORNAME ="INFORMATICA"/>
+        <METADATAEXTENSION DATATYPE ="STRING" DESCRIPTION ="" DOMAINNAME ="User Defined Metadata Domain" ISCLIENTEDITABLE ="YES" ISCLIENTVISIBLE ="YES" ISREUSABLE ="YES" ISSHAREREAD ="NO" ISSHAREWRITE ="NO" MAXLENGTH ="256" NAME ="Workflow_author" VALUE ="Arpit Mishra" VENDORNAME ="INFORMATICA"/>
+    </WORKFLOW>
+</FOLDER>
+</REPOSITORY>
+</POWERMART>

@@ -1,0 +1,53 @@
+
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        cli_schema=script.getProperty("cli_schema");        
+	]]></command>
+		       
+	<command type="try">
+		<try>
+
+        <!--  Update APC raw data with EDW Lookup info  -->
+        <command type="run" datasource="datamart" batch="1000">
+        <![CDATA[
+
+        UPDATE rps.BCBS_report
+                SET     (MBR_ID,
+                        PLAN_CD) =
+                (SELECT l.MBR_ID,
+                        l.PLAN_CD
+           FROM  rps.BCBS_lookup l
+	   WHERE l.claim_gid = rps.BCBS_report.claim_gid )
+        WHERE mbr_id is null
+
+        ]]>
+        </command>
+
+
+        <!--  Update APC raw data with Drug Name Lookup info  -->
+        <command type="run" datasource="datamart" batch="1000">
+        <![CDATA[
+
+        UPDATE rps.BCBS_report
+                SET     
+                        DRUG_NAME =
+                (SELECT   LABL_NME
+           FROM  rps.tdrug l
+	   WHERE l.ndc_nb = rps.BCBS_report.ndc )
+        WHERE DRUG_NAME is null
+
+        ]]>
+        </command>
+
+
+		</try>
+		<catch>
+		</catch>
+	</command>
+</sqml>

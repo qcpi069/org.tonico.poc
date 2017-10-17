@@ -1,0 +1,261 @@
+
+<!--
+     Loads general reports information for a specific quarter into table TDISCNT_APC_RPT.
+     Find out the current processing quarter and save to table VRAP.TCUR_INV_PRD.
+     Datasource definition file datasource.xml is in the ./java/Common_java_db_interface/conf.
+
+     Parameter 1 : Optional, "dashdashquarter YYYY0Q". This should be the parameter passed into XML.
+                   Note: hyphenhyphen means the two dash characters.
+
+     The XML file should reside under ./xml directory
+     Maestro Command with parameter: ./scripts/Common_java_db_interface.ksh dashdashquarter 200701 <xml file name>
+     Maestro Command without parameter: ./scripts/Common_java_db_interface.ksh <xml file name>
+-->
+<sqml>
+        <property name="TIMEOUT" value="0"/>
+        <!-- datasource.xml defines DB connection info. It should be under ./java/Common_java_db_interface/conf-->
+        <datasources resource="datasource.xml"/>
+
+        <!-- Set-up a try block to send an email on exception.  -->
+        <command type="try">
+        <try>
+
+                <!-- Start Update the GDX APC process status -->
+                <command type="run" datasource="gdxprd"><![CDATA[
+
+                    update VRAP.TAPC_QTR_PRCS_EVENT   
+                        SET STRT_TS = CURRENT TIMESTAMP
+                           ,END_TS = NULL
+                           ,PRCS_ERR_TS = NULL
+                           ,PRCS_STAT_TXT='Running'    
+                        WHERE PRCS_ID = 30;
+
+                ]]></command>
+                <!-- End Update the GDX APC process status -->
+
+                <!-- Query DB for current processing quarter info -->
+                <command type="run" datasource="gdxprd" rowName="rowQuarter"><![CDATA[
+
+                         SELECT rtrim(char(year(current date - 3 MONTHS))) || '0' ||
+                                rtrim(char(quarter(current date - 3 MONTHS)))
+                           FROM sysibm.sysdummy1
+
+
+                ]]></command>
+
+                <!-- Command to set quarter parameters, either from DB or parameter-->
+                <command type="java"><![CDATA[
+
+                         String quarter ="";
+
+                         if (script.getProperty("quarter") == null) {
+                             quarter = script.getProperty("rowQuarter.1");
+                             if (quarter == null || quarter.trim().length()== 0){
+                                 // If invalid info from database throw error
+                                 throw new Exception("Processing quarter info not found in database ");
+                             }
+                         }
+                         else { //There is parameter 'quarter' passed in
+                             quarter = script.getProperty("quarter");
+                         }
+
+                         //Make the variables available to other queries below
+                         script.setProperty("quarter", quarter);
+
+                ]]></command>
+
+                <!-- delete existing rows  -->
+                <command type="run" datasource="gdxprd" transaction="true"><![CDATA[
+
+                         DELETE FROM VRAP.TCUR_INV_PRD
+
+                ]]></command>
+
+                <!-- insert quarter ID  -->
+                <command type="run" datasource="gdxprd" transaction="true"><![CDATA[
+
+                         INSERT INTO VRAP.TCUR_INV_PRD(QUARTER_ID) VALUES (${quarter})
+
+                ]]></command>
+
+
+                <!-- delete rows for the current billing quarter -->
+                <command type="run" datasource="gdxprd" transaction="true"><![CDATA[
+
+                         DELETE FROM VRAP.TDISCNT_APC_RPT
+                          WHERE QUARTER_ID = (SELECT QUARTER_ID FROM VRAP.TCUR_INV_PRD)
+
+                ]]></command>
+
+                <!-- Insert report information for current invoicing quarter  -->
+                <command type="copy" batch="500">
+                         <source type="sql" datasource="gdxprd"><![CDATA[
+
+                               SELECT TP.QUARTER_ID,
+                                      TP.PERIOD_BEGIN_DT, TP.PERIOD_END_DT,
+                                      TP.PERIOD_ID, VLGL.DISCNT_RUN_MODE_CD,
+                                      TC.MODEL_TYP_CD, TC.VNDR_ID,
+                                      TV.NDC5_NB AS PICO_NB, TV.VNDR_NM,
+                                      TC.CNTRCT_ID, TC.CNTRCT_TX,
+                                      TC.PMT_SYS_ELIG_CD, TH.HRCY_TYP_CD,
+                                      TR.RPT_ID, TR.RPT_TITLE,
+                                      TR.RPT_TYP_CD, VLGL.HVST_ID
+                                 FROM VRAP.TDISCNT_PERIOD TP
+                                      ,VRAP.VSNAP_APC_DTL VLGL
+                                      ,VRAP.TRPT_REQMT TR
+                                      ,VRAP.TCNTRCT TC
+                                      ,VRAP.THIERARCHY TH
+                                      ,VRAP.TVNDR TV
+                                WHERE TP.QUARTER_ID = (SELECT QUARTER_ID FROM VRAP.TCUR_INV_PRD)
+                                  AND TV.VNDR_ID = TC.VNDR_ID
+                                  AND TC.CNTRCT_ID = TH.CNTRCT_ID
+                                  AND TH.HRCY_ID = TR.HRCY_ID
+                                  AND TH.HRCY_TYP_CD = 3
+                                  AND TR.RPT_ID = VLGL.RPT_ID
+                                  AND VLGL.PERIOD_ID = TP.PERIOD_ID
+                                  AND VLGL.SNAP_APC_TYP_CD = 3
+                                  and (vlgl.INV_STAT_CD = 1
+				       or vlgl.INV_STAT_CD is null)
+                                  AND VLGL.DISCNT_RUN_MODE_CD =
+                                                           (CASE TP.PERIOD_LEVEL
+                                                                WHEN 'QUARTER' THEN 'PROD'
+                                                                WHEN 'MONTH' THEN 'MPRD'
+                                                            END)
+                                  AND VLGL.DISCNT_RUN_MODE_CD =
+                                                            (CASE TC.BILL_FREQ_CD
+                                                                WHEN 4  THEN 'PROD'
+                                                                WHEN 12 THEN 'MPRD'
+                                                                ELSE  'PROD'
+                                                             END)
+                                 WITH UR
+
+                         ]]></source>
+
+                         <target
+                                type           = "sql"
+                                datasource     = "gdxprd"
+                                transaction    = "true"
+                                batch          = "500"
+                                reportInterval = "5000"
+                                queryTimeout   = "${TIMEOUT}"
+                         ><![CDATA[
+
+                                 INSERT INTO VRAP.TDISCNT_APC_RPT (
+                                      QUARTER_ID,
+                                      PERIOD_BEGIN_DT, PERIOD_END_DT,
+                                      PERIOD_ID, DISCNT_RUN_MODE_CD,
+                                      MODEL_TYP_CD, VNDR_ID,
+                                      PICO_NB, VNDR_NM,
+                                      CNTRCT_ID, CNTRCT_TX,
+                                      PMT_SYS_ELIG_CD, HRCY_TYP_CD,
+                                      RPT_ID, RPT_TITLE,
+                                      RPT_TYP_CD, HVST_ID
+                                       )
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+
+                         ]]></target>
+              </command>
+
+                <!-- Query DB for current processing quarter info to get a cycle_gid -->
+                <command type="run" datasource="gdxprd" rowName="rowCycle"><![CDATA[
+
+                         SELECT SUBSTR(cast(a.quarter_id as char(6)),1,4)||'4'||SUBSTR(cast(a.quarter_id as char(6)),6,1)
+                           FROM VRAP.TCUR_INV_PRD a
+
+                ]]></command>
+
+                <!-- Command to set quarter cyclegid parameters, either from DB or parameter-->
+                <command type="java"><![CDATA[
+
+                         String cyclegid ="";
+
+                         cyclegid = script.getProperty("rowCycle.1");
+                         if (cyclegid == null || cyclegid.trim().length()== 0){
+                            // If invalid info from database throw error
+                            throw new Exception("Processing cyclegid info not found in database ");
+                         }
+
+                         //Make the variables available to other queries below
+                         script.setProperty("cyclegid", cyclegid);
+
+                ]]></command>
+
+                <!-- Start Update the GDX APC process status -->
+                <!-- do not abend if this doesnt run properly -->
+                <command type="run" datasource="gdxprd"><![CDATA[
+
+                    update VRAP.TAPC_QTR_PRCS_EVENT   
+                        SET END_TS = CURRENT TIMESTAMP
+                           ,PRCS_STAT_TXT='Successful'    
+                        WHERE PRCS_ID = 30;
+
+                ]]></command>
+                <!-- End Update the GDX APC process status -->
+
+
+        </try>
+                <catch>
+                        <!-- Start Update the GDX APC process status -->
+                        <!-- do not abend if this doesnt run properly -->
+                        <command type="run" datasource="gdxprd"><![CDATA[
+
+                            update VRAP.TAPC_QTR_PRCS_EVENT    
+                                SET PRCS_ERR_TS = CURRENT TIMESTAMP
+                                   ,PRCS_STAT_TXT='Error-IT Investigating'    
+                                WHERE PRCS_ID = 30;
+
+                        ]]></command>
+
+                        <!-- Send an email on error -->
+                        <command
+                                type="mail"
+                                mailTo="${email_address}"
+                                mailFrom="TDISCNT_APC_RPT@caremark.com"
+                                subject="[ERROR] GDX_GD_7700J_DISCNT_APC_RPT_load.xml"
+                                contentType="text/html"
+                                throwsException="false"
+                        ><![CDATA[
+                                <html>
+                                <head>
+                                <title>[ERROR] GDX_GD_7700J_DISCNT_APC_RPT_load.xml</title>
+                                </head>
+                                <body>
+
+                                <h3><u>[ERROR] GDX_GD_7700J_DISCNT_APC_RPT_load.xml</u></h3>
+
+                                <table cellpadding="2">
+                                        <tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+                                        <tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+                                        <tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+                                        #if (${system.getProperty('logfile')})
+                                                <tr>
+                                                        <td><b>Log File:</b></td>
+                                                        <td>
+                                                                ${system.getProperty('logfile')}
+                                                        <td>
+                                                </tr>
+                                        #end
+                                </table>
+
+                                <br>
+                                <br>
+                                #if (${script.getLastStatement()})
+                                        <h3><u>Last Statement</u></h3>
+                                        <font style="color: blue; font-size: small">
+                                        ${script.getLastStatement()}
+                                        </font>
+
+                                        <br>
+                                        <br>
+                                #end
+
+                                <h3><u>Stack Trace</u></h3>
+                                <pre style="color: red; font-size: small;">${stackTrace}</pre>
+                                </body>
+                                </html>
+                        ]]></command>
+                </catch>
+        </command>
+</sqml>
+
+

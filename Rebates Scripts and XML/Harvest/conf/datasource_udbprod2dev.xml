@@ -1,0 +1,34 @@
+<datasources>
+
+	<datasource name="gdxdev" type="dbcp">
+		<defaultAutoCommit>true</defaultAutoCommit>
+		<defaultReadOnly>false</defaultReadOnly>
+		<driverClassName>com.ibm.db2.jcc.DB2Driver</driverClassName>
+		<initialSize>1</initialSize>
+		<maxActive>15</maxActive>
+		<maxIdle>2</maxIdle>
+		<poolPreparedStatements>true</poolPreparedStatements>
+		<testOnBorrow>true</testOnBorrow>
+		<url>jdbc:db2://r07tst07:50000/GDXDEV</url>
+		<username>vactuate</username>
+		<password>mkcrosson</password>
+		<validationQuery>SELECT 1 FROM SYSIBM.SYSDUMMY1</validationQuery>
+	</datasource>
+
+	<datasource name="gdxprd" type="dbcp">
+                <defaultAutoCommit>true</defaultAutoCommit>
+                <defaultReadOnly>true</defaultReadOnly>
+                <driverClassName>com.ibm.db2.jcc.DB2Driver</driverClassName>
+                <initialSize>1</initialSize>
+                <maxActive>15</maxActive>
+                <maxIdle>2</maxIdle>
+                <poolPreparedStatements>true</poolPreparedStatements>
+                <testOnBorrow>true</testOnBorrow>
+                <url>jdbc:db2://r07prd01:50000/GDXPRD</url>
+                <username>vactuate</username>
+                <password>mkcrosson</password>
+                <validationQuery>SELECT 1 FROM SYSIBM.SYSDUMMY1</validationQuery>
+        </datasource>
+
+
+</datasources>

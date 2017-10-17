@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE POWERMART SYSTEM "powrmart.dtd">
+<POWERMART CREATION_DATE="10/30/2013 16:55:37" REPOSITORY_VERSION="182.91">
+<REPOSITORY NAME="PCRepos_Caremark9_PRD1" VERSION="182" CODEPAGE="MS1252" DATABASETYPE="DB2">
+<FOLDER NAME="Rebates_RCI_Project" GROUP="" OWNER="rebates_session_operator" SHARED="NOTSHARED" DESCRIPTION="Daily RCI (Rebate Claims Invoices) Process" PERMISSIONS="rwx---r--" UUID="01fd5e69-321b-4ae1-aeb2-141688adbfc9">
+    <MAPPING DESCRIPTION ="Truncate, then load Finance Summary informaton for Rebate Eligible, Good claims for ALL Open periods." ISVALID ="YES" NAME ="m_TruncLoad_RCIT_OPN_FNC_SUMM" OBJECTVERSION ="1" VERSIONNUMBER ="1">
+        <TRANSFORMATION DESCRIPTION ="----- SQL OVERRIDE used -----&#xD;&#xA;The query uses VRCIT_MODEL_PRD_STUS to find ALL Open periods for selecting claims. &#xD;&#xA;This process uses a SQL Override to perform LEFT JOIN and summarization in one step for performance.&#xD;&#xA;This process ONLY includes Rebate Eligible, Good claims [RBEL=1, NRE=0]" NAME ="SQ_RCIT_OPN_FNC_SUMM" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Source Qualifier" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="PRD_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="6" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RBAT_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="AP_CO_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="EXTL_SRC_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="5" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="MODEL_TYP_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="1" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="MO_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="1" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="LCM_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="3" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="NDC_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="11" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="bigint" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLM_CNT_SUM_QTY" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="19" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="UQ_SUM_QTY" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="17" SCALE ="5"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLNT_PD_SUM_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="13" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CTRC_FEE_PD_SUM_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="11" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="COPAY_SUM_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="13" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="DY_SPLY_SUM_QTY" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="IC_SUM_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="13" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="EXTL_LVL1_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="SPCL_DRUG_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="1" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLM_PMT_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="1" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CT_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLT_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="BUS_SEG_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="2" SCALE ="0"/>
+            <TABLEATTRIBUTE NAME ="Sql Query" VALUE ="select bci.PRD_ID ,&#xD;&#xA;coalesce(bci.RBAT_ID, 99999) ,&#xD;&#xA;coalesce(bci.AP_CO_CD, &apos;**********&apos;) ,&#xD;&#xA;coalesce(bci.EXTL_SRC_CD, &apos;*****&apos;) ,&#xD;&#xA;coalesce(bci.MODEL_TYP_CD, &apos;*&apos;) ,&#xD;&#xA;bci.MO_CD ,&#xD;&#xA;coalesce(bci.LCM_CD, &apos;***&apos;) ,&#xD;&#xA;coalesce(bci.NDC_ID, 99999999999) ,&#xD;&#xA;sum(coalesce(bci.CLM_TYP_CD,0)) ,&#xD;&#xA;sum(coalesce(bci.UQ_QTY,0)) ,&#xD;&#xA;sum(coalesce(bci.CLNT_PD_AMT,0)) ,&#xD;&#xA;sum(coalesce(apc.CTRC_FEE_PD_AMT, 0)) ,&#xD;&#xA;sum(coalesce(bci.COPAY_AMT,0)) ,&#xD;&#xA;sum(coalesce(bci.DY_SPLY_QTY, 0)) ,&#xD;&#xA;sum(coalesce(bci.IC_AMT,0)) ,&#xD;&#xA;coalesce(bci.EXTL_LVL1_ID, &apos;********************&apos;) ,&#xD;&#xA;coalesce(apc.SPCL_DRUG_CD, &apos;*&apos;) ,&#xD;&#xA;coalesce(bci.CLM_PMT_CD, &apos;*&apos;),&#xD;&#xA;bci.CT_ID,&#xD;&#xA;bci.CLT_ID,&#xD;&#xA;bci.BUS_SEG_CD&#xD;&#xA;from&#xD;&#xA;(select x.*, coalesce(z.PMCY_DSPN_TYP_CD, &apos;R&apos;) MO_CD&#xD;&#xA;from vrap.RCIT_BASE_CLM_INV x&#xD;&#xA;inner join vrap.VRCIT_MODEL_PRD_STUS opn&#xD;&#xA;on opn.CLM_LOCK_CD in (&apos;A&apos;,&apos;O&apos;) and&#xD;&#xA;opn.APC_STAT_CD in (&apos;O&apos;) and&#xD;&#xA;opn.MODEL_TYP_CD = x.MODEL_TYP_CD and&#xD;&#xA;opn.MNTH_PERIOD_END_DT = x.INV_ELIG_DT&#xD;&#xA;left join vrap.RCIT_MAIL_SPCL_NABP z&#xD;&#xA;on x.NABP_ID = z.NABP_ID) bci ,&#xD;&#xA;vrap.RCIT_BASE_CLM_APC apc&#xD;&#xA;&#xD;&#xA;where bci.RBEL_CLNT_CD = &apos;1&apos; and&#xD;&#xA;bci.NRE_CLM_CD = &apos;0&apos; and&#xD;&#xA;bci.BTCH_GID = apc.BTCH_GID and&#xD;&#xA;bci.CLM_GID = apc.CLM_GID&#xD;&#xA;group by bci.PRD_ID ,&#xD;&#xA;coalesce(bci.RBAT_ID, 99999) ,&#xD;&#xA;coalesce(bci.AP_CO_CD, &apos;**********&apos;) ,&#xD;&#xA;coalesce(bci.EXTL_SRC_CD, &apos;*****&apos;) ,&#xD;&#xA;coalesce(bci.MODEL_TYP_CD, &apos;*&apos;) ,&#xD;&#xA;bci.MO_CD ,&#xD;&#xA;coalesce(bci.LCM_CD, &apos;***&apos;) ,&#xD;&#xA;coalesce(bci.NDC_ID, 99999999999) ,&#xD;&#xA;coalesce(bci.EXTL_LVL1_ID, &apos;********************&apos;) ,&#xD;&#xA;coalesce(apc.SPCL_DRUG_CD, &apos;*&apos;) ,&#xD;&#xA;coalesce(bci.CLM_PMT_CD, &apos;*&apos;),&#xD;&#xA;bci.CT_ID,&#xD;&#xA;bci.CLT_ID,&#xD;&#xA;bci.BUS_SEG_CD"/>
+            <TABLEATTRIBUTE NAME ="User Defined Join" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Source Filter" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Number Of Sorted Ports" VALUE ="0"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+            <TABLEATTRIBUTE NAME ="Select Distinct" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Is Partitionable" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Pre SQL" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Post SQL" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Output is deterministic" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Output is repeatable" VALUE ="Never"/>
+        </TRANSFORMATION>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="1" NAME ="RCIT_OPN_FNC_SUMM" TRANSFORMATION_NAME ="RCIT_OPN_FNC_SUMM" TRANSFORMATION_TYPE ="Target Definition" TYPE ="TARGET"/>
+        <INSTANCE DBDNAME ="GDX_VRAP" DESCRIPTION ="" INSTANCEID ="2" NAME ="RCIT_OPN_FNC_SUMM1" TRANSFORMATION_NAME ="RCIT_OPN_FNC_SUMM" TRANSFORMATION_TYPE ="Source Definition" TYPE ="SOURCE"/>
+        <INSTANCE DESCRIPTION ="----- SQL OVERRIDE used -----&#xD;&#xA;The query uses VRCIT_MODEL_PRD_STUS to find ALL Open periods for selecting claims. &#xD;&#xA;This process uses a SQL Override to perform LEFT JOIN and summarization in one step for performance.&#xD;&#xA;This process ONLY includes Rebate Eligible, Good claims [RBEL=1, NRE=0]" INSTANCEID ="3" NAME ="SQ_RCIT_OPN_FNC_SUMM" REUSABLE ="NO" TRANSFORMATION_NAME ="SQ_RCIT_OPN_FNC_SUMM" TRANSFORMATION_TYPE ="Source Qualifier" TYPE ="TRANSFORMATION">
+            <ASSOCIATED_SOURCE_INSTANCE NAME ="RCIT_OPN_FNC_SUMM1"/>
+        </INSTANCE>
+        <CONNECTOR FROMFIELD ="MO_CD" FROMINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="MO_CD" TOINSTANCE ="RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="SPCL_DRUG_CD" FROMINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="SPCL_DRUG_CD" TOINSTANCE ="RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CLM_PMT_CD" FROMINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="CLM_PMT_CD" TOINSTANCE ="RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="LCM_CD" FROMINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="LCM_CD" TOINSTANCE ="RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="NDC_ID" FROMINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="NDC_ID" TOINSTANCE ="RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CLM_CNT_SUM_QTY" FROMINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="CLM_CNT_SUM_QTY" TOINSTANCE ="RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="UQ_SUM_QTY" FROMINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="UQ_SUM_QTY" TOINSTANCE ="RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CLNT_PD_SUM_AMT" FROMINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="CLNT_PD_SUM_AMT" TOINSTANCE ="RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CTRC_FEE_PD_SUM_AMT" FROMINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="CTRC_FEE_PD_SUM_AMT" TOINSTANCE ="RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="COPAY_SUM_AMT" FROMINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="COPAY_SUM_AMT" TOINSTANCE ="RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="DY_SPLY_SUM_QTY" FROMINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="DY_SPLY_SUM_QTY" TOINSTANCE ="RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="BUS_SEG_CD" FROMINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="BUS_SEG_CD" TOINSTANCE ="RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CT_ID" FROMINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="CT_ID" TOINSTANCE ="RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CLT_ID" FROMINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="CLT_ID" TOINSTANCE ="RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="EXTL_LVL1_ID" FROMINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="EXTL_LVL1_ID" TOINSTANCE ="RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="IC_SUM_AMT" FROMINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="IC_SUM_AMT" TOINSTANCE ="RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="PRD_ID" FROMINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="PRD_ID" TOINSTANCE ="RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="RBAT_ID" FROMINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="RBAT_ID" TOINSTANCE ="RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="AP_CO_CD" FROMINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="AP_CO_CD" TOINSTANCE ="RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="EXTL_SRC_CD" FROMINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="EXTL_SRC_CD" TOINSTANCE ="RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="MODEL_TYP_CD" FROMINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="MODEL_TYP_CD" TOINSTANCE ="RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CLM_CNT_SUM_QTY" FROMINSTANCE ="RCIT_OPN_FNC_SUMM1" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CLM_CNT_SUM_QTY" TOINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="UQ_SUM_QTY" FROMINSTANCE ="RCIT_OPN_FNC_SUMM1" FROMINSTANCETYPE ="Source Definition" TOFIELD ="UQ_SUM_QTY" TOINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CLNT_PD_SUM_AMT" FROMINSTANCE ="RCIT_OPN_FNC_SUMM1" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CLNT_PD_SUM_AMT" TOINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CTRC_FEE_PD_SUM_AMT" FROMINSTANCE ="RCIT_OPN_FNC_SUMM1" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CTRC_FEE_PD_SUM_AMT" TOINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="EXTL_LVL1_ID" FROMINSTANCE ="RCIT_OPN_FNC_SUMM1" FROMINSTANCETYPE ="Source Definition" TOFIELD ="EXTL_LVL1_ID" TOINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="PRD_ID" FROMINSTANCE ="RCIT_OPN_FNC_SUMM1" FROMINSTANCETYPE ="Source Definition" TOFIELD ="PRD_ID" TOINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="RBAT_ID" FROMINSTANCE ="RCIT_OPN_FNC_SUMM1" FROMINSTANCETYPE ="Source Definition" TOFIELD ="RBAT_ID" TOINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="AP_CO_CD" FROMINSTANCE ="RCIT_OPN_FNC_SUMM1" FROMINSTANCETYPE ="Source Definition" TOFIELD ="AP_CO_CD" TOINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="SPCL_DRUG_CD" FROMINSTANCE ="RCIT_OPN_FNC_SUMM1" FROMINSTANCETYPE ="Source Definition" TOFIELD ="SPCL_DRUG_CD" TOINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CLM_PMT_CD" FROMINSTANCE ="RCIT_OPN_FNC_SUMM1" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CLM_PMT_CD" TOINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="COPAY_SUM_AMT" FROMINSTANCE ="RCIT_OPN_FNC_SUMM1" FROMINSTANCETYPE ="Source Definition" TOFIELD ="COPAY_SUM_AMT" TOINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="DY_SPLY_SUM_QTY" FROMINSTANCE ="RCIT_OPN_FNC_SUMM1" FROMINSTANCETYPE ="Source Definition" TOFIELD ="DY_SPLY_SUM_QTY" TOINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="IC_SUM_AMT" FROMINSTANCE ="RCIT_OPN_FNC_SUMM1" FROMINSTANCETYPE ="Source Definition" TOFIELD ="IC_SUM_AMT" TOINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="EXTL_SRC_CD" FROMINSTANCE ="RCIT_OPN_FNC_SUMM1" FROMINSTANCETYPE ="Source Definition" TOFIELD ="EXTL_SRC_CD" TOINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="MODEL_TYP_CD" FROMINSTANCE ="RCIT_OPN_FNC_SUMM1" FROMINSTANCETYPE ="Source Definition" TOFIELD ="MODEL_TYP_CD" TOINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="MO_CD" FROMINSTANCE ="RCIT_OPN_FNC_SUMM1" FROMINSTANCETYPE ="Source Definition" TOFIELD ="MO_CD" TOINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="LCM_CD" FROMINSTANCE ="RCIT_OPN_FNC_SUMM1" FROMINSTANCETYPE ="Source Definition" TOFIELD ="LCM_CD" TOINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="NDC_ID" FROMINSTANCE ="RCIT_OPN_FNC_SUMM1" FROMINSTANCETYPE ="Source Definition" TOFIELD ="NDC_ID" TOINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="BUS_SEG_CD" FROMINSTANCE ="RCIT_OPN_FNC_SUMM1" FROMINSTANCETYPE ="Source Definition" TOFIELD ="BUS_SEG_CD" TOINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CLT_ID" FROMINSTANCE ="RCIT_OPN_FNC_SUMM1" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CLT_ID" TOINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CT_ID" FROMINSTANCE ="RCIT_OPN_FNC_SUMM1" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CT_ID" TOINSTANCE ="SQ_RCIT_OPN_FNC_SUMM" TOINSTANCETYPE ="Source Qualifier"/>
+        <TARGETLOADORDER ORDER ="1" TARGETINSTANCE ="RCIT_OPN_FNC_SUMM"/>
+        <ERPINFO/>
+    </MAPPING>
+    <SHORTCUT COMMENTS ="" DBDNAME ="GDX_VRAP" FOLDERNAME ="Shared_Rebates_RCI" NAME ="RCIT_OPN_FNC_SUMM" OBJECTSUBTYPE ="Source Definition" OBJECTTYPE ="SOURCE" REFERENCEDDBD ="GDX_VRAP" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="RCIT_OPN_FNC_SUMM" REPOSITORYNAME ="PCRepos_Caremark9_PRD1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="" FOLDERNAME ="Shared_Rebates_RCI" NAME ="RCIT_OPN_FNC_SUMM" OBJECTSUBTYPE ="Target Definition" OBJECTTYPE ="TARGET" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="RCIT_OPN_FNC_SUMM" REPOSITORYNAME ="PCRepos_Caremark9_PRD1" VERSIONNUMBER ="1"/>
+    <CONFIG DESCRIPTION ="Default session configuration object" ISDEFAULT ="YES" NAME ="default_session_config" VERSIONNUMBER ="1">
+        <ATTRIBUTE NAME ="Advanced" VALUE =""/>
+        <ATTRIBUTE NAME ="Constraint based load ordering" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Cache LOOKUP() function" VALUE ="YES"/>
+        <ATTRIBUTE NAME ="Default buffer block size" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Line Sequential buffer length" VALUE ="1024"/>
+        <ATTRIBUTE NAME ="Maximum Memory Allowed For Auto Memory Attributes" VALUE ="5000MB"/>
+        <ATTRIBUTE NAME ="Maximum Percentage of Total Memory Allowed For Auto Memory Attributes" VALUE ="50"/>
+        <ATTRIBUTE NAME ="Additional Concurrent Pipelines for Lookup Cache Creation" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Custom Properties" VALUE =""/>
+        <ATTRIBUTE NAME ="Pre-build lookup cache" VALUE ="Always allowed"/>
+        <ATTRIBUTE NAME ="Optimization Level" VALUE ="Medium"/>
+        <ATTRIBUTE NAME ="DateTime Format String" VALUE ="MM/DD/YYYY HH24:MI:SS.US"/>
+        <ATTRIBUTE NAME ="Pre 85 Timestamp Compatibility" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Log Options" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Save session log by" VALUE ="Session runs"/>
+        <ATTRIBUTE NAME ="Save session log for these runs" VALUE ="7"/>
+        <ATTRIBUTE NAME ="Session Log File Max Size" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Session Log File Max Time Period" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Maximum Partial Session Log Files" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Writer Commit Statistics Log Frequency" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Writer Commit Statistics Log Interval" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Error handling" VALUE =""/>
+        <ATTRIBUTE NAME ="Stop on errors" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Override tracing" VALUE ="Normal"/>
+        <ATTRIBUTE NAME ="On Stored Procedure error" VALUE ="Stop"/>
+        <ATTRIBUTE NAME ="On Pre-session command task error" VALUE ="Stop"/>
+        <ATTRIBUTE NAME ="On Pre-Post SQL error" VALUE ="Stop"/>
+        <ATTRIBUTE NAME ="Enable Recovery" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Error Log Type" VALUE ="None"/>
+        <ATTRIBUTE NAME ="Error Log Table Name Prefix" VALUE =""/>
+        <ATTRIBUTE NAME ="Error Log File Name" VALUE ="PMError.log"/>
+        <ATTRIBUTE NAME ="Log Source Row Data" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Data Column Delimiter" VALUE ="|"/>
+        <ATTRIBUTE NAME ="Partitioning Options" VALUE =""/>
+        <ATTRIBUTE NAME ="Dynamic Partitioning" VALUE ="Disabled"/>
+        <ATTRIBUTE NAME ="Number of Partitions" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Multiplication Factor" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Session on Grid" VALUE =""/>
+        <ATTRIBUTE NAME ="Is Enabled" VALUE ="NO"/>
+    </CONFIG>
+    <SESSION DESCRIPTION ="&#xD;&#xA;Failure e-mail" ISVALID ="YES" MAPPINGNAME ="m_TruncLoad_RCIT_OPN_FNC_SUMM" NAME ="s_m_TruncLoad_RCIT_OPN_FNC_SUMM" REUSABLE ="YES" SORTORDER ="Binary" VERSIONNUMBER ="1">
+        <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="RCIT_OPN_FNC_SUMM" STAGE ="1" TRANSFORMATIONNAME ="RCIT_OPN_FNC_SUMM" TRANSFORMATIONTYPE ="Target Definition">
+            <FLATFILE CODEPAGE ="MS1252" CONSECDELIMITERSASONE ="NO" DELIMITED ="YES" DELIMITERS ="," ESCAPE_CHARACTER ="" KEEPESCAPECHAR ="NO" LINESEQUENTIAL ="NO" MULTIDELIMITERSASAND ="NO" NULLCHARTYPE ="ASCII" NULL_CHARACTER ="*" PADBYTES ="1" QUOTE_CHARACTER ="NONE" REPEATABLE ="NO" ROWDELIMITER ="0" SKIPROWS ="0" STRIPTRAILINGBLANKS ="NO"/>
+            <ATTRIBUTE NAME ="Table Name Prefix" VALUE ="VRAP"/>
+        </SESSTRANSFORMATIONINST>
+        <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="0" SINSTANCENAME ="RCIT_OPN_FNC_SUMM1" STAGE ="0" TRANSFORMATIONNAME ="RCIT_OPN_FNC_SUMM1" TRANSFORMATIONTYPE ="Source Definition"/>
+        <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="SQ_RCIT_OPN_FNC_SUMM" STAGE ="2" TRANSFORMATIONNAME ="SQ_RCIT_OPN_FNC_SUMM" TRANSFORMATIONTYPE ="Source Qualifier"/>
+        <CONFIGREFERENCE REFOBJECTNAME ="default_session_config" TYPE ="Session config"/>
+        <SESSIONCOMPONENT REFOBJECTNAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Failure Email">
+            <TASK DESCRIPTION ="" NAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+                <ATTRIBUTE NAME ="Email User Name" VALUE ="$PMFailureEmailUser"/>
+                <ATTRIBUTE NAME ="Email Subject" VALUE ="FAILURE: Building Open Periods Finance Summary  [%d]"/>
+                <ATTRIBUTE NAME ="Email Text" VALUE ="ONCALL:  After determining and fixing the cause of the error, please ReStart at THIS STEP.&#xD;&#xA;&#xD;&#xA;--------------------------------------------------&#xD;&#xA;&#xD;&#xA;The mapping %m ran in the %s session in the %w workflow ran in %d.&#xD;&#xA;&#xD;&#xA;Target Table:  %t&#xD;&#xA;&#xD;&#xA;%l&#xD;&#xA;&#xD;&#xA;%r&#xD;&#xA;&#xD;&#xA;Session Log is attached&#xD;&#xA;%g"/>
+            </TASK>
+        </SESSIONCOMPONENT>
+        <SESSIONEXTENSION NAME ="File Writer" SINSTANCENAME ="RCIT_OPN_FNC_SUMM" SUBTYPE ="File Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+            <CONNECTIONREFERENCE CNXREFNAME ="Connection" CONNECTIONNAME ="DB2_EE_External_Loader" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="DB2 EE External Loader" CONNECTIONTYPE ="External Loader" VARIABLE ="">
+                <ATTRIBUTE NAME ="Opmode" VALUE ="Replace"/>
+            </CONNECTIONREFERENCE>
+            <ATTRIBUTE NAME ="Merge Type" VALUE ="No Merge"/>
+            <ATTRIBUTE NAME ="Merge File Directory" VALUE ="$PMTargetFileDir&#x5c;"/>
+            <ATTRIBUTE NAME ="Merge File Name" VALUE ="rcit_opn_fnc_summ.out"/>
+            <ATTRIBUTE NAME ="Append if Exists" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Create Target Directory" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Header Options" VALUE ="No Header"/>
+            <ATTRIBUTE NAME ="Header Command" VALUE =""/>
+            <ATTRIBUTE NAME ="Footer Command" VALUE =""/>
+            <ATTRIBUTE NAME ="Output Type" VALUE ="File"/>
+            <ATTRIBUTE NAME ="Merge Command" VALUE =""/>
+            <ATTRIBUTE NAME ="Output file directory" VALUE ="$PMTargetFileDir&#x5c;"/>
+            <ATTRIBUTE NAME ="Output filename" VALUE ="rcit_opn_fnc_summ1.out"/>
+            <ATTRIBUTE NAME ="Reject file directory" VALUE ="$PMBadFileDir&#x5c;"/>
+            <ATTRIBUTE NAME ="Reject filename" VALUE ="rcit_opn_fnc_summ1.bad"/>
+            <ATTRIBUTE NAME ="Command" VALUE =""/>
+            <ATTRIBUTE NAME ="Codepage Parameter" VALUE =""/>
+        </SESSIONEXTENSION>
+        <SESSIONEXTENSION DSQINSTNAME ="SQ_RCIT_OPN_FNC_SUMM" DSQINSTTYPE ="Source Qualifier" NAME ="Relational Reader" SINSTANCENAME ="RCIT_OPN_FNC_SUMM1" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Definition" TYPE ="READER"/>
+        <SESSIONEXTENSION NAME ="Relational Reader" SINSTANCENAME ="SQ_RCIT_OPN_FNC_SUMM" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Qualifier" TYPE ="READER">
+            <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="GDX" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="DB2" CONNECTIONTYPE ="Relational" VARIABLE =""/>
+        </SESSIONEXTENSION>
+        <ATTRIBUTE NAME ="General Options" VALUE =""/>
+        <ATTRIBUTE NAME ="Write Backward Compatible Session Log File" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Session Log File Name" VALUE ="s_m_TruncLoad_RCIT_OPN_FNC_SUMM.log"/>
+        <ATTRIBUTE NAME ="Session Log File directory" VALUE ="$PMSessionLogDir&#x5c;"/>
+        <ATTRIBUTE NAME ="Parameter Filename" VALUE =""/>
+        <ATTRIBUTE NAME ="Enable Test Load" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="$Source connection value" VALUE =""/>
+        <ATTRIBUTE NAME ="$Target connection value" VALUE =""/>
+        <ATTRIBUTE NAME ="Treat source rows as" VALUE ="Insert"/>
+        <ATTRIBUTE NAME ="Commit Type" VALUE ="Target"/>
+        <ATTRIBUTE NAME ="Commit Interval" VALUE ="10000"/>
+        <ATTRIBUTE NAME ="Commit On End Of File" VALUE ="YES"/>
+        <ATTRIBUTE NAME ="Rollback Transactions on Errors" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+        <ATTRIBUTE NAME ="Java Classpath" VALUE =""/>
+        <ATTRIBUTE NAME ="Performance" VALUE =""/>
+        <ATTRIBUTE NAME ="DTM buffer size" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Collect performance data" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Write performance data to repository" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Incremental Aggregation" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Enable high precision" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Session retry on deadlock" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Pushdown Optimization" VALUE ="None"/>
+        <ATTRIBUTE NAME ="Allow Temporary View for Pushdown" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Allow Temporary Sequence for Pushdown" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Allow Pushdown for User Incompatible Connections" VALUE ="NO"/>
+    </SESSION>
+    <WORKFLOW DESCRIPTION ="Build Open Finance Summary data for ALL open periods." ISENABLED ="YES" ISRUNNABLESERVICE ="NO" ISSERVICE ="NO" ISVALID ="YES" NAME ="wf_m_TruncLoad_RCIT_OPN_FNC_SUMM" REUSABLE_SCHEDULER ="NO" SCHEDULERNAME ="Scheduler" SUSPEND_ON_ERROR ="NO" TASKS_MUST_RUN_ON_SERVER ="NO" VERSIONNUMBER ="1">
+        <SCHEDULER DESCRIPTION ="" NAME ="Scheduler" REUSABLE ="NO" VERSIONNUMBER ="1">
+            <SCHEDULEINFO SCHEDULETYPE ="ONDEMAND"/>
+        </SCHEDULER>
+        <TASK DESCRIPTION ="" NAME ="Start" REUSABLE ="NO" TYPE ="Start" VERSIONNUMBER ="1"/>
+        <TASKINSTANCE DESCRIPTION ="" ISENABLED ="YES" NAME ="Start" REUSABLE ="NO" TASKNAME ="Start" TASKTYPE ="Start"/>
+        <TASKINSTANCE DESCRIPTION ="NO Overrides" FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="YES" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="s_m_TruncLoad_RCIT_OPN_FNC_SUMM" REUSABLE ="YES" TASKNAME ="s_m_TruncLoad_RCIT_OPN_FNC_SUMM" TASKTYPE ="Session" TREAT_INPUTLINK_AS_AND ="YES">
+            <SESSIONEXTENSION NAME ="File Writer" SINSTANCENAME ="RCIT_OPN_FNC_SUMM" SUBTYPE ="File Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+                <CONNECTIONREFERENCE CNXREFNAME ="Connection" CONNECTIONNAME ="DB2_EE_External_Loader" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="DB2 EE External Loader" CONNECTIONTYPE ="External Loader" VARIABLE ="">
+                    <ATTRIBUTE NAME ="Recoverable" VALUE ="NO"/>
+                </CONNECTIONREFERENCE>
+            </SESSIONEXTENSION>
+        </TASKINSTANCE>
+        <WORKFLOWLINK CONDITION ="" FROMTASK ="Start" TOTASK ="s_m_TruncLoad_RCIT_OPN_FNC_SUMM"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_RCIT_OPN_FNC_SUMM.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_RCIT_OPN_FNC_SUMM.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_RCIT_OPN_FNC_SUMM.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_RCIT_OPN_FNC_SUMM.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_RCIT_OPN_FNC_SUMM.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_RCIT_OPN_FNC_SUMM.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_RCIT_OPN_FNC_SUMM.SrcSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_RCIT_OPN_FNC_SUMM.SrcFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully loaded" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_RCIT_OPN_FNC_SUMM.TgtSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to load" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_RCIT_OPN_FNC_SUMM.TgtFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Total number of transformation errors" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_RCIT_OPN_FNC_SUMM.TotalTransErrors" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="First error code" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_RCIT_OPN_FNC_SUMM.FirstErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="First error message" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_RCIT_OPN_FNC_SUMM.FirstErrorMsg" USERDEFINED ="NO"/>
+        <ATTRIBUTE NAME ="Parameter Filename" VALUE =""/>
+        <ATTRIBUTE NAME ="Write Backward Compatible Workflow Log File" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Workflow Log File Name" VALUE ="wf_m_TruncLoad_RCIT_OPN_FNC_SUMM.log"/>
+        <ATTRIBUTE NAME ="Workflow Log File Directory" VALUE ="$PMWorkflowLogDir&#x5c;"/>
+        <ATTRIBUTE NAME ="Save Workflow log by" VALUE ="By runs"/>
+        <ATTRIBUTE NAME ="Save workflow log for these runs" VALUE ="7"/>
+        <ATTRIBUTE NAME ="Service Name" VALUE =""/>
+        <ATTRIBUTE NAME ="Service Timeout" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Is Service Visible" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Is Service Protected" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Fail task after wait time" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Enable HA recovery" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Automatically recover terminated tasks" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Service Level Name" VALUE ="Default"/>
+        <ATTRIBUTE NAME ="Allow concurrent run with unique run instance name" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Allow concurrent run with same run instance name" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Maximum number of concurrent runs" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Assigned Web Services Hubs" VALUE =""/>
+        <ATTRIBUTE NAME ="Maximum number of concurrent runs per Hub" VALUE ="1000"/>
+        <ATTRIBUTE NAME ="Expected Service Time" VALUE ="1"/>
+    </WORKFLOW>
+</FOLDER>
+</REPOSITORY>
+</POWERMART>

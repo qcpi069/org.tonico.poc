@@ -1,0 +1,652 @@
+<statements>
+	
+	<property name="schema" value="VRAP"/>
+
+	<!-- Statements used by com.caremark.gdx.rateload.dao.FileExportConfigDAOOracle -->
+	<group name="ExclusionMarketshare">
+		<statement name="DELETE"><![CDATA[
+			DELETE FROM VRAP.TMKTSHR_EXCL_SUM_#MODEL#
+			WHERE PERIOD_ID IN (#PERIOD#)
+			AND   RUN_MODE_CD = #RMC#
+			AND   RPT_ID = #RPT_ID#
+		]]></statement>
+		<statement name="INSERT"><![CDATA[
+			INSERT INTO VRAP.TMKTSHR_EXCL_SUM_#MODEL#
+			    (MODEL_TYP_CD,
+			     VNDR_ID,
+			     CNTRCT_ID,
+			     RPT_ID,
+			     PERIOD_ID,
+			     FILL_PERIOD_ID,
+			     RUN_MODE_CD,
+			     MDA_DCL_PAIR_ID,
+			     MDA_DCL_ID,
+			     MDA_DCL_TYPE,
+			     DRUG_NDC_ID,
+			     NHU_TYP_CD,
+			     CLT_ID,
+			     FRMLY_SRC_CD,
+			     FRMLY_ID,
+			     INP_SRC_ID,
+			     DLVRY_SYS_CD,
+			     QUAL_RX_COUNT,
+			     QUAL_UNITS,
+			     ATTR_COMB_CD,
+			     INEX_REAS_ID)
+			SELECT
+			     TC.MODEL_TYP_CD,
+			     TC.VNDR_ID,    
+			     TH.CNTRCT_ID,
+			     TEEC.RPT_ID,
+			     ('M'|| RTRIM(
+			        CASE  
+			            WHEN (MONTH(VC.INV_ELIG_DT)) <= 9  THEN '0' || CHAR(MONTH(VC.INV_ELIG_DT))
+			            ELSE CHAR(MONTH(VC.INV_ELIG_DT))
+			        END)
+			        ||
+			        SUBSTR(CHAR(YEAR(VC.INV_ELIG_DT)),3,2)) 
+			     AS PERIOD_ID,
+			     ('M'|| RTRIM(
+			        CASE  
+			            WHEN (MONTH(VC.FILL_DT)) <= 9  THEN '0' || CHAR(MONTH(VC.FILL_DT))
+			            ELSE CHAR(MONTH(VC.FILL_DT))
+			        END)
+			        ||
+			        SUBSTR(CHAR(YEAR(VC.FILL_DT)),3,2)) 
+			     AS FILL_PERIOD_ID,
+			       (CASE
+			            WHEN TEEC.DISCNT_RUN_MODE_CD = 'ACCL' THEN 1
+			            WHEN TEEC.DISCNT_RUN_MODE_CD = 'MKSH' THEN 1
+			            WHEN TEEC.DISCNT_RUN_MODE_CD = 'MPRD' THEN 0
+			            WHEN TEEC.DISCNT_RUN_MODE_CD = 'PROD' THEN 0
+			        END) 
+			     AS RUN_MODE_CD,
+			     TEEC.MDA_DCL_PAIR_ID,
+			     TEEC.MDA_DCL_ID,
+			     TEEC.MDA_DCL_TYPE,
+			     VC.DRUG_NDC_ID,
+			     VC.NHU_TYP_CD,
+			     VC.CLT_ID,
+			     VC.FRMLY_SRC_CD,
+			     VC.FRMLY_ID,
+			     VC.INP_SRC_ID,
+			     VC.DLVRY_SYS_CD,
+			     SUM(VC.ITEM_COUNT_QY) AS QUAL_RX_COUNT,
+			     SUM(VC.DSPNSD_QTY) AS QUAL_UNITS,
+			     TEEC.ATTR_COMB_CD,
+			     TEEC.INEX_REAS_ID
+			 FROM VRAP.THIERARCHY TH,
+			      VRAP.VCLAIM_#MODEL# VC,
+			      VRAP.TRPT_REQMT TR,
+			      VRAP.TCNTRCT TC,
+			      (SELECT DISTINCT
+				      INNERVIEW.CLAIM_ID,
+			              a.RPT_ID,
+			              a.PERIOD_ID, 
+			              a.DISCNT_RUN_MODE_CD,
+			              a.MDA_DCL_PAIR_ID,
+			              a.MDA_DCL_ID,
+			              a.MDA_DCL_TYPE,
+			              INNERVIEW.ATTR_COMB_CD,
+			              MAX(a.INEX_REAS_ID) AS INEX_REAS_ID
+			              FROM VRAP.TMKTSHR_EXCL_EXT_CLAIM_#MODEL# a,
+			              (SELECT DISTINCT CLAIM_ID, RPT_ID, PERIOD_ID, DISCNT_RUN_MODE_CD, MAX(ATTR_COMB_CD)AS ATTR_COMB_CD 
+			                      FROM VRAP.TMKTSHR_EXCL_EXT_CLAIM_#MODEL#
+					      WHERE PERIOD_ID = '#PERIOD#'
+			                      AND   DISCNT_RUN_MODE_CD = '#DRM#'
+			                      AND   RPT_ID = #RPT_ID#
+			                      GROUP BY CLAIM_ID, RPT_ID, PERIOD_ID, DISCNT_RUN_MODE_CD) INNERVIEW 
+			              WHERE a.CLAIM_ID = INNERVIEW.CLAIM_ID
+			                      AND a.ATTR_COMB_CD = INNERVIEW.ATTR_COMB_CD
+			                      AND a.RPT_ID = INNERVIEW.RPT_ID
+			                      AND a.PERIOD_ID = INNERVIEW.PERIOD_ID
+			                      AND a.DISCNT_RUN_MODE_CD = INNERVIEW.DISCNT_RUN_MODE_CD 
+			              GROUP BY INNERVIEW.CLAIM_ID,
+					        a.RPT_ID,
+			                        a.PERIOD_ID, 
+			                        a.DISCNT_RUN_MODE_CD,
+			                        a.MDA_DCL_PAIR_ID,
+			                        a.MDA_DCL_ID,
+			                        a.MDA_DCL_TYPE,
+			                        INNERVIEW.ATTR_COMB_CD) TEEC  
+			WHERE TEEC.CLAIM_ID = VC.CLAIM_ID
+			    AND TEEC.RPT_ID = TR.RPT_ID
+			    AND TR.HRCY_ID = TH.HRCY_ID
+			    AND TH.CNTRCT_ID = TC.CNTRCT_ID
+			    AND VC.INV_ELIG_DT  BETWEEN '#START_DATE#' AND '#END_DATE#'
+			    AND TEEC.PERIOD_ID = '#PERIOD#'
+			    AND TEEC.DISCNT_RUN_MODE_CD = '#DRM#'
+			    AND TEEC.RPT_ID = #RPT_ID#
+			GROUP BY
+			     TC.MODEL_TYP_CD,
+			     TC.VNDR_ID,    
+			     TH.CNTRCT_ID,
+				 TEEC.RPT_ID,
+			     ('M'|| RTRIM(CASE  
+			         WHEN (MONTH(VC.INV_ELIG_DT)) <= 9  THEN '0' || CHAR(MONTH(VC.INV_ELIG_DT))
+			         ELSE CHAR(MONTH(VC.INV_ELIG_DT))
+			         END)
+			         ||
+			         SUBSTR(CHAR(YEAR(VC.INV_ELIG_DT)),3,2)
+			      ),
+			     ('M'|| RTRIM(CASE  
+			         WHEN (MONTH(VC.FILL_DT)) <= 9  THEN '0' || CHAR(MONTH(VC.FILL_DT))
+			         ELSE CHAR(MONTH(VC.FILL_DT))
+			         END)
+			         ||
+			         SUBSTR(CHAR(YEAR(VC.FILL_DT)),3,2)
+			      ),
+			     (CASE
+			        WHEN TEEC.DISCNT_RUN_MODE_CD = 'ACCL' THEN 1
+			        WHEN TEEC.DISCNT_RUN_MODE_CD = 'MKSH' THEN 1
+			        WHEN TEEC.DISCNT_RUN_MODE_CD = 'MPRD' THEN 0
+			        WHEN TEEC.DISCNT_RUN_MODE_CD = 'PROD' THEN 0
+			     END), 
+			     TEEC.MDA_DCL_PAIR_ID,
+			     TEEC.MDA_DCL_ID,
+			     TEEC.MDA_DCL_TYPE, 
+			     VC.DRUG_NDC_ID,
+			     VC.NHU_TYP_CD,
+			     VC.CLT_ID,
+			     VC.FRMLY_SRC_CD,
+			     VC.FRMLY_ID,
+			     VC.INP_SRC_ID,
+			     VC.DLVRY_SYS_CD,
+			     TEEC.ATTR_COMB_CD,
+			     TEEC.INEX_REAS_ID
+		]]></statement>
+	</group>
+	<!-- ......................................Exclusion Rebate................................... -->
+	<group name="ExclusionRebate">
+		<statement name="DELETE"><![CDATA[
+			DELETE FROM VRAP.TDISCNT_EXCL_SUM_#MODEL#
+			WHERE PERIOD_ID IN (#PERIOD#)
+			AND   RUN_MODE_CD = #RMC#
+			AND   RPT_ID = #RPT_ID# 
+		]]></statement>
+		<statement name="INSERT"><![CDATA[
+			INSERT INTO VRAP.TDISCNT_EXCL_SUM_#MODEL#
+			    (MODEL_TYP_CD,
+			     VNDR_ID,
+			     CNTRCT_ID,
+			     RPT_ID,
+			     PERIOD_ID,
+			     FILL_PERIOD_ID,
+			     RUN_MODE_CD,
+			     DRUG_NDC_ID,
+			     NHU_TYP_CD,
+			     CLT_ID,
+			     FRMLY_SRC_CD,
+			     FRMLY_ID,
+			     INP_SRC_ID,
+			     DLVRY_SYS_CD,
+			     QUAL_RX_COUNT,
+			     QUAL_UNITS,
+			     ATTR_COMB_CD,
+			     INEX_REAS_ID)
+			SELECT
+			     TC.MODEL_TYP_CD,
+			     TC.VNDR_ID,    
+			     TH.CNTRCT_ID,
+			     TEEC.RPT_ID,
+			     ('M'|| RTRIM(CASE  
+			         WHEN (MONTH(VC.INV_ELIG_DT)) <= 9  THEN '0' || CHAR(MONTH(VC.INV_ELIG_DT))
+			         ELSE CHAR(MONTH(VC.INV_ELIG_DT))
+			         END)
+			         ||
+			         SUBSTR(CHAR(YEAR(VC.INV_ELIG_DT)),3,2)) 
+			     AS PERIOD_ID,
+			     ('M'|| RTRIM(
+			        CASE  
+			            WHEN (MONTH(VC.FILL_DT)) <= 9  THEN '0' || CHAR(MONTH(VC.FILL_DT))
+			            ELSE CHAR(MONTH(VC.FILL_DT))
+			        END)
+			        ||
+			        SUBSTR(CHAR(YEAR(VC.FILL_DT)),3,2)) 
+			     AS FILL_PERIOD_ID,
+				(CASE
+			            WHEN TEEC.DISCNT_RUN_MODE_CD = 'ACCL' THEN 1
+			            WHEN TEEC.DISCNT_RUN_MODE_CD = 'MKSH' THEN 1
+			            WHEN TEEC.DISCNT_RUN_MODE_CD = 'MPRD' THEN 0
+			            WHEN TEEC.DISCNT_RUN_MODE_CD = 'PROD' THEN 0
+			        END) AS RUN_MODE_CD, 
+			     VC.DRUG_NDC_ID,
+			     VC.NHU_TYP_CD,
+			     VC.CLT_ID,
+			     VC.FRMLY_SRC_CD,
+			     VC.FRMLY_ID,
+			     VC.INP_SRC_ID,
+			     VC.DLVRY_SYS_CD,
+			     SUM(VC.ITEM_COUNT_QY) AS QUAL_RX_COUNT,
+			     SUM(VC.DSPNSD_QTY) AS QUAL_UNITS,
+			     TEEC.ATTR_COMB_CD,
+			     TEEC.INEX_REAS_ID
+			  FROM VRAP.THIERARCHY TH,
+			      VRAP.VCLAIM_#MODEL# VC,
+			      VRAP.TRPT_REQMT TR,
+			      VRAP.TCNTRCT TC,
+			      ( SELECT DISTINCT
+				      INNERVIEW.CLAIM_ID,
+			              a.RPT_ID,
+			              a.PERIOD_ID, 
+			              a.DISCNT_RUN_MODE_CD,
+			              a.MDA_DCL_PAIR_ID,
+			              a.MDA_DCL_ID,
+			              a.MDA_DCL_TYPE,
+			              INNERVIEW.ATTR_COMB_CD,
+			              MAX(a.INEX_REAS_ID) AS INEX_REAS_ID
+					      FROM VRAP.TDISCNT_EXCL_EXT_CLAIM_#MODEL# a,
+			                 (SELECT DISTINCT CLAIM_ID, RPT_ID, PERIOD_ID, DISCNT_RUN_MODE_CD, MAX(ATTR_COMB_CD)AS ATTR_COMB_CD 
+			                      FROM VRAP.TDISCNT_EXCL_EXT_CLAIM_#MODEL#
+					      WHERE PERIOD_ID = '#PERIOD#'
+			                      AND DISCNT_RUN_MODE_CD = '#DRM#'
+			                      AND RPT_ID = #RPT_ID#
+			                      GROUP BY CLAIM_ID, RPT_ID, PERIOD_ID, DISCNT_RUN_MODE_CD) INNERVIEW 
+			              WHERE a.CLAIM_ID = INNERVIEW.CLAIM_ID
+						    AND a.ATTR_COMB_CD = INNERVIEW.ATTR_COMB_CD
+						    AND a.RPT_ID = INNERVIEW.RPT_ID
+						    AND a.PERIOD_ID = INNERVIEW.PERIOD_ID
+			                AND a.DISCNT_RUN_MODE_CD = INNERVIEW.DISCNT_RUN_MODE_CD 
+			               GROUP BY INNERVIEW.CLAIM_ID,
+					        a.RPT_ID,
+			                        a.PERIOD_ID, 
+			                        a.DISCNT_RUN_MODE_CD,
+			                        a.MDA_DCL_PAIR_ID,
+			                        a.MDA_DCL_ID,
+			                        a.MDA_DCL_TYPE,
+			                        INNERVIEW.ATTR_COMB_CD) TEEC
+			    WHERE TEEC.CLAIM_ID = VC.CLAIM_ID
+			      AND TEEC.RPT_ID = TR.RPT_ID
+			      AND TR.HRCY_ID = TH.HRCY_ID
+			      AND TH.CNTRCT_ID = TC.CNTRCT_ID
+			      AND VC.INV_ELIG_DT  BETWEEN '#START_DATE#' AND '#END_DATE#'
+			      AND TEEC.PERIOD_ID = '#PERIOD#'
+			      AND TEEC.DISCNT_RUN_MODE_CD = '#DRM#' 
+			      AND TEEC.RPT_ID = #RPT_ID#
+			GROUP BY
+			     TC.MODEL_TYP_CD,
+			     TC.VNDR_ID,    
+			     TH.CNTRCT_ID,
+				 TEEC.RPT_ID,
+			     ('M'|| RTRIM(CASE  
+			                 WHEN (MONTH(VC.INV_ELIG_DT)) <= 9  THEN '0' || CHAR(MONTH(VC.INV_ELIG_DT))
+			                 ELSE CHAR(MONTH(VC.INV_ELIG_DT))
+			                 END)
+			         ||
+			         SUBSTR(CHAR(YEAR(VC.INV_ELIG_DT)),3,2)
+			      ),
+			     ('M'|| RTRIM(CASE  
+			         WHEN (MONTH(VC.FILL_DT)) <= 9  THEN '0' || CHAR(MONTH(VC.FILL_DT))
+			         ELSE CHAR(MONTH(VC.FILL_DT))
+			         END)
+			         ||
+			         SUBSTR(CHAR(YEAR(VC.FILL_DT)),3,2)
+			      ),
+		         (CASE
+		             WHEN TEEC.DISCNT_RUN_MODE_CD = 'ACCL' THEN 1
+		             WHEN TEEC.DISCNT_RUN_MODE_CD = 'MKSH' THEN 1
+		             WHEN TEEC.DISCNT_RUN_MODE_CD = 'MPRD' THEN 0
+		             WHEN TEEC.DISCNT_RUN_MODE_CD = 'PROD' THEN 0
+		         END), 
+			     VC.DRUG_NDC_ID,
+			     VC.NHU_TYP_CD,
+			     VC.CLT_ID,
+			     VC.FRMLY_SRC_CD,
+			     VC.FRMLY_ID,
+			     VC.INP_SRC_ID,
+			     VC.DLVRY_SYS_CD,
+			     TEEC.ATTR_COMB_CD,
+			     TEEC.INEX_REAS_ID 
+		]]></statement>
+	</group>
+	<!-- ................................Marketshare................................ -->
+	<group name="Marketshare">
+		<statement name="DELETE"><![CDATA[
+			DELETE FROM VRAP.TMKTSHR_SUM_#MODEL#
+			WHERE PERIOD_ID IN (#PERIOD#)
+			AND   RUN_MODE_CD = #RMC#
+			AND   RPT_ID = #RPT_ID#
+		]]></statement>
+		<statement name="INSERT"><![CDATA[
+			INSERT INTO VRAP.TMKTSHR_SUM_#MODEL#
+				(MODEL_TYP_CD,
+			     VNDR_ID,
+			     CNTRCT_ID,
+				 RPT_ID,
+				 PERIOD_ID,
+				 FILL_PERIOD_ID,
+			     RUN_MODE_CD,
+			     MDA_DCL_PAIR_ID,
+			     MDA_DCL_ID,
+			     MDA_DCL_TYPE,
+			     DRUG_NDC_ID,
+				 NHU_TYP_CD,
+				 CLT_ID,
+				 FRMLY_SRC_CD,
+			     FRMLY_ID,
+			     INP_SRC_ID,
+			     DLVRY_SYS_CD,
+				 QUAL_EXT_PRICE,
+			     DAYS_OF_THERAPY,
+			     QUAL_RX_COUNT,
+			     QUAL_UNITS
+			     )
+			SELECT
+			     TC.MODEL_TYP_CD,
+			     TC.VNDR_ID,    
+			     TH.CNTRCT_ID,
+				 TEC.RPT_ID,
+			     ('M'|| RTRIM(CASE  
+			                 WHEN (MONTH(VC.INV_ELIG_DT)) <= 9  THEN '0' || CHAR(MONTH(VC.INV_ELIG_DT))
+			                 ELSE CHAR(MONTH(VC.INV_ELIG_DT))
+			                 END)
+			         ||
+			         SUBSTR(CHAR(YEAR(VC.INV_ELIG_DT)),3,2)
+			      ) AS PERIOD_ID,
+			     ('M'|| RTRIM(
+			        CASE  
+			            WHEN (MONTH(VC.FILL_DT)) <= 9  THEN '0' || CHAR(MONTH(VC.FILL_DT))
+			            ELSE CHAR(MONTH(VC.FILL_DT))
+			        END)
+			        ||
+			        SUBSTR(CHAR(YEAR(VC.FILL_DT)),3,2)) 
+			     AS FILL_PERIOD_ID,
+				 (CASE
+			        WHEN TEC.DISCNT_RUN_MODE_CD = 'ACCL' THEN 1
+			        WHEN TEC.DISCNT_RUN_MODE_CD = 'MKSH' THEN 1
+			        WHEN TEC.DISCNT_RUN_MODE_CD = 'MPRD' THEN 0
+			        WHEN TEC.DISCNT_RUN_MODE_CD = 'PROD' THEN 0
+			        END) AS RUN_MODE_CD, 
+			     TCS.MDA_DCL_PAIR_ID,
+			     TCS.MDA_DCL_ID,
+			     TCS.MDA_DCL_TYPE, 
+			     VC.DRUG_NDC_ID,
+				 VC.NHU_TYP_CD,
+				 VC.CLT_ID,
+			     VC.FRMLY_SRC_CD,
+			     VC.FRMLY_ID,
+			     VC.INP_SRC_ID,
+				 VC.DLVRY_SYS_CD,
+			     TCS.QUAL_EXT_PRICE,
+			     TCS.DAYS_OF_THERAPY,
+			     SUM(VC.ITEM_COUNT_QY) AS QUAL_RX_COUNT,
+			     SUM(VC.DSPNSD_QTY) AS QUAL_UNITS
+			 FROM VRAP.THIERARCHY TH,
+			      VRAP.VCLAIM_#MODEL# VC,
+			      VRAP.TRPT_REQMT TR,
+			      VRAP.TCNTRCT TC,
+			      VRAP.TMKTSHR_EXT_CLAIM_#MODEL# TEC,
+			      VRAP.TMKTSHR_CLAIM_SUM_#MODEL# TCS  
+			WHERE TEC.CLAIM_ID = VC.CLAIM_ID
+			  AND TCS.RPT_ID = TR.RPT_ID
+			  AND TR.HRCY_ID = TH.HRCY_ID
+			  AND TH.CNTRCT_ID = TC.CNTRCT_ID  
+			  AND TEC.RPT_ID = TCS.RPT_ID
+			  AND TEC.PERIOD_ID = TCS.PERIOD_ID
+			  AND TEC.DISCNT_RUN_MODE_CD = TCS.DISCNT_RUN_MODE_CD
+			  AND VC.DRUG_NDC_ID = TCS.DRUG_NDC_ID
+			  AND VC.NHU_TYP_CD = TCS.NHU_TYP_CD
+			  AND VC.DLVRY_SYS_CD = TCS.DLVRY_SYS_CD
+			  AND VC.INV_ELIG_DT  BETWEEN '#START_DATE#' AND '#END_DATE#'
+			  AND TCS.PERIOD_ID = '#PERIOD#'
+			  AND TCS.DISCNT_RUN_MODE_CD = '#DRM#'
+			  AND TCS.RPT_ID = #RPT_ID#
+			GROUP BY
+			     TC.MODEL_TYP_CD,
+			     TC.VNDR_ID,    
+			     TH.CNTRCT_ID,
+				 TEC.RPT_ID,
+			     ('M'|| RTRIM(CASE  
+			                 WHEN (MONTH(VC.INV_ELIG_DT)) <= 9  THEN '0' || CHAR(MONTH(VC.INV_ELIG_DT))
+			                 ELSE CHAR(MONTH(VC.INV_ELIG_DT))
+			                 END)
+			         ||
+			         SUBSTR(CHAR(YEAR(VC.INV_ELIG_DT)),3,2)
+			      ),
+			     ('M'|| RTRIM(CASE  
+			         WHEN (MONTH(VC.FILL_DT)) <= 9  THEN '0' || CHAR(MONTH(VC.FILL_DT))
+			         ELSE CHAR(MONTH(VC.FILL_DT))
+			         END)
+			         ||
+			         SUBSTR(CHAR(YEAR(VC.FILL_DT)),3,2)
+			      ),
+				 (CASE
+			            WHEN TEC.DISCNT_RUN_MODE_CD = 'ACCL' THEN 1
+			            WHEN TEC.DISCNT_RUN_MODE_CD = 'MKSH' THEN 1
+			            WHEN TEC.DISCNT_RUN_MODE_CD = 'MPRD' THEN 0
+			            WHEN TEC.DISCNT_RUN_MODE_CD = 'PROD' THEN 0
+			        END), 
+			     TCS.MDA_DCL_PAIR_ID,
+			     TCS.MDA_DCL_ID,
+			     TCS.MDA_DCL_TYPE, 
+			     VC.DRUG_NDC_ID,
+			     VC.NHU_TYP_CD,
+			     VC.CLT_ID,
+			     VC.FRMLY_SRC_CD,
+			     VC.FRMLY_ID,
+			     VC.INP_SRC_ID,
+			     VC.DLVRY_SYS_CD,
+			     TCS.QUAL_EXT_PRICE,
+			     TCS.DAYS_OF_THERAPY
+          ]]></statement>
+	</group>
+	<!-- .....................................Rebate.................................. -->
+	<group name="Rebate">
+		<statement name="DELETE"><![CDATA[
+			DELETE FROM VRAP.TDISCNT_SUM_#MODEL#
+			WHERE PERIOD_ID IN (#PERIOD#)
+			AND   RUN_MODE_CD = #RMC#
+			AND   RPT_ID = #RPT_ID#
+		]]></statement>
+		<statement name="INSERT"><![CDATA[
+			INSERT INTO VRAP.TDISCNT_SUM_#MODEL#
+				(MODEL_TYP_CD,
+			     VNDR_ID,
+			     CNTRCT_ID,
+				 RPT_ID,
+				 PERIOD_ID,
+				 FILL_PERIOD_ID,
+			     RUN_MODE_CD,
+			     DISCNT_BASIS_TYP,
+			     DRUG_NDC_ID,
+				 NHU_TYP_CD,
+				 CLT_ID,
+				 FRMLY_SRC_CD,
+			     FRMLY_ID,
+			     INP_SRC_ID,
+			     DLVRY_SYS_CD,
+				 QUAL_RX_COUNT,
+			     DISCNT_RX_COUNT,
+				 QUAL_UNITS,
+			     DISCNT_UNITS,
+				 ADMN_DISCNT_FCTR,
+			     BASE_DISCNT_FCTR,
+				 PRFMC_DISCNT_FCTR,
+				 FRMLY_DISCNT_FCTR,
+			     GRWTH_DISCNT_FCTR,
+			     PRC_PTCT_DISCNT_FCTR,
+				 ADMN_DRUG_PRC_AMT,
+			     BASE_DRUG_PRC_AMT,
+			     PRFMC_DRUG_PRC_AMT,
+			     FRMLY_DRUG_PRC_AMT,
+			     CNTRCT_DRUG_PRC_AMT,
+			     CNTRCT_PRC_AMT,
+			     ADMN_DISCNT_AMT,
+			     BASE_DISCNT_AMT,
+				 PRFMC_DISCNT_AMT,
+				 FRMLY_DISCNT_AMT,
+			     CNTRCT_DISCNT_AMT,
+			     PRC_PTCT_DISCNT_AMT,
+			     GRWTH_DISCNT_AMT
+			     )
+			select
+			     TC.MODEL_TYP_CD,
+			     TC.VNDR_ID,    
+			     TH.CNTRCT_ID,
+				 TEC.RPT_ID,
+			     ('M'|| RTRIM(CASE  
+			                 WHEN (MONTH(VC.INV_ELIG_DT)) <= 9  THEN '0' || CHAR(MONTH(VC.INV_ELIG_DT))
+			                 ELSE CHAR(MONTH(VC.INV_ELIG_DT))
+			                 END)
+			         ||
+			         SUBSTR(CHAR(YEAR(VC.INV_ELIG_DT)),3,2)
+			      ) AS PERIOD_ID,
+			     ('M'|| RTRIM(
+			        CASE  
+			            WHEN (MONTH(VC.FILL_DT)) <= 9  THEN '0' || CHAR(MONTH(VC.FILL_DT))
+			            ELSE CHAR(MONTH(VC.FILL_DT))
+			        END)
+			        ||
+			        SUBSTR(CHAR(YEAR(VC.FILL_DT)),3,2)) 
+			     AS FILL_PERIOD_ID,
+				 (CASE
+			            WHEN TEC.DISCNT_RUN_MODE_CD = 'ACCL' THEN 1
+			            WHEN TEC.DISCNT_RUN_MODE_CD = 'MKSH' THEN 1
+			            WHEN TEC.DISCNT_RUN_MODE_CD = 'MPRD' THEN 0
+			            WHEN TEC.DISCNT_RUN_MODE_CD = 'PROD' THEN 0
+			        END) AS RUN_MODE_CD, 
+			     TR.RT_BASIS_TYP_CD AS DISCNT_BASIS_TYP,
+			     VC.DRUG_NDC_ID,
+				 VC.NHU_TYP_CD,
+				 VC.CLT_ID,
+			     VC.FRMLY_SRC_CD,
+			     VC.FRMLY_ID,
+			     VC.INP_SRC_ID,
+				 VC.DLVRY_SYS_CD,
+				 SUM(VC.ITEM_COUNT_QY) AS QUAL_RX_COUNT,
+			     SUM(CASE
+			         WHEN (TEC.ADMN_DISCNT_AMT = 0
+			          AND  TEC.BASE_DISCNT_AMT = 0
+				  AND  TEC.PRFMC_DISCNT_AMT = 0
+				  AND  TEC.FRMLY_DISCNT_AMT = 0
+			          AND  TEC.CNTRCT_DISCNT_AMT = 0
+			          AND  TEC.PRC_PTCT_DISCNT_AMT = 0)
+			         THEN 0
+			         ELSE VC.ITEM_COUNT_QY END) AS DISCNT_RX_COUNT,
+				 SUM(VC.DSPNSD_QTY) AS QUAL_UNITS,
+			     SUM(CASE
+			         WHEN (TEC.ADMN_DISCNT_AMT = 0
+			          AND  TEC.BASE_DISCNT_AMT = 0
+				  AND  TEC.PRFMC_DISCNT_AMT = 0
+				  AND  TEC.FRMLY_DISCNT_AMT = 0
+			          AND  TEC.CNTRCT_DISCNT_AMT = 0
+			          AND  TEC.PRC_PTCT_DISCNT_AMT = 0)
+			         THEN 0
+			         ELSE VC.DSPNSD_QTY END) AS DISCNT_UNITS,
+			   	 TEC.ADMN_DISCNT_FCTR,
+			     TEC.BASE_DISCNT_FCTR,
+				 TEC.PRFMC_DISCNT_FCTR,
+				 TEC.FRMLY_DISCNT_FCTR,
+			     CAST(0 AS DECIMAL(18,5)) AS GRWTH_DISCNT_FCTR,
+			     TEC.PRC_PTCT_DISCNT_FCTR,
+			     TEC.ADMN_DRUG_PRC_AMT,
+			     TEC.BASE_DRUG_PRC_AMT,
+			     TEC.PRFMC_DRUG_PRC_AMT,
+			     TEC.FRMLY_DRUG_PRC_AMT,
+			     TEC.CNTRCT_DRUG_PRC_AMT,
+			     TEC.CNTRCT_PRC_AMT,
+			     SUM(TEC.ADMN_DISCNT_AMT) AS ADMN_DISCNT_AMT,
+			     SUM(TEC.BASE_DISCNT_AMT) AS BASE_DISCNT_AMT,
+			     SUM(TEC.PRFMC_DISCNT_AMT) AS PRFMC_DISCNT_AMT,
+			     SUM(TEC.FRMLY_DISCNT_AMT) AS FRMLY_DISCNT_AMT,
+			     SUM(TEC.CNTRCT_DISCNT_AMT) AS CNTRCT_DISCNT_AMT,
+			     SUM(TEC.PRC_PTCT_DISCNT_AMT) AS PRC_PTCT_DISCNT_AMT,
+			     SUM(CAST(0 AS DECIMAL(18,5))) AS GRWTH_DISCNT_AMT
+			 FROM VRAP.THIERARCHY TH,
+			      VRAP.VCLAIM_#MODEL# VC,
+			      VRAP.TRPT_REQMT TR,
+			      VRAP.TCNTRCT TC,
+			      VRAP.TDISCNT_EXT_CLAIM_#MODEL# TEC 
+			WHERE TEC.CLAIM_ID = VC.CLAIM_ID
+			  AND TEC.RPT_ID = TR.RPT_ID
+			  AND TR.HRCY_ID = TH.HRCY_ID
+			  AND TH.CNTRCT_ID = TC.CNTRCT_ID
+			  AND VC.INV_ELIG_DT  BETWEEN '#START_DATE#' AND '#END_DATE#'
+			  AND TEC.PERIOD_ID = '#PERIOD#'
+			  AND TEC.DISCNT_RUN_MODE_CD = '#DRM#'
+			  AND TEC.RPT_ID = #RPT_ID#
+			GROUP BY
+			     TC.MODEL_TYP_CD,
+			     TC.VNDR_ID,    
+			     TH.CNTRCT_ID,
+				 TEC.RPT_ID,
+			     ('M'|| RTRIM(CASE  
+			                 WHEN (MONTH(VC.INV_ELIG_DT)) <= 9  THEN '0' || CHAR(MONTH(VC.INV_ELIG_DT))
+			                 ELSE CHAR(MONTH(VC.INV_ELIG_DT))
+			                 END)
+			         ||
+			         SUBSTR(CHAR(YEAR(VC.INV_ELIG_DT)),3,2)
+			      ),
+			     ('M'|| RTRIM(CASE  
+			         WHEN (MONTH(VC.FILL_DT)) <= 9  THEN '0' || CHAR(MONTH(VC.FILL_DT))
+			         ELSE CHAR(MONTH(VC.FILL_DT))
+			         END)
+			         ||
+			         SUBSTR(CHAR(YEAR(VC.FILL_DT)),3,2)
+			      ),
+			     (CASE
+			        WHEN TEC.DISCNT_RUN_MODE_CD = 'ACCL' THEN 1
+			        WHEN TEC.DISCNT_RUN_MODE_CD = 'MKSH' THEN 1
+			        WHEN TEC.DISCNT_RUN_MODE_CD = 'MPRD' THEN 0
+			        WHEN TEC.DISCNT_RUN_MODE_CD = 'PROD' THEN 0
+			        END),
+				 TR.RT_BASIS_TYP_CD,
+			     VC.DRUG_NDC_ID,
+			     VC.NHU_TYP_CD,
+			     VC.CLT_ID,
+			     VC.FRMLY_SRC_CD,
+			     VC.FRMLY_ID,
+			     VC.INP_SRC_ID,
+			     VC.DLVRY_SYS_CD,
+			     TEC.ADMN_DISCNT_FCTR,
+			     TEC.BASE_DISCNT_FCTR,
+			     TEC.PRFMC_DISCNT_FCTR,
+			     TEC.FRMLY_DISCNT_FCTR,
+			     CAST(0 AS DECIMAL(18,5)),
+			     TEC.PRC_PTCT_DISCNT_FCTR,
+			     TEC.ADMN_DRUG_PRC_AMT,
+			     TEC.BASE_DRUG_PRC_AMT,
+			     TEC.PRFMC_DRUG_PRC_AMT,
+			     TEC.FRMLY_DRUG_PRC_AMT,
+			     TEC.CNTRCT_DRUG_PRC_AMT,
+			     TEC.CNTRCT_PRC_AMT
+		]]></statement>
+	</group>
+	<!-- .........................................SHARED.................................... -->
+	<group name="Shared">
+		<statement name="UPDATE_TREPORT_STAT"><![CDATA[
+			UPDATE VRAP.TREPORT_STAT 
+			SET RPT_ALOC_STAT_CD = ?,
+				LAST_ALOC_TS = CURRENT TIMESTAMP,
+				UPDT_TS = CURRENT TIMESTAMP,
+				UPDT_USER_ID = 'UNIXBTCH'
+			WHERE RPT_STAT_ID = ?
+		]]></statement>
+		<statement name="GET_REPORT_IDS"><![CDATA[
+			SELECT RS.RPT_STAT_ID,
+			       RS.RPT_ID,
+			       RS.PERIOD_ID,
+			       RS.DISCNT_RUN_MODE_CD,
+			       P.PERIOD_BEGIN_DT, 
+			       P.PERIOD_END_DT
+			FROM VRAP.TREPORT_STAT RS,
+			     VRAP.TRPT_REQMT RR,
+			     VRAP.THIERARCHY H,
+			     VRAP.TVNDR_REBT_CD VRC,
+			     VRAP.TCNTRCT C,
+			     VRAP.TDISCNT_PERIOD P
+			WHERE RS.RPT_ALOC_STAT_CD = 2
+			AND RS.RPT_ID = RR.RPT_ID
+			AND RR.HRCY_ID = H.HRCY_ID
+			AND H.HRCY_TYP_CD = ?
+			AND H.CNTRCT_ID = C.CNTRCT_ID
+			AND RR.RPT_TYP_CD = VRC.CD_NB
+			AND VRC.TYP_CD = 12
+			AND C.MODEL_TYP_CD = ?
+			AND SUBSTR(VRC.CD_NM,1,1) = ?
+			AND P.PERIOD_ID = RS.PERIOD_ID
+			ORDER BY RS.UPDT_TS
+			WITH UR
+		]]></statement>
+	</group>
+</statements>

@@ -1,0 +1,94 @@
+<!-- COPIES DATA FROM VRAP.TFORMULARY_CONSOLIDATED TO RBATE_REG.TFORMULARY_CONSOLIDATED  -->
+<!-- THIS RUNS EVERY DAY -->
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	
+	<!--
+		Set-up a try block to send an email on exception.	
+	-->         
+	<command type="try">
+		<try>
+			<!-- Clear out the table on SILVER. -->
+			<command type="run" datasource="silver" transaction="false">
+				<![CDATA[
+					DELETE FROM RBATE_REG.TFRMLY_CNSL
+				]]>
+			</command>
+			<!-- Copy data from GDXPRD to SILVER -->
+			<command type="copy" batch="500">
+				<source type="sql" datasource="gdxprd"><![CDATA[
+					SELECT FRMLY_ID,
+					       FRMLY_SRC_CD,
+					       FORMULARY_NM,
+					       EFF_DT,
+					       END_DT
+					FROM VRAP.TFORMULARY_CONSOLIDATED
+				]]></source>
+				<target
+					type             = "sql"
+					datasource       = "silver"
+					transaction      = "false"
+					batch            = "500"
+					reportInterval   = "500"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					INSERT INTO RBATE_REG.TFRMLY_CNSL (FRMLY_ID, FRMLY_SRC_CD, FRMLY_NM, EFF_DT, END_DT)
+					VALUES (?,?,?,?,?)
+				]]></target>
+			</command>				 
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+			<command
+				type="mail"
+				mailTo="gdxitd@caremark.com"
+				mailFrom="TFORMULARY_CONSOLIDATED_COPY@caremark.com"
+				subject="[ERROR] COPY_T_FORMULARY_CONSOLIDATED_TO_SILVER.XML"
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] COPY_T_FORMULARY_CONSOLIDATED_TO_SILVER.XML</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] COPY_T_FORMULARY_CONSOLIDATED_TO_SILVER.XML</u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		</catch>
+	</command>
+</sqml>

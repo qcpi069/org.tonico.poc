@@ -1,0 +1,61 @@
+#!/usr/bin/ksh
+set -x
+/etc/profile
+##. /user/vraadmin/.profile < /vradfo/test/control/reffile/modefile
+#. /user/vactuate/.profile < /GDX/test/control/reffile/modefile
+. $HOME/.profile < /GDX/test/control/reffile/modefile
+
+export THIS_TIMESTAMP="T`date +"%Y%m%d%H%M%S"`"
+THIS_PROCESS_NO="_P$$"
+
+export SCHEMA="vrap"
+export HOME_DIR="/GDX/test"
+export FTP_STAGING_DIR="/GDX/test/dfoftp"
+export TEMP_DIR="$HOME_DIR/temp/$THIS_TIMESTAMP$THIS_PROCESS_NO"
+export DATA_FILE_NAME_FILE="$TEMP_DIR/data_file_name_file"
+export SCRIPT_DIR="$HOME_DIR/scripts/DFO"
+export EXE_DIR="$HOME_DIR/cobol/aixexec"
+export STAGING_DIR="$HOME_DIR/staging"
+export TEMP_DATA_DIR="$TEMP_DIR/dat"
+export LOG_DIR="$HOME_DIR/log"
+export UNIQUE_RUN_ID="$THIS_TIMESTAMP$THIS_PROCESS_NO"
+export COMMON_SCRIPT_DIR="$HOME_DIR/scripts"
+
+mkdir -p $TEMP_DATA_DIR
+
+export MASTER_LOG="$LOG_DIR/DFO_master.log"
+export LOG_FILE="$LOG_DIR/DFO_$CLIENT_NAME$THIS_PROCESS_NO.log"
+export REF_DIR="$HOME_DIR/control/reffile"
+export DATA_LOAD_DIR="$HOME_DIR/control/dataload"
+export DBA_DATA_LOAD_DIR="/GDX/test/input"
+export MAIL_SUBJECT=""
+export SUPPORT_MAIL_LIST_FILE="$REF_DIR/DFO_support_maillist.ref"
+export CONTRACT_ADMIN_MAIL_LIST_FILE="$REF_DIR/DFO_contract_admin_maillist.ref"
+export MAILFILE="$TEMP_DIR/mailfile"
+export MAIL_BODY_FILE
+export TWO_PERCENT_MAIL_BODY="$REF_DIR/DFO_two_percent_mail_body.ref"
+export INVALID_FILE_MAIL_BODY="$REF_DIR/DFO_invalid_file_mail_body.ref"
+export INVALID_FILENAME_MAIL_BODY="$REF_DIR/DFO_invalid_filename_mail_body.ref"
+
+export CONTRACT_FILE="$TEMP_DATA_DIR/DFO_client_contract_info.ref"
+export REF_CREATION_DIR="$HOME_DIR/aix/compile"
+export ERROR_DESC_FILE="$REF_DIR/DFO_error_desc_index.ref"
+#export ERROR_DESC_FILE="$REF_CREATION_DIR/DFO_error_desc_index.ref"
+
+export PROCESS_MONTH_PARM_FILE="$TEMP_DATA_DIR/DFO_process_month_parm.ref"
+
+export CLIENT_DIR="$HOME_DIR/clients/$CLIENT_NAME"
+export PROCESSED_DIR="$CLIENT_DIR/processed"
+export FAILED_DIR="$CLIENT_DIR/failed"
+export CONTRACT_AUDIT_FILE="$HOME_DIR/clients/contract_audit_file"
+export PROCESSOR_NO_FILE="$TEMP_DIR/processor_no_file"
+
+export RUN_STATUS="$CLIENT_DIR/runstatus"
+export TEMP_PRCS_MONYYYY="$CLIENT_DIR/temp_monyyyy"
+export TEMP_CLIENT_NAME="$CLIENT_DIR/temp_client_name"
+export TEMP_PRCS_TIMESTMP="$CLIENT_DIR/temp_prcs_timestmp"
+export TEMP_PRCS_FILE_NAME="$CLIENT_DIR/temp_prcs_file_name"
+export COMPRESSED_FTP_DIR="$CLIENT_DIR/compressed_ftp_claims"
+export OBADCLT_FILE="$TEMP_DIR/bad_client_log"
+
+export CLIENT_DFO_FILE="created file name with timestamp"

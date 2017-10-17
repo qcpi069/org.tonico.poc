@@ -1,0 +1,35 @@
+
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+	dmt_schema=script.getProperty("dmt_schema");
+	pmt_schema=script.getProperty("pmt_schema");
+	]]></command>
+		       
+	<command type="try">
+		<try>
+                        <command type="run" datasource="datamart" batch="1000">
+
+				<![CDATA[
+merge into rps.cbc_rps_lkp b 
+using ( select CLAIM_GID,LAST_UPDT_TS, l.STMT_ID 
+	from rps.cbc_rps_lkp a , rps.l_stmt_cycle l 
+	where a.LAST_UPDT_TS between l.STMT_BEGIN_TS and l.STMT_END_TS) z 
+on b.CLAIM_GID=z.CLAIM_GID and b.LAST_UPDT_TS=z.LAST_UPDT_TS 
+when matched 
+then update set b.STMT_ID=z.STMT_ID
+
+                              ]]>
+
+			</command>
+
+		</try>
+		<catch>
+		</catch>
+	</command>
+</sqml>

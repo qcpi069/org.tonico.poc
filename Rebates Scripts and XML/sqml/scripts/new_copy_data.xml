@@ -1,0 +1,69 @@
+
+<!-- REFESH INCENTIVE TYPE CODE -->
+
+<sqml>
+	
+	<property name="TIMEOUT" value="0"/>
+	
+	<datasources resource="datasource.xml"/>
+	
+	<command type="run" rowName="cycle_gid" datasource="rebates">
+		SELECT 200543 AS CG FROM DUAL
+	</command>
+	
+	<command type="java"><![CDATA[
+		DYNAMIC_SQL = 
+			"select " +
+				script.getProperty("cycle_gid.CG") + " as CYCLE_GID,  " +
+				"exi.CLAIM_ID as CLAIM_GID,  " +
+				"0 as RPT_ID, 39 as MDA_EXCPT_ID,   " +
+				"0 as RBATE_ACCESS,  " +
+				"0 as RBATE_MRKT_SHR,  " +
+				"0 as RBATE_ADMIN_FEE  " +
+			"from " +
+				"VRAP.VCLAIM_GPO exi " +
+			"where  " +
+				"(exi.INV_ELIG_DT between '7/1/2005' and '9/30/2005') " + 
+				"and exi.DRUG_NDC_ID IN (  " + 
+					"select n11.DRUG_NDC_ID " + 
+					"from VRAP.tcntrct c, VRAP.trpt_reqmt r, VRAP.vrpt_cd cd12, VRAP.trpt_ndc11 n11 " + 
+					"where c.cntrct_id = r.cntrct_id " + 
+						"AND r.rpt_typ_cd = cd12.rpt_cd " + 
+						"AND cd12.rpt_cd_nm LIKE 'R%' " + 
+						"AND r.rpt_id  = n11.rpt_id " + 
+						"AND c.model_typ_cd = 'G' " + 
+				")";
+	
+			script.setProperty("DYNAMIC_SQL", DYNAMIC_SQL);
+	
+	]]></command>
+	
+	<command type="copy" batch="2000">
+		<source type="sql" datasource="gdx_prod"><![CDATA[
+			${DYNAMIC_SQL} 
+		]]></source>
+		<target type="queue" threadCount="15">
+			<target
+				type             = "sql"
+				datasource       = "rebates"
+				transaction      = "true"
+				batch            = "200"
+				reportInterval   = "1000"
+				queryTimeout     = "${TIMEOUT}"
+			><![CDATA[
+				INSERT INTO RBATE_REG.BCC_A_MDA_RBATE_INV (
+					CYCLE_GID,
+					CLAIM_GID, 
+					RPT_ID,
+					MDA_EXCPT_ID,
+					RBATE_ACCESS,
+					RBATE_MRKT_SHR,
+					RBATE_ADMIN_FEE
+				)
+				VALUES (?, ?, ?, ?, ?, ?, ?)
+			]]></target>
+		</target>
+	</command>
+		
+
+</sqml>

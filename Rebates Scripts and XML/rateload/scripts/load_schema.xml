@@ -1,0 +1,63 @@
+<project default="recreate" basedir="..">
+
+	<property name="lib"      location="H:/BatchWorkspace/GDX Shared Libraries"/>
+	<property name="driver"   value="oracle.jdbc.driver.OracleDriver"/>
+	<property name="url"      value="jdbc:oracle:thin:@devdom3:1521:maple"/>
+	<property name="userid"   value="rbate_reg"/>
+	<property name="password" value="devrbate_reg"/>
+		
+	<path id="classpath">
+		<fileset dir="${lib}" includes="**/*.jar"/>
+	</path>
+
+	<target name="recreate" depends="drop,create"/>
+	
+	<target name="init">
+		<echo message="Driver: [${driver}]"/>
+		<echo message="URL:    [${url}]"/>
+		<echo message="User:   [${userid}]"/>
+	</target>
+	
+	<target name="create" depends="init">
+		<echo message="Creating tables"/>
+		<sql
+			driver="${driver}"
+			url="${url}"
+			userid="${userid}"
+			password="${password}"
+			delimiter=";"
+			print="true"
+			onerror="abort"
+			classpathref="classpath"
+			src="sql/tables_oracle.sql"
+		/>
+	</target>
+
+	<target name="drop" depends="init">
+		<echo message="Dropping tables"/>
+		<sql
+			driver="${driver}"
+			url="${url}"
+			userid="${userid}"
+			password="${password}"
+			delimiter=";"
+			print="true"
+			onerror="continue"
+			classpathref="classpath"
+		>
+			DROP TABLE MFG_RATE_LOAD;
+			DROP TABLE MFG_PMCY_EXCL_LOAD;
+			DROP TABLE MFG_ST_EXCL_LOAD;
+			DROP TABLE MFG_RATE;
+			DROP TABLE MFG_PMCY_EXCL;
+			DROP TABLE MFG_ST_EXCL;
+			DROP TABLE HISTORY_MFG_RATE;
+			DROP TABLE HISTORY_MFG_PMCY_EXCL;
+			DROP TABLE HISTORY_MFG_ST_EXCL;
+			DROP TABLE MFG_LOAD_ERR;
+			DROP TABLE POS_FILE_XPRT;
+			DROP TABLE LOAD_SAP_ADDRESS;
+		</sql>
+	</target>
+	
+</project>

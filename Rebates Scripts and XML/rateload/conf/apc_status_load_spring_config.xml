@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<!--
+	This is the spring configuration file for discount client APC Status Load process
+	-->																																				 
+																																					 <!--  - Application context definition for "springapp" DispatcherServlet.  -->
+<beans>    
+	
+	<!--  the driver class -->
+	<bean id="main" class="com.caremark.rebates.registration.batch.main.APCStatusLoadMain">	
+		<property name="service">
+    		<ref bean="apcStatusLoadService"/>
+    	</property>		
+    </bean>
+	<bean id="apcStatusLoadService" class="com.caremark.rebates.registration.batch.service.APCStatusLoadService">	
+		
+		<property name="dataSource">
+            <ref bean="rbateRegDataSource"/>
+        </property>	
+		
+		<property name="apcStatusLoadDAO">
+    		<ref bean="apcStatusLoadDAO"/>
+    	</property>	
+		
+    </bean>	
+ 	
+</beans>

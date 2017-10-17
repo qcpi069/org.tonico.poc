@@ -1,0 +1,1217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- JSF configuration -->
+<!-- 
+  
+ 		 Project code: ITPR003456
+  		 Author:Z120851
+  	 	 Changes:1- CdSetVlService upgradation to CdSetVlCorpService.
+  	 	 	     2- New Managed Bean for CTID FRs   
+	 --> 
+<faces-config xmlns="http://java.sun.com/xml/ns/javaee"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd"
+    		  version="2.0"> 
+<!-- =========== FULL CONFIGURATION FILE ================================== -->
+
+	<application>
+
+		<el-resolver>org.springframework.web.jsf.el.SpringBeanFacesELResolver</el-resolver>  
+	<variable-resolver>  
+			org.springframework.web.jsf.DelegatingVariableResolver  
+	</variable-resolver>  
+	
+	 <default-render-kit-id>
+      org.apache.myfaces.trinidad.core
+    </default-render-kit-id>
+       
+      <!--   <variable-resolver>  
+             org.springframework.web.jsf.SpringBeanVariableResolver  
+        </variable-resolver>   --> 
+        
+        <!-- defines messages -->
+        <message-bundle >
+            com.cvs.caremark.rebates.cr.resources.messages
+        </message-bundle>  
+      
+        <locale-config>
+            <default-locale>en</default-locale>
+            <supported-locale>en</supported-locale>
+        </locale-config>		
+	</application>
+	
+	<!-- managed beans -->
+<!--Z120851:added roleCodesBean-->	   
+	 <managed-bean>
+		<managed-bean-name>roleCodesBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cr.web.controller.RoleCodesBean
+		</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+	      
+	<managed-bean>
+        <managed-bean-name>exceptionDetail</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.exception.ExceptionDetail
+        </managed-bean-class>        
+        <managed-bean-scope>session</managed-bean-scope>               
+    </managed-bean>
+    
+   
+    <managed-bean>
+        <managed-bean-name>messageDetail</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.exception.ExceptionDetail
+        </managed-bean-class>        
+        <managed-bean-scope>request</managed-bean-scope>               
+    </managed-bean>
+    <managed-bean>
+        <managed-bean-name>rebateAppContext</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.web.helper.RebateAppContext
+        </managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope> 
+        <managed-property>
+        	<property-name>appRoleName</property-name>
+            <value>ROLE_REBCR</value>
+        </managed-property>
+    </managed-bean>   
+    <managed-bean>
+        <managed-bean-name>exceptionHandler</managed-bean-name>
+        <managed-bean-class>
+           com.cvs.caremark.rebates.exception.ExceptionHandler
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope> 
+    </managed-bean> 
+    <managed-bean>
+        <managed-bean-name>logoutBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.web.controller.LogoutBean
+        </managed-bean-class> 	
+        <managed-bean-scope>session</managed-bean-scope> 
+       </managed-bean>
+     
+     
+        <managed-bean>
+        <managed-bean-name>clientSearchBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.ClientSearchBean
+        </managed-bean-class> 	
+         <managed-bean-scope>view</managed-bean-scope>
+        <managed-property>
+            <property-name>clientService</property-name>
+            <value>#{clientService}</value>
+        </managed-property>	
+        
+    	</managed-bean>
+    	
+    	<managed-bean>
+        <managed-bean-name>fileDwldBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.FileDwldBean
+        </managed-bean-class> 	
+         <managed-bean-scope>view</managed-bean-scope>
+    	</managed-bean>
+    	
+    	<managed-bean>
+    	 <managed-bean-name>mstrClntSearchBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.MstrClntSearchBean
+        </managed-bean-class> 	
+         <managed-bean-scope>view</managed-bean-scope>
+        <managed-property>
+            <property-name>mstrClntService</property-name>
+            <value>#{mstrClntService}</value>
+        </managed-property>	
+        
+    	</managed-bean>
+    	
+    	 <managed-bean>
+        <managed-bean-name>mstrClntBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.MstrClntEditBean
+        </managed-bean-class>   
+        <managed-bean-scope>view</managed-bean-scope>		 
+        <managed-property>
+			<property-name>mstrClntService</property-name>
+            <value>#{mstrClntService}</value>
+        </managed-property>	           
+        <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>	                
+         
+    	</managed-bean> 
+    	
+
+	<managed-bean>
+		<managed-bean-name>clientTradeIdBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.cr.web.controller.ClientTradeIdBean
+		</managed-bean-class>
+		<managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+			<property-name>clientTradeIdService</property-name>
+			<value>#{ clientTradeIdService }</value>
+		</managed-property>
+		<managed-property>
+			<property-name>notesService</property-name>
+			<value>#{notesService}</value>
+		</managed-property>
+	</managed-bean>
+	
+	    	<!--entry  for ctid -rid Asoc sscreen (FR 7.3) START-->
+    
+        	 <managed-bean>
+        <managed-bean-name>ctidRidAssocBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.CtidRidAssocBean
+        </managed-bean-class>  
+        <managed-bean-scope>view</managed-bean-scope>
+        <managed-property>
+            <property-name>crAsscService</property-name>
+            <value>#{crAsscService}</value>
+        </managed-property>	
+          	</managed-bean>  
+   
+    
+<!-- end of entry   for ctid -rid Asoc sscreen (FR 7.3) END-->
+
+
+<!--Entry  to Add Manage CTID FallOut Screen(FR 7.11) START-->
+
+ 
+<managed-bean>
+        <managed-bean-name>manageCTIDFalloutBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.ManageCTIDFalloutBean
+        </managed-bean-class>   
+        <managed-bean-scope>view</managed-bean-scope>
+         <managed-property>
+            <property-name>manageCTIDFalloutService</property-name>
+            <value>#{manageCTIDFalloutService}</value>
+        </managed-property>               
+        <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>                   
+         
+      </managed-bean>
+
+    <!--Entry  to Add Manage CTID FallOut Screen(FR 7.11) END-->
+	   <!-- FR 7.6 CTID Hierarchy Search change  Start -->  	
+   
+  <managed-bean>
+    <managed-bean-name>CtidHrcySearchBean</managed-bean-name>
+    <managed-bean-class>
+    com.cvs.caremark.rebates.cr.web.controller.CtidHrcySearchBean
+    </managed-bean-class> 	
+ <managed-bean-scope>view</managed-bean-scope>
+    <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>	 
+         <managed-property>
+            <property-name>clientTradeIdService</property-name>
+            <value>#{clientTradeIdService}</value>
+        </managed-property>	  
+         <managed-property>
+            <property-name>clientService</property-name>
+            <value>#{clientService}</value>
+        </managed-property>	  
+</managed-bean>
+        	  	
+    	<managed-bean>
+        <managed-bean-name>ctidAddrAsscBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.CtidAddrAsscBean
+        </managed-bean-class>   
+         <managed-bean-scope>view</managed-bean-scope>		 
+        <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>	 
+        <managed-property>
+            <property-name>addrAsscService</property-name>
+            <value>#{addrAsscService}</value>
+        </managed-property>   
+        <managed-property>
+            <property-name>ctidAddrAsscService</property-name>
+            <value>#{ctidAddrAsscService}</value>
+        </managed-property>
+    	</managed-bean> 
+    	
+
+      <managed-bean>
+            <managed-bean-name>ctidSearchBean</managed-bean-name>
+            <managed-bean-class>
+                  com.cvs.caremark.rebates.cr.web.controller.CTIDSearchBean
+            </managed-bean-class>
+            <managed-bean-scope>view</managed-bean-scope>
+            <managed-property>
+                  <property-name>ctidSearchService</property-name>
+            <value>#{ctidSearchService}</value>
+            </managed-property>
+
+
+      </managed-bean>
+
+      <!--  code  ends-->
+    
+     <!-- FR 7.6 CTID Hierarchy Search change  End -->	
+    
+     
+     	 <managed-bean>
+        <managed-bean-name>clientBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.ClntEditBean
+        </managed-bean-class>   
+        <managed-bean-scope>view</managed-bean-scope>		 
+        <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>	 
+         <managed-property>
+            <property-name>clientService</property-name>
+            <value>#{clientService}</value>
+        </managed-property>	
+        <managed-property>
+            <property-name>dstrRuleAsscService</property-name>
+            <value>#{dstrRuleAsscService}</value>
+        </managed-property>	
+        <managed-property>
+            <property-name>notesService</property-name>
+            <value>#{notesService}</value>
+        </managed-property> 
+        <managed-property>
+		  <property-name>rtmdPrcService</property-name> 
+		  <value>#{rtmdPrcService}</value> 
+		</managed-property> 
+        
+        <managed-property>
+            <property-name>prdService</property-name>
+            <value>#{prdService}</value>
+        </managed-property>	
+        <managed-property>
+            <property-name>mstrClntService</property-name>
+            <value>#{mstrClntService}</value>
+        </managed-property>	               
+         
+    	</managed-bean> 
+    	
+    	<managed-bean>
+        <managed-bean-name>cdsetBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.CdsetBean
+        </managed-bean-class> 
+         <managed-bean-scope>view</managed-bean-scope>  		 
+        <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>	                
+        
+    	</managed-bean>
+    	
+    	<managed-bean>
+        <managed-bean-name>manageFalloutBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.ManageFalloutBean
+        </managed-bean-class>   
+        <managed-bean-scope>view</managed-bean-scope>
+         <managed-property>
+            <property-name>holdMissRbatIdQueService</property-name>
+            <value>#{holdMissRbatIdQueService}</value>
+        </managed-property>	
+         <managed-property>
+            <property-name>manageFalloutService</property-name>
+            <value>#{manageFalloutService}</value>
+        </managed-property>	 		 
+        <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>	                
+         
+    	</managed-bean> 
+    	
+    	
+    	<managed-bean>
+        <managed-bean-name>manageVndrAddrBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.ManageVendAddrBean
+        </managed-bean-class>   
+         <managed-bean-scope>view</managed-bean-scope>
+        <managed-property>
+	            <property-name>clientService</property-name>
+	            <value>#{clientService}</value>
+	    </managed-property>
+        <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>	      			 
+        
+    	</managed-bean> 
+    	
+    	<managed-bean>
+        <managed-bean-name>claimSumSearchBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.ClaimSumSearchBean
+        </managed-bean-class>   
+        <managed-bean-scope>view</managed-bean-scope>		 
+        <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>
+         <managed-property>
+            <property-name>claimSumService</property-name>
+            <value>#{claimSumService}</value>
+        </managed-property>	 
+          <managed-property>
+            <property-name>manageFalloutService</property-name>
+            <value>#{manageFalloutService}</value>
+        </managed-property>	               
+         
+    	</managed-bean> 
+    	
+    	
+    	<managed-bean>
+        <managed-bean-name>clntPrcPoolListBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.ClntPrcPoolListBean
+        </managed-bean-class>   
+         <managed-bean-scope>view</managed-bean-scope>		 
+        <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>	 
+       <managed-property>
+            <property-name>prcPoolService</property-name>
+            <value>#{prcPoolService}</value>
+        </managed-property>               
+        
+    	</managed-bean> 
+    	
+    	
+    	<managed-bean>
+        <managed-bean-name>addExtlHrcyCltnLcmAsscBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.AddExtlHrcyCltnLcmAsscBean
+        </managed-bean-class>  
+          <managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+            <property-name>clientService</property-name>
+            <value>#{clientService}</value>
+        </managed-property>	
+ 	    <managed-property>
+            <property-name>extlHrcyAsscService</property-name>
+            <value>#{extlHrcyAsscService}</value>
+        </managed-property>			 
+        <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>	                
+       
+    	</managed-bean> 
+    	
+    	<managed-bean>
+        <managed-bean-name>ctidnoteEditBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.NoteEditBean
+        </managed-bean-class>  
+         <managed-bean-scope>view</managed-bean-scope>          
+        <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+      </managed-property>
+        <managed-property>
+            <property-name>notesService</property-name>
+            <value>#{notesService}</value>
+        </managed-property> 
+        <managed-property>
+            <property-name>clientService</property-name>
+            <value>#{clientService}</value>
+        </managed-property> 
+         <managed-property>
+            <property-name>mstrClntService</property-name>
+            <value>#{mstrClntService}</value>
+        </managed-property>              
+        
+      </managed-bean>
+    	
+    	
+    	<managed-bean>
+        <managed-bean-name>noteEditBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.NoteEditBean
+        </managed-bean-class>  
+         <managed-bean-scope>view</managed-bean-scope> 		 
+        <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+      </managed-property>
+        <managed-property>
+            <property-name>notesService</property-name>
+            <value>#{notesService}</value>
+        </managed-property> 
+        <managed-property>
+            <property-name>clientService</property-name>
+            <value>#{clientService}</value>
+        </managed-property> 
+         <managed-property>
+            <property-name>mstrClntService</property-name>
+            <value>#{mstrClntService}</value>
+        </managed-property>              
+        
+    	</managed-bean> 
+    	
+    	
+    	 
+    	<managed-bean>
+        <managed-bean-name>editEnrollBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.EnrlEditBean
+        </managed-bean-class> 
+        <managed-bean-scope>view</managed-bean-scope>
+         <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>	 
+        <managed-property>
+            <property-name>enrlService</property-name>
+            <value>#{enrlService}</value>
+        </managed-property> 
+		<managed-property>
+            <property-name>clientService</property-name>
+            <value>#{clientService}</value>
+        </managed-property>	
+        <managed-property>
+			<property-name>mstrClntService</property-name>
+            <value>#{mstrClntService}</value>
+        </managed-property>	
+        <managed-property>
+           <property-name>prdService</property-name>
+            <value>#{prdService}</value>
+         </managed-property>         
+         
+    	</managed-bean> 
+    	
+    	<managed-bean>
+        <managed-bean-name>extlHrcyLcmAsscBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.ExtlHrcyLcmAsscBean
+        </managed-bean-class>   
+         <managed-bean-scope>view</managed-bean-scope>		 
+        <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>
+        <managed-property>
+            <property-name>extlHrcyAsscService</property-name>
+            <value>#{extlHrcyAsscService}</value>
+        </managed-property>		                
+        
+    	</managed-bean> 
+    	
+    	 <managed-bean>
+        <managed-bean-name>addrAsscBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.AddrEditAsscBean
+        </managed-bean-class>    
+        <managed-bean-scope>view</managed-bean-scope>		 
+        <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+         </managed-property>	
+        <managed-property>
+            <property-name>addrAsscService</property-name>
+            <value>#{addrAsscService}</value>
+        </managed-property> 
+        <managed-property>
+            <property-name>addrService</property-name>
+            <value>#{addrService}</value>
+        </managed-property>                         
+        
+    	</managed-bean> 
+    	
+    	
+    	 <managed-bean>
+        <managed-bean-name>extlHrcyClntAsscBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.ExtlHrcyClntAsscBean
+        </managed-bean-class>  
+          <managed-bean-scope>view</managed-bean-scope> 		 
+        <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>	 
+        <managed-property>
+            <property-name>extlHrcyAsscService</property-name>
+            <value>#{extlHrcyAsscService}</value>
+        </managed-property>	 
+        <managed-property>
+            <property-name>clientService</property-name>
+            <value>#{clientService}</value>
+        </managed-property>	                
+       
+    	</managed-bean> 
+    	
+    	<managed-bean>
+        <managed-bean-name>addrSearchBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.AddrSearchBean
+        </managed-bean-class>    
+        <managed-bean-scope>view</managed-bean-scope>       	
+        <managed-property>        
+            <property-name>searchAddrService</property-name>
+            <value>#{searchAddrService}</value>
+        </managed-property>		 
+        <managed-property>  
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>	                
+         
+    	</managed-bean> 
+    	
+    	<managed-bean>
+        <managed-bean-name>clientAddrAsscBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.ClntAddrAsscBean
+        </managed-bean-class>   
+         <managed-bean-scope>view</managed-bean-scope>		 
+        <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+         </managed-property>	
+        <managed-property>
+            <property-name>addrAsscService</property-name>
+            <value>#{addrAsscService}</value>
+        </managed-property>
+        <managed-property>
+            <property-name>clientService</property-name>
+            <value>#{clientService}</value>
+        </managed-property>  
+         <managed-property>
+            <property-name>addrService</property-name>
+            <value>#{addrService}</value>
+        </managed-property>                  
+        
+    	</managed-bean> 
+    	
+    	<managed-bean>
+        <managed-bean-name>mstrAddrAsscBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.MstrAddrAsscBean
+        </managed-bean-class>   
+         <managed-bean-scope>view</managed-bean-scope>		 
+        <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>	 
+        <managed-property>
+            <property-name>addrAsscService</property-name>
+            <value>#{addrAsscService}</value>
+        </managed-property>    
+        <managed-property>
+            <property-name>mstrClntService</property-name>
+            <value>#{mstrClntService}</value>
+        </managed-property>	                        
+        
+    	</managed-bean> 
+    	
+    	 <managed-bean>
+        <managed-bean-name>clientHchySearchBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.ClntHrcySearchBean
+        </managed-bean-class>   
+        <managed-bean-scope>view</managed-bean-scope>		 
+        <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>	 
+         <managed-property>
+            <property-name>clientService</property-name>
+            <value>#{clientService}</value>
+        </managed-property>	                
+         
+    	</managed-bean> 
+    	<managed-bean>
+    	
+    	 <managed-bean-name>extlHrcyAsscSearchBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.ExtlHrcyAsscSearchBean
+        </managed-bean-class>   
+         <managed-bean-scope>view</managed-bean-scope>		 
+        <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>	
+        <managed-property>
+            <property-name>extlHrcyAsscService</property-name>
+            <value>#{extlHrcyAsscService}</value>
+        </managed-property>	                
+        
+    	</managed-bean> 
+    	
+    	
+    	
+    	<managed-bean>
+       <managed-bean-name>rtmdEditBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.RtmdEditBean
+        </managed-bean-class>   
+         <managed-bean-scope>view</managed-bean-scope>		 
+        <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>	
+        <managed-property>
+		  <property-name>rtmdPrcService</property-name> 
+		  <value>#{rtmdPrcService}</value> 
+		</managed-property>                        
+       
+    	</managed-bean>  	
+     	
+       
+       <managed-bean>
+        <managed-bean-name>copyClientBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.CopyClientBean
+        </managed-bean-class> 
+        <managed-bean-scope>view</managed-bean-scope> 
+ 		 <managed-property>
+           <property-name>prcsStatService</property-name>
+            <value>#{prcsStatService}</value>
+         </managed-property>      	
+         <managed-property>
+            <property-name>racService</property-name>
+            <value>#{racService}</value>
+        </managed-property>	
+         <managed-property>
+            <property-name>clientService</property-name>
+            <value>#{clientService}</value>
+        </managed-property>	
+        <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>	
+         <managed-property>
+            <property-name>copyClientService</property-name>
+            <value>#{copyClientService}</value>
+        </managed-property>	        
+         
+    	</managed-bean>    	
+       <managed-bean>     
+       
+        <managed-bean-name>dstrRuleAsscBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.DstrRuleAsscBean
+        </managed-bean-class>          
+        <managed-bean-scope>view</managed-bean-scope>
+        <managed-property>
+            <property-name>dstrRuleAsscService</property-name>
+            <value>#{dstrRuleAsscService}</value>
+        </managed-property>
+        <managed-property>
+            <property-name>clientService</property-name>
+            <value>#{clientService}</value>
+        </managed-property>
+        <managed-property>
+	        <property-name>prcRuleService</property-name>
+	        <value>#{prcRuleService}</value>
+    	</managed-property>              
+        <managed-property>
+           <property-name>prcsStatService</property-name>
+            <value>#{prcsStatService}</value>
+         </managed-property>
+         <managed-property>
+           <property-name>prcMstrService</property-name>
+            <value>#{prcMstrService}</value>
+         </managed-property>
+         <managed-property>
+           <property-name>prdService</property-name>
+            <value>#{prdService}</value>
+         </managed-property> 
+         <managed-property>
+           <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+         </managed-property> 
+         <managed-property>
+           <property-name>rtmdPrcService</property-name>
+            <value>#{rtmdPrcService}</value>
+         </managed-property>  
+          <managed-property>
+           <property-name>clntPrcPoolAsscService</property-name>
+            <value>#{clntPrcPoolAsscService}</value>
+         </managed-property> 
+          <managed-property>
+           <property-name>prcPoolService</property-name>
+            <value>#{prcPoolService}</value>
+         </managed-property>        
+    </managed-bean>
+    
+    <managed-bean>
+        <managed-bean-name>prcMstrSearchBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.PrcMstrSearchBean
+        </managed-bean-class> 	
+          <managed-bean-scope>view</managed-bean-scope>
+        <managed-property>
+            <property-name>prcMstrService</property-name>
+            <value>#{prcMstrService}</value>
+        </managed-property>	
+        <managed-property>
+            <property-name>prcRuleService</property-name>
+            <value>#{prcRuleService}</value>
+        </managed-property> 
+      
+    </managed-bean>
+    
+    <managed-bean>
+    	<managed-bean-name>pricingSearchBean</managed-bean-name>
+    	<managed-bean-class>
+    		com.cvs.caremark.rebates.cr.web.controller.PrcSearchBean
+    	</managed-bean-class>
+    	<managed-bean-scope>view</managed-bean-scope>
+		<managed-property>
+        	<property-name>prcMstrService</property-name>
+            <value>#{prcMstrService}</value>
+        </managed-property> 
+        <managed-property>
+        	<property-name>prcRuleService</property-name>
+        	<value>#{prcRuleService}</value>
+        </managed-property>
+        <managed-property>
+        	<property-name>rebateAppContext</property-name>
+        	<value>#{rebateAppContext}</value>
+       	</managed-property> 
+       	<managed-property>
+        	<property-name>dstrRuleAsscService</property-name>
+        	<value>#{dstrRuleAsscService}</value>
+       	</managed-property> 
+       	
+    </managed-bean>
+    
+    <managed-bean>
+    	<managed-bean-name>pricingRuleBean</managed-bean-name>
+    	<managed-bean-class>
+    		com.cvs.caremark.rebates.cr.web.controller.PrcRuleBean
+    	</managed-bean-class>
+    	<managed-bean-scope>view</managed-bean-scope>
+    	<managed-property>
+    		<property-name>prcRuleService</property-name>
+    		<value>#{prcRuleService}</value>
+    	</managed-property>
+    	<managed-property>
+    		<property-name>prcMstrService</property-name>
+    		<value>#{prcMstrService}</value>
+    	</managed-property>
+    	<managed-property>
+    		<property-name>prcPoolService</property-name>
+    		<value>#{prcPoolService}</value>
+    	</managed-property>
+
+    	<managed-property>
+    		<property-name>prcTermShrService</property-name>
+    		<value>#{prcTermShrService}</value>
+    	</managed-property>
+    	
+    	<managed-property>
+    		<property-name>prcTermGuarService</property-name>
+    		<value>#{prcTermGuarService}</value>
+    	</managed-property>
+    	
+    	<managed-property>
+    		<property-name>prcTermAdvPmtService</property-name>
+    		<value>#{prcTermAdvPmtService}</value>
+    	</managed-property>
+    	
+    	<managed-property>
+    		<property-name>prcTierService</property-name>
+    		<value>#{prcTierService}</value>
+    	</managed-property>
+    	
+    	<managed-property>
+    		<property-name>dstrRuleAsscService</property-name>
+    		<value>#{dstrRuleAsscService}</value>
+    	</managed-property>    	
+    	<managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>
+        <managed-property>
+           <property-name>clntPrcPoolAsscService</property-name>
+            <value>#{clntPrcPoolAsscService}</value>
+         </managed-property> 
+    </managed-bean>
+    
+    <managed-bean>
+    	<managed-bean-name>prcTermAdvBean</managed-bean-name>
+    	<managed-bean-class>
+    		com.cvs.caremark.rebates.cr.web.controller.PrcTermAdvBean
+    	</managed-bean-class>
+    	<managed-bean-scope>view</managed-bean-scope>
+    </managed-bean>
+    
+    <managed-bean>
+    	<managed-bean-name>prcTermShrBean</managed-bean-name>
+    	<managed-bean-class>
+    		com.cvs.caremark.rebates.cr.web.controller.PrcTermShrBean
+    	</managed-bean-class>
+    	<managed-bean-scope>view</managed-bean-scope>
+    	<managed-property>
+    		<property-name>prcMstrService</property-name>
+    		<value>#{prcMstrService}</value>
+    	</managed-property>
+    	
+    </managed-bean>
+    
+    <managed-bean>
+    	<managed-bean-name>prcTermGuarBean</managed-bean-name>
+    	<managed-bean-class>
+    		com.cvs.caremark.rebates.cr.web.controller.PrcTermGuarBean
+    	</managed-bean-class>
+    	<managed-bean-scope>view</managed-bean-scope>
+    	<managed-property>
+    		<property-name>prcMstrService</property-name>
+    		<value>#{prcMstrService}</value>
+    	</managed-property>
+    	
+    </managed-bean>
+    
+    <managed-bean>
+    	<managed-bean-name>prcTierBean</managed-bean-name>
+    	<managed-bean-class>
+    		com.cvs.caremark.rebates.cr.web.controller.PrcTierBean
+    	</managed-bean-class>
+    	<managed-bean-scope>view</managed-bean-scope>
+    	<managed-property>
+    		<property-name>prcMstrService</property-name>
+    		<value>#{prcMstrService}</value>
+    	</managed-property>
+    	
+    </managed-bean>
+    
+    <managed-bean>
+    	<managed-bean-name>prcMstrBean</managed-bean-name>
+    	<managed-bean-class>
+    		com.cvs.caremark.rebates.cr.web.controller.PrcMstrBean
+    	</managed-bean-class>
+    	<managed-bean-scope>view</managed-bean-scope>
+    	<managed-property>
+           <property-name>prcMstrService</property-name>
+            <value>#{prcMstrService}</value>
+         </managed-property>  
+         <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>
+    	
+    </managed-bean>
+<managed-bean>
+ 		<managed-bean-name>manageClusterBean</managed-bean-name>
+	    	<managed-bean-class>
+	    		com.cvs.caremark.rebates.cr.web.controller.ManageClusterBean
+	    	</managed-bean-class>
+	    	<managed-bean-scope>view</managed-bean-scope>
+	    	 <managed-property>
+	            <property-name>clientService</property-name>
+	            <value>#{clientService}</value>
+	        </managed-property>	
+	    	
+    </managed-bean>
+   
+    
+     <!-- Entry for menu item "Missing CTID Addr Assc"for ITPR008196 Rebates Pricing Updates Phase 3B -->
+     
+     <managed-bean>
+            <managed-bean-name>missingCtidAddrsAsscBean</managed-bean-name>
+            <managed-bean-class>
+                  com.cvs.caremark.rebates.cr.web.controller.BatchUpdateCTIDAddrAssoBean
+            </managed-bean-class>
+            <managed-bean-scope>view</managed-bean-scope>
+	    	 <managed-property>
+	            <property-name>batchUploadCTIDService</property-name>
+	            <value>#{batchUploadCTIDService}</value>
+	        </managed-property>	
+      </managed-bean>
+   
+    <!--   7.10 start -->
+    
+    <managed-bean>
+ 		<managed-bean-name>batchUpdateCTIDAttrBean</managed-bean-name>
+	    	<managed-bean-class>
+	    		com.cvs.caremark.rebates.cr.web.controller.BatchUpdateCTIDAttrBean
+	    	</managed-bean-class>
+	    	<managed-bean-scope>view</managed-bean-scope>
+	    	 <managed-property>
+	            <property-name>batchUploadCTIDService</property-name>
+	            <value>#{batchUploadCTIDService}</value>
+	        </managed-property>	
+	    	
+    </managed-bean>
+	<managed-bean>
+ 		<managed-bean-name>batchUpdateCTIDRIDBean</managed-bean-name>
+	    	<managed-bean-class>
+	    		com.cvs.caremark.rebates.cr.web.controller.BatchUpdateCTIDRIDAssoBean
+	    	</managed-bean-class>
+	    	<managed-bean-scope>view</managed-bean-scope>
+	    	<managed-property>
+	            <property-name>batchUploadCTIDService</property-name>
+	            <value>#{batchUploadCTIDService}</value>
+	        </managed-property>	
+	         <managed-property>
+	            <property-name>cdsetVlCorpService</property-name>
+    	        <value>#{cdsetVlCorpService}</value>
+        	</managed-property>
+    </managed-bean>
+  
+    <!--   7.10 End -->
+    
+    
+<managed-bean>
+ 		<managed-bean-name>splashBean</managed-bean-name>
+	    	<managed-bean-class>
+	    		com.cvs.caremark.rebates.cr.web.controller.SplashBean
+	    	</managed-bean-class>
+	    	<managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+  
+    <!-- End ML development -->
+<!-- entries started for ITPR004674 -Defect-1599 (Requirement (7.2)) multiple login-->
+	
+	<managed-bean>
+		<managed-bean-name>loginBean</managed-bean-name>
+		<managed-bean-class>
+			com.cvs.caremark.rebates.web.controller.LoginBean
+		</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+		<managed-property>
+		<property-name>rebateAppContextBean</property-name>
+			<value>#{rebateAppContext}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>roleDisplayMap</property-name>
+				<value>#{roleDisplayMap}</value>
+		</managed-property>		
+	</managed-bean>
+	
+
+<!-- entries stoped for ITPR004674 -Defect-1599 (Requirement (7.2)) multiple login-->
+    
+    <!-- navigation rules, each top level page need to be defined -->   
+    <navigation-rule>       
+        <navigation-case>
+            <from-outcome>home</from-outcome>
+            <to-view-id>/secure/page/index.xhtml</to-view-id>            
+           <redirect/>
+        </navigation-case>
+    </navigation-rule>
+    <navigation-rule>       
+        <navigation-case>
+            <from-outcome>logout</from-outcome>
+            <to-view-id>/logout.xhtml</to-view-id>            
+           <redirect/>
+        </navigation-case>
+    </navigation-rule>
+      <!-- 
+     <navigation-rule>       
+        <navigation-case>
+            <from-outcome>home</from-outcome>
+            <to-view-id>/secure/page/index.iface</to-view-id>            
+           <redirect/>
+        </navigation-case>
+    </navigation-rule>  
+    -->
+    <navigation-rule>       
+        <navigation-case>
+            <from-outcome>login</from-outcome>
+            <to-view-id>/non_secure/page/loginMain.xhtml</to-view-id>            
+           <redirect/>
+        </navigation-case>
+    </navigation-rule>
+      <!-- 
+    <navigation-rule>       
+        <navigation-case>
+            <from-outcome>login</from-outcome>
+            <to-view-id>/non_secure/page/loginMain.iface</to-view-id>            
+           <redirect/>
+        </navigation-case>
+    </navigation-rule>
+   -->
+     <navigation-rule>       
+        <navigation-case>
+            <from-outcome>error</from-outcome>
+            <to-view-id>/non_secure/page/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule> 
+    
+    <navigation-rule>
+    	<navigation-case>
+    		<from-outcome>pricing</from-outcome>
+    		<to-view-id>/secure/page/pricing.xhtml</to-view-id>
+    		<redirect/>
+    	</navigation-case>
+    </navigation-rule>
+   
+    <navigation-rule>
+    	<navigation-case>
+    		<from-outcome>client</from-outcome>
+    		<to-view-id>/secure/page/client.xhtml</to-view-id>
+    		<redirect/>
+    	</navigation-case>
+    </navigation-rule>
+    
+     <navigation-rule>
+    	<navigation-case>
+    		<from-outcome>fallout</from-outcome>
+    		<to-view-id>/secure/page/fallout.xhtml</to-view-id>
+    		<redirect/>
+    	</navigation-case>
+    </navigation-rule>
+    
+    <navigation-rule>
+    	<navigation-case>
+    		<from-outcome>claimsumm</from-outcome>
+    		<to-view-id>/secure/page/claimsumm.xhtml</to-view-id>
+    		<redirect/>
+    	</navigation-case>
+    </navigation-rule>
+    <navigation-rule>
+    	<navigation-case>
+    		<from-outcome>misc_enroll</from-outcome>
+    		<to-view-id>/secure/page/misc_enroll.xhtml</to-view-id>
+    		<redirect/>
+    	</navigation-case>
+    </navigation-rule>
+    
+      <navigation-rule>
+    	<navigation-case>
+    		<from-outcome>misc_mgr_cluster</from-outcome>
+    		<to-view-id>/secure/page/misc_mgr_cluster.xhtml</to-view-id>
+    		<redirect/>
+    	</navigation-case>
+    </navigation-rule>
+    
+     <navigation-rule>
+    	<navigation-case>
+    		<from-outcome>misc_vend_addr</from-outcome>
+    		<to-view-id>/secure/page/misc_vend_addr.xhtml</to-view-id>
+    		<redirect/>
+    	</navigation-case>
+    </navigation-rule>
+    <navigation-rule>
+    	<navigation-case>
+    		<from-outcome>address</from-outcome>
+    		<to-view-id>/secure/page/address.xhtml</to-view-id>
+    		<redirect/>
+    	</navigation-case>
+    </navigation-rule>
+    
+    <navigation-rule>
+    	<navigation-case>
+    		<from-outcome>hrcy</from-outcome>
+    		<to-view-id>/secure/page/hrcy.xhtml</to-view-id>
+    		<redirect/>
+    	</navigation-case>
+    </navigation-rule>
+    <navigation-rule>
+    	<navigation-case>
+    		<from-outcome>cpclient</from-outcome>
+    		<to-view-id>/secure/page/cpclient.xhtml</to-view-id>
+    		<redirect/>
+    	</navigation-case>
+    </navigation-rule>
+    
+    <navigation-rule>
+    	<navigation-case>
+    		<from-outcome>invoicing</from-outcome>
+    		<to-view-id>/secure/page/invoicing.xhtml</to-view-id>
+    		<redirect/>
+    	</navigation-case>
+    </navigation-rule>
+    <navigation-rule>
+    	<navigation-case>
+    		<from-outcome>invoicing_search_ctid_hrcy</from-outcome>
+    		<to-view-id>/secure/page/invoicing_search_ctid_hrcy.xhtml</to-view-id>
+    		<redirect/>
+    	</navigation-case>
+    </navigation-rule>
+    <navigation-rule>
+    	<navigation-case>
+    		<from-outcome>invoicing_manage_ctid_fallout</from-outcome>
+    		<to-view-id>/secure/page/invoicing_manage_ctid_fallout.xhtml</to-view-id>
+    		<redirect/>
+    	</navigation-case>
+    </navigation-rule>
+    <navigation-rule>
+    	<navigation-case>
+    		<from-outcome>invoicing_batch_update_citd_rid_asso</from-outcome>
+    		<to-view-id>/secure/page/invoicing_batch_update_citd_rid_asso.xhtml</to-view-id>
+    		<redirect/>
+    	</navigation-case>
+    </navigation-rule>
+    <navigation-rule>
+    	<navigation-case>
+    		<from-outcome>invoicing_batch_update_citd_attr</from-outcome>
+    		<to-view-id>/secure/page/invoicing_batch_update_citd_attr.xhtml</to-view-id>
+    		<redirect/>
+    	</navigation-case>
+    </navigation-rule>
+    
+    <navigation-rule>
+    	<navigation-case>
+    		<from-outcome>misc</from-outcome>
+    		<to-view-id>/secure/page/misc.xhtml</to-view-id>
+    		<redirect/>
+    	</navigation-case>
+    </navigation-rule>
+    <!-- added to identify the corpcode of user logged in  start-->
+     <managed-bean>
+        <managed-bean-name>userBean</managed-bean-name>
+        <managed-bean-class>
+            com.cvs.caremark.rebates.cr.web.controller.UserBean
+        </managed-bean-class>   
+        <managed-bean-scope>session</managed-bean-scope>		 
+        <managed-property>
+            <property-name>cdsetVlCorpService</property-name>
+            <value>#{cdsetVlCorpService}</value>
+        </managed-property>	
+      </managed-bean>  
+   <!-- added to identify the corpcode of user logged in  stop --> 
+    <converter>
+		<converter-id>checkBoxCodeConverter</converter-id>
+		<converter-class>com.cvs.caremark.rebates.cr.web.helper.CheckBoxCodeConverter</converter-class>
+    </converter>
+    
+    
+    <converter>
+		<converter-id>dateTimeConverter</converter-id>
+		<converter-class>com.cvs.caremark.rebates.cr.web.helper.CRDateTimeConverter</converter-class>
+    </converter>
+    
+    <converter>
+    	<converter-id>rebatesSelectDateConverter</converter-id>
+    	<converter-class>com.cvs.caremark.rebates.cr.web.helper.RebatesSelectInputDateConverter</converter-class>
+    </converter>
+    
+    <converter>
+    <converter-id>clientDateTimeConverter</converter-id>
+    <converter-class>com.cvs.caremark.rebates.cr.web.helper.ClientDateTimeConverter</converter-class>
+  </converter>
+    
+  <!--  <component>
+         <component-type>RebatesSelectInputDate</component-type>
+         <component-class>com.cvs.caremark.rebates.cr.components.RebatesSelectInputDate</component-class>
+     </component>
+    
+    <render-kit>
+    <renderer>
+    	<component-family>javax.faces.Input</component-family>
+      	<renderer-type>RebatesSelectInputDateRenderer</renderer-type>
+      	<renderer-class>com.cvs.caremark.rebates.cr.components.RebatesSelectInputDateRenderer</renderer-class>
+    </renderer>
+    </render-kit>
+    -->  
+    
+</faces-config>

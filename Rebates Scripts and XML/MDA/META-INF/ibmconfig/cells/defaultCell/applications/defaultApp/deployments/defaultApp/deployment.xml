@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appdeployment:Deployment xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:appdeployment="http://www.ibm.com/websphere/appserver/schemas/5.0/appdeployment.xmi" xmi:id="Deployment_1273871382414">
+  <deployedObject xmi:type="appdeployment:ApplicationDeployment" xmi:id="ApplicationDeployment_1273871382414" startingWeight="10">
+    <modules xmi:type="appdeployment:WebModuleDeployment" xmi:id="WebModuleDeployment_1273871382414" startingWeight="10000" uri="MDAWeb.war"/>
+    <classloader xmi:id="Classloader_1273871382414" mode="PARENT_FIRST">
+      <libraries xmi:id="LibraryRef_1276098568267" libraryName="GDXSharedLibMDA"/>
+    </classloader>
+  </deployedObject>
+</appdeployment:Deployment>

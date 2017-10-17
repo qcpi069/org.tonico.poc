@@ -1,0 +1,120 @@
+
+<!-- REFESH CLIENT MODEL ASSOCIATION -->
+
+<sqml>
+	
+	<property name="TIMEOUT" value="0"/>
+	
+	<datasource name="silver" type="dbcp">
+		<defaultAutoCommit>true</defaultAutoCommit>
+		<defaultReadOnly>false</defaultReadOnly>
+		<driverClassName>oracle.jdbc.driver.OracleDriver</driverClassName>
+		<initialSize>1</initialSize>
+		<maxActive>15</maxActive>
+		<maxIdle>2</maxIdle>
+		<poolPreparedStatements>true</poolPreparedStatements>
+		<testOnBorrow>true</testOnBorrow>
+		<url>jdbc:oracle:thin:@rebdom1:1521:silver</url>
+		<username>dma_rbate2_app</username>
+		<password>caste8</password>
+		<validationQuery>SELECT 1 FROM DUAL</validationQuery>
+	</datasource>
+	
+	<datasource name="gdxprd" type="dbcp">
+		<defaultAutoCommit>true</defaultAutoCommit>
+		<defaultReadOnly>false</defaultReadOnly>
+		<driverClassName>com.ibm.db2.jcc.DB2Driver</driverClassName>
+		<initialSize>1</initialSize>
+		<maxActive>15</maxActive>
+		<maxIdle>2</maxIdle>
+		<poolPreparedStatements>true</poolPreparedStatements>
+		<testOnBorrow>true</testOnBorrow>
+		<url>jdbc:db2://r07prd01:50000/GDXPRD</url>
+		<username>vactuate</username>
+		<password>mkcrosson</password>
+		<validationQuery>SELECT 1 FROM SYSIBM.SYSDUMMY1</validationQuery>
+	</datasource>
+
+	<command type="try">
+		<try>
+			<command type="run" datasource="silver">
+				DROP TABLE bcc_TDISCNT_EXT_CLAIM_GPO;
+			</command>
+		</try>
+		<catch>
+			<command type="java">
+				script.setError(null);
+			</command>
+		</catch>
+	</command>
+	
+	<command type="run" datasource="silver">
+		CREATE TABLE bcc_TDISCNT_EXT_CLAIM_GPO (
+			CLAIM_ID INTEGER not null,
+			EXTNL_SRC_CD CHAR(5),
+			CNTRCT_ID INTEGER,
+			RPT_ID INTEGER,
+			PERIOD_ID CHAR(6),
+			DISCNT_RUN_MODE CHAR(4),
+			VNDR_ID INTEGER,
+			DRUG_NDC_ID DECIMAL(11),
+			NHU_TYP_CD SMALLINT,
+			DLVRY_SYS_CD SMALLINT,
+			CLT_ID INTEGER,
+			MODEL_TYP_CD CHAR(1) not null,
+			INP_SRC_ID CHAR(3),
+			CLM_LVL_1_ID VARCHAR(20),
+			CLM_LVL_2_ID VARCHAR(20),
+			CLM_LVL_3_ID VARCHAR(20),
+			BILLG_END_DT DATE,
+			CLT_PLAN_GRP_ID INTEGER,
+			DRUG_BRAND_CD CHAR(1),
+			GENC_AVAIL_IN SMALLINT,
+			FORMLY_IN SMALLINT,
+			DSG_PER_DAY_QTY DECIMAL(11,2),
+			DSPNSD_QTY DECIMAL(15,5),
+			DAY_SPLY_QTY SMALLINT,
+			UNIT_PER_DOSE_QTY DECIMAL(11,2),
+			FILL_DT DATE,
+			DW_PROV_ID INTEGER,
+			NABP_ID CHAR(7),
+			RX_NB CHAR(9),
+			DAW_TYP_CD SMALLINT,
+			REFILL_NB SMALLINT,
+			ITEM_COUNT_QY INTEGER,
+			BRLI_CREATE_DT DATE,
+			DRUG_AWP_PRC DECIMAL(11,5),
+			DRUG_PRC_SRC_CD SMALLINT,
+			DRUG_PRC_TYP_CD SMALLINT,
+			PROV_DEA_NB CHAR(9) ,
+			FORMULARY_ID CHAR(10) ,
+			PB_ID INTEGER ,
+			FRMLY_SRC_CD CHAR(1) not null,
+			PRIM_SECD_COV_CD SMALLINT ,
+			INCENTIVE_TYPE_CD SMALLINT,
+			TYP_FIL_CD SMALLINT ,
+			BASE_DISCNT_AMT DECIMAL(21,2) not null,
+			FORMLY_DISCNT_AMT DECIMAL(21,2) not null,
+			PRFMC_DISCNT_AMT DECIMAL(21,2) not null,
+			CNTRCT_DISCNT_AMT DECIMAL(21,2) not null,
+			GRWTH_DISCNT_AMT DECIMAL(21,2) not null
+		);
+	</command>
+	
+	<command type="copy" batch="500">
+		<source type="sql" datasource="gdxprd"><![CDATA[
+			SELECT * FROM VRAP.TDISCNT_EXT_CLAIM_GPO
+		]]></source>
+		<target
+			type             = "table"
+			datasource       = "silver"
+			transaction      = "true"
+			batch            = "500"
+			reportInterval   = "500"
+			queryTimeout     = "${TIMEOUT}"
+			schema           = "DMA_RBATE2_APP"
+			table            = "BCC_TDISCNT_EXT_CLAIM_GPO"
+		/>
+	</command>
+				
+</sqml>

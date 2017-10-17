@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE jasperReport PUBLIC "-//JasperReports//DTD Report Design//EN" "http://jasperreports.sourceforge.net/dtds/jasperreport.dtd">
+<jasperReport name="MonthlyEnrollmentReport" columnCount="1" pageWidth="1840" pageHeight="792" orientation="Landscape" columnWidth="1692" columnSpacing="0" leftMargin="36" rightMargin="36" topMargin="36" bottomMargin="36">
+  <parameter name="Title" class="java.lang.String">
+    <parameterDescription><![CDATA[Title of the Report]]></parameterDescription>
+    <defaultValueExpression></defaultValueExpression>
+  </parameter>
+  <parameter name="Month1" class="java.lang.String">
+    <defaultValueExpression></defaultValueExpression>
+  </parameter>
+  <field name="Zip5" class="java.lang.String" />
+  <field name="City" class="java.lang.String" />
+  <field name="ClientName" class="java.lang.String" />
+  <field name="TermDateStr" class="java.lang.String" />
+  <field name="Closed1" class="java.lang.Long" />
+  <field name="Perf1" class="java.lang.Long" />
+  <field name="Zip4" class="java.lang.String" />
+  <field name="Plus1" class="java.lang.Long" />
+  <field name="Open1" class="java.lang.Long" />
+  <field name="ClaimsProc" class="java.lang.String" />
+  <field name="ClientType" class="java.lang.String" />
+  <field name="State" class="java.lang.String" />
+  <field name="Address1" class="java.lang.String" />
+  <field name="EffDateStr" class="java.lang.String" />
+  <field name="Perf4E1" class="java.lang.Long" />
+  <field name="TotalEnrollment" class="java.lang.Long" />
+  <field name="ReportingNum" class="java.lang.String" />
+  <field name="Other1" class="java.lang.Long" />
+  <field name="Address2" class="java.lang.String" />
+  <field name="ModelType" class="java.lang.String" />
+  <field name="CompanyCd" class="java.lang.String" />
+  <title>
+    <band height="34">
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="0" y="0" width="500" height="33" />
+        <textElement>
+          <font fontName="Helvetica" size="20" isBold="true" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.String">$P{Title}</textFieldExpression>
+      </textField>
+    </band>
+  </title>
+  <pageHeader>
+    <band height="46">
+      <line>
+        <reportElement positionType="Float" mode="Opaque" x="410" y="0" width="1" height="45" />
+        <graphicElement />
+      </line>
+      <line>
+        <reportElement positionType="Float" mode="Opaque" x="485" y="0" width="1" height="45" />
+        <graphicElement />
+      </line>
+      <line>
+        <reportElement positionType="Float" mode="Opaque" x="560" y="0" width="1" height="45" />
+        <graphicElement />
+      </line>
+      <line>
+        <reportElement positionType="Float" mode="Opaque" x="635" y="0" width="1" height="45" />
+        <graphicElement />
+      </line>
+      <line>
+        <reportElement positionType="Float" mode="Opaque" x="710" y="0" width="1" height="45" />
+        <graphicElement />
+      </line>
+      <line>
+        <reportElement positionType="Float" mode="Opaque" x="785" y="0" width="1" height="45" />
+        <graphicElement />
+      </line>
+      <staticText>
+        <reportElement positionType="Float" mode="Transparent" x="0" y="15" width="75" height="30" />
+        <textElement textAlignment="Center">
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <text>Reporting Client Number</text>
+      </staticText>
+      <staticText>
+        <reportElement positionType="Float" mode="Transparent" x="75" y="15" width="80" height="30" />
+        <textElement textAlignment="Center">
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <text>Rebate Effective Date</text>
+      </staticText>
+      <staticText>
+        <reportElement positionType="Float" mode="Transparent" x="155" y="15" width="80" height="30" />
+        <textElement textAlignment="Center">
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <text>Rebate Term Date</text>
+      </staticText>
+      <staticText>
+        <reportElement positionType="Float" mode="Transparent" x="235" y="15" width="175" height="30" />
+        <textElement textAlignment="Center">
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <text>Reporting Client Name</text>
+      </staticText>
+      <staticText>
+        <reportElement positionType="Float" mode="Transparent" x="410" y="15" width="75" height="15" />
+        <textElement textAlignment="Center">
+          <font fontName="Helvetica" size="10" isBold="true" isUnderline="true" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <text>Basic</text>
+      </staticText>
+      <staticText>
+        <reportElement positionType="Float" mode="Transparent" x="485" y="15" width="75" height="15" />
+        <textElement textAlignment="Center">
+          <font fontName="Helvetica" size="10" isBold="true" isUnderline="true" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <text>Performance</text>
+      </staticText>
+      <staticText>
+        <reportElement positionType="Float" mode="Transparent" x="560" y="0" width="75" height="30" />
+        <textElement textAlignment="Center">
+          <font fontName="Helvetica" size="10" isBold="true" isUnderline="true" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <text>Performance Incentive</text>
+      </staticText>
+      <line>
+        <reportElement positionType="Float" mode="Opaque" x="410" y="30" width="450" height="1" />
+        <graphicElement />
+      </line>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="415" y="30" width="65" height="15" />
+        <textElement textAlignment="Center">
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.String">$P{Month1}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="490" y="30" width="65" height="15" />
+        <textElement textAlignment="Center">
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.String">$P{Month1}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="565" y="30" width="65" height="15" />
+        <textElement textAlignment="Center">
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.String">$P{Month1}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="640" y="30" width="65" height="15" />
+        <textElement textAlignment="Center">
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.String">$P{Month1}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="715" y="30" width="65" height="15" />
+        <textElement textAlignment="Center">
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.String">$P{Month1}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="790" y="30" width="65" height="15" />
+        <textElement textAlignment="Center">
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.String">$P{Month1}</textFieldExpression>
+      </textField>
+      <line>
+        <reportElement positionType="Float" mode="Opaque" x="0" y="0" width="1840" height="1" />
+        <graphicElement />
+      </line>
+      <line>
+        <reportElement positionType="Float" mode="Opaque" x="0" y="45" width="1840" height="1" />
+        <graphicElement />
+      </line>
+      <staticText>
+        <reportElement positionType="Float" mode="Transparent" x="635" y="0" width="75" height="30" />
+        <textElement textAlignment="Center">
+          <font fontName="Helvetica" size="10" isBold="true" isUnderline="true" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <text>Performance Incentive Plus</text>
+      </staticText>
+      <staticText>
+        <reportElement positionType="Float" mode="Transparent" x="710" y="15" width="75" height="15" />
+        <textElement textAlignment="Center">
+          <font fontName="Helvetica" size="10" isBold="true" isUnderline="true" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <text>Closed</text>
+      </staticText>
+      <staticText>
+        <reportElement positionType="Float" mode="Transparent" x="785" y="15" width="75" height="15" />
+        <textElement textAlignment="Center">
+          <font fontName="Helvetica" size="10" isBold="true" isUnderline="true" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <text>Other</text>
+      </staticText>
+      <line>
+        <reportElement positionType="Float" mode="Opaque" x="860" y="0" width="1" height="45" />
+        <graphicElement />
+      </line>
+      <staticText>
+        <reportElement positionType="Float" mode="Transparent" x="960" y="30" width="150" height="15" />
+        <textElement>
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <text>Address 1</text>
+      </staticText>
+      <staticText>
+        <reportElement positionType="Float" mode="Transparent" x="1110" y="30" width="150" height="15" />
+        <textElement>
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <text>Address 2</text>
+      </staticText>
+      <staticText>
+        <reportElement positionType="Float" mode="Transparent" x="1260" y="30" width="150" height="15" />
+        <textElement>
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <text>City</text>
+      </staticText>
+      <staticText>
+        <reportElement positionType="Float" mode="Transparent" x="1410" y="30" width="50" height="15" />
+        <textElement>
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <text>State</text>
+      </staticText>
+      <staticText>
+        <reportElement positionType="Float" mode="Transparent" x="1460" y="30" width="50" height="15" />
+        <textElement>
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <text>Zip</text>
+      </staticText>
+      <staticText>
+        <reportElement positionType="Float" mode="Transparent" x="1510" y="30" width="50" height="15" />
+        <textElement>
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <text>Zip4</text>
+      </staticText>
+      <staticText>
+        <reportElement positionType="Float" mode="Transparent" x="1560" y="15" width="50" height="30" />
+        <textElement>
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <text>Claims Processor</text>
+      </staticText>
+      <staticText>
+        <reportElement positionType="Float" mode="Transparent" x="1610" y="15" width="50" height="30" />
+        <textElement>
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <text>Client Type</text>
+      </staticText>
+      <staticText>
+              <reportElement positionType="Float" mode="Transparent" x="1660" y="15" width="50" height="30" />
+              <textElement>
+                <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+              </textElement>
+              <text>Model Type</text>
+      </staticText>
+      <staticText>
+        <reportElement positionType="Float" mode="Transparent" x="860" y="15" width="100" height="15" />
+        <textElement textAlignment="Center">
+          <font fontName="Helvetica" size="10" isBold="true" isUnderline="true" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <text>Total Average</text>
+      </staticText>
+      <staticText>
+        <reportElement positionType="Float" mode="Transparent" x="1710" y="15" width="70" height="15" />
+        <textElement textAlignment="Center">
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <text>Company Code</text>
+      </staticText>
+      <line>
+        <reportElement positionType="Float" mode="Opaque" x="960" y="0" width="1" height="45" />
+        <graphicElement />
+      </line>
+    </band>
+  </pageHeader>
+  <columnHeader>
+    <band height="0" />
+  </columnHeader>
+  <detail>
+    <band height="16">
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="-1" y="0" width="75" height="15" />
+        <textElement>
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.String">$F{ReportingNum}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="75" y="0" width="80" height="15" />
+        <textElement>
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.String">$F{EffDateStr}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="155" y="0" width="80" height="15" />
+        <textElement>
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.String">$F{TermDateStr}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="235" y="0" width="175" height="15" />
+        <textElement>
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.String">$F{ClientName}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="415" y="0" width="65" height="15" />
+        <textElement textAlignment="Right">
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.Long">$F{Open1}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="490" y="0" width="65" height="15" />
+        <textElement textAlignment="Right">
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.Long">$F{Perf1}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="565" y="0" width="65" height="15" />
+        <textElement textAlignment="Right">
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.Long">$F{Plus1}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="640" y="0" width="65" height="15" />
+        <textElement textAlignment="Right">
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.Long">$F{Perf4E1}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="715" y="0" width="65" height="15" />
+        <textElement textAlignment="Right">
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.Long">$F{Closed1}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="790" y="0" width="65" height="15" />
+        <textElement textAlignment="Right">
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.Long">$F{Other1}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="960" y="0" width="150" height="15" />
+        <textElement>
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.String">$F{Address1}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="1110" y="0" width="150" height="15" />
+        <textElement>
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.String">$F{Address2}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="1260" y="0" width="150" height="15" />
+        <textElement>
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.String">$F{City}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="1410" y="0" width="50" height="15" />
+        <textElement>
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.String">$F{State}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="1460" y="0" width="50" height="15" />
+        <textElement>
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.String">$F{Zip5}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="1510" y="0" width="50" height="15" />
+        <textElement>
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.String">$F{Zip4}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="1560" y="0" width="50" height="15" />
+        <textElement>
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.String">$F{ClaimsProc}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="1610" y="0" width="50" height="15" />
+        <textElement>
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.String">$F{ClientType}</textFieldExpression>
+      </textField>
+      <textField>
+              <reportElement positionType="Float" mode="Transparent" x="1660" y="0" width="50" height="15" />
+              <textElement>
+                <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+              </textElement>
+              <textFieldExpression class="java.lang.String">$F{ModelType}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="865" y="0" width="90" height="15" />
+        <textElement textAlignment="Right">
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.Long">$F{TotalEnrollment}</textFieldExpression>
+      </textField>
+      <textField>
+        <reportElement positionType="Float" mode="Transparent" x="1710" y="0" width="60" height="15" />
+        <textElement textAlignment="Right">
+          <font fontName="Helvetica" size="10" pdfFontName="Helvetica" pdfEncoding="Cp1252" isPdfEmbedded="false" />
+        </textElement>
+        <textFieldExpression class="java.lang.String">$F{CompanyCd}</textFieldExpression>
+      </textField>
+    </band>
+  </detail>
+  <columnFooter>
+    <band height="0" />
+  </columnFooter>
+  <pageFooter>
+    <band height="36" />
+  </pageFooter>
+  <summary>
+    <band height="0" />
+  </summary>
+</jasperReport>
+

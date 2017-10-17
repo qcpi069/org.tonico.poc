@@ -1,0 +1,83 @@
+<sqml>
+        <property name="TIMEOUT" value="0"/>
+        <datasources resource="datasource.xml"/>
+        <properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        dmt_schema=script.getProperty("dmt_schema");
+        ]]></command>
+
+        <command type="try">
+                <try>
+                        <command type="copy" batch="1000">
+                                <source type="sql" datasource="datamart"
+                                        ><![CDATA[
+
+with
+
+prcs ( prcs_nb ) as
+   ( select distinct prcs_nb
+	from rps.ms_chkln
+),
+
+cg_raw ( PRCS_NB,REBATE_ID,RAC,CG ) as 
+( select distinct p.PRCS_NB,REBATE_ID,RAC,CG
+  from rps.ms_rpt_hierarchy h inner join prcs p
+	on h.prcs_nb=p.prcs_nb
+),
+
+cg_raw_xref (PRCS_NB,REBATE_ID,RAC,cg, extl_src_cd,extl_hrcy_lvl1,extl_hrcy_lvl2,extl_hrcy_lvl3,extl_hrcy_lvl4,extl_hrcy_lvl5)
+ as
+( select PRCS_NB,d.REBATE_ID,d.RAC,d.cg, x.extl_src_cd,x.extl_hrcy_lvl1,x.extl_hrcy_lvl2,
+        x.extl_hrcy_lvl3,x.extl_hrcy_lvl4,x.extl_hrcy_lvl5
+from cg_raw d
+left outer join rps.xref007 x on (x.cg_nb = d.cg ))
+,
+
+hrcy_names (EXTL_SRC_CD,EXTL_LVL1_ID,EXTL_LVL2_ID,EXTL_LVL3_ID,EXTL_LVL4_ID,EXTL_LVL5_ID,EXTL_LVL1_NM,EXTL_LVL3_NM) as
+( select distinct cg.EXTL_SRC_CD,EXTL_LVL1_ID,EXTL_LVL2_ID,EXTL_LVL3_ID,EXTL_LVL4_ID,EXTL_LVL5_ID,
+                        EXTL_LVL1_NM,EXTL_LVL3_NM
+ from client_reg.crt_extl_hrcy cg, cg_raw_xref x
+ where cg.EXTL_SRC_CD = x.extl_src_cd
+ and cg.EXTL_LVL1_ID = x.extl_hrcy_lvl1
+ and cg.EXTL_LVL2_ID = x.extl_hrcy_lvl2
+ and cg.EXTL_LVL3_ID = x.extl_hrcy_lvl3
+ and cg.EXTL_LVL4_ID = x.extl_hrcy_lvl4
+ and cg.EXTL_LVL5_ID = x.extl_hrcy_lvl5                         )
+
+select PRCS_NB,REBATE_ID,RAC,cg, cg.EXTL_LVL1_NM, x.extl_src_cd,x.extl_hrcy_lvl1,x.extl_hrcy_lvl2,
+        x.extl_hrcy_lvl3,cg.EXTL_LVL3_NM
+from cg_raw_xref x
+ left outer join hrcy_names cg on
+ ( cg.EXTL_SRC_CD = x.extl_src_cd
+ and cg.EXTL_LVL1_ID = x.extl_hrcy_lvl1
+ and cg.EXTL_LVL2_ID = x.extl_hrcy_lvl2
+ and cg.EXTL_LVL3_ID = x.extl_hrcy_lvl3
+ and cg.EXTL_LVL4_ID = x.extl_hrcy_lvl4
+ and cg.EXTL_LVL5_ID = x.extl_hrcy_lvl5                         )
+
+
+
+                                ]]></source>
+
+                                <target
+                                        type             = "sql"
+                                        datasource       = "datamart"
+                                        transaction      = "true"
+                                        batch            = "1000"
+                                        reportInterval   = "1000"
+                                        queryTimeout     = "${TIMEOUT}"
+                                ><![CDATA[
+                                              insert into rps.ms_rpt_hrcy_lkp values (?,?,?,?,?,?,?,?,?,?)
+
+                                ]]></target>
+
+                        </command>
+
+                </try>
+                <catch>
+                </catch>
+        </command>
+</sqml>
+

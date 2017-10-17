@@ -1,0 +1,273 @@
+<!-- 
+1. Refresh VRAP.TFORMULARY_DRUG_STATUS with data from EDW.
+      ODSII Formulary Expansion process publishes the results in EDW.
+2. Perform NHU Type Code Update.
+3. Copy on formulary from table VRAP.TFRMLY_DRUG_RESULTS_PHC
+   to VRAP.TFORMULARY_DRUG_STATUS
+4. Send a Formulary Expansion completion email to the business.  
+
+###########################################################################
+#   Date                 Description
+# #########  ##########  ##################################################
+# 02-01-07   qcpi567     Parte 6015891
+# 08-15-07   qcpi08a     PRJ001079
+-->
+
+<sqml>
+    <property name="TIMEOUT" value="0"/>
+    <datasources resource="datasource.xml"/>
+    
+    <!--
+        Set-up a try block to send an email on exception.    
+    -->         
+    <command type="try">
+        <try>
+
+            <!-- Query DB for 18 quarters back -->
+            <command type="run" datasource="gdxprd" rowName="rowBQuarter"><![CDATA[
+
+                         SELECT 'Q0' || rtrim(char(quarter(current date - 54 MONTHS))) ||
+                                substr(char(year(current date - 54 MONTHS)), 3, 2) 
+                           FROM sysibm.sysdummy1
+                           WITH UR
+
+            ]]></command>
+
+            <!-- Query DB for current control quarter info -->
+            <command type="run" datasource="gdxdb" rowName="rowQuarter"><![CDATA[
+
+			SELECT RTRIM(A.ON_OFF_FRMLY_PRD)
+			  FROM VRAP.TFRMLY_EXP_CNTL A
+			 WHERE A.FRMLY_EXP_ID = (SELECT MAX(FRMLY_EXP_ID) 
+                                                   FROM VRAP.TFRMLY_EXP_CNTL)
+			   AND A.RUN_STAT = 2
+			   AND A.ON_OFF_FRMLY_STAT IN (0,1) 
+			  WITH UR	
+
+            ]]></command>
+
+            <!-- Command to set quarter parameters -->
+            <command type="java"><![CDATA[
+
+                         String quarter ="";
+                         String bquarter ="";
+
+                         quarter = script.getProperty("rowQuarter.1");
+                         bquarter = script.getProperty("rowBQuarter.1");
+
+                         if (quarter == null || quarter.trim().length()== 0 ||
+                             bquarter == null || bquarter.trim().length()== 0)
+                             throw new Exception("The quarter not found in database ");
+
+                         //Make the variables available
+                         script.setProperty("quarter", quarter);
+                         script.setProperty("bquarter", bquarter);
+
+            ]]></command>
+        
+            <!-- *************** VRAP.TFORMULARY_DRUG_STATUS TABLE ********************* -->
+            <!-- delete data from VRAP.TFORMULARY_DRUG_STATUS in GDX -->
+            <command type="run" datasource="gdxdb" transaction="false">
+                <![CDATA[
+
+                    DELETE 
+                      FROM VRAP.TFORMULARY_DRUG_STATUS
+                     WHERE PERIOD_ID IN ('${quarter}', '${bquarter}')
+                          
+                ]]>
+            </command>
+            
+            <!-- Copy info from EDW(Oracle) to GDX(UDB) -->
+            <command type="copy" batch="500">
+                <source type="sql" datasource="edwdb"><![CDATA[
+                    SELECT  MF.DRUG_LIST_EXTNL_TYPE FRMLY_SRC_CD
+                           ,MF.DRUG_LIST_NBR FRMLY_ID
+                           ,TO_NUMBER(TD.NDC_CODE) DRUG_NDC_ID
+                           ,1 NHU_TYP_CD
+                           ,MFD.FRMLY_STATUS FRMLY_DRUG_STAT_CD
+                           ,TRUNC(MFD.EFF_DATE) EFF_DT
+                           ,TRUNC(NVL(MFD.END_DATE,TO_DATE('12-31-9999','MM-DD-YYYY'))) END_DT
+                      FROM DWCORP.MV_FRMLY MF 
+                          ,DWCORP.T_DRUG TD 
+                          ,DWCORP.MV_FRMLY_DRUG MFD       
+                     WHERE MFD.FRMLY_GID = MF.DRUG_LIST_GID
+                       AND MFD.DRUG_GID  = TD.DRUG_GID
+                     ORDER BY 1,2,3
+                ]]></source>
+                <target
+                    type             = "sql"
+                    datasource       = "gdxdb"
+                    transaction      = "false"
+                    batch            = "500"
+                    reportInterval   = "500"
+                    queryTimeout     = "${TIMEOUT}"
+                ><![CDATA[
+                    INSERT INTO VRAP.TFORMULARY_DRUG_STATUS
+                           (
+                            PERIOD_ID,
+                            FRMLY_SRC_CD,
+                            FRMLY_ID,
+                            DRUG_NDC_ID,
+                            NHU_TYP_CD,
+                            FRMLY_DRUG_STAT_CD,
+                            EFF_DT,
+                            END_DT
+                           )
+                    VALUES ( '${quarter}', ?, ?, ?, ?, ?, ?, ? )
+                ]]></target>
+            </command>
+            
+            <!-- Update NHU Type Code -->
+            <command type="run" datasource="gdxdb" transaction="false" queryTimeout="${TIMEOUT}">
+                <![CDATA[
+                    UPDATE VRAP.TFORMULARY_DRUG_STATUS A
+                       SET A.NHU_TYP_CD = (SELECT B.NHU_TYP_CD
+                                             FROM VRAP.TDRUG B 
+                                            WHERE A.DRUG_NDC_ID = B.DRUG_NDC_ID)
+                     WHERE EXISTS (SELECT 1 
+                                     FROM VRAP.TDRUG C
+                                    WHERE C.DRUG_NDC_ID = A.DRUG_NDC_ID 
+                                      AND C.NHU_TYP_CD <> A.NHU_TYP_CD)
+                       AND PERIOD_ID = '${quarter}'
+                ]]>
+            </command>
+           
+            <!-- Copy info from TFRMLY_DRUG_RESULTS_PHC to TFORMULARY_DRUG_STATUS -->
+            <command type="copy" batch="500">
+                <source type="sql" datasource="gdxdb"><![CDATA[
+
+                    SELECT FRMLY_SRC_CD,
+                           FRMLY_ID,
+                           DECIMAL(NDC_LC11_ID, 11),
+                           NHU_TYP_CD,
+                           FRMLY_DRUG_STAT_CD,
+                           EFF_DT,
+                           END_DT
+                      FROM VRAP.TFRMLY_DRUG_RESULTS_PHC
+                      WHERE FRMLY_DRUG_STAT_CD = '1' -- on formualry
+		      AND DECIMAL(NDC_LC11_ID,11) IN (SELECT B.DRUG_NDC_ID FROM VRAP.TDRUG_RBAT B)
+                      WITH UR
+
+                ]]></source>
+                <target
+                    type             = "sql"
+                    datasource       = "gdxdb"
+                    transaction      = "false"
+                    batch            = "500"
+                    reportInterval   = "500"
+                    queryTimeout     = "${TIMEOUT}"
+                ><![CDATA[
+
+                    INSERT
+                      INTO VRAP.TFORMULARY_DRUG_STATUS
+                           (
+		            PERIOD_ID,		
+                            FRMLY_SRC_CD,
+                            FRMLY_ID,
+                            DRUG_NDC_ID,
+                            NHU_TYP_CD,
+                            FRMLY_DRUG_STAT_CD,
+                            EFF_DT,
+                            END_DT
+                           )
+                    VALUES ( '${quarter}', ?, ?, ?, ?, ?, ?, ? )
+
+                ]]></target>
+            </command>
+ 
+            <!-- Command to set user_email_address if not specified in the command line-->
+            <command type="java"><![CDATA[
+                 
+                if (script.getProperty("user_email_address") == null) {
+                   //If user email address is not passed in the command line, 
+                   //set it to GDXGPOOps@caremark.com,GDXXMDOps@caremark.com,RebateResearch@caremark.com,GDXITD@caremark.com
+                   //email is not sent to DSC users because DSC users do not use the Formualry Expansion results.
+                   //Make the variable available to other queries/commands below
+                   script.setProperty("user_email_address","GDXGPOOps@caremark.com,GDXXMDOps@caremark.com,RebateResearch@caremark.com,GDXITD@caremark.com");
+                }
+
+            ]]></command>
+        
+            <!-- Send Formulary Expansion completion email to the users -->
+            <command
+                type="mail"
+                mailTo="${user_email_address}"
+                mailFrom="${email_address}"
+                subject="[${region}] Formulary Expansion for ${quarter} completed"
+                contentType="text/html"
+                throwsException="false"            
+            ><![CDATA[
+                <html>
+                <head>
+                <title> Formulary Expansion for ${quarter} completed </title>
+                </head>
+                <body>
+            
+                <font style="color: blue; font-size: small">
+                <h3> Formulary Expansion for ${quarter} completed. NHU Type Code updated. </h3>
+                           
+                <br>
+                                
+                <h3> If you any questions, please contact ${email_address} </h3>
+                </font>
+                
+            
+                </body>
+                </html>
+            ]]></command>
+        
+                 
+        </try>
+        <catch>
+            <!-- Send an email on error -->
+            <command
+                type="mail"
+                mailTo="${email_address}"
+                mailFrom="tformulary_drug_status_Refresh@caremark.com"
+                subject="[${region}] [ERROR] Formulary Expansion refresh_tformulary_drug_status.xml"
+                contentType="text/html"
+                throwsException="false"            
+            ><![CDATA[
+                <html>
+                <head>
+                <title>[ERROR] REFRESH tformulary_drug_status</title>
+                </head>
+                <body>
+            
+                <h3><u>[ERROR] REFRESH tformulary_drug_status </u></h3>
+            
+                <table cellpadding="2">
+                    <tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+                    <tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+                    <tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+                    #if (${system.getProperty('logfile')})
+                        <tr>
+                            <td><b>Log File:</b></td>
+                            <td>
+                                ${system.getProperty('logfile')}
+                            <td>
+                        </tr>
+                    #end
+                </table>
+
+                <br>            
+                <br>
+                
+                #if (${script.getLastStatement()})
+                    <h3><u>Last Statement</u></h3>
+                    <font style="color: blue; font-size: small">    
+                    ${script.getLastStatement()}
+                    </font>
+                
+                    <br>
+                    <br>
+                #end
+            
+                <h3><u>Stack Trace</u></h3>        
+                <pre style="color: red; font-size: small;">${stackTrace}</pre>
+                </body>
+                </html>
+            ]]></command>
+        </catch>
+    </command>
+</sqml>

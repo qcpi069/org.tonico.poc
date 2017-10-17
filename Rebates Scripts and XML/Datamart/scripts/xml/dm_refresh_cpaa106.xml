@@ -1,0 +1,233 @@
+
+<!-- REFRESH VENDORS  
+  --> 
+<sqml>
+  <property name="TIMEOUT" value="0" /> 
+  <datasources resource="datasource.xml" /> 
+  <properties resource="datamart.properties" /> 
+<command type="java">
+<![CDATA[ 
+        mailto=script.getProperty("mailto");
+        dmt_schema=script.getProperty("dmt_schema");
+		pmt_schema=script.getProperty("pmt_schema");  
+	
+
+  ]]> 
+  </command>
+<!-- delete from UDB 
+  --> 
+<command type="run" datasource="datamart">
+<![CDATA[ 
+					DELETE FROM ${dmt_schema}.cpaa106
+				
+
+  ]]> 
+  </command>
+<command type="try">
+<try>
+<!-- Copy vendor info from mainframe DB2 to UDB 
+  --> 
+<command type="copy" batch="1000">
+<source type="sql" datasource="datamart">
+<![CDATA[ 
+					SELECT 
+ PICO_ID_NB ,
+       RBAT_CTRC_STRT_DT   ,
+       RBAT_CTRC_END_DT     ,
+ case when PICO_RPT_ID_NB=' ' 
+	then case when pico_id_nb>9999 then char(pico_id_nb)
+		  when pico_id_nb>999 then '0'||char(pico_id_nb)
+		  when pico_id_nb>99  then '00'||char(pico_id_nb)
+		  when pico_id_nb>9   then '000'||char(pico_id_nb)
+		else '0000'||char(pico_id_nb) end
+	else PICO_RPT_ID_NB end ,
+       CORP_NME             ,       
+       CORP_ST_1_ADDR       ,
+       CORP_ST_2_ADDR       ,
+       CORP_CITY_NME         ,
+       CORP_ST_CD           ,
+       CORP_ZIP_CD          ,
+       MAIL_NME              ,
+       MAIL_ST_1_ADDR        ,
+       MAIL_ST_2_ADDR       ,
+       MAIL_CITY_NME        ,
+       MAIL_ST_CD            ,
+       MAIL_ZIP_CD           ,
+       PCS_CNTC_NME          ,     
+       PCS_CNTC_DEPT_NME     ,
+       PCS_CNTC_PHON_NB      ,
+       PCS_CNTC_2_NME        ,
+       PCS_CNTC_DPT_2_NME    ,
+       PCS_CNTC_PHON_2_NB    ,
+       PCS_CNTC_3_NME        ,  
+       PCS_CNTC_DPT_3_NME    ,
+       PCS_CNTC_PHON_3_NB    ,
+       RBAT_CLNT_EXLD_CD    ,
+       AR_NB               ,
+       INSRT_TS           ,
+       CHG_TS              ,
+       USER_ID_NB           ,
+       OTHR_NME              ,
+       OTHR_ST_1_ADDR        ,
+       OTHR_ST_2_ADDR        ,       
+       OTHR_CITY_NME         ,
+       OTHR_ST_CD            ,
+       OTHR_ZIP_CD           ,
+       EDI_CD                ,
+       EDI_ADDR_CD           ,
+       CART_TAPE_SLCT_CD    ,
+       CART_CPRS_CD          ,
+       CART_TAPE_ADDR_CD     ,
+       OFST_RPT_FMT_CD      ,
+       EDIT_CLM_OFST_CD      ,
+       CART_DATA_CPRS_CD    ,
+       PICO_RPT_CTNT_CD     ,
+       FLAT_FEE_AMT         ,
+       FLAT_FEE_WT_VL    ,
+       NEXT_BNDL_NB  ,
+       CORP_CD     
+         
+					 from  ${pmt_schema}.cpaa106
+						ORDER BY 1
+				
+
+  ]]> 
+  </source>
+<target type="sql" datasource="datamart" transaction="true" batch="1000" reportInterval="1000" queryTimeout="${TIMEOUT}">
+<![CDATA[ 
+					INSERT INTO ${dmt_schema}.cpaa106
+					 ( PICO_ID_NB ,
+       RBAT_CTRC_STRT_DT   ,
+       RBAT_CTRC_END_DT     ,
+       PICO_RPT_ID_NB       ,
+       CORP_NME             ,       
+       CORP_ST_1_ADDR       ,
+       CORP_ST_2_ADDR       ,
+       CORP_CITY_NME         ,
+       CORP_ST_CD           ,
+       CORP_ZIP_CD          ,
+       MAIL_NME              ,
+       MAIL_ST_1_ADDR        ,
+       MAIL_ST_2_ADDR       ,
+       MAIL_CITY_NME        ,
+       MAIL_ST_CD            ,
+       MAIL_ZIP_CD           ,
+       PCS_CNTC_NME          ,     
+       PCS_CNTC_DEPT_NME     ,
+       PCS_CNTC_PHON_NB      ,
+       PCS_CNTC_2_NME        ,
+       PCS_CNTC_DPT_2_NME    ,
+       PCS_CNTC_PHON_2_NB    ,
+       PCS_CNTC_3_NME        ,  
+       PCS_CNTC_DPT_3_NME    ,
+       PCS_CNTC_PHON_3_NB    ,
+       RBAT_CLNT_EXLD_CD    ,
+       AR_NB               ,
+       INSRT_TS           ,
+       CHG_TS              ,
+       USER_ID_NB           ,
+       OTHR_NME              ,
+       OTHR_ST_1_ADDR        ,
+       OTHR_ST_2_ADDR        ,       
+       OTHR_CITY_NME         ,
+       OTHR_ST_CD            ,
+       OTHR_ZIP_CD           ,
+       EDI_CD                ,
+       EDI_ADDR_CD           ,
+       CART_TAPE_SLCT_CD    ,
+       CART_CPRS_CD          ,
+       CART_TAPE_ADDR_CD     ,
+       OFST_RPT_FMT_CD      ,
+       EDIT_CLM_OFST_CD      ,
+       CART_DATA_CPRS_CD    ,
+       PICO_RPT_CTNT_CD     ,
+       FLAT_FEE_AMT         ,
+       FLAT_FEE_WT_VL    ,
+       NEXT_BNDL_NB,
+       CORP_CD     
+           
+					  ) 
+					VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,? )
+				
+
+  ]]> 
+  </target>
+  </command>
+<!-- compare totals 
+  --> 
+<!--
+		<command type="run" datasource="rebates" rowName="count1">
+				<![CDATA[
+					SELECT COUNT(*) FROM ${pmt_schema}.cpaa106
+                ]]>
+			</command>
+			<command type="run" datasource="datamart" rowName="count2">
+				<![CDATA[
+					SELECT COUNT(*) FROM ${dmt_schema}.cpaa106
+                ]]>
+			</command>
+			<command type="java">
+				count1 = script.getProperty("count1.1").intValue();
+				count2 = script.getProperty("count2.1").intValue();
+				logger.warn("Silver RBATE_REG.CLIENT COUNT = " + count1);
+				logger.warn("RPS RBATE_REG.CLIENT_COUNT = " + count2);
+				if (count1 != count2) {
+					logger.error(" CLIENT counts do NOT match count1=" + count1 + "  count2=" + count2);
+                    throw new Exception(" CLIENT counts do NOT match count1=" + count1 + " count2=" + count2);
+				} 
+			</command> 
+		
+
+  --> 
+  </try>
+<catch>
+<!-- Send an email on error 
+  --> 
+<command type="mail" mailTo="${mailto}" mailFrom="RPDM_Misc_Refresh" subject="[ERROR] REFESH CPAA106" contentType="text/html" throwsException="false">
+<![CDATA[ 
+				<html>
+				<head>
+				<title>[ERROR] REFESH CPAA106</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] REFESH CPAA106</u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			
+
+  ]]> 
+  </command>
+  </catch>
+  </command>
+  </sqml>

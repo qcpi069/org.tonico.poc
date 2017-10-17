@@ -1,0 +1,34 @@
+<!--  ITPR001968 -  upload parser for ctid record --> 
+<parsers>	
+	<record
+		type="xref"
+		objectType="com.cvs.caremark.rebates.cr.web.valueobject.UploadCITDRecord"
+	>
+		<tokenizer type="split" pattern=","/>
+		<field
+			name="ctid"
+			position="0"
+			dataType="string"
+			trim="true"
+		/>
+		<field
+			name="ctidName"
+			position="1"
+			dataType="string"
+			trim="true"
+		/>
+		<field
+			name="ctidEffectiveDateStr"
+			position="2"
+			dataType="string"
+			trim="true"
+		/>
+		<field
+			name="ctidTerminationDateStr"
+			position="3"
+			dataType="string"
+			trim="true"
+		/>
+		
+	</record>
+</parsers>

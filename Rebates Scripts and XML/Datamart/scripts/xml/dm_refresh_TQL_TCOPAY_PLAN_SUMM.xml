@@ -1,0 +1,150 @@
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        cli_schema=script.getProperty("cli_schema");
+	]]></command>
+	
+	       
+	<command type="try">
+		<try>
+		    <!-- delete from UDB -->
+			
+			<command type="run" datasource="zeus" rowName="count1">
+				<![CDATA[
+					SELECT COUNT(*) FROM SUMMARY.TCOPAY_PLAN_SUMM 
+                ]]>
+			</command>
+			<!-- Copy client info from Oracle to DB2. -->
+			<command type="copy" batch="3000">
+				<source type="sql" datasource="zeus"><![CDATA[
+					SELECT BILLING_END_MONTH, 
+						PB_ID, 
+						PB_PBA_ID, 
+						DELIVERY_SYSTEM_CD, 
+						BRD_COPAY_AT, 
+						BRD_COPAY_RT, 
+						BRDNGENC_COPAY_AT, 
+						BRDNGENC_COPAY_RT, 
+						GENC_COPAY_AT, 
+						GENC_COPAY_RT, 
+						FRMBRD_COPAY_AT, 
+						FRMBRD_COPAY_RT, 
+						NONFRM_COPAY_AT, 
+						NONFRM_COPAY_RT, 
+						RATE_AMT_RSOL_CD, 
+						PVT_COPAY_IN, 
+						MAINT_COPAY_IN, 
+						OTHER_COPAY_IN, 
+						CALC_STY_CD, 
+						PVT_PRN_NTW_IN, 
+						PHM_NTW_IN, 
+						MIN_MAX_COPAY_CD, 	
+						CALC_DAW_CD, 
+						CALC_DAW_ACT_CD, 
+						CLL_PNT_LMT_IN, 
+						MAX_DAY_SUPPLY_QY, 
+						MAX_ALW_BEN_CD, 
+						MAX_OOP_CD, 
+						DEDUCTIBLE_CD, 
+						FORMULARY_ID, 
+						FORMULARY_ICT_CD, 
+						GENERIC_ICT_CD, 
+						PROCESSED_DT
+					FROM SUMMARY.TCOPAY_PLAN_SUMM
+
+				]]></source>
+
+                                <target
+				        type        = "queue"
+					threadCount = "1">
+
+				
+				<target
+					type             = "sql"
+					datasource       = "datamart"
+					transaction      = "false"
+					batch            = "3000"
+					reportInterval   = "3000"
+					queryTimeout     = "${TIMEOUT}"
+					><![CDATA[
+					INSERT INTO RPS.TQL_TCOPAY_PLAN_SUMM 
+						VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) 
+				]]></target>
+                                </target> 
+			</command>
+	        <!-- compare totals -->
+
+			<command type="run" datasource="datamart" rowName="count2">
+				<![CDATA[
+					SELECT COUNT(*) FROM RPS.TQL_TCOPAY_PLAN_SUMM 
+                ]]>
+			</command>
+			<command type="java">
+				count1 = script.getProperty("count1.1").intValue();
+				count2 = script.getProperty("count2.1").intValue();
+				logger.warn("Zeus SUMMARY.TCOPAY_PLAN_SUMM = " + count1);
+				logger.warn("RPS RPS.TQL_TCOPAY_PLAN_SUMM = " + count2);
+				if (count1 != count2) {
+					logger.error(" Record counts do NOT match count1=" + count1 + "  count2=" + count2);
+                    throw new Exception(" Record counts do NOT match count1=" + count1 + " count2=" + count2);
+				} 
+			</command> 
+				 
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+			<command
+				type="mail"
+				mailTo="${mailto}"
+				mailFrom="dm_refresh_TQL_TCOPAY_PLAN_SUMM"
+				subject="[ERROR] REFESH TQL_TCOPAY_PLAN_SUMM "
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] REFESH TQL_TCOPAY_PLAN_SUMM</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] REFESH TQL_TCOPAY_PLAN_SUMM </u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		</catch>
+	</command>
+</sqml>

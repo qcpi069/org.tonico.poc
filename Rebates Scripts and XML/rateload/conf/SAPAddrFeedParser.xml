@@ -1,0 +1,131 @@
+<parsers>
+	
+	<record
+		type="header"
+		objectType="com.caremark.rebates.registration.batch.domain.SAPAddrFeedRecord"
+		acceptPattern="^HD"
+	>
+		<!--
+			The fixed tokenizer is for fixed length fields.
+		-->
+		<tokenizer type="fixed">
+			<field offset="0" length="2"/>
+			<field offset="2" length="14"/>
+		</tokenizer>
+		<field
+			name="headerRecordType"
+			position="0"
+			dataType="string"
+			trim="true"
+			validationPattern="^HD$"
+		/>
+		<field
+			name="headerDateTime"
+			position="1"
+			dataType="date"
+			format="yyyyMMddHHmmss"
+			trim="true"
+		/>
+	</record>
+	
+	<record
+		type="detail"
+		objectType="com.caremark.rebates.registration.batch.domain.SAPAddrFeedRecord"
+		acceptPattern="^UD"
+	>
+		<tokenizer type="fixed">
+			<field offset="0" length="2"/>
+			<field offset="2" length="10"/>
+			<field offset="12" length="35"/>
+			<field offset="47" length="35"/>
+			<field offset="82" length="35"/>
+			<field offset="117" length="3"/>
+			<field offset="120" length="10"/>
+			<field offset="130" length="4"/>
+			<field offset="134" length="1"/>
+		</tokenizer>
+		<field
+			name="recordType"
+			position="0"
+			dataType="string"
+			trim="true"
+			validationPattern="^UD$"
+		/>
+		<field
+			name="vendorNumber"
+			position="1"
+			dataType="string"
+			validationPattern="^.{0,10}$"
+		/>
+		<field
+			name="streetAddress"
+			position="2"
+			dataType="string"
+			validationPattern="^.{0,35}$"
+		/>
+		<field
+			name="name2"
+			position="3"
+			dataType="string"
+			validationPattern="^.{0,35}$"
+		/>
+		<field
+			name="city"
+			position="4"
+			dataType="string"
+			validationPattern="^.{0,35}$"
+		/>
+		<field
+			name="state"
+			position="5"
+			dataType="string"
+			validationPattern="^.{0,3}$"
+		/>
+		<field
+			name="zip"
+			position="6"
+			dataType="string"
+			validationPattern="^.{0,10}$"
+		/>
+		<field
+			name="companyCode"
+			position="7"
+			dataType="string"
+			validationPattern="^.{0,4}$"
+		/>
+		<field
+			name="payType"
+			position="8"
+			dataType="string"
+			validationPattern="^.{0,1}$"
+		/>
+	</record>
+
+	<record
+		type="trailer"
+		objectType="com.caremark.rebates.registration.batch.domain.SAPAddrFeedRecord"
+		acceptPattern="^TR"
+	>
+		<!--
+			The fixed tokenizer is for fixed length fields.
+		-->
+		<tokenizer type="fixed">
+			<field offset="0" length="2"/>
+			<field offset="2" length="11"/>
+		</tokenizer>
+		<field
+			name="trailerRecordType"
+			position="0"
+			dataType="string"
+			trim="true"
+			validationPattern="^TR$"
+		/>
+		<field
+			name="trailerRecordCount"
+			position="1"
+			dataType="string"
+			trim="true"
+			validationPattern="^\d{11}$"
+		/>
+	</record>
+</parsers>

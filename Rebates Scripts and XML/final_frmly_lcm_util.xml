@@ -1,0 +1,420 @@
+
+<!-- 
+     Maestro Command without parameter: ./scripts/Common_java_db_interface.ksh final_lcm_util.xml
+-->
+<sqml>
+	
+	<property name="TIMEOUT" value="0"/>
+	<!-- datasource.xml defines DB connection info. It should be under ./java/Common_java_db_interface/conf-->
+
+	<datasources resource="datasource.xml"/>
+	<!--
+		Set-up a try block to send an email on exception.	
+	-->         
+	<command type="try">
+	<try>		
+		
+			<!-- Query DB for current processing quarter info -->
+			<command type="run" datasource="silver" rowName="cycle"><![CDATA[
+				SELECT TO_CHAR(cycle_start_date,'MM/DD/YYYY') as db2QBegin				      
+				      ,TO_CHAR(cycle_end_date,'MM/DD/YYYY') as db2QEnd
+				      ,rbate_cycle_gid||'' as oraQParm
+				      ,'Q0'|| substrb((rbate_cycle_gid),6,1)||substrb((rbate_cycle_gid),3,2) as db2QParm			      
+				      ,substrb((rbate_cycle_gid),1,4)||'0'||substrb((rbate_cycle_gid),6,1) as checkParm
+				FROM dma_rbate2.t_rbate_cycle
+				WHERE rbate_cycle_gid = (SELECT MAX(rbate_cycle_gid)
+							FROM dma_rbate2.t_rbate_cycle
+							WHERE rbate_cycle_type_id = 2
+							AND   rbate_cycle_status = UPPER('C'))
+			]]></command>
+			<!-- Command to set quarter parameters, either from DB or parameter-->
+			<command type="java"><![CDATA[
+				 
+			         String db2QBegin ="";
+				 String db2QEnd ="";
+				 String db2QParm ="";
+				 String oraQParm ="";
+				 String period ="";
+				 String y ="";
+				 String q ="";
+				 int qNum = 0;
+				 String partition ="";
+				 String checkParm="";
+				 String shortQuarter="";
+				 
+				 db2QBegin = script.getProperty("cycle.1");
+				 db2QEnd = script.getProperty("cycle.2");
+				 db2QParm = script.getProperty("cycle.4");
+				 oraQParm = script.getProperty("cycle.3");
+				 checkParm = script.getProperty("cycle.5");
+				 
+				if (db2QBegin==null || db2QBegin.trim().length()==0||
+				    db2QEnd==null || db2QEnd.trim().length()==0||
+				    db2QParm==null || db2QParm.trim().length()==0||
+				    oraQParm==null || oraQParm.trim().length()==0)
+				{// If invalid info from database throw error
+				 throw new Exception("Processing Cycle Info not found in dma_rbate2.t_rbate_cycle.");
+				}
+				
+				//Make the variables available to other queries below
+				script.setProperty("db2qparm",db2QParm);
+				script.setProperty("oraQParm",oraQParm);
+				script.setProperty("db2QBegin",db2QBegin);
+				script.setProperty("db2QEnd",db2QEnd);
+				partition = "p_"+oraQParm;
+				script.setProperty("apartition",partition);
+				script.setProperty("checkParm",checkParm);
+				script.setProperty("year", oraQParm.substring(0,4));
+				script.setProperty("quarter", "Q" + db2QParm.substring(2,3));
+
+			]]></command>
+			
+			<!-- Get the claim table names for the period from GDX -->
+			<command type="run" datasource="gdxprd" rowName="gpoTable"><![CDATA[
+				SELECT TBL_NM FROM VRAP.TCLAIM_LOAD_CNTL 
+				WHERE MODEL_TYP_CD = 'G'
+				AND INV_ELIG_MIN_DT = '${db2QBegin}'
+				AND INV_ELIG_MAX_DT = '${db2QEnd}'
+			]]></command>
+			<command type="run" datasource="gdxprd" rowName="dscTable"><![CDATA[
+				SELECT TBL_NM FROM VRAP.TCLAIM_LOAD_CNTL 
+				WHERE MODEL_TYP_CD = 'D'
+				AND INV_ELIG_MIN_DT = '${db2QBegin}'
+				AND INV_ELIG_MAX_DT = '${db2QEnd}'
+			]]></command>
+			<command type="run" datasource="gdxprd" rowName="xmdTable"><![CDATA[
+				SELECT TBL_NM FROM VRAP.TCLAIM_LOAD_CNTL 
+				WHERE MODEL_TYP_CD = 'X'
+				AND INV_ELIG_MIN_DT = '${db2QBegin}'
+				AND INV_ELIG_MAX_DT = '${db2QEnd}'
+			]]></command>
+			
+		<command type="java"><![CDATA[
+				String gpoTable = script.getProperty("gpoTable.1");
+				String xmdTable = script.getProperty("xmdTable.1");
+				String dscTable = script.getProperty("dscTable.1");
+				
+				if(gpoTable == null || xmdTable == null || dscTable == null) {
+					throw new Exception("Unable to find claim table for this period.  exiting.");
+				}
+				script.setProperty("gpoTable", gpoTable);
+				script.setProperty("xmdTable", xmdTable);
+				script.setProperty("dscTable", dscTable);
+		]]></command>
+			
+		<!-- delete report records for the quarter-->
+		<command type="run" datasource="silver" transaction="true"><![CDATA[
+			       DELETE FROM RBATE_REG.FINAL_FRMLY_LCM_UTIL
+			       WHERE YR_VL = '${year}'
+			       AND QTR_VL = '${quarter}'
+		]]></command>
+		<!-- Calculate GPO Formulary/LCM percentages and put the data in FINAL_LCM_UTIL-->
+		<command type="copy" batch="500">
+			<source type="sql" datasource="gdxprd"><![CDATA[
+			     SELECT 
+				 TR.RBAT_ID
+				,'${quarter}' AS QUARTER
+				,'${year}' AS YEAR
+				,TR.LCM_TYPE
+				,TC.TOTAL_CLAIMS --claim count per rbate_id
+				,TF.FRMLY_CLM_CNT --claim count per rbate_id/frmly
+				,COALESCE(TR.CLM_COUNT,0) AS CLM_COUNT --claim count per rbate_id/frmly/lcm
+				,CASE
+				     WHEN TF.FRMLY_CLM_CNT <= 0 THEN 0
+				     ELSE ROUND((TR.CLM_COUNT/(TF.FRMLY_CLM_CNT*1.0)),5) 
+				 END AS LCM_CLM_PCT --lcm level pct
+				,CASE 
+				    WHEN TC.TOTAL_CLAIMS <= 0 THEN 0
+				    ELSE ROUND((TF.FRMLY_CLM_CNT/(TC.TOTAL_CLAIMS*1.0)),5) 
+				 END AS FRMLY_CLM_PCT --frmly level pct
+				,CURRENT DATE
+				,'KSOR7700'
+				,TR.FRMLY_ID
+				,TR.FRMLY_SRC_CD
+			    FROM
+				(SELECT
+					    R.RBAT_ID
+					   ,R.FRMLY_ID
+				   ,CASE R.LCM_CD
+					WHEN '2'  THEN '2' WHEN '2A' THEN '2' WHEN '2B' THEN '2' WHEN '2C' THEN '2'
+					WHEN '2D' THEN '2' WHEN '2E' THEN '2' WHEN '2F' THEN '2' WHEN '2H' THEN '2'
+					WHEN '3'  THEN '3' WHEN '3A' THEN '3' WHEN '3B' THEN '3' WHEN '3C' THEN '3'
+					WHEN '3D' THEN '3' WHEN '3E' THEN '3'
+					WHEN '4'  THEN '4' WHEN '4A' THEN '4' WHEN '4B' THEN '4' WHEN '4C' THEN '4'
+					WHEN '4D' THEN '4' WHEN '4M' THEN '4' WHEN '4E' THEN '4E'
+					WHEN '5'  THEN '5' WHEN '5L' THEN '5' WHEN '2G' THEN '5'
+					ELSE '2' 
+				     END AS LCM_TYPE
+				    ,R.FRMLY_SRC_CD
+			            ,COUNT(R.CLAIM_ID) AS CLM_COUNT
+				FROM VRAP.${gpoTable} R
+				    GROUP BY 
+				     R.RBAT_ID
+				    ,R.FRMLY_ID
+				    ,R.FRMLY_SRC_CD
+				    ,CASE R.LCM_CD
+					WHEN '2'  THEN '2' WHEN '2A' THEN '2' WHEN '2B' THEN '2' WHEN '2C' THEN '2'
+					WHEN '2D' THEN '2' WHEN '2E' THEN '2' WHEN '2F' THEN '2' WHEN '2H' THEN '2'
+					WHEN '3'  THEN '3' WHEN '3A' THEN '3' WHEN '3B' THEN '3' WHEN '3C' THEN '3'
+					WHEN '3D' THEN '3' WHEN '3E' THEN '3'
+					WHEN '4'  THEN '4' WHEN '4A' THEN '4' WHEN '4B' THEN '4' WHEN '4C' THEN '4'
+					WHEN '4D' THEN '4' WHEN '4M' THEN '4' WHEN '4E' THEN '4E'
+					WHEN '5'  THEN '5' WHEN '5L' THEN '5' WHEN '2G' THEN '5'
+					ELSE '2' 
+				     END) TR,
+					(SELECT
+					    C.RBAT_ID,
+				    COUNT(C.CLAIM_ID) AS TOTAL_CLAIMS
+				FROM VRAP.${gpoTable} C
+				    GROUP BY C.RBAT_ID) TC,
+				(SELECT
+					C.RBAT_ID,
+					C.FRMLY_ID,
+					COUNT(C.CLAIM_ID) AS FRMLY_CLM_CNT
+				FROM VRAP.${gpoTable} C
+				    GROUP BY C.RBAT_ID, C.FRMLY_ID) TF
+			    WHERE TR.RBAT_ID = TC.RBAT_ID
+			    AND TR.RBAT_ID   = TF.RBAT_ID
+			    AND TR.FRMLY_ID  = TF.FRMLY_ID
+			    ORDER BY RBAT_ID
+			]]></source>
+			<target
+				type             = "sql"
+				datasource       = "silver"
+				transaction      = "false"
+				batch            = "500"
+				reportInterval   = "500"
+				queryTimeout     = "${TIMEOUT}"
+			><![CDATA[
+				INSERT INTO RBATE_REG.FINAL_FRMLY_LCM_UTIL
+					(RBATE_ID,QTR_VL,YR_VL,LCM_CD,TOT_CLM_CNT,FRMLY_CLM_CNT,LCM_CLM_CNT,LCM_CLM_PCT
+					,FRMLY_CLM_PCT,INSRT_DATE,UPDATE_USERID,FRMLY_ID,FRMLY_SRC_CD)
+				VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
+			]]></target>
+		</command>
+		<!-- Calculate XMD Formulary/LCM percentages and put the data in FINAL_LCM_UTIL-->
+		<command type="copy" batch="500">
+			<source type="sql" datasource="gdxprd"><![CDATA[
+			     SELECT 
+				 TR.RBAT_ID
+				,'${quarter}' AS QUARTER
+				,'${year}' AS YEAR
+				,TR.LCM_TYPE
+				,TC.TOTAL_CLAIMS --claim count per rbate_id
+				,TF.FRMLY_CLM_CNT --claim count per rbate_id/frmly
+				,COALESCE(TR.CLM_COUNT,0) AS CLM_COUNT --claim count per rbate_id/frmly/lcm
+				,CASE
+				     WHEN TF.FRMLY_CLM_CNT <= 0 THEN 0
+				     ELSE ROUND((TR.CLM_COUNT/(TF.FRMLY_CLM_CNT*1.0)),5) 
+				 END AS LCM_CLM_PCT --lcm level pct
+				,CASE 
+				    WHEN TC.TOTAL_CLAIMS <= 0 THEN 0
+				    ELSE ROUND((TF.FRMLY_CLM_CNT/(TC.TOTAL_CLAIMS*1.0)),5) 
+				 END AS FRMLY_CLM_PCT --frmly level pct
+				,CURRENT DATE
+				,'KSOR7700'
+				,TR.FRMLY_ID
+				,TR.FRMLY_SRC_CD
+			    FROM
+				(SELECT
+			            R.RBAT_ID
+			           ,R.FRMLY_ID
+				   ,CASE R.LCM_CD
+					WHEN '2'  THEN '2' WHEN '2A' THEN '2' WHEN '2B' THEN '2' WHEN '2C' THEN '2'
+					WHEN '2D' THEN '2' WHEN '2E' THEN '2' WHEN '2F' THEN '2' WHEN '2H' THEN '2'
+					WHEN '3'  THEN '3' WHEN '3A' THEN '3' WHEN '3B' THEN '3' WHEN '3C' THEN '3'
+					WHEN '3D' THEN '3' WHEN '3E' THEN '3'
+					WHEN '4'  THEN '4' WHEN '4A' THEN '4' WHEN '4B' THEN '4' WHEN '4C' THEN '4'
+					WHEN '4D' THEN '4' WHEN '4M' THEN '4' WHEN '4E' THEN '4E'
+					WHEN '5'  THEN '5' WHEN '5L' THEN '5' WHEN '2G' THEN '5'
+					ELSE '2' 
+				     END AS LCM_TYPE
+				    ,R.FRMLY_SRC_CD
+			            ,COUNT(R.CLAIM_ID) AS CLM_COUNT
+				FROM VRAP.${xmdTable} R
+				GROUP BY 
+				     R.RBAT_ID
+				    ,R.FRMLY_ID
+				    ,R.FRMLY_SRC_CD
+				    ,CASE R.LCM_CD
+					WHEN '2'  THEN '2' WHEN '2A' THEN '2' WHEN '2B' THEN '2' WHEN '2C' THEN '2'
+					WHEN '2D' THEN '2' WHEN '2E' THEN '2' WHEN '2F' THEN '2' WHEN '2H' THEN '2'
+					WHEN '3'  THEN '3' WHEN '3A' THEN '3' WHEN '3B' THEN '3' WHEN '3C' THEN '3'
+					WHEN '3D' THEN '3' WHEN '3E' THEN '3'
+					WHEN '4'  THEN '4' WHEN '4A' THEN '4' WHEN '4B' THEN '4' WHEN '4C' THEN '4'
+					WHEN '4D' THEN '4' WHEN '4M' THEN '4' WHEN '4E' THEN '4E'
+					WHEN '5'  THEN '5' WHEN '5L' THEN '5' WHEN '2G' THEN '5'
+					ELSE '2' 
+				     END) TR,
+					(SELECT
+					    C.RBAT_ID,
+				    COUNT(C.CLAIM_ID) AS TOTAL_CLAIMS
+				FROM VRAP.${xmdTable} C
+				    GROUP BY C.RBAT_ID) TC,
+				(SELECT
+					C.RBAT_ID,
+					C.FRMLY_ID,
+					COUNT(C.CLAIM_ID) AS FRMLY_CLM_CNT
+				FROM VRAP.${xmdTable} C
+				    GROUP BY C.RBAT_ID, C.FRMLY_ID) TF
+			    WHERE TR.RBAT_ID = TC.RBAT_ID
+			    AND TR.RBAT_ID   = TF.RBAT_ID
+			    AND TR.FRMLY_ID  = TF.FRMLY_ID
+			    ORDER BY RBAT_ID
+			]]></source>
+			<target
+				type             = "sql"
+				datasource       = "silver"
+				transaction      = "false"
+				batch            = "500"
+				reportInterval   = "500"
+				queryTimeout     = "${TIMEOUT}"
+			><![CDATA[
+				INSERT INTO RBATE_REG.FINAL_FRMLY_LCM_UTIL
+					(RBATE_ID,QTR_VL,YR_VL,LCM_CD,TOT_CLM_CNT,FRMLY_CLM_CNT,LCM_CLM_CNT,LCM_CLM_PCT
+					,FRMLY_CLM_PCT,INSRT_DATE,UPDATE_USERID,FRMLY_ID,FRMLY_SRC_CD)
+				VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
+			]]></target>
+		</command>
+		<!-- Calculate DSC Formulary/LCM percentages and put the data in FINAL_LCM_UTIL-->
+		<command type="copy" batch="500">
+			<source type="sql" datasource="gdxprd"><![CDATA[
+			     SELECT 
+				 TR.RBAT_ID
+				,'${quarter}' AS QUARTER
+				,'${year}' AS YEAR
+				,TR.LCM_TYPE
+				,TC.TOTAL_CLAIMS --claim count per rbate_id
+				,TF.FRMLY_CLM_CNT --claim count per rbate_id/frmly
+				,COALESCE(TR.CLM_COUNT,0) AS CLM_COUNT --claim count per rbate_id/frmly/lcm
+				,CASE
+				     WHEN TF.FRMLY_CLM_CNT <= 0 THEN 0
+				     ELSE ROUND((TR.CLM_COUNT/(TF.FRMLY_CLM_CNT*1.0)),5) 
+				 END AS LCM_CLM_PCT --lcm level pct
+				,CASE 
+				    WHEN TC.TOTAL_CLAIMS <= 0 THEN 0
+				    ELSE ROUND((TF.FRMLY_CLM_CNT/(TC.TOTAL_CLAIMS*1.0)),5) 
+				 END AS FRMLY_CLM_PCT --frmly level pct
+				,CURRENT DATE
+				,'KSOR7700'
+				,TR.FRMLY_ID
+				,TR.FRMLY_SRC_CD
+			    FROM
+				(SELECT
+					    R.RBAT_ID
+					   ,R.FRMLY_ID
+				   ,CASE R.LCM_CD
+					WHEN '2'  THEN '2' WHEN '2A' THEN '2' WHEN '2B' THEN '2' WHEN '2C' THEN '2'
+					WHEN '2D' THEN '2' WHEN '2E' THEN '2' WHEN '2F' THEN '2' WHEN '2H' THEN '2'
+					WHEN '3'  THEN '3' WHEN '3A' THEN '3' WHEN '3B' THEN '3' WHEN '3C' THEN '3'
+					WHEN '3D' THEN '3' WHEN '3E' THEN '3'
+					WHEN '4'  THEN '4' WHEN '4A' THEN '4' WHEN '4B' THEN '4' WHEN '4C' THEN '4'
+					WHEN '4D' THEN '4' WHEN '4M' THEN '4' WHEN '4E' THEN '4E'
+					WHEN '5'  THEN '5' WHEN '5L' THEN '5' WHEN '2G' THEN '5'
+					ELSE '0' 
+				     END AS LCM_TYPE
+				    ,R.FRMLY_SRC_CD
+			            ,COUNT(R.CLAIM_ID) AS CLM_COUNT
+				FROM VRAP.${dscTable} R
+				    GROUP BY 
+				     R.RBAT_ID
+				    ,R.FRMLY_ID
+				    ,R.FRMLY_SRC_CD
+				    ,CASE R.LCM_CD
+					WHEN '2'  THEN '2' WHEN '2A' THEN '2' WHEN '2B' THEN '2' WHEN '2C' THEN '2'
+					WHEN '2D' THEN '2' WHEN '2E' THEN '2' WHEN '2F' THEN '2' WHEN '2H' THEN '2'
+					WHEN '3'  THEN '3' WHEN '3A' THEN '3' WHEN '3B' THEN '3' WHEN '3C' THEN '3'
+					WHEN '3D' THEN '3' WHEN '3E' THEN '3'
+					WHEN '4'  THEN '4' WHEN '4A' THEN '4' WHEN '4B' THEN '4' WHEN '4C' THEN '4'
+					WHEN '4D' THEN '4' WHEN '4M' THEN '4' WHEN '4E' THEN '4E'
+					WHEN '5'  THEN '5' WHEN '5L' THEN '5' WHEN '2G' THEN '5'
+					ELSE '0' 
+				     END) TR,
+					(SELECT
+					    C.RBAT_ID,
+				    COUNT(C.CLAIM_ID) AS TOTAL_CLAIMS
+				FROM VRAP.${dscTable} C
+				    GROUP BY C.RBAT_ID) TC,
+				(SELECT
+					C.RBAT_ID,
+					C.FRMLY_ID,
+					COUNT(C.CLAIM_ID) AS FRMLY_CLM_CNT
+				FROM VRAP.${dscTable} C
+				    GROUP BY C.RBAT_ID, C.FRMLY_ID) TF
+			    WHERE TR.RBAT_ID = TC.RBAT_ID
+			    AND TR.RBAT_ID   = TF.RBAT_ID
+			    AND TR.FRMLY_ID  = TF.FRMLY_ID
+			    ORDER BY RBAT_ID
+			]]></source>
+			<target
+				type             = "sql"
+				datasource       = "silver"
+				transaction      = "false"
+				batch            = "500"
+				reportInterval   = "500"
+				queryTimeout     = "${TIMEOUT}"
+			><![CDATA[
+				INSERT INTO RBATE_REG.FINAL_FRMLY_LCM_UTIL
+					(RBATE_ID,QTR_VL,YR_VL,LCM_CD,TOT_CLM_CNT,FRMLY_CLM_CNT,LCM_CLM_CNT,LCM_CLM_PCT
+					,FRMLY_CLM_PCT,INSRT_DATE,UPDATE_USERID,FRMLY_ID,FRMLY_SRC_CD)
+				VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
+			]]></target>
+		</command>
+		<!-- Extract reports from the source, and load into the target-->
+
+	</try>
+	<catch>
+
+	<!-- Send an email on error -->
+		<command
+			type="mail"
+			mailTo="${email_address}"
+			mailFrom="final_lcm_util@caremark.com"
+			subject="[${region}] [ERROR] Final LCM Util Update Failure."
+			contentType="text/html"
+			throwsException="false"
+		><![CDATA[
+			<html>
+			<head>
+			<title>[ERROR] Final LCM Util Load</title>
+			</head>
+			<body>
+
+			<h3><u>[ERROR] Final LCM Util Load</u></h3>
+
+			<table cellpadding="2">
+				<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+				<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+				<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+				#if (${system.getProperty('logfile')})
+					<tr>
+						<td><b>Log File:</b></td>
+						<td>
+							${system.getProperty('logfile')}
+						<td>
+					</tr>
+				#end
+			</table>
+
+			<br>			
+			<br>
+
+			#if (${script.getLastStatement()})
+				<h3><u>Last Statement</u></h3>
+				<font style="color: blue; font-size: small">	
+				${script.getLastStatement()}
+				</font>
+
+				<br>
+				<br>
+			#end
+
+			<h3><u>Stack Trace</u></h3>		
+			<pre style="color: red; font-size: small;">${stackTrace}</pre>
+			</body>
+			</html>
+		]]></command>
+
+	</catch>
+	</command>
+</sqml>

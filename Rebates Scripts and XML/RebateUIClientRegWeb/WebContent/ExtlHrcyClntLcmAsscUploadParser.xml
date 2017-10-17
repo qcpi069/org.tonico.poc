@@ -1,0 +1,16 @@
+<parsers>
+    <record type = "xref" objectType = "com.cvs.caremark.rebates.cr.web.valueobject.ExtnHrcyAssoVO">
+        <tokenizer type = "split" pattern = ","/>
+        <field name = "extlSrc" position = "0" dataType = "string" trim = "true"/>
+        <field name = "level1" position = "1" dataType = "string" trim = "true"/>
+        <field name = "level2" position = "2" dataType = "string" trim = "true"/>
+        <field name = "level3" position = "3" dataType = "string" trim = "true"/>
+        <field name = "level4" position = "4" dataType = "string" trim = "true"/>
+        <field name = "level5" position = "5" dataType = "string" trim = "true"/>
+        <field name = "effDtStr" position = "6" dataType = "string" trim = "true"/>
+        <field name = "termDtStr" position = "7" dataType = "string" trim = "true"/>
+        <field name = "rebateId" position = "8" dataType = "string" trim = "true"/>
+        <field name = "lcmCd" position = "9" dataType = "string" trim = "true"/>
+        <field name = "dummy" position = "10" dataType = "string" trim = "true"/>
+    </record>
+</parsers>

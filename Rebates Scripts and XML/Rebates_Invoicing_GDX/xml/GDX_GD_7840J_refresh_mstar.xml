@@ -1,0 +1,369 @@
+
+<!--   
+     Loads MSTAR information for a specific quarter from GDX into RPS Datamart 
+     Datasource definition file datasource.xml is in the ./java/Common_java_db_interface/conf.
+     
+     Parameter 1 : Required, "dashdashmodel <model>". This should be the parameter passed into XML.
+                   Note: hyphenhyphen means the two dash characters.
+ 
+     The XML file should reside under ./xml directory
+     Maestro Command with parameter: ./scripts/Common_java_db_interface.ksh dashdashmodel XMD <xml file name>  
+-->
+<sqml>	
+	<property name="TIMEOUT" value="0"/>
+	<!-- datasource.xml defines DB connection info. It should be under ./java/Common_java_db_interface/conf-->
+	<datasources resource="datasource.xml"/>
+	
+	<!-- Set-up a try block to send an email on exception.	--> 
+	<command type="try">
+	<try>
+
+                <!-- Command to set model parameters from parameter-->
+                <command type="java"><![CDATA[
+
+                         String model = "";
+                         String model_typ_cd = "";
+
+                         //Make the variables available to other queries below
+                         model = script.getProperty("model");
+                         script.setProperty("model", model);
+
+                         model_typ_cd = model.substring(0,1);
+                         script.setProperty("model_typ_cd", model_typ_cd);
+ 
+                ]]></command>
+ 
+               <!-- Delete RPS.TDISCNT_MKSR_PCT -->
+               <command type="copy" batch="500">
+                         <source type="sql" datasource="gdxprd"><![CDATA[
+		
+				SELECT PERIOD_ID
+				  FROM VRAP.TDISCNT_PERIOD
+				 WHERE QUARTER_ID = (SELECT QUARTER_ID FROM VRAP.TCUR_INV_PRD)
+
+                         ]]></source>
+
+                         <target
+                                type           = "sql"
+                                datasource     = "datamart"
+                                transaction    = "true"
+                                batch          = "500"
+                                reportInterval = "50000"
+                                queryTimeout   = "${TIMEOUT}"
+                         ><![CDATA[
+
+                         	DELETE FROM RPS.TDISCNT_MKSR_PCT_${model}
+                                 WHERE PERIOD_ID IN ( ? )
+ 
+                         ]]></target>
+                </command>
+
+                <!-- Insert into TDISCNT_MKSR_PCT in RPS from GDX -->
+                <command type="copy" batch="500">
+                         <source type="sql" datasource="gdxprd"><![CDATA[
+
+                                 SELECT
+    					RPT_ID,
+    					PERIOD_ID,
+    					DISCNT_RUN_MODE_CD,
+    					MKSR_RPT_ID,
+    					MKSR_AGGR_LVL_CD,
+    					CLT_ID,
+    					FRMLY_ID,
+    					FRMLY_SRC_CD,
+    					RX_MKSR_PCT,
+    					UNIT_MKSR_PCT,
+    					COST_MKSR_PCT,
+    					DOT_MKSR_PCT,
+    					SPLT_ID,
+    					HVST_ID,
+    					GRP_ID,
+    					NUM_RX_COUNT_QTY,
+    					DNMT_RX_COUNT_QTY,
+    					NUM_DSPN_QTY,
+    					DNMT_DSPN_QTY,
+    					NUM_DRUG_COST_AMT,
+    					DNMT_DRUG_COST_AMT,
+    					NUM_DOT_QTY,
+    					DNMT_DOT_QTY
+                                   FROM VRAP.TDISCNT_MKSR_PCT_${model} 
+                                  WHERE PERIOD_ID IN
+                                        (
+                                           SELECT PERIOD_ID
+                                             FROM VRAP.TDISCNT_PERIOD
+                                            WHERE QUARTER_ID = (SELECT QUARTER_ID FROM VRAP.TCUR_INV_PRD) 
+                                        )
+                                   WITH UR
+
+                         ]]></source>
+
+                         <target
+                                type           = "sql"
+                                datasource     = "datamart"
+                                transaction    = "true"
+                                batch          = "500"
+                                reportInterval = "50000"
+                                queryTimeout   = "${TIMEOUT}"
+                         ><![CDATA[
+
+                                 INSERT INTO RPS.TDISCNT_MKSR_PCT_${model} (
+                                        RPT_ID,
+                                        PERIOD_ID,
+                                        DISCNT_RUN_MODE_CD,
+                                        MKSR_RPT_ID,
+                                        MKSR_AGGR_LVL_CD,
+                                        CLT_ID,
+                                        FRMLY_ID,
+                                        FRMLY_SRC_CD,
+                                        RX_MKSR_PCT,
+                                        UNIT_MKSR_PCT,
+                                        COST_MKSR_PCT,
+                                        DOT_MKSR_PCT,
+                                        SPLT_ID,
+                                        HVST_ID,
+                                        GRP_ID,
+                                        NUM_RX_COUNT_QTY,
+                                        DNMT_RX_COUNT_QTY,
+                                        NUM_DSPN_QTY,
+                                        DNMT_DSPN_QTY,
+                                        NUM_DRUG_COST_AMT,
+                                        DNMT_DRUG_COST_AMT,
+                                        NUM_DOT_QTY,
+                                        DNMT_DOT_QTY
+                                        ) 
+                                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+
+                         ]]></target>
+              </command>
+
+               <!-- Delete RPS.TDISCNT_RPT_DRUG_TIER in RPS -->
+               <command type="copy" batch="500">
+                         <source type="sql" datasource="gdxprd"><![CDATA[
+
+                                SELECT PERIOD_ID
+                                  FROM VRAP.TDISCNT_PERIOD
+                                 WHERE QUARTER_ID = (SELECT QUARTER_ID FROM VRAP.TCUR_INV_PRD)
+
+                         ]]></source>
+
+                         <target
+                                type           = "sql"
+                                datasource     = "datamart"
+                                transaction    = "true"
+                                batch          = "500"
+                                reportInterval = "50000"
+                                queryTimeout   = "${TIMEOUT}"
+                         ><![CDATA[
+
+                                DELETE FROM RPS.TDISCNT_RPT_DRUG_TIER_${model}
+                                 WHERE PERIOD_ID IN ( ? )
+
+                         ]]></target>
+                </command>
+
+                <!-- Insert TDISCNT_RPT_DRUG_TIER for current APC quarter  -->
+                <command type="copy" batch="500">
+                         <source type="sql" datasource="gdxprd"><![CDATA[
+
+                                 SELECT
+                                        PERIOD_ID ,
+                                        DISCNT_RUN_MODE_CD  ,
+                                        RPT_ID ,
+                                        HVST_ID ,
+                                        RPT_DRUG_ID ,
+                                        TIER_NM ,
+                                        TIER_ID ,
+                                        TIER_SEQ_NB ,
+                                        CMPR_ID ,
+                                        CMPR_APLD_VL ,
+                                        TIER_LOW_OPER_CD  ,
+                                        TIER_HIGH_OPER_CD ,
+                                        TIER_LOW_RNG ,
+                                        TIER_HIGH_RNG ,
+                                        MKSR_RATE_VL ,
+                                        BASE_RATE_VL ,
+                                        ADMN_RATE_VL 
+                                   FROM VRAP.TDISCNT_RPT_DRUG_TIER_${model}
+                                  WHERE PERIOD_ID IN
+                                        (
+                                           SELECT PERIOD_ID
+                                             FROM VRAP.TDISCNT_PERIOD
+                                            WHERE QUARTER_ID = (SELECT QUARTER_ID FROM VRAP.TCUR_INV_PRD) 
+                                        )
+                                   WITH UR
+
+                         ]]></source>
+
+                         <target
+                                type           = "sql"
+                                datasource     = "datamart"
+                                transaction    = "true"
+                                batch          = "500"
+                                reportInterval = "50000"
+                                queryTimeout   = "${TIMEOUT}"
+                         ><![CDATA[
+
+                                 INSERT INTO RPS.TDISCNT_RPT_DRUG_TIER_${model} (
+                                        PERIOD_ID ,
+                                        DISCNT_RUN_MODE_CD  ,
+                                        RPT_ID ,
+                                        HVST_ID ,
+                                        RPT_DRUG_ID ,
+                                        TIER_NM ,
+                                        TIER_ID ,
+                                        TIER_SEQ_NB ,
+                                        CMPR_ID ,
+                                        CMPR_APLD_VL ,
+                                        TIER_LOW_OPER_CD  ,
+                                        TIER_HIGH_OPER_CD ,
+                                        TIER_LOW_RNG ,
+                                        TIER_HIGH_RNG ,
+                                        MKSR_RATE_VL ,
+                                        BASE_RATE_VL ,
+                                        ADMN_RATE_VL
+                                        )
+                                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+
+                         ]]></target>
+              </command>
+
+               <!-- Delete RPS.TDISCNT_MSTAR_SMRY -->
+                <command type="run" datasource="datamart" transaction="true"><![CDATA[
+
+                         DELETE FROM RPS.TDISCNT_MSTAR_SMRY
+                       	  WHERE QUARTER_ID = (SELECT QUARTER_ID FROM RPS.TCUR_INV_PRD)
+                            AND MODEL_TYP_CD = '${model_typ_cd}' 
+
+                ]]></command>
+
+               <command type="copy" batch="500">
+                         <source type="sql" datasource="gdxprd"><![CDATA[
+
+				  SELECT 
+				        QUARTER_ID,
+       					MODEL_TYP_CD,
+       					RPT_ID,
+       					PERIOD_ID,
+       					DISCNT_RUN_MODE_CD,
+       					HVST_ID,
+       					MKSR_RPT_ID,
+       					MKSR_RT_BASIS_TYP_CD,
+       					BASE_RATE_BSIS_CD,
+       					CLT_ID,
+       					FRMLY_SRC_CD,
+       					FRMLY_ID,
+       					DRUG_NDC_ID,
+       					NHU_TYP_CD,
+       					RPT_DRUG_ID,
+       					RT_BASIS_TYP_CD,
+       					BASE_DISCNT_FCTR,
+       					BASE_PRC_AMT,
+       					PRFMC_DISCNT_FCTR,
+       					PRFMC_PRC_AMT,
+       					TOT_CLM_CNT_QTY,
+       					SUM_ITEM_CNT_QTY,
+       					SUM_DSPN_QTY,
+       					SUM_BASE_DISCNT_AMT,
+       					SUM_PRFMC_DISCNT_AMT
+	            	           FROM VRAP.TDISCNT_MSTAR_SMRY
+                                  WHERE QUARTER_ID = (SELECT QUARTER_ID FROM VRAP.TCUR_INV_PRD)
+                                    AND MODEL_TYP_CD = '${model_typ_cd}' 
+
+                         ]]></source>
+
+                         <target
+                                type           = "sql"
+                                datasource     = "datamart"
+                                transaction    = "true"
+                                batch          = "500"
+                                reportInterval = "50000"
+                                queryTimeout   = "${TIMEOUT}"
+                         ><![CDATA[
+
+                                 INSERT INTO RPS.TDISCNT_MSTAR_SMRY (
+                                        QUARTER_ID,
+                                        MODEL_TYP_CD,
+                                        RPT_ID,
+                                        PERIOD_ID,
+                                        DISCNT_RUN_MODE_CD,
+                                        HVST_ID,
+                                        MKSR_RPT_ID,
+                                        MKSR_RT_BASIS_TYP_CD,
+                                        BASE_RATE_BSIS_CD,
+                                        CLT_ID,
+                                        FRMLY_SRC_CD,
+                                        FRMLY_ID,
+                                        DRUG_NDC_ID,
+                                        NHU_TYP_CD,
+                                        RPT_DRUG_ID,
+                                        RT_BASIS_TYP_CD,
+                                        BASE_DISCNT_FCTR,
+                                        BASE_PRC_AMT,
+                                        PRFMC_DISCNT_FCTR,
+                                        PRFMC_PRC_AMT,
+                                        TOT_CLM_CNT_QTY,
+                                        SUM_ITEM_CNT_QTY,
+                                        SUM_DSPN_QTY,
+                                        SUM_BASE_DISCNT_AMT,
+                                        SUM_PRFMC_DISCNT_AMT
+                                        ) 
+                                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+
+                         ]]></target>
+                </command>
+
+        </try>
+              <catch>
+                        <!-- Send an email on error -->
+                        <command
+                                type="mail"
+                                mailTo="${email_address}"
+                                mailFrom="CP_MSTAR@caremark.com"
+                                subject="[ERROR] GDX_GD_7840J_refresh_mstar.xml"
+                                contentType="text/html"
+                                throwsException="false"
+                        ><![CDATA[
+                                <html>
+                                <head>
+                                <title>[ERROR] GDX_GD_7840J_refresh_mstar.xml</title>
+                                </head>
+                                <body>
+
+                                <h3><u>[ERROR] GDX_GD_7840J_refresh_mstar.xml</u></h3>
+
+                                <table cellpadding="2">
+                                        <tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+                                        <tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+                                        <tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+                                        #if (${system.getProperty('logfile')})
+                                                <tr>
+                                                        <td><b>Log File:</b></td>
+                                                        <td>
+                                                                ${system.getProperty('logfile')}
+                                                        <td>
+                                                </tr>
+                                        #end
+                                </table>
+
+                                <br>
+                                <br>
+                                #if (${script.getLastStatement()})
+                                        <h3><u>Last Statement</u></h3>
+                                        <font style="color: blue; font-size: small">
+                                        ${script.getLastStatement()}
+                                        </font>
+
+                                        <br>
+                                        <br>
+                                #end
+
+                                <h3><u>Stack Trace</u></h3>
+                                <pre style="color: red; font-size: small;">${stackTrace}</pre>
+                                </body>
+                                </html>
+                        ]]></command>
+                </catch>
+        </command>
+</sqml>
+
+		

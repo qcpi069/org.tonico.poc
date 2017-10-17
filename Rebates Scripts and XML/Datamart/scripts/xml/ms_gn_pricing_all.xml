@@ -1,0 +1,222 @@
+
+<!-- build table gn_pricing  -->
+
+<sqml>
+        <property name="TIMEOUT" value="0"/>
+        <datasources resource="datasource.xml"/>
+        <properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        dmt_schema=script.getProperty("dmt_schema");
+        ]]></command>
+
+        <command type="try">
+                <try>
+
+<!-- truncate rule table ms_gn_pricing_all  -->
+                        <command type="run" datasource="datamart">
+                                <![CDATA[
+                                        DELETE FROM rps.ms_gn_pricing_all
+                                ]]>
+                        </command>
+
+
+
+<!-- pricing for splits  -->
+                        <command type="copy" batch="1000">
+                                <source type="sql" datasource="datamart"
+					><![CDATA[
+with
+
+ gn(rac,eff_dt ,PRC_TYP_CD) as
+( select  distinct rac.rac_id, c.eff_dt , tier.PRC_TYP_CD
+from client_reg.crt_clnt_rule_assc c
+      join client_reg.crt_clnt_prc_pool_assc rac
+                on c.rbat_id=rac.rbat_id
+      join client_reg.crt_prc_pool p
+                on p.prc_rule_id = c.prc_rule_id and p.pool_typ_cd = rac.pool_typ_cd
+      join client_reg.crt_prc_term_guar tg
+                on tg.prc_pool_id = p.prc_pool_id
+      join client_reg.crt_prc_tier tier
+                on tg.prc_term_guar_id=tier.prc_term_id
+			and tg.PRC_TYP_CD=tier.PRC_TYP_CD
+where tier.prc_term_typ_cd = '2'
+        and tg.guar_typ_cd='3'
+and c.eff_dt<c.term_dt
+)
+
+select RAC_ID,ss.EFF_DT,TERM_DT, FORMULA,
+        base.CDSET_VL_DESC_TXT, qbase.CDSET_VL_DESC_TXT, SPLIT_LEVEL,
+CASE WHEN FORMULA = 'A' THEN CLNT_SPLT_PCT
+WHEN TIER_UP_LVL_AMT = 999999999.99 THEN CLNT_MIN_AMT
+ELSE TIER_UP_LVL_AMT
+END as CLIENT_RATE
+from  rps.t_splits_pricing_base ss
+                inner join gn on gn.rac=ss.rac_id and ss.EFF_DT=gn.eff_dt
+			and gn.PRC_TYP_CD=ss.PRC_TYP_CD
+        join (select CDSET_VL, CDSET_VL_DESC_TXT
+                        from client_reg.crt_cdset cd join client_reg.crt_cdset_vl cv
+                                on cd.CDSET_ID=cv.CDSET_ID where CDSET_DESC_TXT='SPLIT_CLM_TYP_CD' ) base
+                on ss.CLM_TYP_CD = base.CDSET_VL
+
+        join (select CDSET_VL, CDSET_VL_DESC_TXT
+                        from client_reg.crt_cdset cd join client_reg.crt_cdset_vl cv
+                                on cd.CDSET_ID=cv.CDSET_ID where CDSET_DESC_TXT='CLM_TYP_QLFR_CD_ALL_MODEL' ) qbase
+                on ss.CLM_TYP_QLFR_CD = qbase.CDSET_VL
+where ss.PRC_TERM_TYP_CD='1'
+
+
+                                ]]></source>
+
+                                <target
+                                        type             = "sql"
+                                        datasource       = "datamart"
+                                        transaction      = "true"
+                                        batch            = "1000"
+                                        reportInterval   = "1000"
+                                        queryTimeout     = "${TIMEOUT}"
+                                ><![CDATA[
+					insert into rps.ms_gn_pricing_all values
+						(?,?,?,?,?,?,?,?)
+
+                                ]]></target>
+
+                        </command>
+
+<!-- pricing for LCM based  -->
+                        <command type="copy" batch="1000">
+                                <source type="sql" datasource="datamart"
+					><![CDATA[
+with
+
+ gn(rac,eff_dt ,PRC_TYP_CD) as
+( select  distinct rac.rac_id, c.eff_dt , tier.PRC_TYP_CD
+from client_reg.crt_clnt_rule_assc c
+      join client_reg.crt_clnt_prc_pool_assc rac
+                on c.rbat_id=rac.rbat_id
+      join client_reg.crt_prc_pool p
+                on p.prc_rule_id = c.prc_rule_id and p.pool_typ_cd = rac.pool_typ_cd
+      join client_reg.crt_prc_term_guar tg
+                on tg.prc_pool_id = p.prc_pool_id
+      join client_reg.crt_prc_tier tier
+                on tg.prc_term_guar_id=tier.prc_term_id
+			and tg.PRC_TYP_CD=tier.PRC_TYP_CD
+where tier.prc_term_typ_cd = '2'
+        and tg.guar_typ_cd='2'
+and c.eff_dt<c.term_dt
+),
+
+ fm(rac,eff_dt,formula ,PRC_TYP_CD) as
+( select rac, gn.eff_dt , s.FORMULA , gn.PRC_TYP_CD
+        from  rps.t_splits_pricing_base s
+                inner join gn on gn.rac=s.rac_id and s.EFF_DT=gn.eff_dt
+			and gn.PRC_TYP_CD=s.PRC_TYP_CD
+        where s.PRC_TERM_TYP_CD='1'
+)
+
+select RAC_ID,ss.EFF_DT,TERM_DT, fm.FORMULA,
+        base.CDSET_VL_DESC_TXT, qbase.CDSET_VL_DESC_TXT, SPLIT_LEVEL, TIER_UP_LVL_AMT
+from  rps.t_splits_pricing_base ss
+                inner join fm on fm.rac=ss.rac_id and ss.EFF_DT=fm.eff_dt
+			and fm.PRC_TYP_CD=ss.PRC_TYP_CD
+        join (select CDSET_VL, CDSET_VL_DESC_TXT
+                        from client_reg.crt_cdset cd join client_reg.crt_cdset_vl cv
+                                on cd.CDSET_ID=cv.CDSET_ID where CDSET_DESC_TXT='SPLIT_CLM_TYP_CD' ) base
+                on ss.CLM_TYP_CD = base.CDSET_VL
+
+        join (select CDSET_VL, CDSET_VL_DESC_TXT
+                        from client_reg.crt_cdset cd join client_reg.crt_cdset_vl cv
+                                on cd.CDSET_ID=cv.CDSET_ID where CDSET_DESC_TXT='CLM_TYP_QLFR_CD_ALL_MODEL' ) qbase
+                on ss.CLM_TYP_QLFR_CD = qbase.CDSET_VL
+where ss.PRC_TERM_TYP_CD='2'
+
+                                ]]></source>
+
+                                <target
+                                        type             = "sql"
+                                        datasource       = "datamart"
+                                        transaction      = "true"
+                                        batch            = "1000"
+                                        reportInterval   = "1000"
+                                        queryTimeout     = "${TIMEOUT}"
+                                ><![CDATA[
+					insert into rps.ms_gn_pricing_all values
+						(?,?,?,?,?,?,?,?)
+
+                                ]]></target>
+
+                        </command>
+
+<!-- pricing for Flat Rate  -->
+                        <command type="copy" batch="1000">
+                                <source type="sql" datasource="datamart"
+                                        ><![CDATA[
+with
+
+ gn(rac,eff_dt , PRC_TYP_CD) as
+( select  distinct rac.rac_id, c.eff_dt , tier.PRC_TYP_CD
+from client_reg.crt_clnt_rule_assc c
+      join client_reg.crt_clnt_prc_pool_assc rac
+                on c.rbat_id=rac.rbat_id
+      join client_reg.crt_prc_pool p
+                on p.prc_rule_id = c.prc_rule_id and p.pool_typ_cd = rac.pool_typ_cd
+      join client_reg.crt_prc_term_guar tg
+                on tg.prc_pool_id = p.prc_pool_id
+      join client_reg.crt_prc_tier tier
+                on tg.prc_term_guar_id=tier.prc_term_id
+			and tg.PRC_TYP_CD=tier.PRC_TYP_CD
+where tier.prc_term_typ_cd = '2'
+        and tg.guar_typ_cd='1'
+and c.eff_dt<c.term_dt
+),
+
+ fm(rac,eff_dt,formula ,PRC_TYP_CD) as
+( select rac, gn.eff_dt , s.FORMULA , gn.PRC_TYP_CD
+        from  rps.t_splits_pricing_base s
+                inner join gn on gn.rac=s.rac_id and s.EFF_DT=gn.eff_dt
+			and gn.PRC_TYP_CD=s.PRC_TYP_CD
+        where s.PRC_TERM_TYP_CD='1'
+)
+
+select RAC_ID,ss.EFF_DT,TERM_DT, fm.FORMULA,
+        base.CDSET_VL_DESC_TXT, qbase.CDSET_VL_DESC_TXT, SPLIT_LEVEL, CLNT_MIN_AMT
+from  rps.t_splits_pricing_base ss
+                inner join fm on fm.rac=ss.rac_id and ss.EFF_DT=fm.eff_dt
+			and fm.PRC_TYP_CD=ss.PRC_TYP_CD
+        join (select CDSET_VL, CDSET_VL_DESC_TXT
+                        from client_reg.crt_cdset cd join client_reg.crt_cdset_vl cv
+                                on cd.CDSET_ID=cv.CDSET_ID where CDSET_DESC_TXT='SPLIT_CLM_TYP_CD' ) base
+                on ss.CLM_TYP_CD = base.CDSET_VL
+
+        join (select CDSET_VL, CDSET_VL_DESC_TXT
+                        from client_reg.crt_cdset cd join client_reg.crt_cdset_vl cv
+                                on cd.CDSET_ID=cv.CDSET_ID where CDSET_DESC_TXT='CLM_TYP_QLFR_CD_ALL_MODEL' ) qbase
+                on ss.CLM_TYP_QLFR_CD = qbase.CDSET_VL
+where ss.PRC_TERM_TYP_CD='2'
+
+
+                                ]]></source>
+
+                                <target
+                                        type             = "sql"
+                                        datasource       = "datamart"
+                                        transaction      = "true"
+                                        batch            = "1000"
+                                        reportInterval   = "1000"
+                                        queryTimeout     = "${TIMEOUT}"
+                                ><![CDATA[
+                                        insert into rps.ms_gn_pricing_all values
+                                                (?,?,?,?,?,?,?,?)
+
+                                ]]></target>
+
+                        </command>
+
+
+                </try>
+                <catch>
+                </catch>
+        </command>
+</sqml>
+

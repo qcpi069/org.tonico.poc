@@ -1,0 +1,418 @@
+
+<!-- This xml will look for claims that were invoiced on both the GDX and PharmaCare systems. Any claims found will be written
+	out ot the vrap.trxmax_duplicate_claims table
+
+     Datasource definition file datasource.xml is in the ./java/Common_java_db_interface/conf.
+
+     Maestro Command to execute xml: ./scripts/Common_java_db_interface.ksh GDX_find_rxmax_dup_inv_claims.xml
+
+-->
+<sqml>
+
+	<property name="TIMEOUT" value="0"/>
+	<!-- datasource.xml defines DB connection info. It should be under ./java/Common_java_db_interface/conf-->
+
+	<datasources resource="datasource.xml"/>
+
+	<!--
+		Set-up a try block to send an email on exception.
+	-->
+	<command type="try">
+	<try>
+
+			<!-- Query DB for current processing quarter info -->
+			<command type="run" datasource="gdxdb" rowName="inv_qtr"><![CDATA[
+				select  CAST(a.quarter_id AS char(6)), CHAR(tp.period_begin_dt,usa), CHAR(tp.period_end_dt,usa)
+				  from
+				  (select distinct quarter_id
+				      from vrap.trxmax_inv_claims) a,
+				  vrap.tdiscnt_period tp
+				 where a.quarter_id = tp.quarter_id
+				   and  tp.PERIOD_ID like 'Q%'
+
+			]]></command>
+			<!-- Command to set quarter parameters-->
+			<command type="java"><![CDATA[
+				 String  qtrBeginDate ="";
+				 String  qtrEndDate ="";
+				 String  qtrId ="";
+
+		    	         qtrId = script.getProperty("inv_qtr.1");
+				 qtrBeginDate = script.getProperty("inv_qtr.2");
+				 qtrEndDate   = script.getProperty("inv_qtr.3");
+
+				 if (qtrId==null || qtrId.trim().length()==0 ||
+				    qtrBeginDate==null || qtrBeginDate.trim().length()==0 ||
+				    qtrEndDate==null || qtrEndDate.trim().length()==0)
+				{
+			  	 throw new Exception("Processing Cycle Info not found in vrap.trxmax_inv_claims.");
+				}
+				//Make the variables available to other queries below
+				 script.setProperty("qtrId",qtrId);
+				 script.setProperty("qtrBeginDate",qtrBeginDate);
+				 script.setProperty("qtrEndDate",qtrEndDate);
+
+			]]></command>
+
+		<!-- delete the current table -->
+		<command type="run" datasource="gdxdb" transaction="true"><![CDATA[
+			DELETE FROM vrap.trxmax_duplicate_claims
+
+			]]></command>
+
+		<!-- Now check for duplicate invoiced claims GPO model -->
+
+		<command type="copy" batch="500">
+			<source type="sql" datasource="gdxdb"><![CDATA[
+
+			 select
+			 clm.claim_id
+			,clm.extnl_src_cd
+			,clm.carrier_id
+			,clm.claim_typ
+			,b.rpt_id
+			,b.period_id
+			,b.discnt_run_mode_cd
+			,b.hvst_id
+			,clm.extnl_claim_id
+			,clm.extnl_claim_seq_nb
+			,clm.drug_ndc_id
+			,clm.fill_dt
+			,clm.rx_nb
+			,clm.refill_nb
+			,clm.nabp_id
+			,clm.dspnsd_qty
+			,clm.model_typ_cd
+			from (
+			    select
+			     a.extnl_claim_id
+			    ,a.extnl_claim_seq_nb
+                            ,a.claim_typ
+			    ,a.carrier_id
+			    ,a.quarter_id
+			    ,c.claim_id
+			    ,c.extnl_src_cd
+			    ,c.drug_ndc_id
+			    ,c.fill_dt
+			    ,c.rx_nb
+			    ,c.refill_nb
+			    ,c.nabp_id
+			    ,c.dspnsd_qty
+			    ,'G' as model_typ_cd
+			   from
+			     vrap.trxmax_inv_claims a,
+			     vrap.vclaim_gpo c
+			    where a.extnl_claim_id = c.clm_lvl_1_id
+			      and a.extnl_claim_seq_nb = c.clm_lvl_2_id
+			      and a.carrier_id	= c.extnl_lvl_1_id
+			      and a.claim_typ = c.item_count_qy
+			      and c.inv_elig_dt between date('${qtrBeginDate}') AND date('${qtrEndDate}')
+			      ) clm,
+			     vrap.tdiscnt_ext_claim_gpo b,
+			     vrap.vhvstq_last_good_locked hvst,
+			     vrap.tdiscnt_period tp
+			where clm.claim_id = b.claim_id
+			  and clm.extnl_src_cd = b.extnl_src_cd
+			  and b.hvst_id = hvst.hvst_id
+			  and tp.quarter_id = ${qtrId}
+			  and tp.period_id = hvst.period_id
+
+			  WITH UR
+
+			]]></source>
+
+
+			<target
+				type        = "queue"
+				threadCount = "5">
+
+
+				<target
+					type           = "sql"
+					datasource     = "gdxdb"
+					transaction    = "true"
+					batch          = "500"
+					reportInterval = "50000"
+					queryTimeout   = "${TIMEOUT}"
+				><![CDATA[
+
+				insert into vrap.trxmax_duplicate_claims
+					(claim_id,
+					 extnl_src_cd,
+					 carrier_id,
+					 claim_typ,
+					 rpt_id,
+					 period_id,
+					 discnt_run_mode_cd,
+					 hvst_id,
+					 extnl_claim_id,
+					 extnl_claim_seq_nb,
+					 ndc_id,
+					 fill_dt,
+					 rx_nb,
+					 refill_nb,
+					 nabp_id,
+					 dspnsd_qty,
+					 model_typ_cd)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+
+				]]></target>
+			 </target>
+		</command>
+
+		<!-- Now check for duplicate invoiced claims DSC model -->
+
+		<command type="copy" batch="500">
+			<source type="sql" datasource="gdxdb"><![CDATA[
+
+			 select
+			 clm.claim_id
+			,clm.extnl_src_cd
+			,clm.carrier_id
+			,clm.claim_typ
+			,b.rpt_id
+			,b.period_id
+			,b.discnt_run_mode_cd
+			,b.hvst_id
+			,clm.extnl_claim_id
+			,clm.extnl_claim_seq_nb
+			,clm.drug_ndc_id
+			,clm.fill_dt
+			,clm.rx_nb
+			,clm.refill_nb
+			,clm.nabp_id
+			,clm.dspnsd_qty
+			,clm.model_typ_cd
+			from (
+			    select
+			     a.extnl_claim_id
+			    ,a.extnl_claim_seq_nb
+                            ,a.claim_typ
+			    ,a.carrier_id
+			    ,a.quarter_id
+			    ,c.claim_id
+			    ,c.extnl_src_cd
+			    ,c.drug_ndc_id
+			    ,c.fill_dt
+			    ,c.rx_nb
+			    ,c.refill_nb
+			    ,c.nabp_id
+			    ,c.dspnsd_qty
+			    ,'D' as model_typ_cd
+			   from
+			     vrap.trxmax_inv_claims a,
+			     vrap.vclaim_dsc c
+			    where a.extnl_claim_id = c.clm_lvl_1_id
+			      and a.extnl_claim_seq_nb = c.clm_lvl_2_id
+			      and a.carrier_id	= c.extnl_lvl_1_id
+			      and a.claim_typ = c.item_count_qy
+			      and c.inv_elig_dt between date('${qtrBeginDate}') AND date('${qtrEndDate}')
+			      ) clm,
+			     vrap.tdiscnt_ext_claim_dsc b,
+			     vrap.vhvstq_last_good_locked hvst,
+			     vrap.tdiscnt_period tp
+			where clm.claim_id = b.claim_id
+			  and clm.extnl_src_cd = b.extnl_src_cd
+			  and b.hvst_id = hvst.hvst_id
+			  and tp.quarter_id = ${qtrId}
+			  and tp.period_id = hvst.period_id
+
+			  WITH UR
+
+			]]></source>
+
+
+			<target
+				type        = "queue"
+				threadCount = "5">
+
+
+				<target
+					type           = "sql"
+					datasource     = "gdxdb"
+					transaction    = "true"
+					batch          = "500"
+					reportInterval = "50000"
+					queryTimeout   = "${TIMEOUT}"
+				><![CDATA[
+
+				insert into vrap.trxmax_duplicate_claims
+					(claim_id,
+					 extnl_src_cd,
+					 carrier_id,
+					 claim_typ,
+					 rpt_id,
+					 period_id,
+					 discnt_run_mode_cd,
+					 hvst_id,
+					 extnl_claim_id,
+					 extnl_claim_seq_nb,
+					 ndc_id,
+					 fill_dt,
+					 rx_nb,
+					 refill_nb,
+					 nabp_id,
+					 dspnsd_qty,
+					 model_typ_cd)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+
+				]]></target>
+			 </target>
+		</command>
+
+		<!-- Now check for duplicate invoiced claims XMD model -->
+
+		<command type="copy" batch="500">
+			<source type="sql" datasource="gdxdb"><![CDATA[
+
+			 select
+			 clm.claim_id
+			,clm.extnl_src_cd
+			,clm.carrier_id
+			,clm.claim_typ
+			,b.rpt_id
+			,b.period_id
+			,b.discnt_run_mode_cd
+			,b.hvst_id
+			,clm.extnl_claim_id
+			,clm.extnl_claim_seq_nb
+			,clm.drug_ndc_id
+			,clm.fill_dt
+			,clm.rx_nb
+			,clm.refill_nb
+			,clm.nabp_id
+			,clm.dspnsd_qty
+			,clm.model_typ_cd
+			from (
+			    select
+			     a.extnl_claim_id
+			    ,a.extnl_claim_seq_nb
+                            ,a.claim_typ
+			    ,a.carrier_id
+			    ,a.quarter_id
+			    ,c.claim_id
+			    ,c.extnl_src_cd
+			    ,c.drug_ndc_id
+			    ,c.fill_dt
+			    ,c.rx_nb
+			    ,c.refill_nb
+			    ,c.nabp_id
+			    ,c.dspnsd_qty
+			    ,'X' as model_typ_cd
+			   from
+			     vrap.trxmax_inv_claims a,
+			     vrap.vclaim_xmd c
+			    where a.extnl_claim_id = c.clm_lvl_1_id
+			      and a.extnl_claim_seq_nb = c.clm_lvl_2_id
+			      and a.carrier_id	= c.extnl_lvl_1_id
+			      and a.claim_typ = c.item_count_qy
+			      and c.inv_elig_dt between date('${qtrBeginDate}') AND date('${qtrEndDate}')
+			      ) clm,
+			     vrap.tdiscnt_ext_claim_xmd b,
+			     vrap.vhvstq_last_good_locked hvst,
+			     vrap.tdiscnt_period tp
+			where clm.claim_id = b.claim_id
+			  and clm.extnl_src_cd = b.extnl_src_cd
+			  and b.hvst_id = hvst.hvst_id
+			  and tp.quarter_id = ${qtrId}
+			  and tp.period_id = hvst.period_id
+
+			  WITH UR
+
+			]]></source>
+
+			<target
+				type        = "queue"
+				threadCount = "5">
+
+
+				<target
+					type           = "sql"
+					datasource     = "gdxdb"
+					transaction    = "true"
+					batch          = "500"
+					reportInterval = "50000"
+					queryTimeout   = "${TIMEOUT}"
+				><![CDATA[
+
+				insert into vrap.trxmax_duplicate_claims
+					(claim_id,
+					 extnl_src_cd,
+					 carrier_id,
+					 claim_typ,
+					 rpt_id,
+					 period_id,
+					 discnt_run_mode_cd,
+					 hvst_id,
+					 extnl_claim_id,
+					 extnl_claim_seq_nb,
+					 ndc_id,
+					 fill_dt,
+					 rx_nb,
+					 refill_nb,
+					 nabp_id,
+					 dspnsd_qty,
+					 model_typ_cd)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+
+				]]></target>
+			 </target>
+		</command>
+
+	</try>
+	<catch>
+
+	<!-- Send an email on error -->
+
+		<command
+			type="mail"
+			mailTo="${email_address}"
+			mailFrom="GDX_find_rxmax_dup_inv_claims.xml@caremark.com"
+			subject="[${region}] [ERROR] Load to trxmax_duplicate_claims table"
+			contentType="text/html"
+			throwsException="false"
+		><![CDATA[
+			<html>
+			<head>
+			<title>[ERROR] vrap.trxmax_duplicate_claims </title>
+			</head>
+			<body>
+
+			<h3><u>[ERROR] Load to vrap.trxmax_duplicate_claims table</u></h3>
+
+			<table cellpadding="2">
+				<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+				<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+				<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+				#if (${system.getProperty('logfile')})
+					<tr>
+						<td><b>Log File:</b></td>
+						<td>
+							${system.getProperty('logfile')}
+						<td>
+					</tr>
+				#end
+			</table>
+
+			<br>
+			<br>
+
+			#if (${script.getLastStatement()})
+				<h3><u>Last Statement</u></h3>
+				<font style="color: blue; font-size: small">
+				${script.getLastStatement()}
+				</font>
+
+				<br>
+				<br>
+			#end
+
+			<h3><u>Stack Trace</u></h3>
+			<pre style="color: red; font-size: small;">${stackTrace}</pre>
+			</body>
+			</html>
+		]]></command>
+
+	</catch>
+	</command>
+</sqml>

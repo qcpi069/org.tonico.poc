@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  - security configuration for the application.
+  -
+  - $Id: applicationContext-security-ns.xml 2818 2008-03-28 00:47:08Z benalex $
+  --> 
+<b:beans xmlns="http://www.springframework.org/schema/security"
+    xmlns:b="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+                        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
+
+   	<!-- configuration for authentication -->
+    <http auto-config="false" access-denied-page="/non_secure/page/loginMain.jspx" lowercase-comparisons="false"  session-fixation-protection="none">  
+        <intercept-url pattern="/secure/**/*.jspx" access="ROLE_REBCR_EDIT,ROLE_REBCR_VIEW" />
+        <intercept-url pattern="/secure/**/*.iface" access="ROLE_REBCR_EDIT,ROLE_REBCR_VIEW" />
+        <intercept-url pattern="/*.jspx" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+        <intercept-url pattern="/*.iface" access="IS_AUTHENTICATED_ANONYMOUSLY" />  
+        <form-login login-page="/login.jsp" 
+        		authentication-failure-url="/non_secure/page/loginMain.jspx?error=true" 
+        		login-processing-url="/j_spring_security_check"/>  
+        <logout />
+        <http-basic />
+        <anonymous />
+    </http>  
+    
+    <!-- global security filter to allow only certain roles to access these methods
+    
+   	<global-method-security >
+	<protect-pointcut expression="execution(* *.dao.impl.*insert*(..))" access="ROLE_REBCR_EDIT"/>
+	
+	<protect-pointcut expression="execution(* *.dao.impl.*update*(..))" access="ROLE_REBCR_EDIT"/>
+	
+	<protect-pointcut expression="execution(* *.dao.impl.*add*(..))" access="ROLE_REBCR_EDIT"/>
+	
+	<protect-pointcut expression="execution(* *.dao.impl.*delete*(..))" access="ROLE_REBCR_EDIT"/>
+	
+	<protect-pointcut expression="execution(* *.dao.impl.*remove*(..))" access="ROLE_REBCR_EDIT"/>
+	
+	<protect-pointcut expression="execution(* *.dao.impl.*change*(..))" access="ROLE_REBCR_EDIT"/>
+	</global-method-security> 
+	-->
+    <!--  
+	<global-method-security >
+	<protect-pointcut expression="execution(* *.findMaster*(..))" access="ROLE_MSSESS"/>
+	</global-method-security> 
+  	-->
+   
+   <!-- LDAP connection info -->
+    <ldap-authentication-provider  	 
+            server-ref="ok_ldap"
+            group-role-attribute="cn"
+            group-search-filter="(uniqueMember={0})" 
+            group-search-base="ou=Groups,ou=DEV,o=People,o=Corp,c=US"
+            user-search-filter="(uid={0})"
+            user-search-base="ou=Internal,ou=DEV,o=People,o=Corp,c=US"
+            >       
+    </ldap-authentication-provider>
+     <ldap-server id="ok_ldap" url="ldap://172.19.5.132:3299/"
+   />  
+   
+    <!--  test only
+    <ldap-server id="ok_ldap" url="ldap://172.19.5.132:3299/"
+    manager-dn="uid=hradmin,ou=Employees,ou=Internal,ou=DEV,o=People,o=Corp,c=US"
+    manager-password="hradmin"/>    
+     -->
+  <!--      test only
+    <authentication-provider>
+        <password-encoder hash="md5"/>
+        <user-service>
+            <user name="rod" password="a564de63c2d0da68cf47586ee05984d7" authorities="ROLE_PCS_MSSESS,ROLE_SUPERVISOR, ROLE_USER, ROLE_TELLER" />
+	        <user name="dianne" password="65d15fe9156f9c4bbffd98085992a44e" authorities="ROLE_USER,ROLE_TELLER" />
+            <user name="scott" password="2b58af6dddbd072ed27ffc86725d7d3a" authorities="ROLE_USER" />
+            <user name="peter" password="22b5c9accc6e1ba628cedc63a72d57f8" authorities="ROLE_USER" />
+	    </user-service>
+	</authentication-provider>
+	 --> 
+</b:beans>

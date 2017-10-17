@@ -1,0 +1,519 @@
+<!--
+     Loads VRAP.TAPC_QTR_TOTALS information for a specific quarter
+     Datasource definition file datasource.xml is in the ./java/Common_java_db_interface/conf.
+     The XML file should reside under ./xml directory
+
+     Parameter 1 : Optional, has year and quarter info. format: "hyphenhyphenquarter  YYYY0Q"  'YYYY': 4 digit year,
+                  'Q':quarter number ('1', '2', '3', '4'). Example: hyphenhyphenquarter  200502 ,
+                   this should be the parameter passed into XML.
+                   Note: hyphenhyphen means the two characters. xml does not allow it in the comments, it is part
+                   of the reserved symbols.
+
+     Maestro Command with parameter:
+              ./scripts/Common_java_db_interface.ksh dashdashquarter 200701 <xml file name>
+              ./scripts/Common_java_db_interface.ksh dashdashquarter <xml file name>
+-->
+<sqml>
+        <property name="TIMEOUT" value="0"/>
+
+        <!-- datasource.xml defines DB connection info. It should be under ./java/Common_java_db_interface/conf-->
+        <datasources resource="datasource.xml"/>
+
+        <!-- Set-up a try block to send an email on exception -->
+        <command type="try">
+        <try>
+
+            <!-- Start Update the GDX APC process status -->
+            <command type="run" datasource="gdxprd"><![CDATA[
+
+                update VRAP.TAPC_QTR_PRCS_EVENT    
+                    SET STRT_TS = CURRENT TIMESTAMP
+                       ,END_TS = NULL
+                       ,PRCS_ERR_TS = NULL
+                       ,PRCS_STAT_TXT='Running'    
+                    WHERE PRCS_ID = 90;
+
+            ]]></command>
+            <!-- End Update the GDX APC process status -->
+
+        <!-- Query DB for current processing quarter info -->
+        <command type="run" datasource="gdxdb" rowName="rowQuarter"><![CDATA[
+
+                SELECT CAST(QUARTER_ID AS CHAR(6)) FROM VRAP.TCUR_INV_PRD WITH UR
+
+        ]]></command>
+
+        <!-- Command to set quarter, either from DB or parameter-->
+        <command type="java"><![CDATA[
+
+                 String quarter ="";
+
+                 //quarter for GDX
+                 if (script.getProperty("quarter") == null) {
+                     quarter = script.getProperty("rowQuarter.1");
+                     if (quarter == null || quarter.trim().length() == 0){
+                         // If invalid info from database throw error
+                         throw new Exception("Processing quarter info not found in database ");
+                     }
+                 }
+                 else { //There is parameter 'quarter' passed in
+                     quarter = script.getProperty("quarter");
+                     if (quarter == null || quarter.trim().length() == 0 || quarter.trim().length() != 6){
+                         // If invalid info from database throw error
+                         throw new Exception("Invalid quarter ");
+                     }
+                 }
+                 script.setProperty("quarter", quarter);
+
+        ]]></command>
+
+        <!-- Command to set model and model type code for GPO -->
+        <command type="java"><![CDATA[
+
+                 String model = "";
+                 script.setProperty("model", "GPO");
+                 model = script.getProperty("model");
+                 script.setProperty("model_typ_cd", model.substring(0,1));
+
+        ]]></command>
+
+        <!-- delete existing rows for GPO in GDX  -->
+        <command type="run" datasource="gdxdb" transaction="false"><![CDATA[
+
+                 DELETE
+                   FROM VRAP.TAPC_QTR_TOTALS
+                  WHERE QUARTER_ID = ${quarter}
+                    AND MODEL_TYP_CD = '${model_typ_cd}'
+
+        ]]></command>
+
+        <!-- Load data for GPO -->
+        <command type="copy" batch="500">
+                 <source type="sql" datasource="gdxdb"><![CDATA[
+
+                         SELECT
+                              C.QUARTER_ID,
+                              C.PRD_ID,
+                              '${model_typ_cd}' as MODEL_TYP_CD,
+                              AP_COMPNY_CD,
+                              PICO_NO,
+                              '1' as PMT_SYS_ELIG_CD,
+                              (CASE WHEN UPPER(DC.ALLW_IN_APC) IS NULL THEN
+                                       (CASE WHEN DC.CLAIM_ID IS NOT NULL THEN 'Z' END)
+                                    ELSE UPPER(DC.ALLW_IN_APC)
+                               END) AS ALLW_IN_APC,
+                              SUM(CASE
+                                  WHEN MDA_EXCPT_ID IN (90, 91, 92) THEN 1
+                                  ELSE 0
+                                  END) AS GRS_CLM_CNT_RBAT ,
+                              SUM(CASE
+                                  WHEN MDA_EXCPT_ID IN (90, 91, 92) THEN 0
+                                  ELSE 1
+                                  END) AS GRS_CLM_CNT_SBMD,
+                              SUM(CASE
+                                  WHEN MDA_EXCPT_ID IN (90, 91, 92) THEN ITEM_COUNT_QY
+                                  ELSE 0
+                                  END) AS NET_CLM_CNT_RBAT,
+                              SUM(CASE
+                                  WHEN MDA_EXCPT_ID IN (90, 91, 92) THEN 0
+                                  ELSE ITEM_COUNT_QY
+                                  END) AS NET_CLM_CNT_SBMD,
+                              SUM(ITEM_COUNT_QY) AS NET_CLM_CNT,
+                              COUNT(*) AS GRS_CLM_CNT,
+                              SUM(PMT_ACC_DISCNT_AMT) AS RBAT_ACC_DISCNT_AMT,
+                              SUM(PMT_PRFMC_DISCNT_AMT) AS RBAT_PRFMC_DISCNT_AMT,
+                              SUM(PMT_ADMN_DISCNT_AMT) AS  RBAT_ADMN_DISCNT_AMT ,
+                              SUM(PMT_ACC_DISCNT_AMT+PMT_PRFMC_DISCNT_AMT+PMT_ADMN_DISCNT_AMT) AS RBAT_DISCNT_AMT,
+                              SUM(CASE
+                                  WHEN MDA_EXCPT_ID IN (90, 91, 92) THEN DSPNSD_QTY
+                                  ELSE 0
+                                  END) AS DSPNSD_QTY_RBAT ,
+                              SUM(CASE
+                                  WHEN MDA_EXCPT_ID IN (90, 91, 92) THEN 0
+                                  ELSE DSPNSD_QTY
+                                  END) AS DSPNSD_QTY_SBMD,
+                              SUM(DSPNSD_QTY) AS DSPNSD_QTY
+                         FROM VRAP.TAPC_CLAIMS_${model} C LEFT JOIN VRAP.TAPC_DUP_CLAIMS DC
+                              ON (C.QUARTER_ID = DC.QUARTER_ID AND C.CLAIM_ID = DC.CLAIM_ID AND DC.MODEL_TYP_CD = '${model_typ_cd}')
+                        WHERE C.QUARTER_ID = ${quarter}
+                        GROUP BY
+                              C.QUARTER_ID,
+                              C.PRD_ID,
+                              AP_COMPNY_CD,
+                              PICO_NO,
+                              (CASE WHEN UPPER(DC.ALLW_IN_APC) IS NULL THEN
+                                       (CASE WHEN DC.CLAIM_ID IS NOT NULL THEN 'Z' END)
+                                    ELSE UPPER(DC.ALLW_IN_APC)
+                               END)
+                         WITH UR
+
+                 ]]></source>
+
+                 <target
+                          type           = "sql"
+                          datasource     = "gdxdb"
+                          transaction    = "false"
+                          batch          = "500"
+                          reportInterval = "50000"
+                          queryTimeout   = "${TIMEOUT}"
+                 ><![CDATA[
+
+                           INSERT INTO VRAP.TAPC_QTR_TOTALS
+                                  (
+                                   QUARTER_ID,
+                                   PRD_ID,
+                                   MODEL_TYP_CD,
+                                   AP_COMPNY_CD,
+                                   PICO_NO,
+                                   PMT_SYS_ELIG_CD,
+                                   ALLW_IN_APC,
+                                   GRS_CLM_CNT_RBAT,
+                                   GRS_CLM_CNT_SBMD,
+                                   NET_CLM_CNT_RBAT,
+                                   NET_CLM_CNT_SBMD,
+                                   NET_CLM_CNT,
+                                   GRS_CLM_CNT,
+                                   RBAT_ACC_DISCNT_AMT,
+                                   RBAT_PRFMC_DISCNT_AMT,
+                                   RBAT_ADMN_DISCNT_AMT,
+                                   RBAT_DISCNT_AMT,
+                                   DSPNSD_QTY_RBAT,
+                                   DSPNSD_QTY_SBMD,
+                                   DSPNSD_QTY,
+                                   CREATE_TS
+                                  )
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT TIMESTAMP)
+
+                  ]]></target>
+        </command>
+
+        <!-- Command to set model and model type code for DSC -->
+        <command type="java"><![CDATA[
+
+                 String model = "";
+                 script.setProperty("model", "DSC");
+                 model = script.getProperty("model");
+                 script.setProperty("model_typ_cd", model.substring(0,1));
+
+        ]]></command>
+
+        <!-- delete existing rows for DSC in GDX  -->
+        <command type="run" datasource="gdxdb" transaction="false"><![CDATA[
+
+                 DELETE
+                   FROM VRAP.TAPC_QTR_TOTALS
+                  WHERE QUARTER_ID = ${quarter}
+                    AND MODEL_TYP_CD = '${model_typ_cd}'
+
+        ]]></command>
+
+        <!-- Load data for DSC -->
+        <command type="copy" batch="500">
+                 <source type="sql" datasource="gdxdb"><![CDATA[
+
+                         SELECT
+                              C.QUARTER_ID,
+                              C.PRD_ID,
+                              '${model_typ_cd}' as MODEL_TYP_CD,
+                              AP_COMPNY_CD,
+                              PICO_NO,
+                              '1' as PMT_SYS_ELIG_CD,
+                              (CASE WHEN UPPER(DC.ALLW_IN_APC) IS NULL THEN
+                                       (CASE WHEN DC.CLAIM_ID IS NOT NULL THEN 'Z' END)
+                                    ELSE UPPER(DC.ALLW_IN_APC)
+                               END) AS ALLW_IN_APC,
+                              SUM(CASE
+                                  WHEN MDA_EXCPT_ID IN (90, 91, 92) THEN 1
+                                  ELSE 0
+                                  END) AS GRS_CLM_CNT_RBAT ,
+                              SUM(CASE
+                                  WHEN MDA_EXCPT_ID IN (90, 91, 92) THEN 0
+                                  ELSE 1
+                                  END) AS GRS_CLM_CNT_SBMD,
+                              SUM(CASE
+                                  WHEN MDA_EXCPT_ID IN (90, 91, 92) THEN ITEM_COUNT_QY
+                                  ELSE 0
+                                  END) AS NET_CLM_CNT_RBAT,
+                              SUM(CASE
+                                  WHEN MDA_EXCPT_ID IN (90, 91, 92) THEN 0
+                                  ELSE ITEM_COUNT_QY
+                                  END) AS NET_CLM_CNT_SBMD,
+                              SUM(ITEM_COUNT_QY) AS NET_CLM_CNT,
+                              COUNT(*) AS GRS_CLM_CNT,
+                              SUM(PMT_ACC_DISCNT_AMT) AS RBAT_ACC_DISCNT_AMT,
+                              SUM(PMT_PRFMC_DISCNT_AMT) AS RBAT_PRFMC_DISCNT_AMT,
+                              SUM(PMT_ADMN_DISCNT_AMT) AS  RBAT_ADMN_DISCNT_AMT ,
+                              SUM(PMT_ACC_DISCNT_AMT+PMT_PRFMC_DISCNT_AMT+PMT_ADMN_DISCNT_AMT) AS RBAT_DISCNT_AMT,
+                              SUM(CASE
+                                  WHEN MDA_EXCPT_ID IN (90, 91, 92) THEN DSPNSD_QTY
+                                  ELSE 0
+                                  END) AS DSPNSD_QTY_RBAT ,
+                              SUM(CASE
+                                  WHEN MDA_EXCPT_ID IN (90, 91, 92) THEN 0
+                                  ELSE DSPNSD_QTY
+                                  END) AS DSPNSD_QTY_SBMD,
+                              SUM(DSPNSD_QTY) AS DSPNSD_QTY
+                         FROM VRAP.TAPC_CLAIMS_${model} C LEFT JOIN VRAP.TAPC_DUP_CLAIMS DC
+                              ON (C.QUARTER_ID = DC.QUARTER_ID AND C.CLAIM_ID = DC.CLAIM_ID AND DC.MODEL_TYP_CD = '${model_typ_cd}')
+                        WHERE C.QUARTER_ID = ${quarter}
+                        GROUP BY
+                              C.QUARTER_ID,
+                              C.PRD_ID,
+                              AP_COMPNY_CD,
+                              PICO_NO,
+                              (CASE WHEN UPPER(DC.ALLW_IN_APC) IS NULL THEN
+                                       (CASE WHEN DC.CLAIM_ID IS NOT NULL THEN 'Z' END)
+                                    ELSE UPPER(DC.ALLW_IN_APC)
+                               END)
+                         WITH UR
+
+                 ]]></source>
+                 <target
+                          type           = "sql"
+                          datasource     = "gdxdb"
+                          transaction    = "false"
+                          batch          = "500"
+                          reportInterval = "50000"
+                          queryTimeout   = "${TIMEOUT}"
+                 ><![CDATA[
+
+                           INSERT INTO VRAP.TAPC_QTR_TOTALS
+                                  (
+                                   QUARTER_ID,
+                                   PRD_ID,
+                                   MODEL_TYP_CD,
+                                   AP_COMPNY_CD,
+                                   PICO_NO,
+                                   PMT_SYS_ELIG_CD,
+                                   ALLW_IN_APC,
+                                   GRS_CLM_CNT_RBAT,
+                                   GRS_CLM_CNT_SBMD,
+                                   NET_CLM_CNT_RBAT,
+                                   NET_CLM_CNT_SBMD,
+                                   NET_CLM_CNT,
+                                   GRS_CLM_CNT,
+                                   RBAT_ACC_DISCNT_AMT,
+                                   RBAT_PRFMC_DISCNT_AMT,
+                                   RBAT_ADMN_DISCNT_AMT,
+                                   RBAT_DISCNT_AMT,
+                                   DSPNSD_QTY_RBAT,
+                                   DSPNSD_QTY_SBMD,
+                                   DSPNSD_QTY,
+                                   CREATE_TS
+                                  )
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT TIMESTAMP)
+
+                  ]]></target>
+
+        </command>
+
+        <!-- Command to set model and model type code for XMD -->
+        <command type="java"><![CDATA[
+
+                 String model = "";
+                 script.setProperty("model", "XMD");
+                 model = script.getProperty("model");
+                 script.setProperty("model_typ_cd", model.substring(0,1));
+
+        ]]></command>
+
+        <!-- delete existing rows for XMD in GDX  -->
+        <command type="run" datasource="gdxdb" transaction="false"><![CDATA[
+
+                 DELETE
+                   FROM VRAP.TAPC_QTR_TOTALS
+                  WHERE QUARTER_ID = ${quarter}
+                    AND MODEL_TYP_CD = '${model_typ_cd}'
+
+        ]]></command>
+
+        <!-- Load data for XMD -->
+        <command type="copy" batch="500">
+                 <source type="sql" datasource="gdxdb"><![CDATA[
+
+                         SELECT
+                              C.QUARTER_ID,
+                              C.PRD_ID,
+                              '${model_typ_cd}' as MODEL_TYP_CD,
+                              AP_COMPNY_CD,
+                              PICO_NO,
+                              '1' as PMT_SYS_ELIG_CD,
+                              (CASE WHEN UPPER(DC.ALLW_IN_APC) IS NULL THEN
+                                       (CASE WHEN DC.CLAIM_ID IS NOT NULL THEN 'Z' END)
+                                    ELSE UPPER(DC.ALLW_IN_APC)
+                               END) AS ALLW_IN_APC,
+                              SUM(CASE
+                                  WHEN MDA_EXCPT_ID IN (90, 91, 92) THEN 1
+                                  ELSE 0
+                                  END) AS GRS_CLM_CNT_RBAT ,
+                              SUM(CASE
+                                  WHEN MDA_EXCPT_ID IN (90, 91, 92) THEN 0
+                                  ELSE 1
+                                  END) AS GRS_CLM_CNT_SBMD,
+                              SUM(CASE
+                                  WHEN MDA_EXCPT_ID IN (90, 91, 92) THEN ITEM_COUNT_QY
+                                  ELSE 0
+                                  END) AS NET_CLM_CNT_RBAT,
+                              SUM(CASE
+                                  WHEN MDA_EXCPT_ID IN (90, 91, 92) THEN 0
+                                  ELSE ITEM_COUNT_QY
+                                  END) AS NET_CLM_CNT_SBMD,
+                              SUM(ITEM_COUNT_QY) AS NET_CLM_CNT,
+                              COUNT(*) AS GRS_CLM_CNT,
+                              SUM(PMT_ACC_DISCNT_AMT) AS RBAT_ACC_DISCNT_AMT,
+                              SUM(PMT_PRFMC_DISCNT_AMT) AS RBAT_PRFMC_DISCNT_AMT,
+                              SUM(PMT_ADMN_DISCNT_AMT) AS  RBAT_ADMN_DISCNT_AMT ,
+                              SUM(PMT_ACC_DISCNT_AMT+PMT_PRFMC_DISCNT_AMT+PMT_ADMN_DISCNT_AMT) AS RBAT_DISCNT_AMT,
+                              SUM(CASE
+                                  WHEN MDA_EXCPT_ID IN (90, 91, 92) THEN DSPNSD_QTY
+                                  ELSE 0
+                                  END) AS DSPNSD_QTY_RBAT ,
+                              SUM(CASE
+                                  WHEN MDA_EXCPT_ID IN (90, 91, 92) THEN 0
+                                  ELSE DSPNSD_QTY
+                                  END) AS DSPNSD_QTY_SBMD,
+                              SUM(DSPNSD_QTY) AS DSPNSD_QTY
+                         FROM VRAP.TAPC_CLAIMS_${model} C LEFT JOIN VRAP.TAPC_DUP_CLAIMS DC
+                              ON (C.QUARTER_ID = DC.QUARTER_ID AND C.CLAIM_ID = DC.CLAIM_ID AND DC.MODEL_TYP_CD = '${model_typ_cd}')
+                        WHERE C.QUARTER_ID = ${quarter}
+                        GROUP BY
+                              C.QUARTER_ID,
+                              C.PRD_ID,
+                              AP_COMPNY_CD,
+                              PICO_NO,
+                              (CASE WHEN UPPER(DC.ALLW_IN_APC) IS NULL THEN
+                                       (CASE WHEN DC.CLAIM_ID IS NOT NULL THEN 'Z' END)
+                                    ELSE UPPER(DC.ALLW_IN_APC)
+                               END)
+                         WITH UR
+
+                 ]]></source>
+
+                 <target
+                          type           = "sql"
+                          datasource     = "gdxdb"
+                          transaction    = "false"
+                          batch          = "500"
+                          reportInterval = "50000"
+                          queryTimeout   = "${TIMEOUT}"
+                 ><![CDATA[
+
+                           INSERT INTO VRAP.TAPC_QTR_TOTALS
+                                  (
+                                   QUARTER_ID,
+                                   PRD_ID,
+                                   MODEL_TYP_CD,
+                                   AP_COMPNY_CD,
+                                   PICO_NO,
+                                   PMT_SYS_ELIG_CD,
+                                   ALLW_IN_APC,
+                                   GRS_CLM_CNT_RBAT,
+                                   GRS_CLM_CNT_SBMD,
+                                   NET_CLM_CNT_RBAT,
+                                   NET_CLM_CNT_SBMD,
+                                   NET_CLM_CNT,
+                                   GRS_CLM_CNT,
+                                   RBAT_ACC_DISCNT_AMT,
+                                   RBAT_PRFMC_DISCNT_AMT,
+                                   RBAT_ADMN_DISCNT_AMT,
+                                   RBAT_DISCNT_AMT,
+                                   DSPNSD_QTY_RBAT,
+                                   DSPNSD_QTY_SBMD,
+                                   DSPNSD_QTY,
+                                   CREATE_TS
+                                  )
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT TIMESTAMP)
+
+                  ]]></target>
+
+           </command>
+
+            <!-- Command to set user_email_address if not specified in the command line-->
+            <command type="java"><![CDATA[
+
+                if (script.getProperty("user_email_address") == null || script.getProperty("user_email_address").trim().length()== 0) {
+                   script.setProperty("user_email_address","GDXITD@caremark.com,GDXAPC@caremark.com");
+                }
+
+            ]]></command>
+
+            <!-- Start Update the GDX APC process status -->
+            <!-- do not abend if this doesnt run properly -->
+            <command type="run" datasource="gdxprd"><![CDATA[
+
+                update VRAP.TAPC_QTR_PRCS_EVENT    
+                    SET END_TS = CURRENT TIMESTAMP
+                       ,PRCS_STAT_TXT='Successful'    
+                    WHERE PRCS_ID = 90;
+
+            ]]></command>
+            <!-- End Update the GDX APC process status -->
+
+         </try>
+        <catch>
+
+                <!-- Start Update the GDX APC process status -->
+                <!-- do not abend if this doesnt run properly -->
+                <command type="run" datasource="gdxprd"><![CDATA[
+
+                    update VRAP.TAPC_QTR_PRCS_EVENT   
+                        SET PRCS_ERR_TS = CURRENT TIMESTAMP
+                           ,PRCS_STAT_TXT='Error-IT Investigating'    
+                        WHERE PRCS_ID = 90;
+
+                ]]></command>
+
+        <!-- Send an email on error -->
+                <command
+                        type="mail"
+                        mailTo="${email_address}"
+                        mailFrom="GDX_build_apc_qtr_total@caremark.com"
+                        subject="[${region}] [ERROR] GDX Build APC Quarter Totals"
+                        contentType="text/html"
+                        throwsException="false"
+                ><![CDATA[
+                        <html>
+                        <head>
+                        <title>[ERROR] GDX Build APC Quarter Totals</title>
+                        </head>
+                        <body>
+                        <h3><u>[ERROR] GDX Build APC Quarter Totals</u></h3>
+
+                        <table cellpadding="2">
+                                <tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+                                <tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+                                <tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+                                #if (${system.getProperty('logfile')})
+                                        <tr>
+                                                <td><b>Log File:</b></td>
+                                                <td>
+                                                        ${system.getProperty('logfile')}
+                                                <td>
+                                        </tr>
+                                #end
+                        </table>
+
+                        <br>
+                        <br>
+
+                        #if (${script.getLastStatement()})
+                                <h3><u>Last Statement</u></h3>
+                                <font style="color: blue; font-size: small">
+                                ${script.getLastStatement()}
+                                </font>
+
+                                <br>
+                                <br>
+                        #end
+
+                        <h3><u>Stack Trace</u></h3>
+                        <pre style="color: red; font-size: small;">${stackTrace}</pre>
+                        </body>
+                        </html>
+                ]]></command>
+
+        </catch>
+        </command>
+</sqml>
+
+

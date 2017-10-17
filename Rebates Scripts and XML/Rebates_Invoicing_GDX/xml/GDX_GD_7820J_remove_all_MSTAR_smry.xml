@@ -1,0 +1,136 @@
+
+<!--   
+     Delete all existing data from MSTAR Summary table in GDX  
+     Datasource definition file datasource.xml is in the ./java/Common_java_db_interface/conf.
+ 
+     The XML file should reside under ./xml directory
+     Maestro Command without parameter: ./scripts/Common_java_db_interface.ksh <xml file name>
+-->
+<sqml>  
+    <property name="TIMEOUT" value="0"/>
+    <!-- datasource.xml defines DB connection info. It should be under ./java/Common_java_db_interface/conf-->
+    <datasources resource="datasource.xml"/>
+    
+    <!-- Set-up a try block to send an email on exception -->         
+    <command type="try">
+    <try>
+
+                <!-- Start Update the GDX APC process status -->
+                <command type="run" datasource="gdxprd"><![CDATA[
+
+                    update VRAP.TAPC_QTR_PRCS_EVENT   
+                        SET STRT_TS = CURRENT TIMESTAMP
+                           ,END_TS = NULL
+                           ,PRCS_ERR_TS = NULL
+                           ,PRCS_STAT_TXT='Running'    
+                        WHERE PRCS_ID = 430;
+
+                ]]></command>
+                <!-- End Update the GDX APC process status -->
+
+                <!-- delete all rows for model DSC -->
+                <command type="run" datasource="gdxprd" transaction="true"><![CDATA[
+
+             DELETE 
+                           FROM VRAP.TDISCNT_MSTAR_SMRY 
+                          WHERE MODEL_TYP_CD = 'D' 
+ 
+                ]]></command>
+
+                <!-- delete all rows for model GPO  -->
+                <command type="run" datasource="gdxprd" transaction="true"><![CDATA[
+
+                         DELETE 
+                           FROM VRAP.TDISCNT_MSTAR_SMRY
+                          WHERE MODEL_TYP_CD = 'G'
+
+                ]]></command>
+
+                <!-- delete all rows for model XMD -->
+                <command type="run" datasource="gdxprd" transaction="true"><![CDATA[
+
+                         DELETE 
+                           FROM VRAP.TDISCNT_MSTAR_SMRY
+                          WHERE MODEL_TYP_CD = 'X'
+
+                ]]></command>
+
+                <!-- Start Update the GDX APC process status -->
+                <!-- do not abend if this doesnt run properly -->
+                <command type="run" datasource="gdxprd"><![CDATA[
+
+                    update VRAP.TAPC_QTR_PRCS_EVENT    
+                        SET END_TS = CURRENT TIMESTAMP
+                           ,PRCS_STAT_TXT='Successful'    
+                        WHERE PRCS_ID = 430;
+
+                ]]></command>
+                <!-- End Update the GDX APC process status -->
+
+        </try>
+                <catch>
+
+                        <!-- Start Update the GDX APC process status -->
+                        <!-- do not abend if this doesnt run properly -->
+                        <command type="run" datasource="gdxprd"><![CDATA[
+
+                            update VRAP.TAPC_QTR_PRCS_EVENT    
+                                SET PRCS_ERR_TS = CURRENT TIMESTAMP
+                                   ,PRCS_STAT_TXT='Error-IT Investigating'    
+                                WHERE PRCS_ID = 430;
+
+                        ]]></command>
+
+                        <!-- Send an email on error -->
+                        <command
+                                type="mail"
+                                mailTo="${email_address}"
+                                mailFrom="Remove_TDISCNT_MSTAR_SMRY@caremark.com"
+                                subject="[ERROR] GDX_GD_7820J_remove_all_MSTAR_smry.xml"
+                                contentType="text/html"
+                                throwsException="false"
+                        ><![CDATA[
+                                <html>
+                                <head>
+                                <title>[ERROR] GDX_GD_7820J_remove_all_MSTAR_smry.xml</title>
+                                </head>
+                                <body>
+
+                                <h3><u>[ERROR] GDX_GD_7820J_remove_all_MSTAR_smry.xml</u></h3>
+
+                                <table cellpadding="2">
+                                        <tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+                                        <tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+                                        <tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+                                        #if (${system.getProperty('logfile')})
+                                                <tr>
+                                                        <td><b>Log File:</b></td>
+                                                        <td>
+                                                                ${system.getProperty('logfile')}
+                                                        <td>
+                                                </tr>
+                                        #end
+                                </table>
+
+                                <br>
+                                <br>
+                                #if (${script.getLastStatement()})
+                                        <h3><u>Last Statement</u></h3>
+                                        <font style="color: blue; font-size: small">
+                                        ${script.getLastStatement()}
+                                        </font>
+
+                                        <br>
+                                        <br>
+                                #end
+
+                                <h3><u>Stack Trace</u></h3>
+                                <pre style="color: red; font-size: small;">${stackTrace}</pre>
+                                </body>
+                                </html>
+                        ]]></command>
+                </catch>
+        </command>
+</sqml>
+
+        

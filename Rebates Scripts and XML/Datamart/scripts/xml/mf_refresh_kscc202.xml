@@ -1,0 +1,137 @@
+
+<!-- REFRESH kscc202  -->
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        cli_schema=script.getProperty("cli_schema");        
+	]]></command>
+		       
+	<command type="try">
+		<try>
+                        <!-- delete from DB2. -->
+                        <command type="run" datasource="db2p">
+                                <![CDATA[
+                                        DELETE FROM ${pmt_schema}.kscc202_cg_mod_asc
+                                ]]>
+                        </command>
+
+            <!-- *************** kscc202 ********************* -->
+
+			<!-- rebuild kscc202 -->
+			<!-- 07/07/2010 change term_dt to use Only ca.term_dt -->
+                        <!-- 05/22/2012 - Shabbir Bhinderwala - Remove the condition -->
+                        <!--          where c.rbat_inv_term_dt >=(current date - 9 months) -->
+                        <!--            and ca.term_dt >=(current date - 9 months) -->
+
+
+			<command type="copy" batch="1000">
+				<source type="sql" datasource="datamart"><![CDATA[
+select distinct
+        h.EXTL_SRC_CD,h.EXTL_LVL1_ID,h.EXTL_LVL2_ID,h.EXTL_LVL3_ID,h.EXTL_LVL4_ID,h.EXTL_LVL5_ID,
+CASE WHEN c.rbat_inv_eff_dt>ca.eff_dt
+THEN c.rbat_inv_eff_dt
+ELSE ca.eff_dt
+END,
+pm.MODEL_TYP_CD,substr(digits(c.rbat_id),3,8),
+ca.term_dt
+from client_reg.crt_rtmd_prc r
+        join client_reg.crt_clnt c
+                on r.rbat_id = c.rbat_id
+        join client_reg.crt_clnt_rule_assc ra
+                on ra.rbat_id = c.rbat_id
+        join client_reg.crt_prc_rule ru
+                on ra.prc_rule_id = ru.prc_rule_id
+        join client_reg.crt_prc_mstr pm
+                on ru.prc_mstr_id = pm.prc_mstr_id
+        join client_reg.crt_clnt_extl_hrcy_assc ca
+                on c.rbat_id = ca.rbat_id
+        join client_reg.crt_extl_hrcy h
+                on ca.EXTL_HRCY_ID = h.EXTL_HRCY_ID
+
+				]]></source>
+				<target
+					type             = "sql"
+					datasource       = "db2p"
+					transaction      = "true"
+					batch            = "1000"
+					reportInterval   = "1000"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					INSERT INTO ${pmt_schema}.kscc202_cg_mod_asc
+					 (EXTL_SRC_CD,
+                                          EXTL_LVL1_ID,
+                                          EXTL_LVL2_ID,
+                                          EXTL_LVL3_ID,
+                                          EXTL_LVL4_ID,
+                                          EXTL_LVL5_ID,
+                                          EFF_DT,
+                                          MODEL_TYP_CD,
+                                          RBAT_ID,
+                                          TERM_DT
+					  ) 
+					VALUES (?,?,?,?,?,?,?,?,?,?)
+				]]></target>
+			</command>
+
+				 
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+			<command
+				type="mail"
+				mailTo="${mailto}"
+				mailFrom="rpsadm@caremark.com"
+				subject="[ERROR] MF REFESH - kscc202 "
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] MF REFESH - kscc202 </title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] MF REFESH - kscc202 </u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		</catch>
+		
+        </command>
+</sqml>
+

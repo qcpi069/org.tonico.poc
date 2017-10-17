@@ -1,0 +1,52 @@
+
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+	dmt_schema=script.getProperty("dmt_schema");
+	pmt_schema=script.getProperty("pmt_schema");
+	]]></command>
+		       
+	<command type="try">
+		<try>
+			<command type="copy" batch="1000">
+				<source type="sql" datasource="db2p"><![CDATA[
+
+SELECT A.CLM_EXTNL_ID, A.RBAT_BILL_PRD_NM, 
+	A.FIX_RBAT_AMT, A.ADMN_FEE_AMT, A.MKSR_RBAT_AMT, A.LAST_UPDT_TS
+FROM ${pmt_schema}.KSRB220_FEBASE A 
+WHERE A.RBAT_BILL_PRD_NM = '${QPARM}'                              
+AND A.EXTL_SRC_CD ='RXC'                                        
+AND A.RBAT_ID = '${RBATE}'
+
+				]]></source>
+				<target
+					type             = "sql"
+					datasource       = "datamart"
+					transaction      = "true"
+					batch            = "1000"
+					reportInterval   = "1000"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					INSERT INTO ${dmt_schema}.CBC_RPS_LKP
+					 (CLAIM_GID,
+					  RBAT_BILL_PRD_NM,
+					  FIX_RBAT_AMT,
+					  ADMN_FEE_AMT,
+					  MKSR_RBAT_AMT,
+					  LAST_UPDT_TS
+					  ) 
+					VALUES ( ?,?,?,?,?,? )
+
+				]]></target>
+			</command>
+
+		</try>
+		<catch>
+		</catch>
+	</command>
+</sqml>

@@ -1,0 +1,189 @@
+
+<!-- This xml will load data from the vrap.tfrmly_rsch table on GDX into the mstrgyint.frmly_res2 table on the EDW
+     Datasource definition file datasource.xml is in the ./java/Common_java_db_interface/conf.
+     Input Parameters: N/A
+		   
+     Maestro Command to execute: ./scripts/Common_java_db_interface.ksh tfrmly_populate_tfrmly_res2.xml
+
+-->
+<sqml>
+	
+	<property name="TIMEOUT" value="0"/>
+	<!-- datasource.xml defines DB connection info. It should be under ./java/Common_java_db_interface/conf-->
+
+	<datasources resource="datasource.xml"/>
+	
+	<!--
+		Set-up a try block to send an email on exception.	
+	-->         
+	<command type="try">
+	<try>	
+
+		<!-- This is step 1 to truncate the mstrgyint.frmly_res2 table-->
+		<command type="run" datasource="mstrgy" transaction="true"><![CDATA[
+		      
+		TRUNCATE TABLE mstrgyint.frmly_res2
+		
+		]]></command>
+				
+		<!-- This is step 2 to select the data from the vrap.tfrmly_rsch table-->
+		
+		<command type="copy" batch="500">
+			<source type="sql" datasource="gdxdb"><![CDATA[
+			
+			SELECT
+			t.FRMLY_SRC_CD
+			,t.FRMLY_ID
+			,t.BRND_DRUG_NM
+			,t.RBAT_PREF_STAT_CD
+			,t.MSG_NB
+			,t.MSG_TXT
+			,t.CURQTR_3_LST_CNT
+			,t.CURQTR_3_1ST_CNT
+			,t.CURQTR_2_MID_CNT
+			,t.CURQTR_2_1ST_CNT
+			,t.CURQTR_1_1ST_CNT
+			,t.RLTVQTR1_3_LST_CNT
+			,t.RLTVQTR1_3_1ST_CNT
+			,t.RLTVQTR1_2_MID_CNT
+			,t.RLTVQTR1_2_1ST_CNT
+			,t.RLTVQTR1_1_1ST_CNT
+			,t.RLTVQTR2_3_LST_CNT
+			,t.RLTVQTR2_3_1ST_CNT
+			,t.RLTVQTR2_2_MID_CNT
+			,t.RLTVQTR2_2_1ST_CNT
+			,t.RLTVQTR2_1_1ST_CNT
+			,t.RLTVQTR3_3_LST_CNT
+			,t.RLTVQTR3_3_1ST_CNT
+			,t.RLTVQTR3_2_MID_CNT
+			,t.RLTVQTR3_2_1ST_CNT
+			,t.RLTVQTR3_1_1ST_CNT
+			,t.RLTVQTR4_3_LST_CNT
+			,t.RLTVQTR4_3_1ST_CNT
+			,t.RLTVQTR4_2_MID_CNT
+			,t.RLTVQTR4_2_1ST_CNT
+			,t.RLTVQTR4_1_1ST_CNT
+			,t.DUM_MSG_CD
+			,t.FRMLY_PRCS_CD
+			,t.FRMLY_CLOS_TYP_CD
+			,t.FRMLY_DRUG_STAT_CD
+			,t.LOCK_CD
+		 FROM VRAP.TFRMLY_RSCH t	
+			
+		 ]]></source>	
+				
+
+			<target
+				type        = "queue"
+				threadCount = "5">
+			
+
+				<target
+					type           = "sql"
+					datasource     = "mstrgy"
+					transaction    = "true"
+					batch          = "500"
+					reportInterval = "50000"
+					queryTimeout   = "${TIMEOUT}"
+				><![CDATA[
+				
+			INSERT into mstrgyint.frmly_res2
+			    (frmly_extnl_typ_cd             
+			    ,frmly_nb                       
+			    ,brnd_nm                        
+			    ,rbate_prfr_stat_cd             
+			    ,msg_nb                         
+			    ,msg_txt                        
+			    ,q0lastcount                    
+			    ,q0lastfirstdaycount            
+			    ,q0midcount                     
+			    ,q0midfirstdaycount             
+			    ,q0firstcount                   
+			    ,q1lastcount                    
+			    ,q1lastfirstdaycount            
+			    ,q1midcount                     
+			    ,q1midfirstdaycount             
+			    ,q1firstcount                   
+			    ,q2lastcount                    
+			    ,q2lastfirstdaycount            
+			    ,q2midcount                     
+			    ,q2midfirstdaycount             
+			    ,q2firstcount                   
+			    ,q3lastcount                    
+			    ,q3lastfirstdaycount            
+			    ,q3midcount                     
+			    ,q3midfirstdaycount             
+			    ,q3firstcount                   
+			    ,q4lastcount                    
+			    ,q4lastfirstdaycount            
+			    ,q4midcount                     
+			    ,q4midfirstdaycount             
+			    ,q4firstcount                   
+			    ,dummy_msg_cd                   
+			    ,frmly_prcs_cd                  
+			    ,frmly_clsd_type_cd             
+			    ,frmly_stat_cd                  
+			    ,lock_out_cd) 
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?,
+			        ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?)
+				
+				]]></target>
+			 </target> 
+		</command>
+		
+	</try>
+	<catch>
+
+	<!-- Send an email on error -->
+		<command
+			type="mail"
+			mailTo="${email_address}"
+			mailFrom="tfrmly_populate_tfrmly_res2@caremark.com"
+			subject="[${region}] [ERROR] Load to mstrgyint.tfrmly_res2 table"
+			contentType="text/html"
+			throwsException="false"
+		><![CDATA[
+			<html>
+			<head>
+			<title>[ERROR] Load to MSTRGYINT.TFRMLY_RES2 table</title>
+			</head>
+			<body>
+
+			<h3><u>[ERROR] Load to MSTRGYINT.TFRMLY_RES2 table</u></h3>
+
+			<table cellpadding="2">
+				<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+				<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+				<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+				#if (${system.getProperty('logfile')})
+					<tr>
+						<td><b>Log File:</b></td>
+						<td>
+							${system.getProperty('logfile')}
+						<td>
+					</tr>
+				#end
+			</table>
+
+			<br>			
+			<br>
+
+			#if (${script.getLastStatement()})
+				<h3><u>Last Statement</u></h3>
+				<font style="color: blue; font-size: small">	
+				${script.getLastStatement()}
+				</font>
+
+				<br>
+				<br>
+			#end
+
+			<h3><u>Stack Trace</u></h3>		
+			<pre style="color: red; font-size: small;">${stackTrace}</pre>
+			</body>
+			</html>
+		]]></command>
+
+	</catch>
+	</command>
+</sqml>

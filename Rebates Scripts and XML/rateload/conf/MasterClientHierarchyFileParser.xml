@@ -1,0 +1,36 @@
+<parsers>
+	<record type="masterclienthierarchy"
+		objectType="com.caremark.rebates.registration.batch.domain.MasterClientHierarchyFileRecord">
+		<tokenizer type="split" pattern="\t" />
+
+		<field name="masterClientName" position="0" dataType="string"
+			trim="true" />
+		<field name="id" position="1" dataType="string" trim="true" />
+		<field name="contractEffDate" position="2" dataType="string"
+			trim="true" />
+		<field name="contractTermDate" position="3" dataType="string"
+			trim="true" />
+		<field name="companyCd" position="4" dataType="string"
+			trim="true" />
+		<field name="marketSegmentType" position="5" dataType="string"
+			trim="true" />
+		<field name="modelType" position="6" dataType="string"
+			trim="true" />
+		<field name="accountMgr" position="7" dataType="string"
+			trim="true" />
+		<field name="paymentType" position="8" dataType="string"
+			trim="true" />
+		<field name="vendorNumber" position="9" dataType="string"
+			trim="true" />
+		<field name="customRpt" position="10" dataType="string"
+			trim="true" />
+		<field name="fafNum" position="11" dataType="string"
+			trim="true" />
+		<field name="paymentTiming" position="12" dataType="string"
+			trim="true" />
+		<field name="paymentSchedule" position="13" dataType="string"
+			trim="true" />
+		<field name="modelTypeDummy" position="14" dataType="string"
+			trim="true" />
+	</record>
+</parsers>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE POWERMART SYSTEM "powrmart.dtd">
+<POWERMART CREATION_DATE="04/24/2017 21:44:39" REPOSITORY_VERSION="182.91">
+<REPOSITORY NAME="PCRepos_Caremark9_DEV1" VERSION="182" CODEPAGE="MS1252" DATABASETYPE="DB2">
+<FOLDER NAME="Shared_Rebates_RCI" GROUP="" OWNER="rebates_session_operator" SHARED="SHARED" DESCRIPTION="Shared folder for Rebates RCI Objects" PERMISSIONS="rwx---r--" UUID="8eee4316-9f2c-439c-9eac-ab14c655db70">
+    <TARGET BUSINESSNAME ="" CONSTRAINT ="" DATABASETYPE ="DB2" DESCRIPTION ="This is the TDRUG table residing on the RPSDM system, RPS schema, and consists only of the NDC_11 along with the Brand and Label names.&#xD;&#xA;This tables primary use is for the Payments group in regards to the RECAP contracts which are by Label name, specifically." NAME ="TDRUG_RPSDM" OBJECTVERSION ="1" TABLEOPTIONS ="" VERSIONNUMBER ="1">
+        <TARGETFIELD BUSINESSNAME ="" DATATYPE ="varchar" DESCRIPTION ="" FIELDNUMBER ="1" KEYTYPE ="PRIMARY KEY" NAME ="NDC_NB" NULLABLE ="NOTNULL" PICTURETEXT ="" PRECISION ="11" SCALE ="0"/>
+        <TARGETFIELD BUSINESSNAME ="" DATATYPE ="varchar" DESCRIPTION ="" FIELDNUMBER ="2" KEYTYPE ="NOT A KEY" NAME ="BRND_NME" NULLABLE ="NULL" PICTURETEXT ="" PRECISION ="30" SCALE ="0"/>
+        <TARGETFIELD BUSINESSNAME ="" DATATYPE ="varchar" DESCRIPTION ="" FIELDNUMBER ="3" KEYTYPE ="NOT A KEY" NAME ="LABL_NME" NULLABLE ="NULL" PICTURETEXT ="" PRECISION ="30" SCALE ="0"/>
+    </TARGET>
+</FOLDER>
+</REPOSITORY>
+</POWERMART>

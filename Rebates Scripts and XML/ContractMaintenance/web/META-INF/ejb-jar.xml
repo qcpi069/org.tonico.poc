@@ -1,0 +1,1227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ejb-jar PUBLIC "-//Sun Microsystems, Inc.//DTD Enterprise JavaBeans 2.0//EN" "http://java.sun.com/dtd/ejb-jar_2_0.dtd">
+<ejb-jar>
+
+    <enterprise-beans>
+
+      <session>
+	<ejb-name>RebatesAuthentication</ejb-name>
+         <home>com.advpcs.rebates.ldap.ejb.RebatesAuthenticationEJBHome</home>
+         <remote>com.advpcs.rebates.ldap.ejb.RebatesAuthenticationEJB</remote>
+         <ejb-class>com.advpcs.rebates.ldap.ejb.RebatesAuthenticationEJBBean</ejb-class>
+      	<session-type>Stateless</session-type>
+	<transaction-type>Container</transaction-type>
+        <env-entry>
+          <env-entry-name>ldap/LdapJndi</env-entry-name>
+          <env-entry-type>java.lang.String</env-entry-type>
+          <env-entry-value>RebatesLdap</env-entry-value>
+        </env-entry>
+        <env-entry>
+          <env-entry-name>ldap/LdapHost</env-entry-name>
+          <env-entry-type>java.lang.String</env-entry-type>
+          <env-entry-value>172.19.5.132</env-entry-value>
+        </env-entry>
+        <env-entry>
+          <env-entry-name>ldap/LdapPort</env-entry-name>
+          <env-entry-type>java.lang.Integer</env-entry-type>
+          <env-entry-value>3299</env-entry-value>
+        </env-entry>
+        <env-entry>
+          <env-entry-name>ldap/LdapDnSuffix</env-entry-name>
+          <env-entry-type>java.lang.String</env-entry-type>
+          <env-entry-value>ou=Employees,ou=Internal,ou=DEV,o=People,o=Corp,c=US</env-entry-value>
+        </env-entry>
+
+      </session>
+
+
+      <session>
+	<ejb-name>StatelessSession</ejb-name>
+         <home>com.advpcs.acube.eventhandler.ejb.ACubeStatelessEventHandlerHome</home>
+         <remote>com.advpcs.acube.eventhandler.ejb.ACubeStatelessEventHandler</remote>
+         <ejb-class>com.advpcs.acube.eventhandler.ejb.ACubeStatelessPOEEJB</ejb-class>
+      	<session-type>Stateless</session-type>
+	<transaction-type>Container</transaction-type>
+
+  <!--  Weblogic Configurations -->
+
+      <env-entry>
+        <env-entry-name>ProviderURL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>t3://qatapp6:8311</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>InitialContextFactory</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>weblogic.jndi.WLInitialContextFactory</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>Datasource</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>RB2_datasource</env-entry-value>
+      </env-entry>
+
+	<env-entry>
+        <env-entry-name>ldap/LdapJndi</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>RebatesLdap</env-entry-value>
+      </env-entry>
+
+<!--  Events : Manufacturer   -->
+
+      <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.facade.event.ManufacturerListingEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.facade.handler.ManufacturerListingEventHandler</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.UpdateManufacturerEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.UpdateManufacturerEventHandler</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.AddManufacturerEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.AddManufacturerEventHandler</env-entry-value>
+      </env-entry>
+
+<!--  Events : Market Basket   -->
+
+       <env-entry>
+	<env-entry-name>event/com.advpcs.rebates.facade.event.MarketBasketListingEvent</env-entry-name>
+	<env-entry-type>java.lang.String</env-entry-type>
+	<env-entry-value>com.advpcs.rebates.facade.handler.MarketBasketListingEventHandler</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.UpdateMarketBasketEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.UpdateMarketBasketEventHandler</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.AddMarketBasketEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.AddMarketBasketEventHandler</env-entry-value>
+      </env-entry>
+
+<!--  Events : Contract   -->
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.ContractListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.ContractListingEventHandler</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.UpdateContractEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.UpdateContractEventHandler</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.AddContractEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.AddContractEventHandler</env-entry-value>
+      </env-entry>
+
+<!--  Events : Login/Logout  -->
+
+       <env-entry>
+      	<env-entry-name>event/com.advpcs.rebates.facade.event.LoginEvent</env-entry-name>
+      	<env-entry-type>java.lang.String</env-entry-type>
+      	<env-entry-value>com.advpcs.rebates.facade.handler.LoginEventHandler</env-entry-value>
+       </env-entry>
+
+       <env-entry>
+      	<env-entry-name>event/com.advpcs.rebates.facade.event.LogoutEvent</env-entry-name>
+      	<env-entry-type>java.lang.String</env-entry-type>
+      	<env-entry-value>com.advpcs.rebates.facade.handler.LogoutEventHandler</env-entry-value>
+       </env-entry>
+
+   <!--  Events : Reference List Items      -->
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.RebateIdListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.RebateIdListingEventHandler</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.RebateLevelListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.RebateLevelListingEventHandler</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.MarketShareTypeListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.MarketShareTypeListingEventHandler</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.CycleListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.CycleListingEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.MediaTypeListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.MediaTypeListingEventHandler</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.LCMListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.LCMListingEventHandler</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.PharmacyListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.PharmacyListingEventHandler</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.FormularyListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.FormularyListingEventHandler</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.SourceCodeListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.SourceCodeListingEventHandler</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.facade.event.CycleDateListingEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.facade.handler.CycleDateListingEventHandler</env-entry-value>
+      </env-entry>
+
+   <!-- Events : Reason Codes  -->
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.ReasonCodeListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.ReasonCodeListingEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.ReasonCodeListingGlobalExcEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.ReasonCodeListingGlobalExcEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.ReasonCodeListingRebateLvlEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.ReasonCodeListingRebateLvlEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.ReasonCodeListingNDCExcEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.ReasonCodeListingNDCExcEventHandler</env-entry-value>
+      </env-entry>
+
+   <!-- Events : Rollup   -->
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.RollupListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.RollupListingEventHandler</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.AddRollupEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.AddRollupEventHandler</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.DeleteRollupEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.DeleteRollupEventHandler</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.DeleteRollupRuleEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.DeleteRollupRuleEventHandler</env-entry-value>
+      </env-entry>
+
+  <!-- Events :  Global exclusion   -->
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.GlobalExclusionListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.GlobalExclusionListingEventHandler</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.AddGlobalExclusionEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.AddGlobalExclusionEventHandler</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.DeleteGlobalExclusionEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.DeleteGlobalExclusionEventHandler</env-entry-value>
+      </env-entry>
+
+<!-- Events : NDC   -->
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.NDCListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.NDCListingEventHandler</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.AddNDCEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.AddNDCEventHandler</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.UpdateNDCEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.UpdateNDCEventHandler</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.DeleteNDCEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.DeleteNDCEventHandler</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.ScanNDCEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.ScanNDCEventHandler</env-entry-value>
+       </env-entry>
+
+ <!-- Events : Brand   -->
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.BrandListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.BrandListingEventHandler</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.DeleteBrandEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.DeleteBrandEventHandler</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.UpdateBrandEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.UpdateBrandEventHandler</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.SearchBrandsEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.SearchBrandsEventHandler</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.AddBrandEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.AddBrandEventHandler</env-entry-value>
+      </env-entry>
+
+ <!-- Events : RebateLevel and Tier   -->
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.DeleteRebateLevelRuleEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.DeleteRebateLevelRuleEventHandler</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.DeleteRebateLevelEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.DeleteRebateLevelEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.RebateLevelListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.RebateLevelListingEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.AddRebateLevelRuleEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.AddRebateLevelRuleEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.TierListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.TierListingEventHandler</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.AddTierEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.AddTierEventHandler</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.UpdateTierEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.UpdateTierEventHandler</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.DeleteTierEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.DeleteTierEventHandler</env-entry-value>
+      </env-entry>
+
+  <!--  Formulary Selection -->
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.AddSelectedFormularyEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.AddSelectedFormularyEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.DeleteSelectedFormularyEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.DeleteSelectedFormularyEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.SelectedFormularyListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.SelectedFormularyListingEventHandler</env-entry-value>
+      </env-entry>
+
+<!--  NDC Exclusion -->
+     <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.facade.event.NDCExclusionListingEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.facade.handler.NDCExclusionListingEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.DeleteNDCExclusionEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.DeleteNDCExclusionEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.AddNDCExclusionEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.AddNDCExclusionEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.UpdateNDCExclusionEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.UpdateNDCExclusionEventHandler</env-entry-value>
+      </env-entry>
+
+<!--  Auto Exclusion/inclusion -->
+     <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.facade.event.NDCAutoExclusionListingEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.facade.handler.NDCAutoExclusionListingEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.FormularyAutoExclusionListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.FormularyAutoExclusionListingEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.FormularyAutoInclusionListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.FormularyAutoInclusionListingEventHandler</env-entry-value>
+      </env-entry>
+
+<!--  ErrorCorrection -->
+     <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.facade.event.ErrorCorrectionListingEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.facade.handler.ErrorCorrectionListingEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.AddErrorCorrectionEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.AddErrorCorrectionEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.DeleteErrorCorrectionEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.DeleteErrorCorrectionEventHandler</env-entry-value>
+      </env-entry>
+
+<!--  Run Invoice-->
+     <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.facade.event.RunInvoiceEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.facade.handler.RunInvoiceEventHandler</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.facade.event.ContractSelectionListingEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.facade.handler.ContractSelectionListingEventHandler</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.facade.event.QueueListingEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.facade.handler.QueueListingEventHandler</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.facade.event.ArchiveAdjustmentInvoiceEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.facade.handler.ArchiveAdjustmentInvoiceEventHandler</env-entry-value>
+      </env-entry>
+
+<!--  NCPDP Files-->
+     <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.facade.event.InvoiceListingEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.facade.handler.InvoiceListingEventHandler</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.facade.event.RunNCPDPSummaryEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.facade.handler.RunNCPDPSummaryEventHandler</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.facade.event.RunNCPDPDetailEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.facade.handler.RunNCPDPDetailEventHandler</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.facade.event.NCPDPInvoiceSelectionListingEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.facade.handler.NCPDPInvoiceSelectionListingEventHandler</env-entry-value>
+      </env-entry>
+
+<!--  APC Files-->
+     <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.facade.event.RunAPCFileEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.facade.handler.RunAPCFileEventHandler</env-entry-value>
+      </env-entry>
+
+<!--  Cascading Dates-->
+     <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.facade.event.CascadeTermDateContractEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.facade.handler.CascadeTermDateContractEventHandler</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.facade.event.CascadeTermDateBasketEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.facade.handler.CascadeTermDateBasketEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+       <env-entry-name>event/com.advpcs.rebates.facade.event.CascadeTermDateBrandEvent</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>com.advpcs.rebates.facade.handler.CascadeTermDateBrandEventHandler</env-entry-value>
+      </env-entry>
+
+ <!-- Gather/Refresh screen -->
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.RefreshCycleListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.RefreshCycleListingEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.UpdateRefreshCyclesEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.UpdateRefreshCyclesEventHandler</env-entry-value>
+      </env-entry>
+
+ <!-- Force Gather screen -->
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.ForceGatherBatchListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.ForceGatherBatchListingEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.UpdateForceGatherBatchEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.UpdateForceGatherBatchEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.AddForceGatherBatchEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.AddForceGatherBatchEventHandler</env-entry-value>
+      </env-entry>
+
+ <!-- Admin Fee Adjustment screen -->
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.AdminFeeListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.AdminFeeListingEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.UpdateAdminFeeEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.UpdateAdminFeeEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.AddAdminFeeEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.AddAdminFeeEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.DeleteAdminFeeEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.DeleteAdminFeeEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.AdminFeeNdcValidationEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.AdminFeeNdcValidationEventHandler</env-entry-value>
+      </env-entry>
+
+
+ <!-- Lists -->
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.ListListingEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.ListListingEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.UpdateListEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.UpdateListEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.AddListEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.AddListEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.DeleteListEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.DeleteListEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.UpdateListRuleEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.UpdateListRuleEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.AddListRuleEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.AddListRuleEventHandler</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>event/com.advpcs.rebates.facade.event.DeleteListRuleEvent</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>com.advpcs.rebates.facade.handler.DeleteListRuleEventHandler</env-entry-value>
+      </env-entry>
+
+
+<!-- SQL : Manufacturer   -->
+
+      <env-entry>
+        <env-entry-name>ManufacturerListingDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>select a.pico_no,a.mfg_nam,b.media_type_desc,a.addr_1,a.addr_2, a.city,a.state,a.zip,a.cntct_frst_nam,a.cntct_last_nam, a.tlphn,a.email,a.fax,a.cntct_addr_1,a.cntct_addr_2,a.cntct_city,a.cntct_state,a.cntct_zip,a.title from t_rbate_mfg a,t_media_type b where  a.media_type_id =  b.media_type_id order by a.pico_no  asc</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>UpdateManufacturerDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>update t_rbate_mfg set mfg_nam = ?,addr_1 = ?,addr_2 = ?,city = ?,state = ?,zip = ?,tlphn = ?,cntct_frst_nam = ?,cntct_last_nam = ?,fax = ?,email = ?,cntct_addr_1 = ?,cntct_addr_2 = ?,cntct_city = ?, cntct_state = ?,cntct_zip = ?,title = ?,media_type_id = (select media_type_id from t_media_type where upper(media_type_desc) = ? and rownum = 1) where pico_no = ?</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>AddManufacturerDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>{call pk_manufacturer.add_manufacturer(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}</env-entry-value>
+       </env-entry>
+
+<!-- SQL : Contract   -->
+
+       <env-entry>
+        <env-entry-name>AddContractDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+     <!--   <env-entry-value>{call pk_contract.add_contract(?,?,?,?,?,?,?,?,?)}</env-entry-value> -->
+        <env-entry-value>{call pk_fe_contract.prc_add_contract(?,?,?,?,?,?,?,?,?,?)}</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>ContractListingDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>select a.pico_no,a.cntrc_gid,a.cntrc_id,b.rbate_cycle_desc,a.notes,a.cntrc_eff_date,a.cntrc_end_date from t_cntrc a,t_rbate_cycle_type b where  a.rbate_cycle_type_id =  b.rbate_cycle_type_id and  a.pico_no = ? order by a.cntrc_id  asc</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>UpdateContractDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+     <!--   <env-entry-value>{call pk_contract.edit_contract(?,?,?,?,?)}</env-entry-value> -->
+        <env-entry-value>{call pk_fe_contract.prc_edit_contract(?,?,?,?,?,?)}</env-entry-value>
+      </env-entry>
+
+<!-- SQL : Basket   -->
+
+<!-- removed unit_basis from market basket sql-->
+      <env-entry>
+        <env-entry-name>MarketBasketListingDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>select a.bskt_gid,a.bskt_nam,a.eff_date,a.end_date,a.mrkt_shr_type,a.cntrl_no,b.cntrc_id from t_bskt a,t_cntrc b where a.cntrc_gid = ? and a.cntrc_gid = b.cntrc_gid</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>AddMarketBasketDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>insert into t_bskt(bskt_gid,cntrc_gid,bskt_nam,eff_date,end_date,mrkt_shr_type,cntrl_no, usr_gid) (select ?,b.cntrc_gid,?,?,?,?,?,? from t_cntrc b where upper(trim(b.cntrc_id)) = ? )</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>UpdateMarketBasketDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>update t_bskt set cntrc_gid = (select a.cntrc_gid from t_cntrc a where upper(trim(a.cntrc_id)) = ?),bskt_nam = ?,eff_date = ?,end_date = ?,mrkt_shr_type = ?,cntrl_no = ?,usr_gid = ?  where bskt_gid = ?</env-entry-value>
+      </env-entry>
+
+   <!-- SQL for ReferenceListing   -->
+
+    <env-entry>
+       <env-entry-name>MarketShareTypeListingDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select mrkt_shr_type from t_mrkt_shr_type order by mrkt_shr_type</env-entry-value>
+    </env-entry>
+
+   <env-entry>
+      <env-entry-name>RebateIdListingDAO-SQL</env-entry-name>
+      <env-entry-type>java.lang.String</env-entry-type>
+      <env-entry-value>select rbate_id from t_rbate_id order by rbate_id</env-entry-value>
+   </env-entry>
+
+   <env-entry>
+       <env-entry-name>MediaTypeListingDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select distinct media_type_desc from t_media_type</env-entry-value>
+    </env-entry>
+
+   <env-entry>
+       <env-entry-name>CycleListingDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select distinct rbate_cycle_desc from t_rbate_cycle_type</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+       <env-entry-name>LCMListingDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select lcm_code from t_lcm order by lcm_code</env-entry-value>
+    </env-entry>
+
+    <env-entry>
+       <env-entry-name>PharmacyListingDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select nabp_code from v_phmcy where  nabp_code like ?</env-entry-value>
+    </env-entry>
+
+   <env-entry>
+       <env-entry-name>SourceCodeListingDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select extnl_src_code from v_extnl_src_code</env-entry-value>
+    </env-entry>
+
+     <env-entry>
+       <env-entry-name>CycleDateListingDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select a.rbate_cycle_gid, b.rbate_cycle_desc,a.cycle_start_date,a.cycle_end_date, a.rbate_cycle_status from t_rbate_cycle a,t_rbate_cycle_type b where a.rbate_cycle_type_id = b.rbate_cycle_type_id ORDER BY a.rbate_cycle_type_id desc, rbate_cycle_gid</env-entry-value>
+      </env-entry>
+
+<!-- SQL : Reason Code  -->
+   <env-entry>
+       <env-entry-name>ReasonCodeListingDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select distinct excpt_rsn from t_excpt_code</env-entry-value>
+    </env-entry>
+
+   <env-entry>
+       <env-entry-name>ReasonCodeListingGlobalExcDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select distinct excpt_rsn from t_excpt_code where screen_code = 1</env-entry-value>
+    </env-entry>
+
+   <env-entry>
+       <env-entry-name>ReasonCodeListingRebateLvlDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select distinct excpt_rsn from t_excpt_code where screen_code = 2</env-entry-value>
+    </env-entry>
+
+   <env-entry>
+       <env-entry-name>ReasonCodeListingNDCExcDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select distinct excpt_rsn from t_excpt_code where screen_code = 3</env-entry-value>
+    </env-entry>
+
+ <!-- SQL : Rollup   -->
+
+      <env-entry>
+        <env-entry-name>RollupListingDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>select b.rllp_gid,trim(a.rollp_nam) rollp_nam,trim(b.rllp_type) rllp_type,trim(b.rllp_value) rllp_value from t_rllp a, t_rllp_rule b where a.rllp_gid = b.rllp_gid and b.bskt_gid = ?</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>AddRollupDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>{call pk_rollup.add_rollup (?,?,?,?) }</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>DeleteRollupRuleDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>delete from t_rllp_rule where rllp_gid = ? and bskt_gid = ? and upper(trim(rllp_type)) = ? and upper(trim(rllp_value)) = ?</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+         <env-entry-name>DeleteRollupDAO-SQL</env-entry-name>
+         <env-entry-type>java.lang.String</env-entry-type>
+         <env-entry-value>{call pk_rollup.delete_rollup ( ?, ?) }</env-entry-value>
+      </env-entry>
+
+ <!-- SQL : Global exclusion   -->
+
+      <env-entry>
+        <env-entry-name>GlobalExclusionListingDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>select a.glbl_excpt_gid,a.rbate_id,a.nabp_code,b.excpt_rsn from t_glbl_excpt a, t_excpt_code b where a.excpt_id = b.excpt_id</env-entry-value>
+      </env-entry>
+
+       <env-entry>
+        <env-entry-name>AddGlobalExclusionDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>insert into t_glbl_excpt (glbl_excpt_gid,rbate_id,excpt_id,nabp_code) (select ?,?, b.excpt_id, ? from t_excpt_code b where upper(trim(b.excpt_rsn)) = ? and rownum = 1)</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+        <env-entry-name>DeleteGlobalExclusionDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>delete from t_glbl_excpt where glbl_excpt_gid = ?</env-entry-value>
+      </env-entry>
+
+ <!-- SQL : NDC   -->
+
+       <env-entry>
+        <env-entry-name>NDCListingDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>select a.bskt_drug_gid,a.drug_gid,b.ndc_code,a.cntrc_flag,a.mrkt_shr_flag,a.eff_date,a.end_date,b.strgh_desc,b.pkg_desc,b.dsg_form, b.route_name, b.drug_class,b.gnrc_prdct_ind,b.unit_dsg_code,b.inst_prdct_ind,b.rpkg_ind, a.prmtd_drug_denom_exclude_flag from t_bskt_drug a, dma_rbate2.v_drug_remote b where a.drug_gid = b.drug_gid and a.brnd_nam = ? and a. bskt_gid = ?</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+         <env-entry-name>AddNDCDAO-SQL</env-entry-name>
+         <env-entry-type>java.lang.String</env-entry-type>
+         <env-entry-value>insert into t_bskt_drug (bskt_drug_gid,drug_gid,bskt_gid,cntrc_flag,mrkt_shr_flag,brnd_nam,eff_date,end_date, prmtd_drug_denom_exclude_flag, usr_gid) values(?,?,?,?,?,?,?,?,?,?)</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+         <env-entry-name>DeleteNDCDAO-SQL</env-entry-name>
+         <env-entry-type>java.lang.String</env-entry-type>
+         <env-entry-value>delete from t_bskt_drug where bskt_drug_gid = ? </env-entry-value>
+      </env-entry>
+
+      <env-entry>
+         <env-entry-name>UpdateNDCDAO-SQL</env-entry-name>
+         <env-entry-type>java.lang.String</env-entry-type>
+         <env-entry-value>update t_bskt_drug  set cntrc_flag= ?,mrkt_shr_flag = ?,eff_date =?,end_date = ?, prmtd_drug_denom_exclude_flag = ?, usr_gid = ? where bskt_drug_gid = ?</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+         <env-entry-name>ScanNDCDAO-SQL</env-entry-name>
+         <env-entry-type>java.lang.String</env-entry-type>
+         <env-entry-value>select a.drug_gid, a.ndc_code, a.strgh_desc, a.pkg_desc,a.dsg_form, a.route_name, a.drug_class,a.gnrc_prdct_ind,a.unit_dsg_code,a.inst_prdct_ind,a.rpkg_ind from dma_rbate2.v_drug_remote a where brand_name = ? minus select a.drug_gid, b.ndc_code, b.strgh_desc, b.pkg_desc,b.dsg_form, b.route_name, b.drug_class,b.gnrc_prdct_ind,b.unit_dsg_code,b.inst_prdct_ind,b.rpkg_ind from t_bskt_drug a, dma_rbate2.v_drug_remote b where a.brnd_nam = ? and a.bskt_gid = ? and a.drug_gid = b.drug_gid</env-entry-value>
+      </env-entry>
+
+ <!-- SQL : Brand   -->
+
+       <env-entry>
+         <env-entry-name>BrandListingDAO-SQL</env-entry-name>
+         <env-entry-type>java.lang.String</env-entry-type>
+         <env-entry-value>select brnd_nam,cntrc_flag,eff_date,end_date from  t_bskt_brnd where bskt_gid = ?</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+         <env-entry-name>DeleteBrandDAO-SQL</env-entry-name>
+         <env-entry-type>java.lang.String</env-entry-type>
+         <env-entry-value>{call pk_fe_brand.prc_delete_brand (?,?) }</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+         <env-entry-name>UpdateBrandDAO-SQL</env-entry-name>
+         <env-entry-type>java.lang.String</env-entry-type>
+         <env-entry-value>update t_bskt_brnd set eff_date =?,end_date = ?, usr_gid = ? where  bskt_gid = ? and brnd_nam = ?</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+         <env-entry-name>SearchBrandsDAO-SQL</env-entry-name>
+         <env-entry-type>java.lang.String</env-entry-type>
+         <env-entry-value>select distinct brand_name from dma_rbate2.v_drug_remote  where upper(brand_name) like ? </env-entry-value>
+      </env-entry>
+
+      <env-entry>
+         <env-entry-name>AddBrandDAO-SQL</env-entry-name>
+         <env-entry-type>java.lang.String</env-entry-type>
+         <env-entry-value>{call pk_fe_brand.prc_add_brand (?,?,?,?) }</env-entry-value>
+      </env-entry>
+
+ <!-- SQL : RebateLevel and Tier  -->
+
+    <env-entry>
+        <env-entry-name>DeleteRebateLevelRuleDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>{call pk_fe_rebate_level.delete_level_rule(?,?)}</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+        <env-entry-name>DeleteRebateLevelDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>{call pk_fe_rebate_level.delete_level(?,?)}</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>RebateLevelListingDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>select rbate_id,pk_common.get_reason(excpt_id) excpt_rsn,rbate_lvl_rule_gid,rbate_lvl_id,pk_common.get_external_id(frmly_gid) frmly_extnl_id,lcm_code,nabp_code,prior_athzn_flag, r.list_gid, l.list_name from dma_rbate2.t_rbate_lvl_rule r, dma_rbate2.t_list l where r.list_gid = l.list_gid(+) and bskt_gid = ?</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>AddRebateLevelRuleDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>{call pk_fe_rebate_level.add_level(?,?,?,?,?,?,?,?,?,?,?)}</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>TierListingDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>select tier_id,tier_gid,mrkt_tier_pctg from t_tier_asgn where  upper(trim(rbate_lvl_id)) = ?  and bskt_gid = ?</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+        <env-entry-name>AddTierDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>insert into t_tier_asgn(tier_gid,tier_id,bskt_gid,rbate_lvl_id,mrkt_tier_pctg) values (?,?,?,?,?)</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+        <env-entry-name>DeleteTierDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>delete  from t_tier_asgn where tier_gid = ?</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+        <env-entry-name>UpdateTierDAO-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>update t_tier_asgn set tier_id = ?,mrkt_tier_pctg = ? where tier_gid = ?</env-entry-value>
+      </env-entry>
+
+ <!-- SQL : Miscellaneous   -->
+      <env-entry>
+        <env-entry-name>ReasonCode-SQL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>select excpt_id from t_excpt_code b where upper(trim(b.excpt_rsn)) = ?  and rownum = 1</env-entry-value>
+      </env-entry>
+
+<!-- SQL : Formulary   -->
+
+    <env-entry>
+       <env-entry-name>FormularyListingDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>{? = call pk_formulary.select_formulary( ?, ?) }</env-entry-value>
+    </env-entry>
+
+     <env-entry>
+       <env-entry-name>AddSelectedFormularyDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>insert into t_bskt_frmly(bskt_gid,frmly_gid,eff_date,end_date)values(?,?,?,?)</env-entry-value>
+    </env-entry>
+
+     <env-entry>
+       <env-entry-name>DeleteSelectedFormularyDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>delete from t_bskt_frmly where bskt_gid= ? and frmly_gid = ? and eff_date = ? and end_date = ?</env-entry-value>
+    </env-entry>
+
+<!--  SQL : NDC Exclusion -->
+     <env-entry>
+       <env-entry-name>NDCExclusionListingDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select a.ndc_excpt_gid,b.excpt_rsn,c.ndc_code,d.frmly_extnl_id,a.eff_date,a.end_date from t_bskt_frmly_drug_excpt a, t_excpt_code b, dma_rbate2.v_drug_remote c ,v_frmly d where a.excpt_id = b.excpt_id and a.bskt_gid = ? and d.frmly_gid = a.frmly_gid and c.drug_gid = a.drug_gid</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+       <env-entry-name>AddNDCExclusionDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>{call pk_exclusion.add_ndc_exclusion(?,?,?,?,?,?,?,?,?)}</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+       <env-entry-name>DeleteNDCExclusionDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>delete from t_bskt_frmly_drug_excpt where ndc_excpt_gid = ?</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+       <env-entry-name>UpdateNDCExclusionDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>update t_bskt_frmly_drug_excpt set eff_date = ? , end_date = ?, bskt_gid = ? ,frmly_gid = (select frmly_gid from v_frmly where upper(trim(frmly_extnl_id)) = ? ), excpt_id = (select excpt_id from t_excpt_code where upper(trim(excpt_rsn)) = ? ) ,drug_gid = (select drug_gid from dma_rbate2.v_drug_remote where upper(trim(ndc_code)) = ?) where ndc_excpt_gid = ?</env-entry-value>
+      </env-entry>
+
+<!--  SQL : Auto Exclusion/Inclusion -->
+     <env-entry>
+       <env-entry-name>NDCAutoExclusionListingDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select b.frmly_extnl_id,c.ndc_code,a.eff_date,a.end_date from t_fe_frmly_drug_date_excpt a, dma_rbate2.v_drug_remote c ,v_frmly b where a.frmly_gid = b.frmly_gid and a.drug_gid = c.drug_gid and a.cycle_gid = ? and a.bskt_gid = ?</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+       <env-entry-name>FormularyAutoExclusionListingDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select b.frmly_extnl_id, b.frmly_desc,a.eff_date,a.end_date from t_fe_frmly_drug_date a, v_frmly b where a.frmly_gid = b.frmly_gid and a.cycle_gid = ?</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+       <env-entry-name>FormularyAutoInclusionListingDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select b.frmly_extnl_id, b.frmly_desc,a.eff_date,a.end_date from t_fe_frmly_date a, v_frmly b where a.frmly_gid = b.frmly_gid and a.cycle_gid = ? and a.bskt_gid = ?</env-entry-value>
+      </env-entry>
+
+<!--  SQL : Error Correction -->
+		  
+		  
+     <env-entry>
+       <env-entry-name>ErrorCorrectionListingDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select b.frmly_extnl_id,a.err_crctn_gid,a.eff_date,a.end_date,a.extnl_src_code,a.extnl_lvl_id1,a.extnl_lvl_id2,a.extnl_lvl_id3,a.extnl_lvl_id4,a.extnl_lvl_id5,a.plan_code,a.lcm_code,a.rbate_id,a.orgnl_rbate_id, a.from_lcm_code from t_err_crctn a, v_frmly_all b where a.frmly_gid = b.frmly_gid(+) </env-entry-value>
+      </env-entry>
+
+     <env-entry>
+       <env-entry-name>AddErrorCorrectionDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>insert into t_err_crctn(frmly_gid,err_crctn_gid,eff_date,end_date,extnl_src_code,extnl_lvl_id1,extnl_lvl_id2,extnl_lvl_id3,extnl_lvl_id4,extnl_lvl_id5,plan_code,lcm_code,from_lcm_code,rbate_id,orgnl_rbate_id)(select pk_common.get_frmly_id(?),?,?,?,?,?,?,?,?,?,?,?,?,?,?  from dual )</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+       <env-entry-name>DeleteErrorCorrectionDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>delete from t_err_crctn where err_crctn_gid = ?</env-entry-value>
+      </env-entry>
+
+<!--  SQL : Login/logout -->
+     <env-entry>
+       <env-entry-name>LoginDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select a.usr_gid,a.frst_nam,a.lst_nam,b.usr_privs_nam, a.email from t_usr a,t_usr_privs b where a.usr_privs_gid = b.usr_privs_gid and upper(trim(a.login_id)) = ? and exists (select 1 from t_usr a where upper(trim(a.login_id)) = ? and trim(a.psswd) = ? )</env-entry-value>
+      </env-entry>
+
+<!--  SQL : Run Invoices -->
+     <env-entry>
+       <env-entry-name>RunInvoiceDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>{call insert_inv_gen_entry(?,?,?,?,?,?)}</env-entry-value>
+      </env-entry>
+  <!--   <env-entry>
+       <env-entry-name>ContractSelectionListingDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>SELECT rcycl.rbate_cycle_gid, cntrc.cntrc_gid, mfg.mfg_nam, cntrc.cntrc_eff_date,cntrc.cntrc_end_date,(SELECT inv_gid FROM t_inv inv WHERE inv.cntrc_gid = cntrc.cntrc_gid AND inv.rbate_cycle_gid = rcycl.rbate_cycle_gid) AS invGid,(SELECT run_date FROM t_inv inv WHERE inv.cntrc_gid = cntrc.cntrc_gid AND inv.rbate_cycle_gid = rcycl.rbate_cycle_gid) AS runDate,DECODE (contract_gid,null,(SELECT rbate_inv_status FROM t_inv inv WHERE inv.cntrc_gid=cntrc.cntrc_gid AND inv.rbate_cycle_gid=rcycl.rbate_cycle_gid), 'Q') AS invStatus, ctype.rbate_cycle_desc FROM t_rbate_cycle rcycl,t_rbate_cycle_type ctype,t_cntrc cntrc,t_rbate_mfg mfg,inv_gen_queue que WHERE rcycl.rbate_cycle_gid = ? AND rcycl.rbate_cycle_type_id=ctype.rbate_cycle_type_id AND cntrc.rbate_cycle_type_id=rcycl.rbate_cycle_type_id AND cntrc.cntrc_eff_date <= rcycl.cycle_end_date AND cntrc.cntrc_end_date >= rcycl.cycle_start_date AND mfg.pico_no=cntrc.pico_no AND que.contract_gid (+)= cntrc.cntrc_gid ORDER BY cntrc_gid</env-entry-value>
+      </env-entry> -->
+
+<!--  SQL : NCPDP Files-->
+     <env-entry>
+       <env-entry-name>RunNCPDPSummaryDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>{call insert_ncpdp_market_entry(?,?,?,?,?,?)}</env-entry-value>
+      </env-entry>
+     <env-entry>
+       <env-entry-name>RunNCPDPDetailDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>{call insert_ncpdp_entry(?,?,?,?,?,?,?)}</env-entry-value>
+      </env-entry>
+      <env-entry>
+       <env-entry-name>InvoiceListingDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select i.inv_gid, i.cntrc_gid, i.rbate_cycle_gid, c.cycle_end_date, c.cycle_start_date from t_inv i, t_rbate_cycle c where i.rbate_cycle_gid = c.rbate_cycle_gid and i.inv_status = 'C' and cntrc_gid = ?</env-entry-value>
+      </env-entry>
+
+<!--  SQL : APC Files-->
+     <env-entry>
+       <env-entry-name>RunAPCFileDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>{call insert_process_claims_entry(?,?,?,?,?,?)}</env-entry-value>
+      </env-entry>
+
+<!--  SQL : Cascading Dates-->
+     <env-entry>
+       <env-entry-name>CascadeTermDateContractDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>{call pk_fe_cascading_dates.prc_cascade_cntrc(?,?,?,?)}</env-entry-value>
+      </env-entry>
+
+     <env-entry>
+       <env-entry-name>CascadeTermDateBasketDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>{call pk_fe_cascading_dates.prc_cascade_bskt(?,?,?,?)}</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+       <env-entry-name>CascadeTermDateBrandDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>{call pk_fe_cascading_dates.prc_cascade_brnd(?,?,?,?,?)}</env-entry-value>
+      </env-entry>
+
+<!-- SQL : Gather/Refresh screen -->
+      <env-entry>
+       <env-entry-name>RefreshCycleListingDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select c.rbate_cycle_gid,t.rbate_cycle_desc,c.cycle_start_date,c.cycle_end_date,c.rbate_cycle_status,c.alv_refresh_ind,c.rxc_refresh_ind,c.ruc_refresh_ind,c.cycle_lock_dt from dma_rbate2.t_rbate_cycle c, dma_rbate2.t_rbate_cycle_type t where c.rbate_cycle_type_id = t.rbate_cycle_type_id </env-entry-value>
+      </env-entry>
+      <env-entry>
+       <env-entry-name>UpdateRefreshCyclesDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>update dma_rbate2.t_rbate_cycle set rbate_cycle_status = ?, alv_refresh_ind = ?, rxc_refresh_ind = ?, ruc_refresh_ind = ?, usr_gid = ? where rbate_cycle_gid = ?</env-entry-value>
+      </env-entry>
+
+<!-- SQL : Force Gather screen -->
+      <env-entry>
+       <env-entry-name>ForceGatherBatchListingDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select f.batch_gid, f.batch_date, f.cycle_gid, f.processed_ind, f.extnl_src_code , f.split_batch_ind from dma_rbate2.t_force_gather_cntl f</env-entry-value>
+      </env-entry>
+      <env-entry>
+       <env-entry-name>UpdateForceGatherBatchDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>update dma_rbate2.t_force_gather_cntl set batch_date = ?, cycle_gid = ?, extnl_src_code = ?, usr_gid = ?, upd_date = ? where batch_gid = ?</env-entry-value>
+      </env-entry>
+      <env-entry>
+       <env-entry-name>AddForceGatherBatchDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>insert into dma_rbate2.t_force_gather_cntl (batch_gid, batch_date, cycle_gid, extnl_src_code, usr_gid) values (?,?,?,?,?)</env-entry-value>
+      </env-entry>
+
+<!-- SQL : Admin Fee Adjustment screen -->
+      <env-entry>
+       <env-entry-name>AdminFeeListingDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select ndc_code, drug_gid, threshold, mod_fctr from dma_rbate2.t_scrc_adjust_ndcs</env-entry-value>
+      </env-entry>
+      <env-entry>
+       <env-entry-name>UpdateAdminFeeDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>update dma_rbate2.t_scrc_adjust_ndcs set threshold = ?, mod_fctr = ?, updt_dt = ?, usr_gid = ? where drug_gid = ?</env-entry-value>
+      </env-entry>
+      <env-entry>
+       <env-entry-name>AddAdminFeeDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>insert into dma_rbate2.t_scrc_adjust_ndcs (ndc_code,drug_gid,threshold,mod_fctr,usr_gid) values(?,?,?,?,?)</env-entry-value>
+      </env-entry>
+      <env-entry>
+       <env-entry-name>DeleteAdminFeeDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>delete from dma_rbate2.t_scrc_adjust_ndcs where drug_gid = ?</env-entry-value>
+      </env-entry>
+      <env-entry>
+       <env-entry-name>AdminFeeNdcValidationDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select drug_gid from dma_rbate2.v_drug_remote where ndc_code = ?</env-entry-value>
+      </env-entry>
+
+
+<!-- SQL : Lists -->
+      <env-entry>
+       <env-entry-name>ListListingDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select list_gid, list_name from dma_rbate2.t_list</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+       <env-entry-name>ListRuleListingDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>SELECT list_rule_gid, lcm_code, prcdn_order, nabp_code, rbate_id, frmly_id FROM dma_rbate2.t_list_rule WHERE list_gid = ?</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+       <env-entry-name>AddListDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>insert into dma_rbate2.t_list (list_gid, list_name, insrt_date, last_updt_usr) values (?,?, SYSDATE, ?)</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+       <env-entry-name>UpdateListDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>update dma_rbate2.t_list set list_name = ?, last_updt_usr = ? where list_gid = ?</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+       <env-entry-name>DeleteListDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>delete from dma_rbate2.t_list where list_gid = ?</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+       <env-entry-name>DeleteListBasketReferenceCheckDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select c.pico_no, b.bskt_nam from dma_rbate2.t_rbate_lvl_rule r,dma_rbate2.t_bskt b,dma_rbate2.t_cntrc c WHERE r.bskt_gid = b.bskt_gid and b.cntrc_gid = c.cntrc_gid</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+       <env-entry-name>AddListRuleDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>insert into dma_rbate2.t_list_rule (list_rule_gid, list_gid, lcm_code, frmly_gid, prcdn_order, nabp_code, rbate_id, frmly_id,insrt_date, last_updt_usr) values (?,?,?,?,?,?,?,?, SYSDATE, ?)</env-entry-value>
+      </env-entry>
+
+      <env-entry>
+       <env-entry-name>AddListRuleGetFrmlyGidDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>select f.frmly_gid, f.frmly_desc from dma_rbate2.v_frmly f where f.frmly_desc = ? </env-entry-value>
+      </env-entry>
+
+
+      <env-entry>
+       <env-entry-name>DeleteListRuleDAO-SQL</env-entry-name>
+       <env-entry-type>java.lang.String</env-entry-type>
+       <env-entry-value>delete from dma_rbate2.t_list_rule where list_rule_gid = ?</env-entry-value>
+      </env-entry>
+
+
+    </session>
+    </enterprise-beans>
+ </ejb-jar>

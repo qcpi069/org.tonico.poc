@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE POWERMART SYSTEM "powrmart.dtd">
+<POWERMART CREATION_DATE="10/30/2013 12:08:33" REPOSITORY_VERSION="182.91">
+<REPOSITORY NAME="PCRepos_Caremark9_PRD1" VERSION="182" CODEPAGE="MS1252" DATABASETYPE="DB2">
+<FOLDER NAME="Shared_Rebates_RCI" GROUP="" OWNER="rebates_session_operator" SHARED="SHARED" DESCRIPTION="Shared Objects" PERMISSIONS="rwx---r--" UUID="482f1f88-6499-4f1e-95c4-5f8d78fe0b3e">
+    <TRANSFORMATION DESCRIPTION ="This lookup was added for ITPR002957 FEP 2012 for Rebates.   &#xD;&#xA;Modified 5/7/2012 for project ITRP000634.&#xD;&#xA;&#xD;&#xA;This expression will evaluate the response from the LKP_RCIT_PMCY_NTWK results and possibly change the BCA SPCL_DRUG_CD value being written out.&#xD;&#xA;&#xD;&#xA;If the lookup returns a SPCL_DRUG_CD then that means this claims RBAT_ID/PHCY_NTWK_ID/DSPN_DT (range) was found in the RCIT_PMCY_NTWK table, and therefore the BCA SPCL_DRUG_CD value needs to be overridden to the value returned.  Otherwise, if the rebate id is found on the table and the FEP_CNTL_CD is 1, override the value with a 0, else use the input specialty drug code." NAME ="EXP_Evaluate_PMCY_NTWK_ID" OBJECTVERSION ="1" REUSABLE ="YES" TYPE ="Expression" VERSIONNUMBER ="1">
+        <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="in_RBAT_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+        <TRANSFORMFIELD DATATYPE ="small integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="in_FEP_CLNT_CD" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="5" SCALE ="0"/>
+        <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="in_DSPN_DT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="29" SCALE ="9"/>
+        <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="in_PMCY_NTWK_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+        <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This input only port is from the EXP_CLAIM expression, and can possibly be overridden for the BCA target field." NAME ="in_SPCL_DRUG_CD" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="1" SCALE ="0"/>
+        <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This output only port will evaluate the lkp_SPCL_DRUG_CD, and when it is NULL, will assign the in_SPCL_DRUG_CD value.  If the lkp_SPCL_DRUG_CD is NOT null, then that means that the lookup value from the LKP_RCIT_SPCL_NTWK field SPCL_DRUG_CD will be used for the BCA target." EXPRESSION ="IIF(ISNULL(in_RBAT_ID),in_SPCL_DRUG_CD,&#xD;&#xA;  IIF(ISNULL(in_FEP_CLNT_CD),in_SPCL_DRUG_CD,&#xD;&#xA;    IIF(ISNULL(:LKP.LKP_RCIT_SPCL_NTWK(in_RBAT_ID,in_PMCY_NTWK_ID,in_DSPN_DT)),&#xD;&#xA;      DECODE(in_FEP_CLNT_CD, 0, in_SPCL_DRUG_CD,&#xD;&#xA;                                                                     1, &apos;0&apos;),&#xD;&#xA;      :LKP.LKP_RCIT_SPCL_NTWK(in_RBAT_ID,in_PMCY_NTWK_ID,in_DSPN_DT))))" EXPRESSIONTYPE ="GENERAL" NAME ="out_SPCL_DRUG_CD" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="1" SCALE ="0"/>
+        <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+    </TRANSFORMATION>
+</FOLDER>
+</REPOSITORY>
+</POWERMART>

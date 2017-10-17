@@ -1,0 +1,266 @@
+<!--
+     Copy APC claims information to silver for a specific quarter from GDX
+     Datasource definition file datasource.xml is in the ./java/Common_java_db_interface/conf.
+     The XML file should reside under ./xml directory
+
+     Parameter 1 : Required, "dashdashmodel <model>". This should be the parameter passed into XML.
+                   Note: hyphenhyphen means the two dash characters.
+     Parameter 2 : Optional, has year and quarter info. format: "hyphenhyphenquarter  YYYY0Q"  'YYYY': 4 digit year,
+                  'Q':quarter number ('1', '2', '3', '4'). Example: hyphenhyphenquarter  200502 ,
+                   this should be the parameter passed into XML.
+                   Note: hyphenhyphen means the two characters. xml does not allow it in the comments, it is part
+                   of the reserved symbols.
+
+     Maestro Command with parameter:
+              ./scripts/Common_java_db_interface.ksh dashdashmodel XMD dashdashquarter 200701 <xml file name>
+              ./scripts/Common_java_db_interface.ksh dashdashmodel XMD <xml file name>
+-->
+<sqml>
+
+        <property name="TIMEOUT" value="0"/>
+
+        <!-- datasource.xml defines DB connection info. It should be under ./java/Common_java_db_interface/conf-->
+        <datasources resource="datasource.xml"/>
+
+        <!-- Set-up a try block to send an email on exception -->
+        <command type="try">
+        <try>
+
+        <!-- Query DB for current processing quarter info -->
+        <command type="run" datasource="gdxdb" rowName="rowQuarter"><![CDATA[
+
+                SELECT CAST(QUARTER_ID AS CHAR(6)) FROM VRAP.TCUR_INV_PRD WITH UR
+
+        ]]></command>
+
+        <!-- Command to set quarter, model parameters, either from DB or parameter-->
+        <command type="java"><![CDATA[
+
+                 String quarter ="";
+                 String oquarter ="";
+                 String model = "";
+                 String model_typ_cd = "";
+                 String y ="";
+                 String q ="";
+                 String apartition ="";
+                 String remtrg = "";
+
+                 //model and model type code
+                 model = script.getProperty("model");
+                 script.setProperty("model", model);
+
+                 if (model == null || model.trim().length() == 0 || model.trim().length()!= 3){
+                     // If invalid info throw error
+                     throw new Exception("Invalid model parameter! Should be in a format as 'GPO' " + model);
+                 }
+
+                 model_typ_cd = model.substring(0,1);
+                 script.setProperty("model_typ_cd", model_typ_cd);
+
+                 //quarter for GDX
+                 if (script.getProperty("quarter") == null) {
+                     quarter = script.getProperty("rowQuarter.1");
+                     if (quarter == null || quarter.trim().length()== 0){
+                         // If invalid info from database throw error
+                         throw new Exception("Processing quarter info not found in database ");
+                     }
+                 }
+                 else { //There is parameter 'quarter' passed in
+                     quarter = script.getProperty("quarter");
+                     if (quarter == null || quarter.trim().length()== 0 || quarter.trim().length() != 6){
+                         throw new Exception("Invalid quarter ");
+                     }
+                 }
+                 script.setProperty("quarter", quarter);
+
+                //get cycle id for oracle side
+                if (quarter.trim().length()== 6){
+                       y = quarter.substring(0, 4);
+                       q = quarter.substring(5, 6);
+                       oquarter = y+"4"+q;
+                       script.setProperty("oquarter",oquarter);
+                       apartition = "P_"+oquarter;
+                       script.setProperty("apartition",apartition);
+                }else {
+                       throw new Exception("Invalid quarter parameter! Should be in a format as '200702'.");
+                }
+
+                //-- Remove the Trigger file if remtrig is YES--
+                //remtrg
+                 remtrg = script.getProperty("remtrg");
+                 script.setProperty("remtrg", remtrg);
+
+                 if (remtrg == null || remtrg.trim().length() == 0){
+                     // If invalid info throw error
+                     throw new Exception("Invalid remtrg parameter! Should be 'YES' or 'NO' ");
+                 }
+
+                 System.out.println(" " );
+                 System.out.println("remtrg is " + remtrg );
+                 System.out.println("Removing File ****** /GDX/prod/input/GDX_NO_DUPLICATES_IN_APC.trg *****" );
+
+                 if ( remtrg.equals("YES")) {
+                         System.out.println(" " );
+                         System.out.println("We succeeded in removing the File ****** /GDX/prod/input/GDX_NO_DUPLICATES_IN_APC.trg *****" );
+                         System.out.println(" " );
+                        try {
+                                File triggerFile = new File("/GDX/prod/input/GDX_NO_DUPLICATES_IN_APC.trg");
+                                if(triggerFile.exists()) {
+                                        triggerFile.delete();
+                                        }
+                        } catch (IOException e) {throw new Exception("We can not remove the APC process continuation Trigger file, ****** /GDX/prod/input/GDX_NO_DUPLICATES_IN_APC.trg ***** ");
+                                                }
+                   }
+                   else {
+                         System.out.println(" " );
+                         System.out.println("We did not remove the File ****** /GDX/prod/input/GDX_NO_DUPLICATES_IN_APC.trg *****" );
+                         System.out.println(" " );
+                   }
+
+
+        ]]></command>
+
+        <!-- Truncate the claims partition for the quarter before the run-->
+        <command type="run" datasource="silver" transaction="true"><![CDATA[
+
+                 call dma_rbate2.PK_CYCLE_UTIL.TRUNCATE_PARTITION('A_${model}_RBATE_INV','${apartition}', 'APC ${oquarter}')
+
+        ]]></command>
+
+        <!-- Copy apc from GDX to Silver -->
+        <command type="copy" batch="500">
+                 <source type="sql" datasource="gdxdb"><![CDATA[
+
+                         SELECT
+                                ${oquarter} AS CYCLE_GID
+                               ,C.CLAIM_ID
+                               ,RPT_ID
+                               ,MDA_EXCPT_ID
+                               ,CAST(NULL AS VARCHAR(8)) AS MRKT_NAM
+                               ,PMT_ACC_DISCNT_AMT
+                               ,PMT_PRFMC_DISCNT_AMT
+                               ,PMT_ADMN_DISCNT_AMT
+                               ,RBAT_ID
+                               ,DSPNSD_QTY
+                               ,DLVRY_SYS_CD
+                               ,PMT_SYS_ELIG_CD
+                               ,FRMLY_SRC_CD
+                               ,FRMLY_ID
+                               ,LCM_CD
+                               ,PICO_NO
+                               ,AP_COMPNY_CD
+                               ,INV_FRMLY_STAT_CD
+                               ,CALC_BRND_XLAT_CD
+                               ,INCNTV_TYP_CD
+                          FROM VRAP.TAPC_CLAIMS_${model} C LEFT JOIN VRAP.TAPC_DUP_CLAIMS DC
+                               ON (
+                                   C.QUARTER_ID = DC.QUARTER_ID AND
+                                   C.CLAIM_ID = DC.CLAIM_ID AND
+                                   DC.MODEL_TYP_CD = '${model_typ_cd}'
+                                  )
+                         WHERE C.QUARTER_ID = ${quarter}
+                           AND (
+                                DC.CLAIM_ID IS NULL OR
+                                (DC.CLAIM_ID IS NOT NULL AND UPPER(DC.ALLW_IN_APC) = 'Y')
+                               )
+                          WITH UR
+
+                 ]]></source>
+
+                 <target
+                        type        = "queue"
+                        threadCount = "5">
+                        <target
+                                type           = "sql"
+                                datasource     = "silver"
+                                transaction    = "true"
+                                batch          = "500"
+                                reportInterval = "50000"
+                                queryTimeout   = "${TIMEOUT}"
+                         ><![CDATA[
+                                INSERT INTO DMA_RBATE2.A_${model}_RBATE_INV
+                                       (
+                                        CYCLE_GID
+                                       ,CLAIM_GID
+                                       ,RPT_ID
+                                       ,MDA_EXCPT_ID
+                                       ,MRKT_NAM
+                                       ,RBATE_ACCESS
+                                       ,RBATE_MRKT_SHR
+                                       ,RBATE_ADMIN_FEE
+                                       ,RBATE_ID
+                                       ,UNIT_QTY
+                                       ,DLVRY_SYS_CD
+                                       ,PYMT_SYS_ELIG_CD
+                                       ,FRMLY_SRC_CD
+                                       ,FRMLY_ID
+                                       ,LCM_CD
+                                       ,PICO_NO
+                                       ,AP_COMPNY_CD
+                                       ,INV_FRMLY_STAT_CD
+                                       ,CALC_BRND_XLAT_CD
+                                       ,INCNTV_TYP_CD
+                                       )
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                          ]]></target>
+                  </target>
+           </command>
+
+
+        </try>
+        <catch>
+
+        <!-- Send an email on error -->
+                <command
+                        type="mail"
+                        mailTo="${email_address}"
+                        mailFrom="GDX_apc_to_silver_copy@caremark.com"
+                        subject="[${region}] [ERROR] GDX APC to Silver Copy"
+                        contentType="text/html"
+                        throwsException="false"
+                ><![CDATA[
+                        <html>
+                        <head>
+                        <title>[ERROR] GDX APC to Silver Copy</title>
+                        </head>
+                        <body>
+                        <h3><u>[ERROR] GDX APC to Silver Copy</u></h3>
+
+                        <table cellpadding="2">
+                                <tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+                                <tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+                                <tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+                                #if (${system.getProperty('logfile')})
+                                        <tr>
+                                                <td><b>Log File:</b></td>
+                                                <td>
+                                                        ${system.getProperty('logfile')}
+                                                <td>
+                                        </tr>
+                                #end
+                        </table>
+
+                        <br>
+                        <br>
+
+                        #if (${script.getLastStatement()})
+                                <h3><u>Last Statement</u></h3>
+                                <font style="color: blue; font-size: small">
+                                ${script.getLastStatement()}
+                                </font>
+
+                                <br>
+                                <br>
+                        #end
+
+                        <h3><u>Stack Trace</u></h3>
+                        <pre style="color: red; font-size: small;">${stackTrace}</pre>
+                        </body>
+                        </html>
+                ]]></command>
+
+        </catch>
+        </command>
+</sqml>
+
+

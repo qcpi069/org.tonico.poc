@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="Cp1252"?>
+
+<!DOCTYPE application PUBLIC '-//Sun Microsystems, Inc.//DTD J2EE Application 1.2//EN' 'http://java.sun.com/j2ee/dtds/application_1_2.dtd'>
+
+<!-- @author    Jeff Ryan -->
+<!-- @version   $Revision:   1.1  $, $Date:   29 Jan 2002 15:58:28  $ -->
+
+<application>
+  <display-name>advpcsrx_rbate_reg</display-name>
+  <description>Application description</description>
+  <module>
+    <web>
+      <web-uri>advpcsrx_rbate_reg.war</web-uri>
+      <context-root>advpcsrx_rbate_reg</context-root>
+    </web>
+  </module>
+  <module>
+    <ejb>rbate_regEJB.jar</ejb>
+  </module>
+</application>
+

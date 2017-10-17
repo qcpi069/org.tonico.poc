@@ -1,0 +1,144 @@
+
+<!--
+     Update the GDX VRAP.TAPC_QTR_PRCS table during the run of the APC process.
+
+     Parameter 1 - the process id that the specific task needs to update in the TAPC_QTR_PRCS.
+     
+     Parameter 2 - what is the process doing - starting, ending, or erroring out?
+
+     This XML is executed from within another script process in the APC process.
+              ./scripts/Common_GDX_APC_Status_update.ksh dashdashprocessId 000 dashdashupdtFlg ABCD
+-->
+<sqml>
+        <property name="TIMEOUT" value="0"/>
+
+        <!-- datasource.xml defines DB connection info. It should be under ./conf-->
+        <datasources resource="datasource.xml"/>
+
+        <!-- Set-up a try block for the body -->
+        <command type="try">
+        <try>
+
+             <!-- Command to set processId and updtFlg parameters, from input parms -->
+             <command type="java"><![CDATA[
+
+                String processId ="";
+                String updtFlg = "";
+                String strtTs = "";
+                String endTs = "";
+                String prcsErrTs = "";
+                String prcsStatTxt = "";
+
+                 processId = script.getProperty("processId");
+                 if (processId == null){ 
+                     throw new Exception("Invalid input parameter for the Process ID. "+processId+"That was theprocess id");
+                 }
+ 
+                 updtFlg = script.getProperty("updtFlg");
+                 if (processId == null){ 
+                     throw new Exception("Invalid input parameter for the Update Flag. "+updtFlg+"That was the process id");
+                 }
+ 
+                System.out.println(" ");
+                 System.out.println(" ");
+                 System.out.println("processId :" +processId);
+                 System.out.println("updtFlg   :" +updtFlg);
+                 System.out.println(" ");
+                 System.out.println(" ");
+ 
+                if (updtFlg.equals("STRT")){
+                     System.out.println("Update Flag = START");
+                     strtTs="current timestamp";
+                     endTs = "NULL";
+                     prcsErrTs = "NULL";
+                     prcsStatTxt = "Running";
+                 }
+                 else if (updtFlg.equals("END")){
+                     System.out.println("Update Flag = END");
+                     strtTs="STRT_TS";
+                     endTs = "current timestamp";
+                     prcsErrTs = "NULL";
+                     prcsStatTxt = "Successful";
+                 }
+                 else if (updtFlg.equals("ERR")){
+                     System.out.println("Update Flag = ERR");
+                     strtTs="STRT_TS";
+                     endTs = "NULL";
+                     prcsErrTs = "current timestamp";
+                     prcsStatTxt = "Error-IT Investigating";
+                 }
+                 
+                 script.setProperty("processId",processId);
+                 script.setProperty("strtTs",strtTs);
+                 script.setProperty("endTs",endTs);
+                 script.setProperty("prcsErrTs",prcsErrTs);
+                 script.setProperty("prcsStatTxt",prcsStatTxt);
+
+                 ]]></command>
+
+                <command type="run" datasource="gdxprd"><![CDATA[
+
+                    update VRAP.TAPC_QTR_PRCS_EVENT    
+                        SET STRT_TS = ${strtTs}
+                           ,END_TS  = ${endTs}
+                           ,PRCS_ERR_TS   = ${prcsErrTs}
+                           ,PRCS_STAT_TXT = '${prcsStatTxt}'    
+                        WHERE PRCS_ID = ${processId}
+
+                ]]></command>
+
+        </try>
+        <catch>
+
+        <!-- Send an email on error -->
+                        <!-- Send an email on error -->
+                        <command
+                                type="mail"
+                                mailTo="${email_address}"
+                                mailFrom="Common_RPSDM_APC_Status_update.xml@caremark.com"
+                                subject="[ERROR] RPSDM APC Status update error"
+                                contentType="text/html"
+                                throwsException="false"
+                        ><![CDATA[
+                                <html>
+                                <head>
+                                <title>[ERROR] RPSDM APC Status update error</title>
+                                </head>
+                                <body>
+
+                                <h3><u>[ERROR] RPSDM APC Status update error</u></h3>
+
+                                <table cellpadding="2">
+                                        <tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+                                        <tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+                                        <tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+                                        #if (${system.getProperty('logfile')})
+                                                <tr>
+                                                        <td><b>Log File:</b></td>
+                                                        <td>
+                                                                ${system.getProperty('logfile')}
+                                                        <td>
+                                                </tr>
+                                        #end
+                                </table>
+
+                                <br>
+                                <br>
+                                #if (${script.getLastStatement()})
+                                        <h3><u>Last Statement</u></h3>
+                                        <font style="color: blue; font-size: small">
+                                        ${script.getLastStatement()}
+                                        </font>
+                                        <br>
+                                        <br>
+                                #end
+                                <h3><u>Stack Trace</u></h3>
+                                <pre style="color: red; font-size: small;">${stackTrace}</pre>
+                                </body>
+                                </html>
+                        ]]></command>
+                </catch>
+        </command>
+</sqml>
+
+

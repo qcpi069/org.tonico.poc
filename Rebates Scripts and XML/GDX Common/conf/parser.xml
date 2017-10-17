@@ -1,0 +1,86 @@
+<parsers>
+	
+	<record type="body" objectType="java.util.HashMap">
+		
+		<tokenizer type="fixed">
+			<field offset="0" length="5"/>
+			<field offset="5" length="5"/>
+			<field offset="10" length="10"/>
+		</tokenizer>
+		
+		<field
+			name="name"
+			position="0"
+			dataType="string"
+			trim="true"	
+		/>
+		<field
+			name="age"
+			position="1"
+			dataType="double"
+			trim="true"	
+		/>
+		<field
+			name="entryDate"
+			position="2"
+			dataType="date"
+			format="MM/dd/yy"
+			trim="true"	
+		/>
+	</record>
+	
+	<record type="body2" objectType="com.caremark.gdx.common.test.TRecord">
+		
+		<tokenizer type="fixed">
+			<field offset="0" length="5"/>
+			<field offset="5" length="5"/>
+			<field offset="10" length="10"/>
+		</tokenizer>
+		
+		<field
+			name="name"
+			position="0"
+			dataType="string"
+			trim="true"	
+		/>
+		<field
+			name="age"
+			position="1"
+			dataType="double"
+			trim="true"	
+		/>
+		<field
+			name="entryDate"
+			position="2"
+			dataType="date"
+			format="MM/dd/yyyy"
+			trim="true"	
+		/>
+	</record>
+	
+	<record type="body3" objectType="java.util.HashMap">
+		
+		<tokenizer type="split" pattern=","/>
+		
+		<field
+			name="name"
+			position="0"
+			dataType="string"
+			trim="true"	
+		/>
+		<field
+			name="age"
+			position="1"
+			dataType="double"
+			trim="true"	
+		/>
+		<field
+			name="entryDate"
+			position="2"
+			dataType="date"
+			format="yyyy-MM-dd HH:mm:ss.SSS,yyyy-MM-dd HH:mm:ss,yyyy-MM-dd,MM/dd/yy"
+			trim="true"	
+		/>
+	</record>
+	
+</parsers>

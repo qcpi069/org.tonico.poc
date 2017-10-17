@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE POWERMART SYSTEM "powrmart.dtd">
+<POWERMART CREATION_DATE="04/26/2017 11:32:49" REPOSITORY_VERSION="182.91">
+<REPOSITORY NAME="PCRepos_Caremark9_DEV1" VERSION="182" CODEPAGE="MS1252" DATABASETYPE="DB2">
+<FOLDER NAME="Rebates_RPSDM" GROUP="" OWNER="rebates_session_operator" SHARED="NOTSHARED" DESCRIPTION="" PERMISSIONS="rwx---r--" UUID="d66846c0-9b42-4f1c-a905-33e6f271d941">
+    <MAPPING DESCRIPTION ="" ISVALID ="YES" NAME ="m_TruncLoad_CRT_ENRL_KSCC011_ENRL" OBJECTVERSION ="1" VERSIONNUMBER ="1">
+        <TRANSFORMATION DESCRIPTION ="" NAME ="SQ_CRT_ENRL" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Source Qualifier" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="BE_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="BE_TYP_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="6" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="ENRL_PRD_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="6" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="ENRL_CNT_QTY" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="INSRT_TS" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="29" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="INSRT_USER_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="UPDT_TS" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="29" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="UPDT_USER_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TABLEATTRIBUTE NAME ="Sql Query" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="User Defined Join" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Source Filter" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Number Of Sorted Ports" VALUE ="0"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+            <TABLEATTRIBUTE NAME ="Select Distinct" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Is Partitionable" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Pre SQL" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Post SQL" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Output is deterministic" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Output is repeatable" VALUE ="Never"/>
+        </TRANSFORMATION>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="3" NAME ="CRT_ENRL" TRANSFORMATION_NAME ="CRT_ENRL" TRANSFORMATION_TYPE ="Target Definition" TYPE ="TARGET"/>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="4" NAME ="KSCC011_ENRL" TRANSFORMATION_NAME ="KSCC011_ENRL" TRANSFORMATION_TYPE ="Target Definition" TYPE ="TARGET"/>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="2" NAME ="SQ_CRT_ENRL" REUSABLE ="NO" TRANSFORMATION_NAME ="SQ_CRT_ENRL" TRANSFORMATION_TYPE ="Source Qualifier" TYPE ="TRANSFORMATION">
+            <ASSOCIATED_SOURCE_INSTANCE NAME ="CRT_ENRL"/>
+        </INSTANCE>
+        <INSTANCE DBDNAME ="GDX_CLIENT_REG" DESCRIPTION ="" INSTANCEID ="1" NAME ="CRT_ENRL" TRANSFORMATION_NAME ="CRT_ENRL" TRANSFORMATION_TYPE ="Source Definition" TYPE ="SOURCE"/>
+        <CONNECTOR FROMFIELD ="BE_ID" FROMINSTANCE ="SQ_CRT_ENRL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="BE_ID" TOINSTANCE ="CRT_ENRL" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="BE_TYP_CD" FROMINSTANCE ="SQ_CRT_ENRL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="BE_TYP_CD" TOINSTANCE ="CRT_ENRL" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="ENRL_PRD_ID" FROMINSTANCE ="SQ_CRT_ENRL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="ENRL_PRD_ID" TOINSTANCE ="CRT_ENRL" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="ENRL_CNT_QTY" FROMINSTANCE ="SQ_CRT_ENRL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="ENRL_CNT_QTY" TOINSTANCE ="CRT_ENRL" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="INSRT_TS" FROMINSTANCE ="SQ_CRT_ENRL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="INSRT_TS" TOINSTANCE ="CRT_ENRL" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="INSRT_USER_ID" FROMINSTANCE ="SQ_CRT_ENRL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="INSRT_USER_ID" TOINSTANCE ="CRT_ENRL" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="UPDT_TS" FROMINSTANCE ="SQ_CRT_ENRL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="UPDT_TS" TOINSTANCE ="CRT_ENRL" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="UPDT_USER_ID" FROMINSTANCE ="SQ_CRT_ENRL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="UPDT_USER_ID" TOINSTANCE ="CRT_ENRL" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="BE_ID" FROMINSTANCE ="SQ_CRT_ENRL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="BE_ID" TOINSTANCE ="KSCC011_ENRL" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="BE_TYP_CD" FROMINSTANCE ="SQ_CRT_ENRL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="BE_TYP_CD" TOINSTANCE ="KSCC011_ENRL" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="ENRL_PRD_ID" FROMINSTANCE ="SQ_CRT_ENRL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="ENRL_PRD_ID" TOINSTANCE ="KSCC011_ENRL" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="ENRL_CNT_QTY" FROMINSTANCE ="SQ_CRT_ENRL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="ENRL_CNT_QTY" TOINSTANCE ="KSCC011_ENRL" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="INSRT_TS" FROMINSTANCE ="SQ_CRT_ENRL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="INSRT_TS" TOINSTANCE ="KSCC011_ENRL" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="INSRT_USER_ID" FROMINSTANCE ="SQ_CRT_ENRL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="INSRT_USER_ID" TOINSTANCE ="KSCC011_ENRL" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="UPDT_TS" FROMINSTANCE ="SQ_CRT_ENRL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="UPDT_TS" TOINSTANCE ="KSCC011_ENRL" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="UPDT_USER_ID" FROMINSTANCE ="SQ_CRT_ENRL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="UPDT_USER_ID" TOINSTANCE ="KSCC011_ENRL" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="ENRL_PRD_ID" FROMINSTANCE ="CRT_ENRL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="ENRL_PRD_ID" TOINSTANCE ="SQ_CRT_ENRL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="ENRL_CNT_QTY" FROMINSTANCE ="CRT_ENRL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="ENRL_CNT_QTY" TOINSTANCE ="SQ_CRT_ENRL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="INSRT_TS" FROMINSTANCE ="CRT_ENRL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="INSRT_TS" TOINSTANCE ="SQ_CRT_ENRL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="INSRT_USER_ID" FROMINSTANCE ="CRT_ENRL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="INSRT_USER_ID" TOINSTANCE ="SQ_CRT_ENRL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="UPDT_TS" FROMINSTANCE ="CRT_ENRL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="UPDT_TS" TOINSTANCE ="SQ_CRT_ENRL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="UPDT_USER_ID" FROMINSTANCE ="CRT_ENRL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="UPDT_USER_ID" TOINSTANCE ="SQ_CRT_ENRL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="BE_ID" FROMINSTANCE ="CRT_ENRL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="BE_ID" TOINSTANCE ="SQ_CRT_ENRL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="BE_TYP_CD" FROMINSTANCE ="CRT_ENRL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="BE_TYP_CD" TOINSTANCE ="SQ_CRT_ENRL" TOINSTANCETYPE ="Source Qualifier"/>
+        <TARGETLOADORDER ORDER ="1" TARGETINSTANCE ="CRT_ENRL"/>
+        <TARGETLOADORDER ORDER ="1" TARGETINSTANCE ="KSCC011_ENRL"/>
+        <ERPINFO/>
+    </MAPPING>
+    <SHORTCUT COMMENTS ="" DBDNAME ="GDX_CLIENT_REG" FOLDERNAME ="Shared_Rebates_RCI" NAME ="CRT_ENRL" OBJECTSUBTYPE ="Source Definition" OBJECTTYPE ="SOURCE" REFERENCEDDBD ="GDX_CLIENT_REG" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="CRT_ENRL" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="" FOLDERNAME ="Shared_Rebates_RCI" NAME ="CRT_ENRL" OBJECTSUBTYPE ="Target Definition" OBJECTTYPE ="TARGET" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="CRT_ENRL" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="" FOLDERNAME ="Shared_Rebates_RCI" NAME ="KSCC011_ENRL" OBJECTSUBTYPE ="Target Definition" OBJECTTYPE ="TARGET" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="KSCC011_ENRL" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <CONFIG DESCRIPTION ="Default session configuration object" ISDEFAULT ="YES" NAME ="default_session_config" VERSIONNUMBER ="1">
+        <ATTRIBUTE NAME ="Advanced" VALUE =""/>
+        <ATTRIBUTE NAME ="Constraint based load ordering" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Cache LOOKUP() function" VALUE ="YES"/>
+        <ATTRIBUTE NAME ="Default buffer block size" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Line Sequential buffer length" VALUE ="1024"/>
+        <ATTRIBUTE NAME ="Maximum Memory Allowed For Auto Memory Attributes" VALUE ="5000MB"/>
+        <ATTRIBUTE NAME ="Maximum Percentage of Total Memory Allowed For Auto Memory Attributes" VALUE ="50"/>
+        <ATTRIBUTE NAME ="Additional Concurrent Pipelines for Lookup Cache Creation" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Custom Properties" VALUE =""/>
+        <ATTRIBUTE NAME ="Pre-build lookup cache" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Optimization Level" VALUE ="Medium"/>
+        <ATTRIBUTE NAME ="DateTime Format String" VALUE ="MM/DD/YYYY HH24:MI:SS.US"/>
+        <ATTRIBUTE NAME ="Pre 85 Timestamp Compatibility" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Log Options" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Save session log by" VALUE ="Session runs"/>
+        <ATTRIBUTE NAME ="Save session log for these runs" VALUE ="7"/>
+        <ATTRIBUTE NAME ="Session Log File Max Size" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Session Log File Max Time Period" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Maximum Partial Session Log Files" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Writer Commit Statistics Log Frequency" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Writer Commit Statistics Log Interval" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Error handling" VALUE =""/>
+        <ATTRIBUTE NAME ="Stop on errors" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Override tracing" VALUE ="None"/>
+        <ATTRIBUTE NAME ="On Stored Procedure error" VALUE ="Stop"/>
+        <ATTRIBUTE NAME ="On Pre-session command task error" VALUE ="Stop"/>
+        <ATTRIBUTE NAME ="On Pre-Post SQL error" VALUE ="Stop"/>
+        <ATTRIBUTE NAME ="Enable Recovery" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Error Log Type" VALUE ="None"/>
+        <ATTRIBUTE NAME ="Error Log Table Name Prefix" VALUE =""/>
+        <ATTRIBUTE NAME ="Error Log File Name" VALUE ="PMError.log"/>
+        <ATTRIBUTE NAME ="Log Source Row Data" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Data Column Delimiter" VALUE ="|"/>
+        <ATTRIBUTE NAME ="Partitioning Options" VALUE =""/>
+        <ATTRIBUTE NAME ="Dynamic Partitioning" VALUE ="Disabled"/>
+        <ATTRIBUTE NAME ="Number of Partitions" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Multiplication Factor" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Session on Grid" VALUE =""/>
+        <ATTRIBUTE NAME ="Is Enabled" VALUE ="NO"/>
+    </CONFIG>
+    <WORKFLOW DESCRIPTION ="" ISENABLED ="YES" ISRUNNABLESERVICE ="NO" ISSERVICE ="NO" ISVALID ="YES" NAME ="wf_m_TruncLoad_CRT_ENRL_KSCC011_ENRL" REUSABLE_SCHEDULER ="NO" SCHEDULERNAME ="Scheduler" SERVERNAME ="IntSvc_Rebates_DEV1" SERVER_DOMAINNAME ="DOM_Caremark9_DEV1" SUSPEND_ON_ERROR ="NO" TASKS_MUST_RUN_ON_SERVER ="NO" VERSIONNUMBER ="1">
+        <SCHEDULER DESCRIPTION ="" NAME ="Scheduler" REUSABLE ="NO" VERSIONNUMBER ="1">
+            <SCHEDULEINFO SCHEDULETYPE ="ONDEMAND"/>
+        </SCHEDULER>
+        <TASK DESCRIPTION ="" NAME ="Email_ABORT_GDX_RPS_CNT_MISMATCH" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+            <ATTRIBUTE NAME ="Email User Name" VALUE ="$PMFailureEmailUser"/>
+            <ATTRIBUTE NAME ="Email Subject" VALUE ="FAILURE:  wf_m_TruncLoad_CRT_ENRL_KSCC011_ENRL"/>
+            <ATTRIBUTE NAME ="Email Text" VALUE ="The Source count does not match the target count for the workflow wf_m_TruncLoad_CRT_ENRL_KSCC011_ENRL workflow.&#xD;&#xA;&#xD;&#xA;The input counts should match the output counts in this process."/>
+        </TASK>
+        <TASK DESCRIPTION ="determine DB2 region for table schema name" NAME ="Assignment_for_DB2_Region" REUSABLE ="NO" TYPE ="Assignment" VERSIONNUMBER ="1">
+            <ATTRIBUTE NAME ="Assignment Condition" VALUE =""/>
+            <VALUEPAIR EXECORDER ="1" NAME ="$$MVS_DB2_OWNER" REVERSEASSIGNMENT ="NO" VALUE ="iif(instr($PMRepositoryServiceName,&apos;DEV&apos;) &gt; 0,&apos;DBAD1&apos;,--DBAW1&#xD;&#xA;    iif(instr($PMRepositoryServiceName,&apos;SIT&apos;) &gt; 0,&apos;DBAX1&apos;,&#xD;&#xA;     iif(instr($PMRepositoryServiceName,&apos;PRD&apos;) &gt; 0,&apos;DBAP1&apos;,&apos;DBAD1&apos;))) &#xD;&#xA;"/>
+        </TASK>
+        <TASK DESCRIPTION ="" NAME ="Start" REUSABLE ="NO" TYPE ="Start" VERSIONNUMBER ="1"/>
+        <TASK DESCRIPTION ="" NAME ="c_src_tgt_cnt_mismatch_GDX_RPS_RPSMVS1" REUSABLE ="NO" TYPE ="Control" VERSIONNUMBER ="1">
+            <ATTRIBUTE NAME ="Control Option" VALUE ="Fail me"/>
+        </TASK>
+        <SESSION DESCRIPTION ="" ISVALID ="YES" MAPPINGNAME ="m_TruncLoad_CRT_ENRL_KSCC011_ENRL" NAME ="s_m_TruncLoad_CRT_ENRL_KSCC011_ENRL" REUSABLE ="NO" SORTORDER ="Binary" VERSIONNUMBER ="1">
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="0" SINSTANCENAME ="CRT_ENRL" STAGE ="0" TRANSFORMATIONNAME ="CRT_ENRL" TRANSFORMATIONTYPE ="Source Definition">
+                <ATTRIBUTE NAME ="Owner Name" VALUE ="CLIENT_REG"/>
+                <ATTRIBUTE NAME ="Source Table Name" VALUE ="CRT_ENRL"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="SQ_CRT_ENRL" STAGE ="1" TRANSFORMATIONNAME ="SQ_CRT_ENRL" TRANSFORMATIONTYPE ="Source Qualifier"/>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="CRT_ENRL" STAGE ="2" TRANSFORMATIONNAME ="CRT_ENRL" TRANSFORMATIONTYPE ="Target Definition">
+                <FLATFILE CODEPAGE ="MS1252" CONSECDELIMITERSASONE ="NO" DELIMITED ="YES" DELIMITERS ="|" ESCAPE_CHARACTER ="" KEEPESCAPECHAR ="NO" LINESEQUENTIAL ="NO" MULTIDELIMITERSASAND ="NO" NULLCHARTYPE ="ASCII" NULL_CHARACTER ="*" PADBYTES ="1" QUOTE_CHARACTER ="NONE" REPEATABLE ="NO" ROWDELIMITER ="10" SKIPROWS ="0" STRIPTRAILINGBLANKS ="NO"/>
+                <ATTRIBUTE NAME ="Table Name Prefix" VALUE ="CLIENT_REG"/>
+                <ATTRIBUTE NAME ="Target Table Name" VALUE ="CRT_ENRL"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="KSCC011_ENRL" STAGE ="3" TRANSFORMATIONNAME ="KSCC011_ENRL" TRANSFORMATIONTYPE ="Target Definition">
+                <ATTRIBUTE NAME ="Table Name Prefix" VALUE ="$$MVS_DB2_OWNER"/>
+                <ATTRIBUTE NAME ="Target Table Name" VALUE ="KSCC011_ENRL"/>
+            </SESSTRANSFORMATIONINST>
+            <CONFIGREFERENCE REFOBJECTNAME ="default_session_config" TYPE ="Session config"/>
+            <SESSIONCOMPONENT REFOBJECTNAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Failure Email">
+                <TASK DESCRIPTION ="" NAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Email User Name" VALUE ="$PMFailureEmailUser"/>
+                    <ATTRIBUTE NAME ="Email Subject" VALUE ="FAILURE:  %w - %d"/>
+                    <ATTRIBUTE NAME ="Email Text" VALUE ="The mapping %m ran in the %s session in the %w workflow ran in %d.&#xD;&#xA; &#xD;&#xA;%t&#xD;&#xA; &#xD;&#xA;%l&#xD;&#xA; &#xD;&#xA;%r&#xD;&#xA; &#xD;&#xA;Session Log is attached&#xD;&#xA;%g"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Pre-session variable assignment">
+                <TASK DESCRIPTION ="" NAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Post-session success variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Post-session failure variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONEXTENSION DSQINSTNAME ="SQ_CRT_ENRL" DSQINSTTYPE ="Source Qualifier" NAME ="Relational Reader" SINSTANCENAME ="CRT_ENRL" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Definition" TYPE ="READER"/>
+            <SESSIONEXTENSION NAME ="Relational Reader" SINSTANCENAME ="SQ_CRT_ENRL" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Qualifier" TYPE ="READER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="GDX" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="DB2" CONNECTIONTYPE ="Relational" VARIABLE =""/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION NAME ="File Writer" SINSTANCENAME ="CRT_ENRL" SUBTYPE ="File Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+                <CONNECTIONREFERENCE CNXREFNAME ="Connection" CONNECTIONNAME ="RPSDM_DB2_EE_External_Loader" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="DB2 EE External Loader" CONNECTIONTYPE ="External Loader" VARIABLE ="">
+                    <ATTRIBUTE NAME ="Opmode" VALUE ="Replace"/>
+                </CONNECTIONREFERENCE>
+                <ATTRIBUTE NAME ="Merge Type" VALUE ="No Merge"/>
+                <ATTRIBUTE NAME ="Merge File Directory" VALUE ="$PMTargetFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Merge File Name" VALUE ="crt_enrl.out"/>
+                <ATTRIBUTE NAME ="Append if Exists" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Create Target Directory" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Header Options" VALUE ="No Header"/>
+                <ATTRIBUTE NAME ="Header Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Footer Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Output Type" VALUE ="File"/>
+                <ATTRIBUTE NAME ="Merge Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Output file directory" VALUE ="$PMTargetFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Output filename" VALUE ="crt_enrl1.out"/>
+                <ATTRIBUTE NAME ="Reject file directory" VALUE ="$PMBadFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Reject filename" VALUE ="crt_enrl1.bad"/>
+                <ATTRIBUTE NAME ="Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Codepage Parameter" VALUE =""/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION NAME ="Relational Writer" SINSTANCENAME ="KSCC011_ENRL" SUBTYPE ="Relational Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" COMPONENTVERSION ="8005000" CONNECTIONNAME ="Mainframe_DB2" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="PWX DB2zOS" CONNECTIONTYPE ="Relational" VARIABLE ="">
+                    <ATTRIBUTE NAME ="Load Options" VALUE ="REPLACE"/>
+                </CONNECTIONREFERENCE>
+                <ATTRIBUTE NAME ="Target load type" VALUE ="Normal"/>
+                <ATTRIBUTE NAME ="Insert" VALUE ="YES"/>
+                <ATTRIBUTE NAME ="Update as Update" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update as Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update else Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Delete" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Truncate target table option" VALUE ="YES"/>
+                <ATTRIBUTE NAME ="Reject file directory" VALUE ="$PMBadFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Reject filename" VALUE ="kscc011_enrl1.bad"/>
+            </SESSIONEXTENSION>
+            <ATTRIBUTE NAME ="General Options" VALUE =""/>
+            <ATTRIBUTE NAME ="Write Backward Compatible Session Log File" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session Log File Name" VALUE ="s_m_TruncLoad_CRT_ENRL_KSCC011_ENRL.log"/>
+            <ATTRIBUTE NAME ="Session Log File directory" VALUE ="$PMSessionLogDir&#x5c;"/>
+            <ATTRIBUTE NAME ="Parameter Filename" VALUE =""/>
+            <ATTRIBUTE NAME ="Enable Test Load" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="$Source connection value" VALUE =""/>
+            <ATTRIBUTE NAME ="$Target connection value" VALUE =""/>
+            <ATTRIBUTE NAME ="Treat source rows as" VALUE ="Insert"/>
+            <ATTRIBUTE NAME ="Commit Type" VALUE ="Target"/>
+            <ATTRIBUTE NAME ="Commit Interval" VALUE ="10000"/>
+            <ATTRIBUTE NAME ="Commit On End Of File" VALUE ="YES"/>
+            <ATTRIBUTE NAME ="Rollback Transactions on Errors" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+            <ATTRIBUTE NAME ="Java Classpath" VALUE =""/>
+            <ATTRIBUTE NAME ="Performance" VALUE =""/>
+            <ATTRIBUTE NAME ="DTM buffer size" VALUE ="Auto"/>
+            <ATTRIBUTE NAME ="Collect performance data" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Write performance data to repository" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Incremental Aggregation" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Enable high precision" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session retry on deadlock" VALUE ="YES"/>
+            <ATTRIBUTE NAME ="Pushdown Optimization" VALUE ="None"/>
+            <ATTRIBUTE NAME ="Allow Temporary View for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Temporary Sequence for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Pushdown for User Incompatible Connections" VALUE ="NO"/>
+        </SESSION>
+        <TASKINSTANCE DESCRIPTION ="" FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="NO" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="Email_ABORT_GDX_RPS_CNT_MISMATCH" REUSABLE ="NO" TASKNAME ="Email_ABORT_GDX_RPS_CNT_MISMATCH" TASKTYPE ="Email" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <TASKINSTANCE DESCRIPTION ="determine DB2 region for table schema name" FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="NO" FAIL_PARENT_IF_INSTANCE_FAILS ="NO" ISENABLED ="YES" NAME ="Assignment_for_DB2_Region" REUSABLE ="NO" TASKNAME ="Assignment_for_DB2_Region" TASKTYPE ="Assignment" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <TASKINSTANCE DESCRIPTION ="" ISENABLED ="YES" NAME ="Start" REUSABLE ="NO" TASKNAME ="Start" TASKTYPE ="Start"/>
+        <TASKINSTANCE DESCRIPTION ="" FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="NO" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="c_src_tgt_cnt_mismatch_GDX_RPS_RPSMVS1" REUSABLE ="NO" TASKNAME ="c_src_tgt_cnt_mismatch_GDX_RPS_RPSMVS1" TASKTYPE ="Control" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <TASKINSTANCE DESCRIPTION ="" FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="YES" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="s_m_TruncLoad_CRT_ENRL_KSCC011_ENRL" REUSABLE ="NO" TASKNAME ="s_m_TruncLoad_CRT_ENRL_KSCC011_ENRL" TASKTYPE ="Session" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <WORKFLOWLINK CONDITION ="$s_m_TruncLoad_CRT_ENRL_KSCC011_ENRL.SrcSuccessRows &lt;&gt;($s_m_TruncLoad_CRT_ENRL_KSCC011_ENRL.TgtSuccessRows/2)" FROMTASK ="s_m_TruncLoad_CRT_ENRL_KSCC011_ENRL" TOTASK ="Email_ABORT_GDX_RPS_CNT_MISMATCH"/>
+        <WORKFLOWLINK CONDITION ="" FROMTASK ="Start" TOTASK ="Assignment_for_DB2_Region"/>
+        <WORKFLOWLINK CONDITION ="" FROMTASK ="Email_ABORT_GDX_RPS_CNT_MISMATCH" TOTASK ="c_src_tgt_cnt_mismatch_GDX_RPS_RPSMVS1"/>
+        <WORKFLOWLINK CONDITION ="" FROMTASK ="Assignment_for_DB2_Region" TOTASK ="s_m_TruncLoad_CRT_ENRL_KSCC011_ENRL"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Email_ABORT_GDX_RPS_CNT_MISMATCH.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Email_ABORT_GDX_RPS_CNT_MISMATCH.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Email_ABORT_GDX_RPS_CNT_MISMATCH.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Email_ABORT_GDX_RPS_CNT_MISMATCH.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Email_ABORT_GDX_RPS_CNT_MISMATCH.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Email_ABORT_GDX_RPS_CNT_MISMATCH.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Assignment_for_DB2_Region.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Assignment_for_DB2_Region.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Assignment_for_DB2_Region.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Assignment_for_DB2_Region.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Assignment_for_DB2_Region.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Assignment_for_DB2_Region.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$c_src_tgt_cnt_mismatch_GDX_RPS_RPSMVS1.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$c_src_tgt_cnt_mismatch_GDX_RPS_RPSMVS1.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$c_src_tgt_cnt_mismatch_GDX_RPS_RPSMVS1.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$c_src_tgt_cnt_mismatch_GDX_RPS_RPSMVS1.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$c_src_tgt_cnt_mismatch_GDX_RPS_RPSMVS1.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$c_src_tgt_cnt_mismatch_GDX_RPS_RPSMVS1.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_CRT_ENRL_KSCC011_ENRL.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_CRT_ENRL_KSCC011_ENRL.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_CRT_ENRL_KSCC011_ENRL.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_CRT_ENRL_KSCC011_ENRL.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_CRT_ENRL_KSCC011_ENRL.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_CRT_ENRL_KSCC011_ENRL.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_CRT_ENRL_KSCC011_ENRL.SrcSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_CRT_ENRL_KSCC011_ENRL.SrcFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully loaded" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_CRT_ENRL_KSCC011_ENRL.TgtSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to load" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_CRT_ENRL_KSCC011_ENRL.TgtFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Total number of transformation errors" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_CRT_ENRL_KSCC011_ENRL.TotalTransErrors" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="First error code" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_CRT_ENRL_KSCC011_ENRL.FirstErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="First error message" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_TruncLoad_CRT_ENRL_KSCC011_ENRL.FirstErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$MVS_DB2_OWNER" USERDEFINED ="YES"/>
+        <ATTRIBUTE NAME ="Parameter Filename" VALUE =""/>
+        <ATTRIBUTE NAME ="Write Backward Compatible Workflow Log File" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Workflow Log File Name" VALUE ="wf_dm_refresh_chkstat_crt_enrl_kscc011.log"/>
+        <ATTRIBUTE NAME ="Workflow Log File Directory" VALUE ="$PMWorkflowLogDir&#x5c;"/>
+        <ATTRIBUTE NAME ="Save Workflow log by" VALUE ="By runs"/>
+        <ATTRIBUTE NAME ="Save workflow log for these runs" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Service Name" VALUE =""/>
+        <ATTRIBUTE NAME ="Service Timeout" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Is Service Visible" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Is Service Protected" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Fail task after wait time" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Enable HA recovery" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Automatically recover terminated tasks" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Service Level Name" VALUE ="Default"/>
+        <ATTRIBUTE NAME ="Allow concurrent run with unique run instance name" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Allow concurrent run with same run instance name" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Maximum number of concurrent runs" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Assigned Web Services Hubs" VALUE =""/>
+        <ATTRIBUTE NAME ="Maximum number of concurrent runs per Hub" VALUE ="1000"/>
+        <ATTRIBUTE NAME ="Expected Service Time" VALUE ="1"/>
+        <METADATAEXTENSION DATATYPE ="STRING" DESCRIPTION ="" DOMAINNAME ="User Defined Metadata Domain" ISCLIENTEDITABLE ="YES" ISCLIENTVISIBLE ="YES" ISREUSABLE ="YES" ISSHAREREAD ="NO" ISSHAREWRITE ="NO" MAXLENGTH ="256" NAME ="Creation_date" VALUE ="18-dec-2012" VENDORNAME ="INFORMATICA"/>
+        <METADATAEXTENSION DATATYPE ="STRING" DESCRIPTION ="" DOMAINNAME ="User Defined Metadata Domain" ISCLIENTEDITABLE ="YES" ISCLIENTVISIBLE ="YES" ISREUSABLE ="YES" ISSHAREREAD ="NO" ISSHAREWRITE ="NO" MAXLENGTH ="256" NAME ="Workflow_author" VALUE ="Arpit Mishra" VENDORNAME ="INFORMATICA"/>
+    </WORKFLOW>
+</FOLDER>
+</REPOSITORY>
+</POWERMART>

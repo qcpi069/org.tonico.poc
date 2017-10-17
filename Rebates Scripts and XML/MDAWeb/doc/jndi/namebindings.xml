@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:namebindings="http://www.ibm.com/websphere/appserver/schemas/5.0/namebindings.xmi">
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130790281731" name="%CELL%_jdbc_url_vra2" nameInNameSpace="JNDI/%CELL%/jdbc/url/vra2" stringToBind="jdbc:db2://%GDX_HOST%:%GDX_PORT%/%GDX_DB%"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130790359814" name="%CELL%_jdbc_id_vra2" nameInNameSpace="JNDI/%CELL%/jdbc/id/vra2" stringToBind="%GDX_USER%"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130789833537" name="%CELL%_jdbc_pass_vra2" nameInNameSpace="JNDI/%CELL%/jdbc/pass/vra2" stringToBind="%GDX_PASSWORD%"/> 
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130791596121" name="%CELL%_jdbc_url_mf" nameInNameSpace="JNDI/%CELL%/jdbc/url/mf" stringToBind="jdbc:db2:%INFRA_DB%"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130792869292" name="%CELL%_%SERVER%_jdbc_schema_security" nameInNameSpace="JNDI/%NODE%/%SERVER%/jdbc/schema/security" stringToBind="%INFRA_SCHEMA%"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130794673366" name="%CELL%_%SERVER%_jdbc_schema_primary" nameInNameSpace="JNDI/%NODE%/%SERVER%/jdbc/schema/primary" stringToBind="%INFRA_SCHEMA%"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130794551331" name="%CELL%_jdbc_id_infra" nameInNameSpace="JNDI/%CELL%/jdbc/id/infra" stringToBind="%INFRA_USER%"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130794617356" name="%CELL%_jdbc_pass_infra" nameInNameSpace="JNDI/%CELL%/jdbc/pass/infra" stringToBind="%INFRA_PASSWORD%"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130787407138" name="%CELL%_apps_mda_db_vratabschema" nameInNameSpace="JNDI/%CELL%/apps/mda/db/vratabschema" stringToBind="VRAP."/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130787486692" name="%CELL%_apps_mda_db_claimstabschema" nameInNameSpace="JNDI/%CELL%/apps/mda/db/claimstabschema" stringToBind="CLAIMSP."/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130789281694" name="%CELL%_apps_mda_act_rmipath" nameInNameSpace="JNDI/%CELL%/apps/mda/act/rmipath" stringToBind="//tstras1:8000/ReportBrokerRMI"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130789646278" name="%CELL%_apps_mda_act_boxname" nameInNameSpace="JNDI/%CELL%/apps/mda/act/boxname" stringToBind="tstras1"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130789726673" name="%CELL%_apps_mda_act_userid" nameInNameSpace="JNDI/%CELL%/apps/mda/act/userid" stringToBind="VRAActuateProxy"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130790448812" name="%CELL%_apps_mda_act_location" nameInNameSpace="JNDI/%CELL%/apps/mda/act/location" stringToBind="null"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130791262141" name="%CELL%_apps_mda_act_location" nameInNameSpace="JNDI/%CELL%/apps/mda/act/location" stringToBind="JNDI/%CELL%/apps/mda/act/location"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130791437744" name="%CELL%_%SERVER%_cics_region_primary" nameInNameSpace="JNDI/%NODE%/%SERVER%/cics/region/primary" stringToBind="QCPCICSG"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130792963227" name="%CELL%_ssl_flag" nameInNameSpace="JNDI/%CELL%/ssl/flag" stringToBind="n"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130794491184" name="%CELL%_%SERVER%_environment_id" nameInNameSpace="JNDI/%NODE%/%SERVER%/environment/id" stringToBind="%CELL%"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130794737238" name="%CELL%_%SERVER%_cics_sharesize" nameInNameSpace="JNDI/%NODE%/%SERVER%/cics/sharesize" stringToBind="5"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130794932579" name="%CELL%_jdbc_id_log" nameInNameSpace="JNDI/%CELL%/jdbc/id/log" stringToBind="QCPU98i"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130794990482" name="%CELL%_jdbc_pass_log" nameInNameSpace="JNDI/%CELL%/jdbc/pass/log" stringToBind="gdxmda1"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130795054875" name="%CELL%_apps_mda_act_password" nameInNameSpace="JNDI/%CELL%/apps/mda/act/password" stringToBind="mdaprod1"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130795343039" name="%CELL%_%SERVER%_cics_gateway_primary" nameInNameSpace="JNDI/%NODE%/%SERVER%/cics/gateway/primary" stringToBind="198.187.113.95"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130795402555" name="%CELL%_%SERVER%_cics_gateway_port" nameInNameSpace="JNDI/%NODE%/%SERVER%/cics/gateway/port" stringToBind="2014"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130795465245" name="%CELL%_apps_cmrrxmetrics_volume" nameInNameSpace="JNDI/%CELL%/apps/cmrrxmetrics/volume" stringToBind="lns-7jhw231"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130795786217" name="%CELL%_apps_ext_url_cmr" nameInNameSpace="JNDI/%CELL%/apps/ext/url/cmr" stringToBind="http://%CELL%:9080/cmrrxmetrics/getfolderitems.do"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130795874153" name="%CELL%_apps_ext_url_rxnevg" nameInNameSpace="JNDI/%CELL%/apps/ext/url/rxnevg" stringToBind="s99011"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130795971453" name="%CELL%_apps_mda_rxmetrics_url" nameInNameSpace="JNDI/%CELL%/apps/mda/rxmetrics/url" stringToBind="http://tstras1:8700/iportal/login.jsp"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130796121909" name="%CELL%_apps_actuate_volume" nameInNameSpace="JNDI/%CELL%/apps/actuate/volume" stringToBind="lns-7jhw231"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130796191790" name="%CELL%_apps_actuate_password" nameInNameSpace="JNDI/%CELL%/apps/actuate/password" stringToBind="jp7233"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130796309189" name="%CELL%_apps_mda_act_volume_discount" nameInNameSpace="JNDI/%CELL%/apps/mda/act/volume/discount" stringToBind="dsc"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130796388733" name="%CELL%_apps_mda_act_volume_gpo" nameInNameSpace="JNDI/%CELL%/apps/mda/act/volume/gpo" stringToBind="gpo"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1134751859807" name="%CELL%_apps_mda_act_volume_xmd" nameInNameSpace="JNDI/%CELL%/apps/mda/act/volume/xmd" stringToBind="xmd"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1248790376701" name="%CELL%_apps_mda_gdxcash_url" nameInNameSpace="JNDI/%CELL%/apps/mda/gdxcash/url" stringToBind="https://dev1ras.caremarkrx.net/rebate_cash"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1275084174934" name="%CELL%_mda_volume_gdx" nameInNameSpace="JNDI/%CELL%/mda/volume/jndi/gdx" stringToBind="gdx"/>
+</xmi:XMI>

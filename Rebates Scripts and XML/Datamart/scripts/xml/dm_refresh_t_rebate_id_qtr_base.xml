@@ -1,0 +1,351 @@
+
+<!-- REFRESH rps.t_rebate_id_qtr_base  -->
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+
+	<command type="java">
+		<![CDATA[
+		mailto=script.getProperty("mailto");
+		cli_schema=script.getProperty("cli_schema");
+		pmt_schema=script.getProperty("pmt_schema");
+		]]>
+	</command>
+
+	<command type="try">
+		<try>
+			<!-- *************** rps.t_rebate_id_qtr_base ********************* -->
+			<command type="copy" batch="1000">
+				<source type="sql" datasource="datamart">
+					<![CDATA[
+
+                    SELECT (CASE WHEN b.rbat_id > 9999999 THEN trim(char(b.rbat_id)) WHEN b.rbat_id > 999999 THEN '0' || trim(char(b.rbat_id)) WHEN b.rbat_id > 99999 THEN '00' || trim(char(b.rbat_id)) ELSE '000' || trim(char(b.rbat_id)) END)
+                           , PERIOD_ID
+                           , MSTR_CLNT_NM AS MSTR_CLIENT_NAM
+                           , CLNT_NM AS REBATE_ID_NAME
+                           , substr(model.CDSET_VL_DESC_TXT, 1, 10) AS MODEL_TYPE_DESC
+                           , AP_CO_CD AS COMPANY
+                           , AP_VEND_NB AS VENDOR
+                           , PAY_TIMING
+                           , (CASE WHEN PAY_SCHEDULE = 'Q' THEN 'Quarterly' WHEN PAY_SCHEDULE = 'M' THEN 'Monthly' ELSE PAY_SCHEDULE END) AS PAY_SCHEDULE
+                           , pmt_typ.CDSET_VL_DESC_TXT AS PAY_METHOD_DESC,
+                           sap.CDSET_VL_DESC_TXT AS SAP_PAY_TYPE_DESC,
+                           PMT_HOLD_CD AS CREDIT_HOLD,
+                           MODEL_EFF_DT,
+                           MODEL_TERM_DT,
+                           trim(char(year(MODEL_EFF_DT))) || substr(char(MODEL_EFF_DT, usa), 1, 2) AS MODEL_EFF_YYYYMM,
+                           trim(char(year(MODEL_TERM_DT))) || substr(char(MODEL_TERM_DT, usa), 1, 2) AS MODEL_TERM_YYYYMM,
+                           trim(char(year(MODEL_EFF_DT))) || 'Q' || trim(char(quarter(MODEL_EFF_DT))) AS MODEL_EFF_QTR,
+                           trim(char(year(MODEL_TERM_DT))) || 'Q' || trim(char(quarter(MODEL_TERM_DT))) AS MODEL_TERM_QTR,
+                           FAF_ID AS FAF_NBR,
+                           RBAT_CLSTR_NM AS CLIENT_TYPE_DESC,
+                           sap.SEQ_NB,
+                           pmt_typ.SEQ_NB,
+                           model.SEQ_NB,
+                           model.CDSET_VL,
+                           RBAT_INV_EFF_DT AS REBATE_INV_EFF_DT,
+                           RBAT_INV_TERM_DT AS REBATE_INV_TERM_DT,
+                           ANN_RECN_IN,
+                           RECN_METHOD_CD,
+                           HOLD_COL_RECN_IN,
+                           RECN_FREQ_CD,
+                           RECN_TM_CD,
+                           RECN_PAY_AFTR_CD,
+                           ALT_COAL_RPT_IN,
+                           RECN_EXCP_IN                           
+                    FROM   rps.quarter_summary qtr,
+                           (SELECT DISTINCT c.RBAT_ID, m.mstr_clnt_nm, c.clnt_nm, pm.model_typ_cd,
+                                            c.ap_co_cd, c.ap_vend_nb, ru.dstr_pmt_tm_cd AS pay_timing, ru.dstr_pmt_schd_cd AS pay_schedule,
+                                            c.pmt_typ_cd, c.ap_pmt_typ_cd AS sap_pay_type, c.pmt_hold_cd, ra.eff_dt AS model_eff_dt,
+                                            ra.term_dt AS model_term_dt, pm.faf_id, c.RBAT_CLSTR_NM, c.rbat_inv_eff_dt,
+                                            c.rbat_inv_term_dt,
+                                            c.RECN_EXCP_IN, ru.ANN_RECN_IN, ru.RECN_METHOD_CD, ru.HOLD_COL_RECN_IN, ru.RECN_FREQ_CD, ru.RECN_TM_CD, 
+                                            ru.RECN_PAY_AFTR_CD, ru.ALT_COAL_RPT_IN
+                            FROM   client_reg.crt_clnt c
+                                   JOIN client_reg.crt_mstr_clnt m ON c.mstr_clnt_id = m.mstr_clnt_id
+                                   JOIN client_reg.crt_clnt_rule_assc ra ON ra.rbat_id = c.rbat_id
+                                   JOIN client_reg.crt_prc_rule ru ON ra.prc_rule_id = ru.prc_rule_id
+                                   JOIN client_reg.crt_prc_mstr pm ON ru.prc_mstr_id = pm.prc_mstr_id
+                            WHERE  RBAT_INV_TERM_DT > RBAT_INV_EFF_DT AND ra.term_dt > ra.eff_dt) b
+                           JOIN (SELECT CDSET_VL, CDSET_VL_DESC_TXT, SEQ_NB
+                                 FROM   client_reg.crt_cdset cd JOIN client_reg.crt_cdset_vl cv ON cd.CDSET_ID = cv.CDSET_ID
+                                 WHERE  CDSET_DESC_TXT = 'MODEL_TYPE_CD') model
+                             ON b.MODEL_TYP_CD = model.CDSET_VL
+                           LEFT OUTER JOIN (SELECT CDSET_VL, CDSET_VL_DESC_TXT, SEQ_NB
+                                            FROM   client_reg.crt_cdset cd JOIN client_reg.crt_cdset_vl cv ON cd.CDSET_ID = cv.CDSET_ID
+                                            WHERE  CDSET_DESC_TXT = 'PAYMENT_TYPE') pmt_typ
+                             ON b.PMT_TYP_CD = pmt_typ.CDSET_VL
+                           LEFT OUTER JOIN (SELECT CDSET_VL, CDSET_VL_DESC_TXT, SEQ_NB
+                                            FROM   client_reg.crt_cdset cd JOIN client_reg.crt_cdset_vl cv ON cd.CDSET_ID = cv.CDSET_ID
+                                            WHERE  CDSET_DESC_TXT = 'SAP_PAY_TYPE') sap
+                             ON b.SAP_PAY_TYPE = sap.CDSET_VL
+                    WHERE  ((qtr.QTR_BEGIN_DT + 1 DAYS) BETWEEN MODEL_EFF_DT AND MODEL_TERM_DT OR (qtr.QTR_END_DT - 1 DAYS) BETWEEN MODEL_EFF_DT
+                                                                                                                                AND MODEL_TERM_DT) AND
+                           RPS_ACTIVE_IND <> '3'	
+                        ]]>
+					</source>
+					<target
+						type             = "sql"
+						datasource       = "datamart"
+						transaction      = "true"
+						batch            = "1000"
+						reportInterval   = "1000"
+						queryTimeout     = "${TIMEOUT}"
+						>
+						<![CDATA[
+						INSERT INTO rps.t_rebate_id_qtr_base
+						(REBATE_ID,
+						INV_QTR,
+						MSTR_CLIENT_NAM,
+						REBATE_ID_NAME,
+						MODEL_TYPE_DESC,
+						COMPANY,
+						VENDOR,
+						PAY_TIMING,
+						PAY_SCHEDULE,
+						PAY_METHOD_DESC,
+						SAP_PAY_TYPE_DESC,
+						CREDIT_HOLD,
+						MODEL_EFF_DT,
+						MODEL_TERM_DT,
+						MODEL_EFF_YYYYMM,
+						MODEL_TERM_YYYYMM,
+						MODEL_EFF_QTR,
+						MODEL_TERM_QTR,
+						FAF_NBR,
+						CLIENT_TYPE_DESC,
+						SAP_PAY_TYPE_SORT,
+						PAY_METHOD_SORT,
+						MODEL_TYPE_SORT,
+						MODEL_TYPE_CD,
+						REBATE_INV_EFF_DT,
+						REBATE_INV_TERM_DT,						
+                        ANN_RECN_IN,
+                        RECN_METHOD_CD,
+                        HOLD_COL_RECN_IN,
+                        RECN_FREQ_CD,
+                        RECN_TM_CD,
+                        RECN_PAY_AFTR_CD,
+                        ALT_COAL_RPT_IN,
+                        RECN_EXCP_IN
+						)				
+						VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+						]]>
+					</target>
+				</command>
+
+
+				<command type="copy" batch="1000">
+					<source type="sql" datasource="datamart">
+						<![CDATA[
+                        with base(RBATE_ID, PERIOD_ID) as (select distinct RBATE_ID, PERIOD_ID from rps.vapc_client_sum),
+                             missing(RBATE_ID, PERIOD_ID)
+                             as (select * from base
+                                 except
+                                 (select distinct REBATE_ID, INV_QTR from rps.l_rebate_id_qtr)),
+                             line(RBATE_ID, PERIOD_ID)
+                             as (select   REBATE_ID, max(INV_QTR)
+                                 from     rps.l_rebate_id_qtr
+                                 where    REBATE_ID in (select distinct RBATE_ID from missing)
+                                 group by REBATE_ID),
+                             lkp(REBATE_ID, INV_QTR, MSTR_CLIENT_NAM, REBATE_ID_NAME, MODEL_TYPE_DESC, COMPANY, VENDOR,
+                                 PAY_TIMING, PAY_SCHEDULE, PAY_METHOD_DESC, SAP_PAY_TYPE_DESC, CREDIT_HOLD, MODEL_EFF_DT, MODEL_TERM_DT,
+                                 MODEL_EFF_YYYYMM, MODEL_TERM_YYYYMM, MODEL_EFF_QTR, MODEL_TERM_QTR, FAF_NBR, CLIENT_TYPE_DESC, SAP_PAY_TYPE_SORT,
+                                 PAY_METHOD_SORT, MODEL_TYPE_SORT, MODEL_TYPE_CD, REBATE_INV_EFF_DT, REBATE_INV_TERM_DT, RECN_EXCP_IN, ANN_RECN_IN,
+                                 RECN_METHOD_CD, HOLD_COL_RECN_IN, RECN_FREQ_CD, RECN_TM_CD, RECN_PAY_AFTR_CD, ALT_COAL_RPT_IN)
+                             as (select REBATE_ID, INV_QTR, MSTR_CLIENT_NAM, REBATE_ID_NAME, MODEL_TYPE_DESC, COMPANY, VENDOR,
+                                        PAY_TIMING, PAY_SCHEDULE, PAY_METHOD_DESC, SAP_PAY_TYPE_DESC, CREDIT_HOLD, MODEL_EFF_DT, MODEL_TERM_DT,
+                                        MODEL_EFF_YYYYMM, MODEL_TERM_YYYYMM, MODEL_EFF_QTR, MODEL_TERM_QTR, FAF_NBR, CLIENT_TYPE_DESC, SAP_PAY_TYPE_SORT,
+                                        PAY_METHOD_SORT, MODEL_TYPE_SORT, MODEL_TYPE_CD, REBATE_INV_EFF_DT, REBATE_INV_TERM_DT, RECN_EXCP_IN, ANN_RECN_IN,
+                                        RECN_METHOD_CD, HOLD_COL_RECN_IN, RECN_FREQ_CD, RECN_TM_CD, RECN_PAY_AFTR_CD, ALT_COAL_RPT_IN
+                                 from   rps.t_rebate_id_qtr_base b join line on b.REBATE_ID = line.RBATE_ID and b.INV_QTR = line.PERIOD_ID)
+                        select RBATE_ID, PERIOD_ID, MSTR_CLIENT_NAM, REBATE_ID_NAME, MODEL_TYPE_DESC, COMPANY, VENDOR,
+                               PAY_TIMING, PAY_SCHEDULE, PAY_METHOD_DESC, SAP_PAY_TYPE_DESC, CREDIT_HOLD, MODEL_EFF_DT, MODEL_TERM_DT,
+                               MODEL_EFF_YYYYMM, MODEL_TERM_YYYYMM, MODEL_EFF_QTR, MODEL_TERM_QTR, FAF_NBR, CLIENT_TYPE_DESC, SAP_PAY_TYPE_SORT,
+                               PAY_METHOD_SORT, MODEL_TYPE_SORT, MODEL_TYPE_CD, REBATE_INV_EFF_DT, REBATE_INV_TERM_DT, ANN_RECN_IN,
+                               RECN_METHOD_CD, HOLD_COL_RECN_IN, RECN_FREQ_CD, RECN_TM_CD, RECN_PAY_AFTR_CD, ALT_COAL_RPT_IN, RECN_EXCP_IN
+                        from   missing left outer join lkp on missing.RBATE_ID = lkp.REBATE_ID
+						]]>
+					</source>
+					<target
+						type             = "sql"
+						datasource       = "datamart"
+						transaction      = "true"
+						batch            = "1000"
+						reportInterval   = "1000"
+						queryTimeout     = "${TIMEOUT}"
+						>
+						<![CDATA[
+						INSERT INTO rps.t_rebate_id_qtr_base
+						(REBATE_ID,
+						INV_QTR,
+						MSTR_CLIENT_NAM,
+						REBATE_ID_NAME,
+						MODEL_TYPE_DESC,
+						COMPANY,
+						VENDOR,
+						PAY_TIMING,
+						PAY_SCHEDULE,
+						PAY_METHOD_DESC,
+						SAP_PAY_TYPE_DESC,
+						CREDIT_HOLD,
+						MODEL_EFF_DT,
+						MODEL_TERM_DT,
+						MODEL_EFF_YYYYMM,
+						MODEL_TERM_YYYYMM,
+						MODEL_EFF_QTR,
+						MODEL_TERM_QTR,
+						FAF_NBR,
+						CLIENT_TYPE_DESC,
+						SAP_PAY_TYPE_SORT,
+						PAY_METHOD_SORT,
+						MODEL_TYPE_SORT,
+						MODEL_TYPE_CD,
+						REBATE_INV_EFF_DT,
+						REBATE_INV_TERM_DT,						
+                        ANN_RECN_IN,
+                        RECN_METHOD_CD,
+                        HOLD_COL_RECN_IN,
+                        RECN_FREQ_CD,
+                        RECN_TM_CD,
+                        RECN_PAY_AFTR_CD,
+                        ALT_COAL_RPT_IN,
+                        RECN_EXCP_IN
+						)
+						VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+						]]>
+					</target>
+				</command>
+
+
+				<command type="run" datasource="datamart">
+					<![CDATA[
+
+					update rps.t_rebate_id_qtr_base set
+					(MSTR_CLIENT_NAM,
+					REBATE_ID_NAME,
+					MODEL_TYPE_DESC,
+					COMPANY,
+					VENDOR,
+					PAY_METHOD_DESC,
+					SAP_PAY_TYPE_DESC,
+					CREDIT_HOLD,
+					CLIENT_TYPE_DESC,
+					REBATE_INV_EFF_DT,
+					REBATE_INV_TERM_DT
+					) =
+					(
+					select distinct
+					m.mstr_clnt_nm, c.clnt_nm,
+					substr(model.CDSET_VL_DESC_TXT,1,10), c.ap_co_cd, c.ap_vend_nb,
+					pmt_typ.CDSET_VL_DESC_TXT, sap.CDSET_VL_DESC_TXT,
+					c.pmt_hold_cd,
+					c.RBAT_CLSTR_NM,
+					c.rbat_inv_eff_dt, c.rbat_inv_term_dt
+					from client_reg.crt_clnt c
+					join client_reg.crt_mstr_clnt m
+					on c.mstr_clnt_id = m.mstr_clnt_id
+					join client_reg.crt_clnt_rule_assc ra
+					on ra.rbat_id = c.rbat_id
+					join client_reg.crt_prc_rule ru
+					on ra.prc_rule_id = ru.prc_rule_id
+					join client_reg.crt_prc_mstr pm
+					on ru.prc_mstr_id = pm.prc_mstr_id
+
+					join (select CDSET_VL, CDSET_VL_DESC_TXT
+					from client_reg.crt_cdset cd join client_reg.crt_cdset_vl cv
+					on cd.CDSET_ID=cv.CDSET_ID where CDSET_DESC_TXT='MODEL_TYPE_CD' ) model
+					on pm.MODEL_TYP_CD=model.CDSET_VL
+
+					left outer join (select CDSET_VL, CDSET_VL_DESC_TXT
+					from client_reg.crt_cdset cd join client_reg.crt_cdset_vl cv
+					on cd.CDSET_ID=cv.CDSET_ID where CDSET_DESC_TXT='PAYMENT_TYPE' ) pmt_typ
+					on c.PMT_TYP_CD=pmt_typ.CDSET_VL
+
+					left outer join (select CDSET_VL, CDSET_VL_DESC_TXT
+					from client_reg.crt_cdset cd join client_reg.crt_cdset_vl cv
+					on cd.CDSET_ID=cv.CDSET_ID where CDSET_DESC_TXT='SAP_PAY_TYPE' ) sap
+					on c.ap_pmt_typ_cd=sap.CDSET_VL
+
+					where c.rbat_id = integer(rps.t_rebate_id_qtr_base.REBATE_ID)
+					)
+					WHERE REBATE_ID_NAME is null
+
+					]]>
+
+				</command>
+
+			</try>
+			<catch>
+				<!-- Send an email on error -->
+				<command type="mail"
+					mailTo="${mailto}" mailFrom="helen.tang@caremark.com" subject="[ERROR]
+					GDX -> DM REFESH - rps.t_rebate_id_qtr_base " contentType="text/html"
+					throwsException="false" >
+					<![CDATA[ <html> <head> <title>[ERROR] GDX ->
+				DM REFRESH - rps.t_rebate_id_qtr_base</title>
+			</head>
+			<body>
+
+				<h3>
+					<u>[ERROR] GDX -> DM REFRESH - rps.t_rebate_id_qtr_base </u>
+				</h3>
+
+				<table cellpadding="2">
+					<tr>
+						<td>
+							<b>Host:</b>
+						</td>
+					<td>${localhost}<td></tr>
+					<tr>
+						<td>
+							<b>Started:</b>
+						</td>
+					<td>${startTime}<td></tr>
+					<tr>
+						<td>
+							<b>Script:</b>
+						</td>
+					<td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+					<tr>
+						<td>
+							<b>Log File:</b>
+						</td>
+						<td>
+							${system.getProperty('logfile')}
+							<td>
+							</tr>
+							#end
+						</table>
+
+						<br>
+							<br>
+
+								#if (${script.getLastStatement()})
+								<h3>
+									<u>Last Statement</u>
+								</h3>
+								<font style="color: blue; font-size: small">
+									${script.getLastStatement()}
+								</font>
+
+								<br>
+									<br>
+										#end
+
+										<h3>
+											<u>Stack Trace</u>
+										</h3>
+										<pre style="color: red; font-size: small;">${stackTrace}</pre>
+									</body>
+								</html>
+								]]>
+							</command>
+						</catch>
+
+					</command>
+				</sqml>
+

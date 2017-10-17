@@ -1,0 +1,160 @@
+
+<!-- REFRESH client_reg.crt_clnt_extl_hrcy_assc  -->
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        cli_schema=script.getProperty("cli_schema");        
+	]]></command>
+		       
+
+	<command type="try">
+		<try>
+            <!-- *************** client_reg.crt_clnt_extl_hrcy_assc ********************* -->
+			<command type="copy" batch="1000">
+				<source type="sql" datasource="datamart"><![CDATA[
+with qtr (PRD_ID,PRD_BEG_DT,PRD_END_DT,inv_qtr,inv_mon) as
+(select PRD_ID,PRD_BEG_DT,PRD_END_DT,PRD_CYQ_Q_CD,PRD_CYM_CD
+from client_reg.crt_prd
+where PRD_ID='${PRDID}'
+),
+
+hrcy (EXTL_HRCY_ID,EXTL_SRC_CD,EXTL_LVL1_ID,EXTL_LVL2_ID,EXTL_LVL3_ID,EXTL_LVL4_ID,EXTL_LVL5_ID,
+        PRD_ID,PRD_BEG_DT,PRD_END_DT,inv_qtr,inv_mon ) as
+(select EXTL_HRCY_ID,EXTL_SRC_CD,EXTL_LVL1_ID,EXTL_LVL2_ID,EXTL_LVL3_ID,EXTL_LVL4_ID,EXTL_LVL5_ID,
+        PRD_ID,PRD_BEG_DT,PRD_END_DT,inv_qtr,inv_mon
+from client_reg.crt_extl_hrcy , qtr
+),
+
+hrcy_asc_dtl (EXTL_HRCY_ID,EXTL_SRC_CD,EXTL_LVL1_ID,EXTL_LVL2_ID,EXTL_LVL3_ID,EXTL_LVL4_ID,EXTL_LVL5_ID,
+	RBAT_ID,EFF_DT,TERM_DT) as
+(select h.EXTL_HRCY_ID, h.EXTL_SRC_CD, h.EXTL_LVL1_ID,EXTL_LVL2_ID,EXTL_LVL3_ID,EXTL_LVL4_ID,EXTL_LVL5_ID,
+        a.RBAT_ID, a.EFF_DT, a.TERM_DT
+from client_reg.crt_clnt_extl_hrcy_assc a
+        join client_reg.crt_extl_hrcy h
+                on a.EXTL_HRCY_ID=h.EXTL_HRCY_ID
+),
+
+lvl1 (EFF_DT,TERM_DT,RBAT_ID,EXTL_SRC_CD,EXTL_LVL1_ID) as
+(select EFF_DT,TERM_DT,RBAT_ID,EXTL_SRC_CD,EXTL_LVL1_ID
+from hrcy_asc_dtl , qtr
+where EXTL_LVL2_ID=' ' and EXTL_LVL3_ID=' '
+and (PRD_BEG_DT + 1 days) between EFF_DT and TERM_DT
+),
+
+lvl2 (EFF_DT,TERM_DT,RBAT_ID,EXTL_SRC_CD,EXTL_LVL1_ID,EXTL_LVL2_ID) as
+(select EFF_DT,TERM_DT,RBAT_ID,EXTL_SRC_CD,EXTL_LVL1_ID,EXTL_LVL2_ID
+from hrcy_asc_dtl , qtr
+where EXTL_LVL2_ID<>' ' and EXTL_LVL3_ID=' '
+and (PRD_BEG_DT + 1 days) between EFF_DT and TERM_DT
+),
+
+lvl3 (EFF_DT,TERM_DT,RBAT_ID,EXTL_SRC_CD,EXTL_LVL1_ID,EXTL_LVL2_ID,EXTL_LVL3_ID) as
+(select EFF_DT,TERM_DT,RBAT_ID,EXTL_SRC_CD,EXTL_LVL1_ID,EXTL_LVL2_ID,EXTL_LVL3_ID
+from hrcy_asc_dtl , qtr
+where EXTL_LVL3_ID<>' '
+and (PRD_BEG_DT + 1 days) between EFF_DT and TERM_DT
+)
+select distinct h.EXTL_HRCY_ID,h.EXTL_SRC_CD,h.EXTL_LVL1_ID,h.EXTL_LVL2_ID,h.EXTL_LVL3_ID,
+        h.EXTL_LVL4_ID,h.EXTL_LVL5_ID,inv_qtr,inv_mon,
+        coalesce(lvl3.EFF_DT,lvl2.eff_dt,lvl1.eff_dt,'01/01/1700'),
+        coalesce(lvl3.TERM_DT,lvl2.TERM_DT,lvl1.TERM_DT,'01/01/1700'),
+        coalesce(lvl3.RBAT_ID,lvl2.RBAT_ID,lvl1.RBAT_ID,0)
+from hrcy h left outer join lvl3
+        on h.EXTL_SRC_CD=lvl3.EXTL_SRC_CD and h.EXTL_LVL1_ID=lvl3.EXTL_LVL1_ID
+                and h.EXTL_LVL2_ID=lvl3.EXTL_LVL2_ID and h.EXTL_LVL3_ID=lvl3.EXTL_LVL3_ID
+        left outer join lvl2
+        on h.EXTL_SRC_CD=lvl2.EXTL_SRC_CD and h.EXTL_LVL1_ID=lvl2.EXTL_LVL1_ID
+                and h.EXTL_LVL2_ID=lvl2.EXTL_LVL2_ID
+        left outer join lvl1
+        on h.EXTL_SRC_CD=lvl1.EXTL_SRC_CD and h.EXTL_LVL1_ID=lvl1.EXTL_LVL1_ID
+where coalesce(lvl3.RBAT_ID,lvl2.RBAT_ID,lvl1.RBAT_ID,0)<>0
+
+
+				]]></source>
+				<target
+					type             = "sql"
+					datasource       = "datamart"
+					transaction      = "true"
+					batch            = "1000"
+					reportInterval   = "1000"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					INSERT INTO client_reg.crt_clnt_hrcy_qtr_dtl
+                                         (EXTL_HRCY_ID,
+                                          EXTL_SRC_CD,
+                                          EXTL_LVL1_ID,
+                                          EXTL_LVL2_ID,
+                                          EXTL_LVL3_ID,
+                                          EXTL_LVL4_ID,
+                                          EXTL_LVL5_ID,
+                                          PRD_CYQ_Q_CD,
+                                          PRD_CYM_CD,
+                                          EFF_DT,
+                                          TERM_DT,
+                                          RBAT_ID
+					  ) 
+					VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+				]]></target>
+			</command>
+				 
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+			<command
+				type="mail"
+				mailTo="${mailto}"
+				mailFrom="helen.tang@caremark.com"
+				subject="[ERROR] GDX -> DM REFESH - client_reg.crt_clnt_extl_hrcy_assc "
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] GDX -> DM REFRESH - client_reg.crt_clnt_extl_hrcy_assc</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] GDX -> DM REFRESH - client_reg.crt_clnt_extl_hrcy_assc </u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		</catch>
+		
+        </command>
+</sqml>
+

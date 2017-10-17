@@ -1,0 +1,139 @@
+
+<!-- REFESH TMAP NDC11 GPO BSKT -->
+
+<sqml>
+	
+	<property name="TIMEOUT" value="0"/>
+	
+	<datasources resource="datasource.xml"/>
+	
+	<!--
+		Set-up a try block to send an email on exception.	
+	-->         
+	<command type="try">
+		<try>
+			
+			<!-- Validate passed in parameters -->
+			<command type="java"><![CDATA[
+				if (script.getProperty("start_date") == null) {
+					throw new Exception("Missing start_date parameter!");
+				}
+				if (script.getProperty("end_date") == null) {
+					throw new Exception("Missing end_date parameter!");
+				}
+			]]></command>
+			
+			<command type="run" datasource="gdxprd" transaction="true"><![CDATA[
+				DELETE FROM VRAP.TMAP_NDC11_GPO_BSKT
+			]]></command>
+			
+			<command type="copy" batch="500">
+				<source type="sql" datasource="silver"><![CDATA[
+					SELECT DISTINCT
+						b.bskt_nam
+						,b.cntrl_no
+						,bb.brnd_nam
+						,vd.ndc_code
+						,vd.dsg_form
+						,1
+					FROM dma_rbate2.t_rbate_mfg p
+						,dma_rbate2.t_cntrc c
+						,dma_rbate2.t_bskt b
+						,dma_rbate2.t_bskt_brnd bb
+						,dma_rbate2.t_bskt_drug bd
+						,dma_rbate2.v_drug_remote vd
+						,dma_rbate2.t_rbate_cycle trc
+					WHERE
+						p.pico_no = 69
+						AND p.pico_no = c.pico_no
+						AND c.cntrc_eff_date < TRUNC(TO_DATE(?{end_date}, 'MM/DD/YYYY')) + 1
+						AND c.cntrc_end_date >= TO_DATE(?{start_date}, 'MM/DD/YYYY')
+						AND c.cntrc_gid = b.cntrc_gid
+						AND b.eff_date < TRUNC(TO_DATE(?{end_date}, 'MM/DD/YYYY')) + 1
+						AND b.end_date >= TO_DATE(?{start_date}, 'MM/DD/YYYY')
+						AND b.bskt_gid = bb.bskt_gid
+						AND bb.eff_date < TRUNC(TO_DATE(?{end_date}, 'MM/DD/YYYY')) + 1
+						AND bb.end_date >= TO_DATE(?{start_date}, 'MM/DD/YYYY')
+						AND bb.bskt_gid = bd.bskt_gid
+						AND bb.brnd_nam = bd.brnd_nam
+						AND bd.mrkt_shr_flag = 1
+						AND bd.cntrc_flag = 1
+						AND bd.eff_date < TRUNC(TO_DATE(?{end_date}, 'MM/DD/YYYY')) + 1
+						AND bd.end_date >= TO_DATE(?{start_date}, 'MM/DD/YYYY')
+						AND bd.drug_gid = vd.drug_gid
+						ORDER BY 1,2,3,4,5,6
+				]]></source>
+				<target
+					type           = "sql"
+					datasource     = "gdxprd"
+					transaction    = "true"
+					batch          = "500"
+					reportInterval = "500"
+					queryTimeout   = "${TIMEOUT}"
+				><![CDATA[
+					INSERT into VRAP.TMAP_NDC11_GPO_BSKT (
+						BSKT_NAM,
+						CNTRL_NO,
+						BRND_NAM,
+						DRUG_NDC_ID,
+						DSG_FORM,
+						NHU_TYP_CD
+					)
+					VALUES (?,?,?,?,?,?)
+				]]></target>
+			</command>
+
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+			<command
+				type="mail"
+				mailTo="${email_address}"
+				mailFrom="client_tmap_ndc11_gpo_bskt@caremark.com"
+				subject="[${region}] [ERROR] REFESH TMAP NDC11 GPO BSKT"
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] REFESH TMAP NDC11 GPO BSKT</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] REFESH TMAP NDC11 GPO BSKT</u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		</catch>
+	</command>
+</sqml>

@@ -1,0 +1,292 @@
+<!--
+     Check if ALLW_IN_APC in table VRAP.TAPC_DUP_CLAIMS for a specific quarter
+     Datasource definition file datasource.xml is in the ./java/Common_java_db_interface/conf.
+     The XML file should reside under ./xml directory
+
+     Parameter 1 : Optional, has year and quarter info. format: "hyphenhyphenquarter  YYYY0Q"  'YYYY': 4 digit year,
+                  'Q':quarter number ('1', '2', '3', '4'). Example: hyphenhyphenquarter  200502 ,
+                   this should be the parameter passed into XML.
+                   Note: hyphenhyphen means the two characters. xml does not allow it in the comments, it is part
+                   of the reserved symbols.
+
+     Maestro Command with parameter:
+              ./scripts/Common_java_db_interface.ksh dashdashquarter 200701 <xml file name>
+-->
+<sqml>
+        <property name="TIMEOUT" value="0"/>
+
+        <!-- datasource.xml defines DB connection info. It should be under ./java/Common_java_db_interface/conf-->
+        <datasources resource="datasource.xml"/>
+
+        <!-- Set-up a try block to send an email on exception -->
+        <command type="try">
+        <try>
+
+            <!-- Start Update the GDX APC process status -->
+            <command type="run" datasource="gdxprd"><![CDATA[
+
+                update VRAP.TAPC_QTR_PRCS_EVENT    
+                    SET STRT_TS = CURRENT TIMESTAMP
+                       ,END_TS = NULL
+                       ,PRCS_ERR_TS = NULL
+                       ,PRCS_STAT_TXT='Running'    
+                    WHERE PRCS_ID = 110;
+
+            ]]></command>
+            <!-- End Update the GDX APC process status -->
+
+             <command type="java"><![CDATA[
+
+                 script.setProperty("user_email_address", "GDXITD@caremark.com");
+                 //script.setProperty("user_email_address", "randy.redus@caremark.com");
+                 script.setProperty("email_text1","ERROR in GDX APC Duplicate Claims Checking");
+                 script.setProperty("email_text2","Please read log file");
+                 script.setProperty("email_text3","");
+                 String dupfiltrg = "";
+
+                 //dupfiltrg
+                 dupfiltrg = script.getProperty("dupfiltrg");
+                 script.setProperty("dupfiltrg", dupfiltrg);
+
+                 if (dupfiltrg == null || dupfiltrg.trim().length() == 0){
+                     // If invalid info throw error
+                     throw new Exception("Invalid dupfiltrg parameter! Should be 'YES' or 'NO' ");
+                 }
+
+             ]]></command>
+
+             <!-- Query DB for current processing quarter info -->
+             <command type="run" datasource="gdxdb" rowName="rowQuarter"><![CDATA[
+
+                SELECT CAST(QUARTER_ID AS CHAR(6)) FROM VRAP.TCUR_INV_PRD WITH UR
+
+             ]]></command>
+
+             <!-- Command to set quarter, model parameters, either from DB or parameter-->
+             <command type="java"><![CDATA[
+
+                 String quarter ="";
+
+                 if (script.getProperty("quarter") == null) {
+                     quarter = script.getProperty("rowQuarter.1");
+                     if (quarter == null || quarter.trim().length()== 0){
+                         // If invalid info from database throw error
+                         throw new Exception("Processing quarter info not found in database ");
+                     }
+                 }
+                 else { //There is parameter 'quarter' passed in
+                     quarter = script.getProperty("quarter");
+                     if (quarter == null || quarter.trim().length()== 0 || quarter.trim().length() != 6){
+                         throw new Exception("Invalid quarter ");
+                     }
+                 }
+                 script.setProperty("quarter", quarter);
+
+             ]]></command>
+
+             <!-- Query DB for current processing quarter info -->
+             <command type="run" datasource="gdxdb" rowName="count1"><![CDATA[
+
+                      SELECT COUNT(*)
+                        FROM VRAP.TAPC_DUP_CLAIMS
+                       WHERE QUARTER_ID = ${quarter}
+                         AND ALLW_IN_APC IS NULL
+                        WITH UR
+
+             ]]></command>
+
+             <command type="java"><![CDATA[
+
+                      int cnt1 = script.getProperty("count1.1").intValue();
+                      System.out.println("DUP: " + cnt1);
+                      if (cnt1 > 0) {
+//                         script.setProperty("user_email_address","elizaldo.samelin@caremark.com,randy.redus@caremark.com,yanping.zhao@caremark.com,GDXITD@caremark.com");
+                         script.setProperty("user_email_address","GDXAPC@caremark.com,GDXITD@caremark.com");
+                         script.setProperty("email_text1","Duplicate claims were found between models, and inserted into the table VRAP.TAPC_DUP_CLAIMS");
+                         script.setProperty("email_text2","If you have any questions, please contact GDXITD@caremark.com");
+                         throw new Exception( "Duplicate claims are found in table VRAP.TAPC_DUP_CLAIMS: " + cnt1);
+                      }
+
+             ]]></command>
+
+             <!-- Check wrong value for the proocessing quarter -->
+             <command type="run" datasource="gdxdb" rowName="count2"><![CDATA[
+
+                      SELECT COUNT(*)
+                        FROM VRAP.TAPC_DUP_CLAIMS
+                       WHERE QUARTER_ID = ${quarter}
+                         AND UPPER(ALLW_IN_APC) NOT IN ('Y', 'N')
+                        WITH UR
+
+             ]]></command>
+
+             <!-- Query DB for current processing quarter -->
+             <command type="run" datasource="gdxdb" rowName="count3"><![CDATA[
+
+                    SELECT COUNT(*)
+                      FROM (
+                      SELECT COUNT(*) AS COUNT
+                        FROM VRAP.TAPC_DUP_CLAIMS
+                       WHERE QUARTER_ID = ${quarter}
+                         AND UPPER(ALLW_IN_APC) = 'Y'
+                       GROUP BY CLAIM_ID
+                      HAVING COUNT(*) > 1
+                           ) C
+                        WITH UR
+
+             ]]></command>
+
+             <command type="java"><![CDATA[
+
+                      int cnt2 = 0;
+                      int cnt3 = 0;
+
+                      cnt2 = script.getProperty("count2.1").intValue();
+
+                      if (script.getProperty("count3.1") == null){
+                          cnt3 = 0;
+                      }
+                      else {
+                          cnt3 = script.getProperty("count3.1").intValue();
+                      }
+
+                      System.out.println("DUP With Wrong ALLW_IN_APC: " + cnt2);
+                      System.out.println("DUP With ALLW_IN_APC = 'Y': " + cnt3);
+
+                      if (cnt2 > 0) {
+                          script.setProperty("email_text1","Invalid value for ALLW_IN_APC in table VRAP.TAPC_DUP_CLAIMS found ");
+                          script.setProperty("email_text2","");
+                      }
+                      if (cnt3 > 0) {
+                          script.setProperty("email_text1","");
+                          script.setProperty("email_text2","A duplicate claim has a Y on both entries of the duplicate.  Only one of duplicate claims in table VRAP.TAPC_DUP_CLAIMS can have ALLW_IN_APC set to Y");
+                      }
+                      if (cnt2 > 0 && cnt3 > 0){
+                          script.setProperty("email_text1","Invalid value for ALLW_IN_APC in table VRAP.TAPC_DUP_CLAIMS found ");
+                          script.setProperty("email_text2","A duplicate claim has a Y on both entries of the duplicate.  Only one of distinct duplicate claims in table VRAP.TAPC_DUP_CLAIMS can have ALLW_IN_APC set to Y");
+                      }
+                      if (cnt2 > 0 || cnt3 > 0) {
+//                         script.setProperty("user_email_address","elizaldo.samelin@caremark.com,randy.redus@caremark.com,yanping.zhao@caremark.com,GDXITD@caremark.com");
+                          script.setProperty("user_email_address","GDXAPC@caremark.com,GDXITD@caremark.com");
+                          script.setProperty("email_text3","If you have any questions, please contact GDXITD@caremark.com");
+                          throw new Exception( "Invalid ALLW_IN_APC in table VRAP.TAPC_DUP_CLAIMS ");
+                      }
+
+             ]]></command>
+
+             <command type="java"><![CDATA[
+
+                      int cnt1a = script.getProperty("count1.1").intValue();
+                      int cnt2a = script.getProperty("count2.1").intValue();;
+
+                      if (script.getProperty("count3.1") == null){
+                          cnt3a = 0;
+                      }
+                      else {
+                          cnt3a = script.getProperty("count3.1").intValue();
+                      }
+
+                      if (cnt1a > 0 || cnt2a > 0 || cnt3a > 0) {
+                         System.out.println(" " );
+                         System.out.println("There are duplicate claims" );
+                         System.out.println("We are not creating the Trigger file ****** /GDX/prod/input/GDX_NO_DUPLICATES_IN_APC.trg *****" );
+                         System.out.println("due to duplicate claims." );
+                         System.out.println(" " );
+                      }
+                      else {
+                           //<!-- We had to re-set the property here. For some reason, even though set above it was VOID -->
+                           dupfiltrg = script.getProperty("dupfiltrg");
+                           script.setProperty("dupfiltrg", dupfiltrg);
+                           if (dupfiltrg.equals("YES") ) {
+                           System.out.println(" " );
+                           System.out.println("dupfiltrg is >" + dupfiltrg + "<" );
+                           System.out.println("Creating the Trigger File ****** /GDX/prod/input/GDX_NO_DUPLICATES_IN_APC.trg *****" );
+                           System.out.println(" " );
+                           try {
+                               BufferedWriter out = new BufferedWriter(new FileWriter("/GDX/prod/input/GDX_NO_DUPLICATES_IN_APC.trg"));
+                               out.write("This is the APC continuation file Trigger created within XML member GDX_dup_claim_check.xml. We are continuing because no duplicates were found.");
+                               out.close();
+                               } catch (IOException e) {throw new Exception("We can not write the APC process continuation Trigger file ");
+                                                       }
+                           }
+                           else {
+                                System.out.println(" " );
+                                System.out.println("dupfiltrg is >" + dupfiltrg + "<" );
+                                System.out.println("We did not create the Trigger File ****** /GDX/prod/input/GDX_NO_DUPLICATES_IN_APC.trg *****" );
+                                System.out.println("because dupfiltrg parm was NO." );
+                                System.out.println(" " );
+                           }
+
+                      }
+
+             ]]></command>
+
+            <!-- Start Update the GDX APC process status -->
+            <!-- do not abend if this doesnt run properly -->
+            <command type="run" datasource="gdxprd"><![CDATA[
+
+                update VRAP.TAPC_QTR_PRCS_EVENT    
+                    SET END_TS = CURRENT TIMESTAMP
+                       ,PRCS_STAT_TXT='Successful'    
+                    WHERE PRCS_ID = 110;
+
+            ]]></command>
+            <!-- End Update the GDX APC process status -->
+
+        </try>
+        <catch>
+
+                <!-- Start Update the GDX APC process status -->
+                <!-- do not abend if this doesnt run properly -->
+                <command type="run" datasource="gdxprd"><![CDATA[
+
+                    update VRAP.TAPC_QTR_PRCS_EVENT    
+                        SET PRCS_ERR_TS = CURRENT TIMESTAMP
+                           ,PRCS_STAT_TXT='Error-IT Investigating'    
+                        WHERE PRCS_ID = 110;
+
+                ]]></command>
+
+        <!-- Send an email on error -->
+                <command
+                        type="mail"
+                        mailTo="${user_email_address}"
+                        mailFrom="GDX_apc_dup_claim_check.xml@caremark.com"
+                        subject="[${region}] [ERROR] GDX APC duplicate claims check"
+                        contentType="text/html"
+                        throwsException="false"
+                ><![CDATA[
+                        <html>
+                        <head>
+                        <title>[ERROR] GDX APC Duplicate Claims Check </title>
+                        </head>
+                        <body>
+                        <font style="color: blue; font-size: small">
+                        <h3> ${email_text1}</h3>
+                        <h3> ${email_text2}</h3>
+                        <h3> ${email_text3}</h3>
+                        </font>
+
+                        <table cellpadding="2">
+                                <tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+                                <tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+                                <tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+                                #if (${system.getProperty('logfile')})
+                                        <tr>
+                                                <td><b>Log File:</b></td>
+                                                <td>
+                                                        ${system.getProperty('logfile')}
+                                                <td>
+                                        </tr>
+                                #end
+                        </table>
+
+                        </body>
+                        </html>
+                ]]></command>
+
+        </catch>
+        </command>
+</sqml>
+
+

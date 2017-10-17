@@ -1,0 +1,136 @@
+ 
+ 
+<!-- REFESH MAINFRAME PAYMENTS SPLIT LEVEL TABLE  -->
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+
+		   
+     <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        dmt_schema=script.getProperty("dmt_schema");
+        pmt_schema=script.getProperty("pmt_schema");
+	]]></command>
+	
+
+	<command type="try">
+		<try>
+			
+			<!-- delete from DB2. -->
+	<!--  deleted by parent 		
+			<command type="run" datasource="db2p">
+				<![CDATA[
+					DELETE FROM ${pmt_schema}.kscc017_splt_lvl
+				]]>
+			</command>
+     -->
+			<!-- Copy from UDB to mainframe DB2. -->
+			<command type="copy" batch="1000">  
+				<source type="sql" datasource="datamart"><![CDATA[
+SELECT  
+ SPLT_LVL_ID,  PCS_SYS_ID_NB,  RBAT_SPLT_ID_NB,  CLM_TYP_QLFR_VL,  
+ LAST_CHG_ID_NB, SRC_INSRT_TS  
+    FROM   ${dmt_schema}.kscc017_splt_lvl
+    order by 1, 2
+
+				]]></source> 
+				<target
+					type             = "sql"
+					datasource       = "db2p"
+					transaction      = "true"
+					batch            = "1000"
+					reportInterval   = "1000"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					INSERT INTO ${pmt_schema}.kscc017_splt_lvl
+                    (SPLT_LVL_ID,  PCS_SYS_ID_NB,  RBAT_SPLT_ID_NB,  CLM_TYP_QLFR_VL,  LAST_CHG_ID_NB, SRC_INSRT_TS 
+					)
+					VALUES ( ?, ?, ?, ?, ?, ? )
+				]]></target>
+			</command>
+    
+	        <!-- compare totals -->
+			<command type="run" datasource="db2p" rowName="count1">
+				<![CDATA[
+					SELECT COUNT(*) FROM ${pmt_schema}.kscc017_splt_lvl
+				]]>
+			</command>
+
+
+			<command type="run" datasource="datamart" rowName="count2">
+				<![CDATA[ 
+				 SELECT COUNT(*) FROM ${dmt_schema}.kscc017_splt_lvl 				
+					  ]]>
+			</command>
+
+
+			<command type="java">
+				count1 = script.getProperty("count1.1").intValue();  
+				count2 = script.getProperty("count2.1").intValue();
+				if (count1 != count2) {
+					logger.error(" kscc017 counts do NOT match count1=" + count1 + "  count2=" + count2);
+          throw new Exception(" kscc017 counts do NOT match count1=" + count1 + " count2=" + count2);
+				} 
+				System.out.println(" *********************************************** ");
+				System.out.println(" * Rows refreshed into kscc017 is " + count1 + ". ");
+				System.out.println(" *********************************************** ");
+			</command>
+			  
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+		<command
+				type="mail"
+				mailTo="${mailto}"
+				mailFrom="RPMF_Refresh_Client"
+				subject="[ERROR] MF REFESH kscc017 "
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] MF REFRESH kscc017</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] MF REFRESH kscc017 </u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		
+		
+		</catch>
+	</command>
+</sqml>

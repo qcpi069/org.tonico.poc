@@ -1,0 +1,77 @@
+
+<!-- build table gn_pricing  -->
+
+<sqml>
+        <property name="TIMEOUT" value="0"/>
+        <datasources resource="datasource.xml"/>
+        <properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        dmt_schema=script.getProperty("dmt_schema");
+        ]]></command>
+
+        <command type="try">
+                <try>
+
+                      <!-- truncate table rpsadm.ms_adv_w_GN -->
+                        <command type="run" datasource="datamart">
+                                <![CDATA[
+                                        DELETE FROM rps.ms_adv_w_GN
+                                ]]>
+                        </command>
+
+                        <command type="copy" batch="1000">
+                                <source type="sql" datasource="datamart"
+					><![CDATA[
+
+with adv (rac,  adv_eff_dt, adv_term_dt, calc_shr, modulator, PRC_TYP_CD ) as
+( select ra.RAC_ID,  ra.EFF_DT, ra.TERM_DT, ra.CALC_SHR_AMT, ra.MODL_VL , ra.PRC_TYP_CD
+from  rps.t_advance_base ra
+where CALC_TYP_CD='4'
+)
+
+select distinct adv.rac, adv_eff_dt, adv_term_dt, calc_shr, modulator,
+        l.formula, EFF_DT,TERM_DT,
+        base.CDSET_VL_DESC_TXT as RATE_BASIS_DESC,
+        qbase.CDSET_VL_DESC_TXT as RATE_BASIS_QUALF_DESC,
+        SPLIT_LEVEL, CLNT_MIN_AMT
+from adv left outer join rps.t_splits_pricing_base l
+        on adv.rac=l.rac_id and adv.adv_eff_dt=l.EFF_DT
+		and adv.PRC_TYP_CD=l.PRC_TYP_CD
+        join (select CDSET_VL, CDSET_VL_DESC_TXT
+                        from client_reg.crt_cdset cd join client_reg.crt_cdset_vl cv
+                                on cd.CDSET_ID=cv.CDSET_ID where CDSET_DESC_TXT='SPLIT_CLM_TYP_CD' ) base
+                on l.CLM_TYP_CD = base.CDSET_VL
+
+        join (select CDSET_VL, CDSET_VL_DESC_TXT
+                        from client_reg.crt_cdset cd join client_reg.crt_cdset_vl cv
+                                on cd.CDSET_ID=cv.CDSET_ID where CDSET_DESC_TXT='CLM_TYP_QLFR_CD' ) qbase
+                on l.CLM_TYP_QLFR_CD = qbase.CDSET_VL
+
+where l.PRC_TERM_TYP_CD='1'
+
+
+                                ]]></source>
+
+                                <target
+                                        type             = "sql"
+                                        datasource       = "datamart"
+                                        transaction      = "true"
+                                        batch            = "1000"
+                                        reportInterval   = "1000"
+                                        queryTimeout     = "${TIMEOUT}"
+                                ><![CDATA[
+					insert into rps.ms_adv_w_GN values
+						(?,?,?,?,?,?,?,?,?,?,?,?)
+
+                                ]]></target>
+
+                        </command>
+
+                </try>
+                <catch>
+                </catch>
+        </command>
+</sqml>
+

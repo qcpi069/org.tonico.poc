@@ -1,0 +1,78 @@
+<FilePart name="UtilHeader0101">
+  <Field name="RecordType" class="com.advpcs.rebatebilling2.util.dataformat.StringFormat">
+    <Length>2</Length>
+  </Field>
+  <Field name="ActionType" class="com.advpcs.rebatebilling2.util.dataformat.StringFormat">
+    <Length>2</Length>
+  </Field>
+  <Field name="RebateVersionReleaseNum" class="com.advpcs.rebatebilling2.util.dataformat.StringFormat">
+    <Length>5</Length>
+  </Field>
+  <Field name="TransmissionDate" class="com.advpcs.rebatebilling2.util.dataformat.UnsignedNumericFormat">
+    <Length>8</Length>
+    <Decimals>0</Decimals>
+    <Fill>0</Fill>
+  </Field>
+  <Field name="TransmissionControlNum" class="com.advpcs.rebatebilling2.util.dataformat.StringFormat">
+    <Length>9</Length>
+  </Field>
+  <Field name="RebateBatchNum" class="com.advpcs.rebatebilling2.util.dataformat.StringFormat">
+    <Length>15</Length>
+  </Field>
+  <Field name="MfrContractNum" class="com.advpcs.rebatebilling2.util.dataformat.StringFormat">
+    <Length>15</Length>
+  </Field>
+  <Field name="ContractingOrgContractNum" class="com.advpcs.rebatebilling2.util.dataformat.StringFormat">
+    <Length>15</Length>
+  </Field>
+<!--
+  <Field name="PeriodStartDate" class="com.advpcs.rebatebilling2.util.dataformat.UnsignedNumericFormat">
+    <Length>8</Length>
+    <Decimals>0</Decimals>
+    <Fill>0</Fill>
+  </Field>
+  <Field name="PeriodEndDate" class="com.advpcs.rebatebilling2.util.dataformat.UnsignedNumericFormat">
+    <Length>8</Length>
+    <Decimals>0</Decimals>
+    <Fill>0</Fill>
+  </Field>
+-->
+  <Field name="PeriodStartDate" class="com.advpcs.rebatebilling2.util.dataformat.StringFormat">
+    <Length>8</Length>
+  </Field>
+  <Field name="PeriodEndDate" class="com.advpcs.rebatebilling2.util.dataformat.StringFormat">
+    <Length>8</Length>
+  </Field>
+
+
+  <Field name="ContractingOrgIDQualifier" class="com.advpcs.rebatebilling2.util.dataformat.StringFormat">
+    <Length>1</Length>
+  </Field>
+  <Field name="ContractingOrgIDCode" class="com.advpcs.rebatebilling2.util.dataformat.StringFormat">
+    <Length>17</Length>
+  </Field>
+  <Field name="ContractingOrgName" class="com.advpcs.rebatebilling2.util.dataformat.StringFormat">
+    <Length>30</Length>
+  </Field>
+  <Field name="DataProviderIDQualifier" class="com.advpcs.rebatebilling2.util.dataformat.StringFormat">
+    <Length>1</Length>
+  </Field>
+  <Field name="DataProviderIDCode" class="com.advpcs.rebatebilling2.util.dataformat.StringFormat">
+    <Length>17</Length>
+  </Field>
+  <Field name="DataProviderIDName" class="com.advpcs.rebatebilling2.util.dataformat.StringFormat">
+    <Length>30</Length>
+  </Field>
+  <Field name="MfrIDQualifier" class="com.advpcs.rebatebilling2.util.dataformat.StringFormat">
+    <Length>1</Length>
+  </Field>
+  <Field name="MfrIDCode" class="com.advpcs.rebatebilling2.util.dataformat.StringFormat">
+    <Length>17</Length>
+  </Field>
+  <Field name="MfrName" class="com.advpcs.rebatebilling2.util.dataformat.StringFormat">
+    <Length>30</Length>
+  </Field>
+  <Field name="Filler" class="com.advpcs.rebatebilling2.util.dataformat.StringFormat">
+    <Length>169</Length>
+  </Field>
+</FilePart>

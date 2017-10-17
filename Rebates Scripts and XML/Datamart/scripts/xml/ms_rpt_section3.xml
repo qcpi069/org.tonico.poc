@@ -1,0 +1,208 @@
+<sqml>
+        <property name="TIMEOUT" value="0"/>
+        <datasources resource="datasource.xml"/>
+        <properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        dmt_schema=script.getProperty("dmt_schema");
+        ]]></command>
+
+        <command type="try">
+                <try>
+                        <command type="copy" batch="1000">
+                                <source type="sql" datasource="datamart"
+                                        ><![CDATA[
+
+with
+
+ chkln (be_id,rac_id, inv_qtr, pmt_amt, cutoff_stmt_id, pmt_rls_dt, inv_qtr_dt,PRCS_NB ) as
+   ( select RBID,RAC,INV_QTR,PMT_AMT,STMD_ID,PMT_RLS_DT,INV_QTR_DT,PRCS_NB
+	from rps.ms_chkln
+),
+
+ pmt_rls_stmt_id ( pmt_stmt_id) as
+   (select distinct stmt_id
+    from chkln c, rps.l_stmt_cycle
+    where c.pmt_rls_dt between date(stmt_begin_ts) and date(stmt_end_ts)
+),
+
+ r_adm_rule (rac_id, eff_dt, term_dt, maf_in ) as
+   (select  distinct rac.rac_id, c.eff_dt, c.term_dt, ts.maf_in
+        from client_reg.crt_clnt_rule_assc c
+                join client_reg.crt_clnt_prc_pool_assc rac
+                        on c.rbat_id=rac.rbat_id
+                join client_reg.crt_prc_pool p
+                        on p.prc_rule_id = c.prc_rule_id and p.pool_typ_cd = rac.pool_typ_cd
+                join client_reg.crt_prc_term_shr ts
+                        on ts.prc_pool_id = p.prc_pool_id
+                join client_reg.crt_prc_tier tier
+                        on ts.prc_term_shr_id=tier.prc_term_id
+                                and ts.PRC_TYP_CD=tier.PRC_TYP_CD
+        where tier.prc_term_typ_cd = '1'
+                and c.eff_dt<c.term_dt
+                and FRMA_TYP_CD ='R'
+),
+
+ adm_fee (rac_id, inv_qtr) as
+   (select distinct r.rac_id,  r.inv_qtr
+    from rps.t_splits_pricing_base s inner join chkln r
+                on r.rac_id = s.rac_id and (r.inv_qtr_dt between s.EFF_DT and s.TERM_DT)
+    where s.PRC_TYP_CD='A'
+
+        union all
+
+    select distinct r.rac_id,  r.inv_qtr
+    from r_adm_rule s inner join chkln r
+                on r.rac_id = s.rac_id and (r.inv_qtr_dt between s.EFF_DT and s.TERM_DT)
+    where s.maf_in='1'
+),
+
+ odist_orig (PRCS_NB,be_id,rac_id, inv_qtr, gn_amt, curdist,priordist ) as
+   (select PRCS_NB,be_id,f.rac_id,  f.inv_qtr,
+    sum(case when f.tran_type_cd in ('G1', 'G2', 'GN')
+              then f.amount*-1 else 0 end) ,
+    sum(case when f.tran_type_cd in ('A','D9','S4','A4','MA','A7','A8','A1','A2','A5','O1','O2','O3','MD', 
+	'S1', 'S2', 'S3','D1','D2','D3')
+                        and f.stmt_id = p.pmt_stmt_id
+              then f.amount else 0 end) ,
+    sum(case when f.tran_type_cd in ('A','D9','S4','A4','MA','A7','A8','A1','A2','A5','O1','O2','O3','MD', 
+	'S1', 'S2', 'S3','D1','D2','D3')
+                        and f.stmt_id < p.pmt_stmt_id
+              then f.amount else 0 end)
+   from (rps.f_sl_client_sum f inner join  chkln
+         	on f.rac_id=chkln.rac_id and f.inv_qtr=chkln.inv_qtr)
+	,
+             pmt_rls_stmt_id p
+where f.stmt_id <= p.pmt_stmt_id
+	and (chkln.rac_id,chkln.inv_qtr) not in (select * from adm_fee)
+   group by PRCS_NB,be_id,f.rac_id, f.inv_qtr
+ ),
+
+ odist_adm (PRCS_NB,be_id,rac_id, inv_qtr, gn_amt, curdist,priordist ) as
+   (select PRCS_NB,be_id,f.rac_id,  f.inv_qtr,
+    sum(case when f.tran_type_cd in ('G1', 'G2', 'GN','GA','G3','G4')
+              then f.amount*-1 else 0 end) ,
+    sum(case when f.tran_type_cd in ('A','D9','S4','A4','MA','A7','A8','A1','A2','A5','O1','O2','O3','MD', 
+	'S1', 'S2', 'S3','D1','D2','D3')
+                        and f.stmt_id = p.pmt_stmt_id
+              then f.amount else 0 end) ,
+    sum(case when f.tran_type_cd in ('A','D9','S4','A4','MA','A7','A8','A1','A2','A5','O1','O2','O3','MD', 
+	'S1', 'S2', 'S3','D1','D2','D3')
+                        and f.stmt_id < p.pmt_stmt_id
+              then f.amount else 0 end)
+   from (rps.f_sl_client_sum f inner join  chkln
+         	on f.rac_id=chkln.rac_id and f.inv_qtr=chkln.inv_qtr)
+	,
+             pmt_rls_stmt_id p
+where f.stmt_id <= p.pmt_stmt_id
+	and (chkln.rac_id,chkln.inv_qtr) in (select * from adm_fee)
+   group by PRCS_NB,be_id,f.rac_id, f.inv_qtr
+ ),
+
+ odist (PRCS_NB,be_id,rac_id, inv_qtr, gn_amt, curdist,priordist ) as
+   (select * from odist_adm
+	union all
+    select * from odist_orig
+   ),
+  sl_orig (rac_id, inv_qtr, caps_cs, inv_orig,pmt_amt) as
+   (select c.rac_id, c.inv_qtr,
+      sum(case when f.tran_type_cd in ('P1','P5','20') then f.amount else 0 end) as CAPs_cs ,
+      sum(case when f.tran_type_cd in ('I1','I2','I3') then f.amount * -1 else 0 end) as inv_orig
+        ,c.pmt_amt
+    from chkln c inner join rps.f_sl_client_sum f
+    on c.rac_id = f.rac_id and c.inv_qtr = f.inv_qtr
+    where f.stmt_id <= c.cutoff_stmt_id
+	and (c.rac_id,c.inv_qtr) not in (select * from adm_fee)
+          group by c.rac_id, c.inv_qtr, c.pmt_amt
+   ),
+
+  sl_adm (rac_id, inv_qtr, caps_cs, inv_orig,pmt_amt) as
+   (select c.rac_id, c.inv_qtr,
+      sum(case when f.tran_type_cd in ('P1','P5','F1','F7','20','22') then f.amount else 0 end) as CAPs_cs ,
+      sum(case when f.tran_type_cd in ('I1','I2','I3','FA','FC') then f.amount * -1 else 0 end) as inv_orig
+        ,c.pmt_amt
+    from chkln c inner join rps.f_sl_client_sum f
+    on c.rac_id = f.rac_id and c.inv_qtr = f.inv_qtr
+    where f.stmt_id <= c.cutoff_stmt_id
+	and (c.rac_id,c.inv_qtr) in (select * from adm_fee)
+          group by c.rac_id, c.inv_qtr, c.pmt_amt
+   ),
+
+  sl (rac_id, inv_qtr, caps_cs, inv_orig,pmt_amt) as
+   (select * from sl_orig
+	union all
+    select * from sl_adm
+   ),
+
+ adv_qtr_gn (rac_id, inv_qtr, formula, share) as
+(select distinct rac,inv_qtr,formula,CALC_SHR*MODULATOR/100
+        from rps.ms_adv_w_gn a inner join chkln c
+		on a.rac=c.rac_id and c.inv_qtr_dt between ADV_EFF_DT and ADV_TERM_DT
+),
+
+ adv_qtr_inv (rac_id, inv_qtr, calc_shr, ashare) as
+(select distinct rac,inv_qtr,CALC_SHR,MODULATOR
+        from rps.ms_adv_w_inv a inner join chkln c
+                on a.rac=c.rac_id and c.inv_qtr_dt between ADV_EFF_DT and ADV_TERM_DT
+),
+
+  coal_flag(rac_id, inv_qtr, alt_coal_rpt_in, corp_cd) as
+  (select distinct r.rac_id,  r.inv_qtr, s.alt_coal_rpt_in, co.corp_cd
+    from rps.t_splits_pricing_base s inner join chkln r
+                on r.rac_id = s.rac_id and (r.inv_qtr_dt between s.EFF_DT and s.TERM_DT)
+		inner join client_reg.crt_clnt c 
+		on r.be_id = substr(digits(c.rbat_id),3,8)
+		inner join rps.tcorp_ap_co_cd co
+		on c.ap_co_cd = co.ap_co_cd
+),
+
+distrSum(PRCS_NB,be_id,rac_id, inv_qtr, cap_cs,amount_due,curdist,priordist) as
+(
+select PRCS_NB,be_id,d.rac_id, d.inv_qtr,
+	case when cf.alt_coal_rpt_in=1 and cf.corp_cd = 1 then 0 else caps_cs end as caps_cs,
+	case when cf.alt_coal_rpt_in=1 and cf.corp_cd = 1 then gn_amt
+	     else
+   		case
+     		when a.share is not null and gn_amt > sl.caps_cs then gn_amt
+     		when a.share is not null and gn_amt < sl.caps_cs then sl.caps_cs
+     		when ai.ashare is not null and sl.inv_orig*ai.ashare*ai.calc_shr/100 > sl.caps_cs then sl.inv_orig*ai.ashare*ai.calc_shr/100
+     		else sl.caps_cs 
+     		end 
+	     end	as amount_due,
+   d.curdist,
+   d.priordist
+
+from
+  odist d
+  left outer join sl on sl.rac_id = d.rac_id and sl.inv_qtr = d.inv_qtr
+  left outer join adv_qtr_gn a on sl.rac_id = a.rac_id and sl.inv_qtr = a.inv_qtr
+  left outer join adv_qtr_inv ai on sl.rac_id = ai.rac_id and sl.inv_qtr = ai.inv_qtr
+  left outer join coal_flag cf on sl.rac_id = cf.rac_id and sl.inv_qtr = cf.inv_qtr
+)
+
+select DISTINCT PRCS_NB,be_id,rac_id, inv_qtr,cap_cs,priordist,curdist,amount_due,0
+from distrSum d
+
+                                ]]></source>
+
+                                <target
+                                        type             = "sql"
+                                        datasource       = "datamart"
+                                        transaction      = "true"
+                                        batch            = "1000"
+                                        reportInterval   = "1000"
+                                        queryTimeout     = "${TIMEOUT}"
+                                ><![CDATA[
+                                              insert into rps.ms_rpt_section3 values (?,?,?,?,?,?,?,?,?)
+
+                                ]]></target>
+
+                        </command>
+
+                </try>
+                <catch>
+                </catch>
+        </command>
+</sqml>
+

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE POWERMART SYSTEM "powrmart.dtd">
+<POWERMART CREATION_DATE="10/30/2013 12:09:40" REPOSITORY_VERSION="182.91">
+<REPOSITORY NAME="PCRepos_Caremark9_PRD1" VERSION="182" CODEPAGE="MS1252" DATABASETYPE="DB2">
+<FOLDER NAME="Shared_Rebates_RCI" GROUP="" OWNER="rebates_session_operator" SHARED="SHARED" DESCRIPTION="Shared Objects" PERMISSIONS="rwx---r--" UUID="482f1f88-6499-4f1e-95c4-5f8d78fe0b3e">
+    <TRANSFORMATION DESCRIPTION ="This lookup was added for ITPR000634 MedD Appropriate Days Supply&#xD;&#xA;&#xD;&#xA;It is to be used to lookup assigned Rebate ID to determine if it&apos;s a FEP client.  If the fields match a row in the lookup, use the FEP_CLNT_FLG on the lookup for the target field" NAME ="LKP_RCIT_SPCL_NTWK_SPCL_DRUG_CD" OBJECTVERSION ="1" REUSABLE ="YES" TYPE ="Lookup Procedure" VERSIONNUMBER ="1">
+        <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Used for lookup to identify FEP specialty pharmacies in LKP_RCIT_SPCL_NTWK, matched to the RBAT_ID on BCI during claim extract." NAME ="in_RBAT_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+        <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="Used for lookup to identify FEP clients in RCIT_SPCL_NTWK, compared to the DSPN_DT on BCI during claim extract." NAME ="in_DSPN_DT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="29" SCALE ="9"/>
+        <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Used for lookup to identify FEP specialty pharmacies in LKP_RCIT_SPCL_NTWK, matched to the RBAT_ID on BCI during claim extract." NAME ="RBAT_ID" PICTURETEXT ="" PORTTYPE ="LOOKUP/OUTPUT" PRECISION ="10" SCALE ="0"/>
+        <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="Used for lookup to identify FEP specialty pharmacies in LKP_RCIT_SPCL_NTWK, compared to the DSPN_DT on BCI during claim extract." NAME ="EFF_DT" PICTURETEXT ="" PORTTYPE ="LOOKUP" PRECISION ="29" SCALE ="9"/>
+        <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="Used for lookup to identify FEP specialty pharmacies in LKP_RCIT_SPCL_NTWK, compared to the DSPN_DT on BCI during claim extract." NAME ="TERM_DT" PICTURETEXT ="" PORTTYPE ="LOOKUP" PRECISION ="29" SCALE ="9"/>
+        <TRANSFORMFIELD DATATYPE ="small integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="FEP_CLNT_CD" PICTURETEXT ="" PORTTYPE ="LOOKUP/OUTPUT" PRECISION ="5" SCALE ="0"/>
+        <TABLEATTRIBUTE NAME ="Lookup Sql Override" VALUE =""/>
+        <TABLEATTRIBUTE NAME ="Lookup table name" VALUE ="VRAP.RCIT_SPCL_NTWK"/>
+        <TABLEATTRIBUTE NAME ="Lookup Source Filter" VALUE =""/>
+        <TABLEATTRIBUTE NAME ="Lookup caching enabled" VALUE ="YES"/>
+        <TABLEATTRIBUTE NAME ="Lookup policy on multiple match" VALUE ="Use Any Value"/>
+        <TABLEATTRIBUTE NAME ="Lookup condition" VALUE ="RBAT_ID = in_RBAT_ID AND EFF_DT &lt;= in_DSPN_DT AND TERM_DT &gt;= in_DSPN_DT"/>
+        <TABLEATTRIBUTE NAME ="Connection Information" VALUE ="$Source"/>
+        <TABLEATTRIBUTE NAME ="Source Type" VALUE ="Database"/>
+        <TABLEATTRIBUTE NAME ="Recache if Stale" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+        <TABLEATTRIBUTE NAME ="Lookup cache directory name" VALUE ="$PMCacheDir"/>
+        <TABLEATTRIBUTE NAME ="Lookup cache initialize" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Lookup cache persistent" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Lookup Data Cache Size" VALUE ="Auto"/>
+        <TABLEATTRIBUTE NAME ="Lookup Index Cache Size" VALUE ="Auto"/>
+        <TABLEATTRIBUTE NAME ="Dynamic Lookup Cache" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Synchronize Dynamic Cache" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Output Old Value On Update" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Update Dynamic Cache Condition" VALUE ="TRUE"/>
+        <TABLEATTRIBUTE NAME ="Cache File Name Prefix" VALUE =""/>
+        <TABLEATTRIBUTE NAME ="Re-cache from lookup source" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Insert Else Update" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Update Else Insert" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Datetime Format" VALUE =""/>
+        <TABLEATTRIBUTE NAME ="Thousand Separator" VALUE ="None"/>
+        <TABLEATTRIBUTE NAME ="Decimal Separator" VALUE ="."/>
+        <TABLEATTRIBUTE NAME ="Case Sensitive String Comparison" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Null ordering" VALUE ="Null Is Highest Value"/>
+        <TABLEATTRIBUTE NAME ="Sorted Input" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Lookup source is static" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Pre-build lookup cache" VALUE ="Auto"/>
+        <TABLEATTRIBUTE NAME ="Subsecond Precision" VALUE ="6"/>
+    </TRANSFORMATION>
+</FOLDER>
+</REPOSITORY>
+</POWERMART>

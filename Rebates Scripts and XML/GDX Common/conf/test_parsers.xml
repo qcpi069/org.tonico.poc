@@ -1,0 +1,194 @@
+<parsers>
+	
+	<record
+		type="stock"
+		objectType="org.apache.commons.collections.map.LinkedMap"
+		acceptPattern="^STK"
+	>
+		<!--
+			The fixed tokenizer is for fixed length fields.
+		-->
+		<tokenizer type="fixed">
+			<field offset="3" length="10"/>
+			<field offset="13" length="10"/>
+			<field offset="23" length="19"/>
+		</tokenizer>
+		<field
+			name="ticker"
+			position="0"
+			dataType="string"
+			trim="true"	
+		/>
+		<field
+			name="value"
+			position="1"
+			dataType="double"
+			trim="true"
+		/>
+		<field
+			name="effective"
+			position="2"
+			dataType="date"
+			format="yyyy-MM-dd HH:mm:ss"
+			trim="true"	
+		/>
+	</record>
+	
+	<record
+		type="customer"
+		objectType="org.apache.commons.collections.map.LinkedMap"
+		acceptPattern="^CUS"
+	>
+		<tokenizer type="fixed">
+			<field offset="3" length="20"/>
+			<field offset="23" length="20"/>
+			<field offset="43" length="10"/>
+		</tokenizer>
+		<field
+			name="firstName"
+			position="0"
+			dataType="string"
+			trim="true"	
+		/>
+		<field
+			name="lastName"
+			position="1"
+			dataType="string"
+			trim="true"
+		/>
+		<field
+			name="birth"
+			position="2"
+			dataType="date"
+			format="MM/dd/yyyy"
+			trim="true"	
+		/>
+	</record>
+	
+	<record
+		type="employee"
+		objectType="java.util.ArrayList"
+		acceptPattern="^EMP"
+	>
+		<tokenizer type="fixed">
+			<field offset="3" length="20"/>
+			<field offset="23" length="20"/>
+			<field offset="43" length="25"/>
+			<field offset="68" length="15"/>
+		</tokenizer>
+		<field
+			name="firstName"
+			position="0"
+			dataType="string"
+			trim="true"	
+		/>
+		<field
+			name="lastName"
+			position="1"
+			dataType="string"
+			trim="true"
+		/>
+		<field
+			name="position"
+			position="2"
+			dataType="string"
+			trim="true"
+			letterCase="upper"
+		/>
+		<field
+			name="salary"
+			position="3"
+			dataType="double"
+			trim="true"
+			letterCase="upper"
+		/>
+	</record>
+	
+	<record
+		type="book"
+		objectType="org.apache.commons.collections.map.LinkedMap"
+		acceptPattern="(?i)^\s*book,"
+	>
+		<!--
+			This tokenizer splits the input using a regular expression.
+			This is good for delimited files (that have no escaped delimiters).
+		-->
+		<tokenizer type="split" pattern=","/>
+		<field
+			name="title"
+			position="1"
+			dataType="string"
+			trim="true"
+		/>
+		<field
+			name="author"
+			position="2"
+			dataType="string"
+			trim="true"
+			letterCase="upper"
+		/>
+		<field
+			name="price"
+			position="3"
+			dataType="double"
+			trim="true"
+			format="$#,###.##"
+		/>
+	</record>
+	
+	<record
+		type="product"
+		objectType="org.apache.commons.collections.map.LinkedMap"
+		acceptPattern="(?i)^\s*PRODUCT"
+	>
+		<!--
+			This example uses a regular expression to pull out submatches
+			from the text.
+			This is pretty good for parsing things that weren't designed to
+			be parsed, like log files.
+		-->
+		<tokenizer
+			type="regex"
+			pattern="(?i)PRODUCT\s+ID\s*=\s*(\d+)\s+VALUE\s*=\s*(\S+)"
+		/>
+		<field
+			name="productId"
+			position="1"
+			dataType="long"
+			trim="true"
+		/>
+		<!-- Example of a field parsing a trailing negative sign. -->
+		<field
+			name="value"
+			position="2"
+			dataType="double"
+			trim="true"
+			format="#.##;#.##-"
+		/>
+	</record>
+	
+	<!--
+		This record type shows how to set up a way to capture
+		unparseable records without throwing an error.
+		The acceptPattern matches anything.
+		The tokeinzer type "record" just gives you the entire record line
+		at position 0.  The field is just a string with no formatting.
+		This will return an ArrayList with the first element as the record itself.
+		This entry should be the last entry in the XML file. If you put this
+		as the first record definition, then every record will be an error,
+		since the acceptPattern matches everything.
+	-->
+	<record
+		type="error"
+		objectType="java.util.ArrayList"
+		acceptPattern=".*"
+	>
+		<tokenizer type="record"/>
+		<field
+			name="error"
+			type="string"
+			position="0"
+		/>	
+	</record>
+	
+</parsers>

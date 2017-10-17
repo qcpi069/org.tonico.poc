@@ -1,0 +1,557 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<!--
+	This is the spring configuration file for discount client split conversion process
+-->
+<!--  - Application context definition for "springapp" DispatcherServlet.  -->
+
+<beans>
+	<bean id="xrefReportDAO"
+		class="com.caremark.rebates.registration.batch.dao.XREFReportDAO">
+		<property name="dataSource">
+			<ref bean="rbateRegDataSource" />
+		</property>
+		<property name="selectReportSQL">
+			<value>
+			  SELECT c.extl_src_cd, c.extl_lvl1_id, c.extl_lvl2_id,
+				     c.extl_lvl3_id, c.extl_lvl4_id, c.extl_lvl5_id,
+				     a.rbat_id, b.eff_dt, b.term_dt,b.lcm_cd 
+				FROM CLIENT_REG.CRT_CLNT_EXTL_HRCY_ASSC a
+                   , CLIENT_REG.CRT_EXTL_HRCY_LCM_ASSC b
+                   , CLIENT_REG.CRT_EXTL_HRCY c
+		       WHERE a.EXTL_HRCY_ID = b.EXTL_HRCY_ID 
+			 	 AND a.EXTL_HRCY_ID	= c.EXTL_HRCY_ID 
+				 AND c.EXTL_SRC_CD not in ('RECAP', 'RXC') 
+				 AND a.eff_dt &lt;= ? 
+				 AND a.term_dt &gt;= ? 
+				 AND b.eff_dt &lt;= ? 
+				 AND b.term_dt &gt;= ? 	
+		    ORDER BY c.extl_src_cd, c.extl_lvl1_id, c.extl_lvl2_id,
+				     c.extl_lvl3_id,a.rbat_id
+				WITH UR
+			</value>
+		</property>
+	</bean>
+	<bean id="enrollDAO"
+		class="com.caremark.rebates.registration.batch.dao.ENRLDAO">
+		<property name="dataSource">
+			<ref bean="rbateRegDataSource" />
+		</property>
+		<property name="enrollDeleteSQL">
+			<value>
+				DELETE 
+				  FROM CLIENT_REG.CRT_ENRL 
+				 WHERE BE_TYP_CD = ? 
+				   AND ENRL_PRD_ID = ?
+				   AND EXISTS (SELECT EXTL_HRCY_ID FROM CLIENT_REG.CRT_EXTL_HRCY  
+					             WHERE EXTL_SRC_CD = ? 
+					               AND EXTL_HRCY_ID = BE_ID
+					           )
+			</value>
+		</property>		
+		<property name="enrollSelectSQL">
+			<value>
+				SELECT * 
+				  FROM CLIENT_REG.CRT_ENRL 
+				 WHERE BE_ID = ? 
+				   AND BE_TYP_CD = ? 
+				   AND ENRL_PRD_ID = ?
+				  WITH UR
+			</value>
+		</property>
+		<property name="enrollInsertSQL">
+			<value>
+				INSERT INTO CLIENT_REG.CRT_ENRL 
+				       (
+				       		BE_ID
+				       	   ,BE_TYP_CD
+				       	   ,ENRL_PRD_ID
+				       	   ,ENRL_CNT_QTY
+				       	   ,INSRT_TS
+				       	   ,INSRT_USER_ID
+				       	   ,UPDT_TS
+				       	   ,UPDT_USER_ID			       
+				        ) 
+				VALUES (?, ?, ? ,?, (CURRENT TIMESTAMP), ?, (CURRENT TIMESTAMP), ?)
+			</value>
+		</property>
+		<property name="enrollUpdateSQL">
+			<value>
+				UPDATE CLIENT_REG.CRT_ENRL 
+				   SET ENRL_CNT_QTY = ?
+				      ,UPDT_USER_ID = ? 
+				      ,UPDT_TS = CURRENT TIMESTAMP
+				WHERE BE_ID = ? 
+				  AND BE_TYP_CD = ? 
+				  AND ENRL_PRD_ID = ?
+			</value>
+		</property>
+
+	</bean>
+	<bean id="extlHrcyDAO"
+		class="com.caremark.rebates.registration.batch.dao.ExtlHrcyDAO">
+		<property name="dataSource">
+			<ref bean="rbateRegDataSource" />
+		</property>
+		<property name="selectExtlHrcyQLRollUpSQL">
+			<value>
+			WITH 
+       			T1 ( EXTL_HRCY_ID,EXTL_SRC_CD
+					,EXTL_LVL1_ID,EXTL_LVL2_ID,EXTL_LVL3_ID,EXTL_LVL4_ID,EXTL_LVL5_ID
+                    ,EXTL_LVL1_NM,EXTL_LVL2_NM,EXTL_LVL3_NM,EXTL_LVL4_NM,EXTL_LVL5_NM
+                    ,PLAN_ID,INSRT_USER_ID,UPDT_USER_ID
+                   ) AS 
+                     (SELECT hrcy.EXTL_HRCY_ID,EXTL_SRC_CD
+							,EXTL_LVL1_ID,EXTL_LVL2_ID,EXTL_LVL3_ID,EXTL_LVL4_ID,EXTL_LVL5_ID
+							,EXTL_LVL1_NM,EXTL_LVL2_NM,EXTL_LVL3_NM,EXTL_LVL4_NM,EXTL_LVL5_NM
+							,PLAN_ID,hrcy.INSRT_USER_ID,hrcy.UPDT_USER_ID
+                       FROM CLIENT_REG.CRT_EXTL_HRCY hrcy , CLIENT_REG.crt_clnt_extl_hrcy_assc clnthrcy
+					  WHERE hrcy.EXTL_HRCY_ID = clnthrcy.EXTL_HRCY_ID
+                        AND EXTL_SRC_CD = ? 
+						AND RTRIM(EXTL_LVL1_ID) = ?
+					 ), 
+				T2 ( EXTL_SRC_CD,EXTL_LVL1_ID,EXTL_LVL2_ID,EXTL_LVL3_ID
+				    ) AS 
+						(SELECT EXTL_SRC_CD, EXTL_LVL1_ID, EXTL_LVL2_ID, EXTL_LVL3_ID 
+						   FROM CLIENT_REG.CRT_EXTL_HRCY hrcy , CLIENT_REG.crt_clnt_extl_hrcy_assc clnthrcy
+						  WHERE hrcy.EXTL_HRCY_ID = clnthrcy.EXTL_HRCY_ID
+                            AND EXTL_SRC_CD = ?
+                            AND RTRIM(EXTL_LVL1_ID) = ?
+                            AND RTRIM(EXTL_LVL2_ID) = ?
+                        ),          
+				T3 ( EXTL_SRC_CD,EXTL_LVL1_ID,EXTL_LVL2_ID,EXTL_LVL3_ID
+				    ) AS 
+						(SELECT EXTL_SRC_CD, EXTL_LVL1_ID, EXTL_LVL2_ID, EXTL_LVL3_ID 
+                           FROM CLIENT_REG.CRT_EXTL_HRCY  hrcy , CLIENT_REG.crt_clnt_extl_hrcy_assc clnthrcy
+                          WHERE hrcy.EXTL_HRCY_ID = clnthrcy.EXTL_HRCY_ID
+                            AND EXTL_SRC_CD = ?
+                            AND RTRIM(EXTL_LVL1_ID) = ?
+                            AND RTRIM(EXTL_LVL2_ID) = ?
+                            AND RTRIM(EXTL_LVL3_ID) = ?
+                        )
+				SELECT T1.*, T2.EXTL_LVL2_ID AS LEVEL2, T3.EXTL_LVL3_ID AS LEVEL3 
+				  FROM T1 LEFT JOIN T2 ON RTRIM(T1.EXTL_SRC_CD) = RTRIM(T2.EXTL_SRC_CD) 
+                                      AND RTRIM(T1.EXTL_LVL1_ID) = RTRIM(T2.EXTL_LVL1_ID) 
+                                      AND RTRIM(T1.EXTL_LVL2_ID) = RTRIM(T2.EXTL_LVL2_ID)  
+                                      AND RTRIM(T1.EXTL_LVL3_ID) = RTRIM(T2.EXTL_LVL3_ID) 
+                          LEFT JOIN T3 ON RTRIM(T1.EXTL_SRC_CD) = RTRIM(T3.EXTL_SRC_CD) 
+									  AND RTRIM(T1.EXTL_LVL1_ID) = RTRIM(T3.EXTL_LVL1_ID) 
+									  AND RTRIM(T1.EXTL_LVL2_ID) = RTRIM(T3.EXTL_LVL2_ID)  
+                                      AND RTRIM(T1.EXTL_LVL3_ID) = RTRIM(T3.EXTL_LVL3_ID)
+                 WHERE RTRIM(T1.EXTL_LVL2_ID) IN ('&#32;',?) 
+                   AND RTRIM(T1.EXTL_LVL3_ID) IN ('&#32;',?) 
+                 ORDER BY T3.EXTL_LVL3_ID, T2.EXTL_LVL2_ID, T1.EXTL_LVL3_ID, T1.EXTL_LVL2_ID
+                  WITH UR
+
+			</value>
+		</property>
+		<property name="selectExtlHrcyRollUpSQL">
+			<value>
+			WITH 
+				T1 ( EXTL_HRCY_ID,EXTL_SRC_CD
+					,EXTL_LVL1_ID,EXTL_LVL2_ID,EXTL_LVL3_ID,EXTL_LVL4_ID,EXTL_LVL5_ID
+					,EXTL_LVL1_NM,EXTL_LVL2_NM,EXTL_LVL3_NM,EXTL_LVL4_NM,EXTL_LVL5_NM
+					,PLAN_ID,INSRT_USER_ID,UPDT_USER_ID
+				   ) AS 
+					(SELECT EXTL_HRCY_ID,EXTL_SRC_CD
+							,EXTL_LVL1_ID,EXTL_LVL2_ID,EXTL_LVL3_ID,EXTL_LVL4_ID,EXTL_LVL5_ID
+							,EXTL_LVL1_NM,EXTL_LVL2_NM,EXTL_LVL3_NM,EXTL_LVL4_NM,EXTL_LVL5_NM
+							,PLAN_ID,INSRT_USER_ID,UPDT_USER_ID
+					   FROM CLIENT_REG.CRT_EXTL_HRCY  
+					  WHERE EXTL_SRC_CD = ? 
+						AND (EXTL_LVL1_ID) = ?
+					), 
+				T2 ( EXTL_SRC_CD,EXTL_LVL1_ID,EXTL_LVL2_ID,EXTL_LVL3_ID
+				   ) AS 
+					(SELECT EXTL_SRC_CD, EXTL_LVL1_ID, EXTL_LVL2_ID, EXTL_LVL3_ID 
+					   FROM CLIENT_REG.CRT_EXTL_HRCY 
+					  WHERE EXTL_SRC_CD = ?
+						AND (EXTL_LVL1_ID) = ?
+						AND (EXTL_LVL2_ID) = ?
+					), 	
+				T3 ( EXTL_SRC_CD,EXTL_LVL1_ID,EXTL_LVL2_ID,EXTL_LVL3_ID
+				    ) AS 
+					(SELECT EXTL_SRC_CD, EXTL_LVL1_ID, EXTL_LVL2_ID, EXTL_LVL3_ID 
+					   FROM CLIENT_REG.CRT_EXTL_HRCY  
+					  WHERE EXTL_SRC_CD = ?
+					    AND (EXTL_LVL1_ID) = ?
+						AND	(EXTL_LVL2_ID) = ?
+						AND (EXTL_LVL3_ID) = ?
+					)
+				SELECT T1.*, T2.EXTL_LVL2_ID AS LEVEL2, T3.EXTL_LVL3_ID AS LEVEL3 
+				  FROM T1 LEFT JOIN T2 ON (T1.EXTL_SRC_CD) = (T2.EXTL_SRC_CD) 
+                                      AND (T1.EXTL_LVL1_ID) = (T2.EXTL_LVL1_ID) 
+                                      AND (T1.EXTL_LVL2_ID) = (T2.EXTL_LVL2_ID)  
+                                      AND (T1.EXTL_LVL3_ID) = (T2.EXTL_LVL3_ID) 
+                          LEFT JOIN T3 ON (T1.EXTL_SRC_CD) = (T3.EXTL_SRC_CD) 
+									  AND (T1.EXTL_LVL1_ID) = (T3.EXTL_LVL1_ID) 
+									  AND (T1.EXTL_LVL2_ID) = (T3.EXTL_LVL2_ID)  
+                                      AND (T1.EXTL_LVL3_ID) = (T3.EXTL_LVL3_ID)
+                 WHERE (T1.EXTL_LVL2_ID) IN ('&#32;',?) 
+                   AND (T1.EXTL_LVL3_ID) IN ('&#32;',?) 
+                 ORDER BY T3.EXTL_LVL3_ID, T2.EXTL_LVL2_ID, T1.EXTL_LVL3_ID, T1.EXTL_LVL2_ID
+                  WITH UR				   										    					
+			</value>
+		</property>
+		<property name="selectAllDistinctLvl1SQL">
+			<value>
+				select distinct h.EXTL_LVL1_ID 
+				from client_reg.crt_extl_hrcy h, CLIENT_REG.crt_clnt_extl_hrcy_assc clnt
+				where H.extl_hrcy_id = clnt.extl_hrcy_id
+				and h.EXTL_SRC_CD = ?
+				with ur
+			</value>
+		</property>
+		<property name="selectAllDistinctLvl2SQL">
+			<value>
+				select distinct h.EXTL_LVL1_ID , h.EXTL_LVL2_ID
+				from client_reg.crt_extl_hrcy h, CLIENT_REG.crt_clnt_extl_hrcy_assc clnt
+				where H.extl_hrcy_id = clnt.extl_hrcy_id
+				and h.EXTL_SRC_CD = ?
+				with ur
+			</value>
+		</property>
+		
+		<property name="selectQLAllDistinctLvl1SQL">
+			<value>
+				select distinct h.EXTL_LVL1_ID 
+				from client_reg.crt_extl_hrcy h, CLIENT_REG.crt_clnt_extl_hrcy_assc clnt
+				where H.extl_hrcy_id = clnt.extl_hrcy_id
+				AND h.EXTL_SRC_CD = ?
+				with ur
+			</value>
+		</property>
+		
+		<property name="selectAllLvl1HrcySQL">
+			<value>
+				select  distinct h.EXTL_LVL1_ID , h.EXTL_HRCY_ID
+				from client_reg.crt_extl_hrcy h, CLIENT_REG.crt_clnt_extl_hrcy_assc clnt
+				where H.extl_hrcy_id = clnt.extl_hrcy_id				
+				and h.EXTL_SRC_CD = ?			
+				and h.EXTL_LVL2_ID = ''
+				and h.EXTL_LVL3_ID = ''
+				with ur
+			</value>
+		</property>
+		<property name="selectQLAllLvl1HrcySQL">
+			<value>
+				select  distinct h.EXTL_LVL1_ID , h.EXTL_HRCY_ID
+				from client_reg.crt_extl_hrcy h, CLIENT_REG.crt_clnt_extl_hrcy_assc clnt
+				where H.extl_hrcy_id = clnt.extl_hrcy_id
+				AND h.EXTL_SRC_CD = ?			
+				and h.EXTL_LVL2_ID = ''
+				and h.EXTL_LVL3_ID = ''
+				with ur
+			</value>
+		</property>
+		<property name="selectAllLvl2HrcySQL">
+			<value>
+				select distinct h.EXTL_LVL1_ID, h.EXTL_LVL2_ID , h.EXTL_HRCY_ID
+				from client_reg.crt_extl_hrcy h, CLIENT_REG.crt_clnt_extl_hrcy_assc clnt
+				where H.extl_hrcy_id = clnt.extl_hrcy_id			
+				and h.EXTL_SRC_CD = ?				
+				and h.EXTL_LVL2_ID != ''
+				and h.EXTL_LVL3_ID = ''
+				with ur
+			</value>
+		</property>
+		<property name="selectQLAllLvl2HrcySQL">
+			<value>
+				select  distinct h.EXTL_LVL1_ID, h.EXTL_LVL2_ID , h.EXTL_HRCY_ID
+				from client_reg.crt_extl_hrcy h, CLIENT_REG.crt_clnt_extl_hrcy_assc clnt
+				where H.extl_hrcy_id = clnt.extl_hrcy_id
+				AND h.EXTL_SRC_CD = ?				
+				and h.EXTL_LVL2_ID != ''
+				and h.EXTL_LVL3_ID = ''
+				with ur
+			</value>
+		</property>
+		<property name="selectExtlHrcyOnlySQL">
+			<value>
+				SELECT a.extl_hrcy_id, a.EXTL_LVL1_ID, a.EXTL_LVL2_ID, a.EXTL_LVL3_ID, a.EXTL_SRC_CD
+				  FROM CLIENT_REG.CRT_EXTL_HRCY A 				
+				 where A.EXTL_SRC_CD = ?
+				   AND (A.EXTL_LVL1_ID) = ? 
+				   AND (A.EXTL_LVL2_ID) = ?
+				   AND (A.EXTL_LVL3_ID) = ?				 
+				  WITH UR
+			</value>
+		</property>
+		<property name="selectExtlHrcySQL">
+			<value>
+				SELECT a.extl_hrcy_id, a.EXTL_LVL1_ID, a.EXTL_LVL2_ID, a.EXTL_LVL3_ID, a.EXTL_SRC_CD, clnt.eff_dt
+				  FROM CLIENT_REG.CRT_EXTL_HRCY A inner join CLIENT_REG.crt_clnt_extl_hrcy_assc clnt
+				 on A.extl_hrcy_id = clnt.extl_hrcy_id
+				 where A.EXTL_SRC_CD = ?
+				   AND (A.EXTL_LVL1_ID) = ? 
+				   AND (A.EXTL_LVL2_ID) = ?
+				   AND (A.EXTL_LVL3_ID) = ?				 
+				  WITH UR
+			</value>
+		</property>
+		<property name="selectExtlHrcyLvl1SQL">
+			<value>
+			   SELECT  distinct  a.EXTL_SRC_CD, a.EXTL_LVL1_ID
+				 FROM CLIENT_REG.CRT_EXTL_HRCY A , CLIENT_REG.crt_clnt_extl_hrcy_assc clnt
+				WHERE a.extl_hrcy_id = clnt.extl_hrcy_id
+				and (A.EXTL_SRC_CD) = ? 
+				  AND (A.EXTL_LVL1_ID) = ? 
+				  and a.extl_hrcy_id = clnt.extl_hrcy_id
+				 WITH UR
+			</value>
+		</property>
+		<property name="extlHrcyInsertSQL">
+			<value>
+				INSERT INTO CLIENT_REG.CRT_EXTL_HRCY 
+					   (
+						 EXTL_HRCY_ID,EXTL_SRC_CD
+						,EXTL_LVL1_ID,EXTL_LVL2_ID,EXTL_LVL3_ID,EXTL_LVL4_ID,EXTL_LVL5_ID
+					    ,EXTL_LVL1_NM,EXTL_LVL2_NM,EXTL_LVL3_NM,EXTL_LVL4_NM,EXTL_LVL5_NM
+						,PLAN_ID,INSRT_USER_ID,INSRT_TS,UPDT_USER_ID,UPDT_TS				
+				       ) 
+				VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, (current TIMESTAMP), ?, (current TIMESTAMP))
+			</value>
+		</property>
+		<property name="extlHrcySeqSelectSQL">
+			<value>
+				SELECT NEXTVAL FOR CLIENT_REG.EXTL_HRCY_ID_SEQ FROM SYSIBM.SYSDUMMY1 WITH UR
+			</value>
+		</property>
+	</bean>
+
+<!-- APC Status Load SQL -->
+	
+	<bean id="apcStatusLoadDAO"
+		class="com.caremark.rebates.registration.batch.dao.APCStatusLoadDAO">
+		<property name="dataSource">
+			<ref bean="rbateRegDataSource" />
+		</property>
+		<property name="apcStatusSelectSQL">
+			<value>
+				SELECT COUNT(*)
+				  FROM CLIENT_REG.CRT_PRD
+				 WHERE PRD_INTRV_TYP_CD = 'QUARTER'
+                   AND PRD_CYQ_Q_CD = ?
+                  WITH UR
+			</value>
+		</property>
+		<property name="insertAPCStatusSQL">
+			<value>
+				INSERT INTO CLIENT_REG.CRT_PRD 
+				       (
+				       	  PRD_ID, PRD_NM, PRD_BEG_DT, PRD_END_DT, PRD_PAR_ID
+						, PRD_INTRV_TYP_CD, PRD_CYQ_CD, PRD_CYQ_Q_CD, PRD_CYM_CD, APC_PMT_LOCK_CD
+						, APC_INV_LOCK_CD, CLM_LOCK_DSC_CD, CLM_LOCK_GPO_CD, CLM_LOCK_XMD_CD, INSRT_USER_ID
+						, INSRT_TS, UPDT_USER_ID, UPDT_TS   
+				       ) 
+				VALUES (?,?,?,?,?, ?,?,?,?,?,  ?,?,?,?,?, CURRENT TIMESTAMP, ?, CURRENT TIMESTAMP)
+			</value>
+		</property>
+		<property name="updatePMTAPCSQL">
+			<value>
+				UPDATE CLIENT_REG.CRT_PRD P
+				   SET P.APC_PMT_LOCK_CD = ?,
+				       P.UPDT_USER_ID = ?,
+				       P.UPDT_TS = CURRENT TIMESTAMP
+				 WHERE PRD_INTRV_TYP_CD = 'QUARTER'
+				   AND PRD_CYQ_Q_CD = ?	
+			</value>
+		</property>
+		<property name="updateINVAPCSQL">
+			<value>
+				UPDATE CLIENT_REG.CRT_PRD P
+				   SET P.APC_INV_LOCK_CD = ?,
+				       P.UPDT_USER_ID = ?,
+				       P.UPDT_TS = CURRENT TIMESTAMP
+				 WHERE PRD_INTRV_TYP_CD = 'QUARTER'
+				   AND PRD_CYQ_Q_CD = ?	
+			</value>
+		</property>
+	</bean>
+	<bean id="clntDAO"
+		class="com.caremark.rebates.registration.batch.dao.ClntDAO">
+		<property name="dataSource">
+			<ref bean="rbateRegDataSource" />
+		</property>	
+		<property name="updateClntApPmpTypSQL">
+			<value>
+				  UPDATE CLIENT_REG.CRT_CLNT
+				     SET AP_PMT_TYP_CD = ?
+				        ,UPDT_TS = CURRENT TIMESTAMP
+				        ,UPDT_USER_ID = ?
+				   WHERE TRIM(AP_VEND_NB) = ?
+      				 AND TRIM(AP_CO_CD) = ?
+			</value>
+		</property>
+		<property name="selectClntSQL">
+			<value>
+				SELECT *
+				  FROM CLIENT_REG.CRT_CLNT
+                 WHERE TRIM(AP_VEND_NB) = ?
+      			   AND TRIM(AP_CO_CD) = ?
+      			  WITH UR				
+			</value>
+		</property>
+	</bean>
+	<bean id="beAddrAsscDAO"
+		class="com.caremark.rebates.registration.batch.dao.BeAddrAsscDAO">
+		<property name="dataSource">
+			<ref bean="rbateRegDataSource" />
+		</property>	
+		<property name="selectBeAddrIdSeqSQL">
+			<value>
+				SELECT NEXTVAL FOR CLIENT_REG.BE_ADDR_ID_SEQ FROM SYSIBM.SYSDUMMY1 WITH UR
+			</value>
+		</property>
+		<property name="insertBeAddrAsscSQL">
+			<value>
+				INSERT INTO CLIENT_REG.CRT_BE_ADDR_ASSC
+       				   ( 
+       				     BE_ADDR_ID, ADDR_ID, BE_ID, BE_TYP_CD, ADDR_USAG_TYP_CD, MSTR_ADDR_USAG_TYP_CD
+						,INSRT_TS, INSRT_USER_ID, UPDT_TS, UPDT_USER_ID
+					   )
+				VALUES (?,?,?,?,?, ?,CURRENT TIMESTAMP,?, CURRENT TIMESTAMP,?)
+			</value>
+		</property>
+	</bean>
+	<bean id="addrDAO"
+		class="com.caremark.rebates.registration.batch.dao.AddrDAO">
+		<property name="dataSource">
+			<ref bean="rbateRegDataSource" />
+		</property>
+		<property name="selectAddrIdSeqSQL">
+			<value>
+				SELECT NEXTVAL FOR CLIENT_REG.ADDR_ID_SEQ FROM SYSIBM.SYSDUMMY1 WITH UR
+			</value>
+		</property>
+		<property name="insertAddrSQL">
+			<value>
+				INSERT INTO CLIENT_REG.CRT_ADDR
+       				   ( 
+       				   	 ADDR_ID, ST_CD, PSTL_CD, INSRT_TS, INSRT_USER_ID
+       				    ,UPDT_TS, UPDT_USER_ID, PYE_NM, CTRY_NM, CITY_NM
+       				    ,ADDR_LN1_TXT, ADDR_LN2_TXT, ATTN_LN_TXT
+       				   )
+				VALUES (?,?,?,CURRENT TIMESTAMP,?, CURRENT TIMESTAMP,?,?,?,?, ?,?,?)
+			</value>
+		</property>
+		<property name="updateAddrSQL">
+			<value>
+				  UPDATE CLIENT_REG.CRT_ADDR
+				   	 SET ST_CD = ?
+						,PSTL_CD = ?
+						,CITY_NM = ?
+						,ADDR_LN1_TXT = ?
+						,ATTN_LN_TXT = ?
+						,UPDT_TS = CURRENT TIMESTAMP
+						,UPDT_USER_ID = ?
+				   WHERE ADDR_ID IN (SELECT ADDR_ID	
+				   					  FROM CLIENT_REG.CRT_BE_ADDR_ASSC B
+                 					 WHERE B.BE_ID = ?
+                   					   AND TRIM(B.BE_TYP_CD) = ?
+                   					   AND TRIM(B.ADDR_USAG_TYP_CD) = ?
+                   				    )
+			</value>
+		</property>	
+	</bean>	
+	<bean id="purgeOldEntriesDAO"
+		class="com.caremark.rebates.registration.batch.dao.PurgeOldEntriesDAO">
+		<property name="dataSource">
+			<ref bean="rbateRegDataSource" />
+		</property>
+
+		<property name="purgeOldEntriesSQL">
+			<value>
+				select (
+						case when t1.c>0 then t1.c
+						else (select 
+							(case when t2.c > 0 then t2.c
+								  else (select 
+									  (case when t3.c > 0 then t3.c
+								 		    else 0
+								 	   end) 
+								from (select count(*) as c from client_reg.crt_extl_hrcy hrcy, client_reg.crt_clnt_extl_hrcy_assc assc
+								where assc.extl_hrcy_id=hrcy.extl_hrcy_id and hrcy.EXTL_SRC_CD=? and hrcy.EXTL_LVL1_ID=? and hrcy.EXTL_LVL2_ID='' and hrcy.EXTL_LVL3_ID='') t3)
+							 end) 
+								from (select count(*) as c from client_reg.crt_extl_hrcy hrcy,client_reg.crt_clnt_extl_hrcy_assc assc 
+								where assc.extl_hrcy_id=hrcy.extl_hrcy_id and hrcy.EXTL_SRC_CD=? and hrcy.EXTL_LVL1_ID=? and hrcy.EXTL_LVL2_ID=? and hrcy.EXTL_LVL3_ID='') t2)
+							 end) 	
+								from (select count(*) as c from client_reg.crt_extl_hrcy hrcy,client_reg.crt_clnt_extl_hrcy_assc assc
+								where assc.extl_hrcy_id=hrcy.extl_hrcy_id and hrcy.EXTL_SRC_CD=? and hrcy.EXTL_LVL1_ID=? and hrcy.EXTL_LVL2_ID=?
+								and hrcy.EXTL_LVL3_ID=?) t1
+				WITH UR
+			</value>
+		</property>
+		<property name="holdMissRbatIdQue">
+			<value>
+				select distinct * from client_reg.crt_hold_miss_rbat_id_que with ur
+			</value>
+		</property>
+		<property name="deleteHoldMissRbatIdQue">
+			<value>
+				delete from client_reg.crt_hold_miss_rbat_id_que q where q.extl_src_cd=? and q.extl_lvl1_id=? and q.extl_lvl2_id=? and q.extl_lvl3_id=?
+			</value>
+		</property>
+		
+		<!-- Added as a part of BSR #55489 Client Regs Scheduled Purging -->
+		
+		<property name = "deleteClientRuleAsscQuery">
+			<value>
+				delete from CLIENT_REG.CRT_CLNT_RULE_ASSC assc where assc.eff_dt > assc.term_dt
+			</value>
+		</property>
+		
+		<property name = "deleteClientExtlHrcyAsscQuery">
+			<value>
+				delete from CLIENT_REG.CRT_CLNT_EXTL_HRCY_ASSC where eff_dt > term_dt and (current_date - date(CLIENT_REG.CRT_CLNT_EXTL_HRCY_ASSC.UPDT_TS)) > 2 
+			</value>
+		</property>	
+		
+		<property name = "deleteAddrQuery">
+			<value>
+				delete from CLIENT_REG.CRT_ADDR addr where NOT EXISTS (select 1 from CLIENT_REG.CRT_BE_ADDR_ASSC assc where addr.ADDR_ID =assc.ADDR_ID) 
+			</value>
+		</property>			
+		
+		<property name = "selectClientQuery">
+			<value>
+				select clnt.RBAT_ID from CLIENT_REG.CRT_CLNT clnt where clnt.RBAT_INV_EFF_DT > clnt.RBAT_INV_TERM_DT 
+				and NOT EXISTS(select 1 from CLIENT_REG.CRT_CLNT_EXTL_HRCY_ASSC assc where assc.RBAT_ID = clnt.RBAT_ID)
+				and NOT EXISTS(select 1 from CLIENT_REG.CRT_CLNT_RULE_ASSC rle where rle.RBAT_ID = clnt.RBAT_ID) with ur
+			</value>
+		</property>	
+		
+		<property name = "deleteBeAddrAsscQuery">
+			<value>
+				delete from CLIENT_REG.CRT_BE_ADDR_ASSC addassc where addassc.BE_ID = ? and addassc.BE_TYP_CD = 'C' 
+			</value>
+		</property>
+		
+		<property name = "deleteNoteQuery">
+			<value>
+				delete from CLIENT_REG.CRT_NOTE note where note.BE_ID = ? and note.BE_TYP_CD = 'C'
+			</value>
+		</property>
+		
+		<property name = "deleteEnrlQuery">
+			<value>
+				delete from CLIENT_REG.CRT_ENRL enrl where enrl.BE_ID = ? and enrl.BE_TYP_CD = 'C'
+			</value>
+		</property>
+		
+		<property name = "deleteRtmdPrcQuery">
+			<value>
+				delete from CLIENT_REG.CRT_RTMD_PRC rtmd where rtmd.RBAT_ID = ? 
+			</value>
+		</property>
+		
+		<property name = "deleteClientQuery">
+			<value>
+				delete from CLIENT_REG.CRT_CLNT clnt where clnt.RBAT_ID = ?
+			</value>
+		</property>		
+				
+		<!-- Ends BSR #55489 Client Regs Scheduled Purging -->
+		
+	</bean>						
+</beans>

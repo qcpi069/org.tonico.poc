@@ -1,0 +1,2439 @@
+<statements>
+	
+	<property name="schema" value="CLIENT_REG"/>
+
+	<!-- Generic statements -->
+	<group name="Generic">
+		
+		<statement name="SELECT_CURRENT_TIME"><![CDATA[
+			SELECT CURRENT TIMESTAMP FROM SYSIBM.SYSDUMMY1 WITH UR
+		]]></statement>
+		
+	</group>
+	
+	<!-- Statements used by com.caremark.gdx.rateload.dao.FileExportConfigDAOUDB -->
+	<group name="FileExportConfig">
+		
+		<statement name="SELECT_NEXT_SEQUENCE_NUMBER"><![CDATA[
+			SELECT SEQ_NB, SRC_REC_MOD_TS, CURRENT TIMESTAMP AS CUR_DT
+			FROM ${schema}.CRT_POS_FILE_XPRT
+			WHERE PTFM_ID=? AND XPRT_TYP_ID=?
+			WITH UR
+		]]></statement>
+		<statement name="SELECT_LAST_RUN_DATE"><![CDATA[
+			SELECT LAST_RUN_TS
+			FROM ${schema}.CRT_POS_FILE_XPRT
+			WHERE PTFM_ID=? AND XPRT_TYP_ID=?
+			WITH UR
+		]]></statement>
+		<statement name="UPDATE_LAST_RUN_DATE"><![CDATA[
+			UPDATE ${schema}.CRT_POS_FILE_XPRT
+			SET LAST_RUN_TS=?, SRC_REC_MOD_TS = CURRENT TIMESTAMP
+			WHERE PTFM_ID=? AND XPRT_TYP_ID=?
+		]]></statement>
+		
+	</group>
+	
+	<!-- Statements for clearing various tables -->
+	<group name="ManufacturerFileLoad">
+
+		<statement name="CLEAR_LOAD_ERRORS"><![CDATA[
+			DELETE FROM ${schema}.CRT_MFG_LOAD_ERR WHERE TBL_NM=?
+		]]></statement>
+		<statement name="INSERT_LOAD_ERROR"><![CDATA[
+			INSERT INTO ${schema}.CRT_MFG_LOAD_ERR
+			(
+				TBL_NM     ,
+				LOAD_REC_ID,
+				ERR_TXT    ,
+				DATA_TXT   
+			)
+			VALUES (?,?,SUBSTR(?,1,100),SUBSTR(?,1,350))
+		]]></statement>
+		<group name="CLEAR">
+			<statement name="CRT_MFG_RATE_LOAD"><![CDATA[
+				DELETE FROM ${schema}.CRT_MFG_RATE_LOAD
+			]]></statement>
+			<statement name="CRT_MFG_PMCY_EXCL_LOAD"><![CDATA[
+				DELETE FROM ${schema}.CRT_MFG_PMCY_EXCL_LOAD
+			]]></statement>
+			<statement name="CRT_MFG_ST_EXCL_LOAD"><![CDATA[
+				DELETE FROM ${schema}.CRT_MFG_ST_EXCL_LOAD
+			]]></statement>
+		</group>
+		<group name="SELECT_ERROR_COUNT">
+			
+			<statement name="CRT_MFG_RATE_LOAD"><![CDATA[
+				SELECT SUM(count) FROM (
+						SELECT COUNT(*) AS count
+						FROM ${schema}.CRT_MFG_RATE_LOAD
+						WHERE ERR_TXT IS NOT NULL
+					UNION ALL
+						SELECT COUNT(*) AS count
+						FROM ${schema}.CRT_MFG_LOAD_ERR
+						WHERE TBL_NM ='CRT_MFG_RATE_LOAD'
+				) A		
+				WITH UR				
+			]]></statement>
+			
+			<statement name="CRT_MFG_PMCY_EXCL_LOAD"><![CDATA[
+				SELECT SUM(count) FROM (
+						SELECT COUNT(*) AS count
+						FROM ${schema}.CRT_MFG_PMCY_EXCL_LOAD
+						WHERE ERR_TXT IS NOT NULL
+					UNION ALL
+						SELECT COUNT(*) AS count
+						FROM ${schema}.CRT_MFG_LOAD_ERR
+						WHERE TBL_NM ='CRT_MFG_PMCY_EXCL_LOAD'
+				) A
+				WITH UR
+			]]></statement>
+			<statement name="CRT_MFG_ST_EXCL_LOAD"><![CDATA[
+				SELECT SUM(count) FROM (
+						SELECT COUNT(*) AS count
+						FROM ${schema}.CRT_MFG_ST_EXCL_LOAD
+						WHERE ERR_TXT IS NOT NULL
+					UNION ALL
+						SELECT COUNT(*) AS count
+						FROM ${schema}.CRT_MFG_LOAD_ERR
+						WHERE TBL_NM ='CRT_MFG_ST_EXCL_LOAD'
+				) A
+				WITH UR
+			]]></statement>
+		</group>
+
+		<group name="SELECT_VALID_COUNT">
+			<statement name="CRT_MFG_RATE_LOAD"><![CDATA[
+				SELECT COUNT(*)
+				FROM ${schema}.CRT_MFG_RATE_LOAD
+				WHERE ERR_TXT IS NULL
+				 WITH UR
+			]]></statement>
+			<statement name="CRT_MFG_PMCY_EXCL_LOAD"><![CDATA[
+				SELECT COUNT(*)
+				FROM ${schema}.CRT_MFG_PMCY_EXCL_LOAD
+				WHERE ERR_TXT IS NULL
+				 WITH UR
+			]]></statement>
+			<statement name="CRT_MFG_ST_EXCL_LOAD"><![CDATA[
+				SELECT COUNT(*)
+				FROM ${schema}.CRT_MFG_ST_EXCL_LOAD
+				WHERE ERR_TXT IS NULL
+				 WITH UR
+			]]></statement>
+		</group>
+
+		<group name="SELECT_DELETE_COUNT">
+			<statement name="CRT_MFG_RATE_LOAD"><![CDATA[
+				SELECT COUNT(*)
+				FROM ${schema}.CRT_MFG_RATE t1 LEFT JOIN ${schema}.CRT_MFG_RATE_LOAD t2
+				  ON t1.PICO_ID      = t2.PICO_ID
+				 AND t1.FRMLY_SRC_CD = t2.FRMLY_SRC_CD
+				 AND t1.FRMLY_ID     = t2.FRMLY_ID
+				 AND t1.NDC11_ID     = t2.NDC11_ID
+				 AND t1.EFF_DT       = t2.EFF_DT
+		       WHERE t1.EFF_DT >= CURRENT DATE + 1 DAY
+                 AND t2.PICO_ID IS NULL 
+                WITH UR            
+			]]></statement>
+			<statement name="CRT_MFG_PMCY_EXCL_LOAD"><![CDATA[
+				SELECT COUNT(*)
+				FROM ${schema}.CRT_MFG_PMCY_EXCL t1 LEFT JOIN ${schema}.CRT_MFG_PMCY_EXCL_LOAD t2
+				  ON t1.PICO_ID = t2.PICO_ID
+				 AND t1.PMCY_ID = t2.PMCY_ID
+				 AND t1.PGM_CD  = t2.PGM_CD
+				 AND t1.EFF_DT  = t2.EFF_DT 
+			   WHERE t1.EFF_DT >= CURRENT DATE + 1 DAY
+				 AND t2.PICO_ID IS NULL
+				WITH UR
+			]]></statement>
+			<statement name="CRT_MFG_ST_EXCL_LOAD"><![CDATA[
+				SELECT COUNT(*)
+				FROM ${schema}.CRT_MFG_ST_EXCL t1 LEFT JOIN ${schema}.CRT_MFG_ST_EXCL_LOAD t2
+				  ON t1.PICO_ID = t2.PICO_ID
+				 AND t1.ST_CD   = t2.ST_CD
+				 AND t1.PGM_CD  = t2.PGM_CD
+				 AND t1.EFF_DT  = t2.EFF_DT
+				WHERE t1.EFF_DT >= CURRENT DATE + 1 DAY
+				  AND t2.PICO_ID IS NULL
+				 WITH UR
+			]]></statement>
+		</group>
+		
+		<group name="SELECT_NEW_COUNT">
+			<statement name="CRT_MFG_RATE_LOAD"><![CDATA[
+				SELECT COUNT(*)
+				FROM ${schema}.CRT_MFG_RATE_LOAD r1 LEFT JOIN ${schema}.CRT_MFG_RATE r2
+				  ON r1.PICO_ID      = r2.PICO_ID
+				 AND r1.FRMLY_ID     = r2.FRMLY_ID
+				 AND r1.FRMLY_SRC_CD = r2.FRMLY_SRC_CD
+				 AND r1.NDC11_ID     = r2.NDC11_ID
+				 AND r1.EFF_DT       = r2.EFF_DT
+			   WHERE r1.ERR_TXT IS NULL 
+				 AND r2.PICO_ID IS NULL
+				WITH UR
+			]]></statement>
+			<statement name="CRT_MFG_PMCY_EXCL_LOAD"><![CDATA[
+				SELECT COUNT(*)
+				FROM ${schema}.CRT_MFG_PMCY_EXCL_LOAD r1 LEFT JOIN ${schema}.CRT_MFG_PMCY_EXCL r2
+                  ON r1.PICO_ID  = r2.PICO_ID
+				 AND r1.PMCY_ID  = r2.PMCY_ID
+				 AND r1.PGM_CD   = r2.PGM_CD
+				 AND r1.EFF_DT   = r2.EFF_DT
+			   WHERE r1.ERR_TXT IS NULL 
+				 AND r2.PICO_ID IS NULL
+				WITH UR
+			]]></statement>
+			<statement name="CRT_MFG_ST_EXCL_LOAD"><![CDATA[
+				SELECT COUNT(*)
+				FROM ${schema}.CRT_MFG_ST_EXCL_LOAD r1 LEFT JOIN ${schema}.CRT_MFG_ST_EXCL r2
+				  ON r1.PICO_ID  = r2.PICO_ID
+				 AND r1.ST_CD    = r2.ST_CD
+				 AND r1.PGM_CD   = r2.PGM_CD
+				 AND r1.EFF_DT   = r2.EFF_DT
+			   WHERE r1.ERR_TXT IS NULL
+				 AND r2.PICO_ID IS NULL
+				WITH UR
+			]]></statement>
+		</group>
+				
+		<group name="SELECT_UPDATE_COUNT">
+			<statement name="CRT_MFG_RATE_LOAD"><![CDATA[
+				SELECT COUNT(*)
+				FROM ${schema}.CRT_MFG_RATE_LOAD r1, ${schema}.CRT_MFG_RATE r2
+			   WHERE
+					r1.ERR_TXT IS NULL AND
+					r1.PICO_ID      = r2.PICO_ID AND
+					r1.FRMLY_SRC_CD = r2.FRMLY_SRC_CD AND
+					r1.FRMLY_ID     = r2.FRMLY_ID AND
+					r1.NDC11_ID     = r2.NDC11_ID AND
+					r1.EFF_DT       = r2.EFF_DT AND (
+						r1.TERM_DT          != r2.TERM_DT OR
+						r1.RATE_QLFR_CD     != r2.RATE_QLFR_CD OR
+						r1.MAIL_RATE_T2_AMT != r2.MAIL_RATE_T2_AMT OR
+						r1.MAIL_RATE_T3_AMT != r2.MAIL_RATE_T3_AMT OR
+						r1.RTL_RATE_T2_AMT  != r2.RTL_RATE_T2_AMT OR
+						r1.RTL_RATE_T3_AMT  != r2.RTL_RATE_T3_AMT OR
+						r1.EXCL_MAIL_CD     != r2.EXCL_MAIL_CD OR
+						r1.EXCL_THER_CD     != r2.EXCL_THER_CD
+					)
+				WITH UR
+			]]></statement>
+			<statement name="CRT_MFG_PMCY_EXCL_LOAD"><![CDATA[
+				SELECT COUNT(*)
+				FROM ${schema}.CRT_MFG_PMCY_EXCL_LOAD r1 LEFT JOIN ${schema}.CRT_MFG_PMCY_EXCL r2
+                  ON r1.PICO_ID  = r2.PICO_ID AND
+					 r1.PMCY_ID  = r2.PMCY_ID AND
+					 r1.PGM_CD   = r2.PGM_CD AND
+					 r1.EFF_DT   = r2.EFF_DT 
+				WHERE
+					 r1.ERR_TXT IS NULL AND 
+					 r1.TERM_DT  != r2.TERM_DT
+				WITH UR	
+			]]></statement>
+			<statement name="CRT_MFG_ST_EXCL_LOAD"><![CDATA[
+				SELECT COUNT(*)
+				FROM ${schema}.CRT_MFG_ST_EXCL_LOAD r1, ${schema}.CRT_MFG_ST_EXCL r2
+				WHERE
+					r1.ERR_TXT IS NULL AND
+					r1.PICO_ID = r2.PICO_ID AND
+					r1.ST_CD   = r2.ST_CD   AND
+					r1.PGM_CD  = r2.PGM_CD  AND
+					r1.EFF_DT  = r2.EFF_DT  AND (
+					r1.TERM_DT != r2.TERM_DT
+					)
+				WITH UR
+			]]></statement>
+		</group>
+		
+		<group name="SELECT_ERRORS">
+			<statement name="CRT_MFG_RATE_LOAD"><![CDATA[		
+			
+				SELECT
+					LOAD_REC_ID,
+					('"' || ERR_TXT || '"') ERR_TXT,
+					DATA_TXT
+				FROM ${schema}.CRT_MFG_LOAD_ERR
+				WHERE TBL_NM = 'CRT_MFG_RATE_LOAD'
+			
+				UNION ALL
+			
+				SELECT
+					LOAD_REC_ID,
+					('"' || ERR_TXT || '"') ERR_TXT, 
+                    (
+						coalesce (PICO_ID, ' ') || ',' ||
+						coalesce (FRMLY_ID, ' ') || ',' ||
+						coalesce (FRMLY_SRC_CD, ' ') || ',' ||
+						coalesce (NDC11_ID, ' ') || ',' ||
+						coalesce (CHAR(EFF_DT),' ') || ',' ||
+						coalesce (CHAR(TERM_DT),' ') || ',' ||
+						coalesce (RATE_QLFR_CD, ' ') || ',' ||
+						coalesce (	CHAR(MAIL_RATE_T2_AMT), ' ') || ',' ||
+							coalesce (CHAR(MAIL_RATE_T3_AMT), ' ') || ',' ||
+							coalesce (CHAR(RTL_RATE_T2_AMT), ' ') || ',' ||
+							coalesce (CHAR(RTL_RATE_T3_AMT), ' ') || ',' ||
+							coalesce (EXCL_MAIL_CD, ' ') || ',' ||
+							coalesce (EXCL_THER_CD, ' ')
+					) DATA_TXT
+				FROM ${schema}.CRT_MFG_RATE_LOAD
+				WHERE ERR_TXT IS NOT NULL
+				ORDER BY LOAD_REC_ID
+				 WITH UR			
+			]]></statement>
+			<statement name="CRT_MFG_PMCY_EXCL_LOAD"><![CDATA[  
+			
+				SELECT
+					LOAD_REC_ID,
+					('"' || ERR_TXT || '"') ERR_TXT,
+					DATA_TXT
+				FROM ${schema}.CRT_MFG_LOAD_ERR
+				WHERE TBL_NM = 'CRT_MFG_PMCY_EXCL_LOAD'
+			
+				UNION ALL
+			
+				SELECT
+					LOAD_REC_ID,
+					('"' || ERR_TXT || '"') ERR_TXT, (
+						coalesce (PICO_ID, ' ') || ',' ||
+						coalesce (CHAR(EFF_DT), ' ') || ',' ||
+						coalesce (CHAR(TERM_DT), ' ') || ',' ||
+						coalesce (PMCY_ID , ' ')|| ',' ||
+						coalesce (PGM_CD, ' ')
+					) DATA_TXT
+				FROM ${schema}.CRT_MFG_PMCY_EXCL_LOAD
+				WHERE ERR_TXT IS NOT NULL
+				ORDER BY LOAD_REC_ID
+				WITH UR
+			]]></statement>
+			<statement name="CRT_MFG_ST_EXCL_LOAD"><![CDATA[
+				SELECT
+					LOAD_REC_ID,
+					('"' || ERR_TXT || '"') ERR_TXT,
+					DATA_TXT
+				FROM ${schema}.CRT_MFG_LOAD_ERR
+				WHERE TBL_NM = 'CRT_MFG_ST_EXCL_LOAD'
+			
+				UNION ALL
+			
+				SELECT
+					LOAD_REC_ID,
+					('"' || ERR_TXT || '"') ERR_TXT, (
+						coalesce (PICO_ID, ' ') || ',' ||
+						coalesce (CHAR(EFF_DT), ' ') || ',' ||
+						coalesce (CHAR(TERM_DT), ' ') || ',' ||
+						coalesce (ST_CD , ' ')|| ',' ||
+						coalesce (PGM_CD, ' ')
+					) DATA_TXT
+				FROM ${schema}.CRT_MFG_ST_EXCL_LOAD
+				WHERE ERR_TXT IS NOT NULL
+				ORDER BY LOAD_REC_ID
+				 WITH UR
+			]]></statement>
+		</group>
+	</group>
+	
+	<!-- Statements used by com.caremark.gdx.rateload.dao.ManufacturerRateFileLoadDAOUDB -->
+	<group name="ManufacturerRateFileLoad">
+		<statement name="INSERT_RATE_LOAD"><![CDATA[
+			INSERT INTO ${schema}.CRT_MFG_RATE_LOAD
+			(
+                PICO_ID                        ,
+                FRMLY_ID                       ,
+                FRMLY_SRC_CD                   ,
+                NDC11_ID                       ,
+                EFF_DT                         ,
+                TERM_DT                        ,
+                DRUG_PRC_SRC_CD                ,
+                DRUG_PRC_TYP_CD                ,
+                RATE_QLFR_CD                   ,
+                MAIL_RATE_T2_AMT               ,
+                MAIL_RATE_T3_AMT               ,
+                RTL_RATE_T2_AMT                ,
+                RTL_RATE_T3_AMT                ,
+                EXCL_MAIL_CD                   ,
+                EXCL_THER_CD                   ,
+                INSRT_TS                       ,
+                INSRT_USER_ID                  ,
+                UPDT_TS                        ,
+                UPDT_USER_ID                   ,
+                LOAD_REC_ID                    ,
+                ERR_TXT                        
+			)
+			VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT TIMESTAMP,'RTMD',CURRENT TIMESTAMP,'RTMD', ?,NULL)
+		]]></statement>
+		<statement name="SELECT_LOAD_RECORDS"><![CDATA[
+			SELECT r1.*
+			FROM ${schema}.CRT_MFG_RATE_LOAD r1 LEFT JOIN ${schema}.CRT_MFG_RATE r2
+              ON r1.PICO_ID      = r2.PICO_ID
+			 AND r1.FRMLY_SRC_CD = r2.FRMLY_SRC_CD
+			 AND r1.FRMLY_ID     = r2.FRMLY_ID
+			 AND r1.NDC11_ID     = r2.NDC11_ID
+			 AND r1.EFF_DT       = r2.EFF_DT
+		   WHERE r1.ERR_TXT IS NULL 
+		     AND (
+					(
+						r1.TERM_DT          != r2.TERM_DT OR
+						r1.RATE_QLFR_CD     != r2.RATE_QLFR_CD OR
+						r1.MAIL_RATE_T2_AMT != r2.MAIL_RATE_T2_AMT OR
+						r1.MAIL_RATE_T3_AMT != r2.MAIL_RATE_T3_AMT OR
+						r1.RTL_RATE_T2_AMT  != r2.RTL_RATE_T2_AMT OR
+						r1.RTL_RATE_T3_AMT  != r2.RTL_RATE_T3_AMT OR
+						r1.EXCL_MAIL_CD     != r2.EXCL_MAIL_CD OR
+						r1.EXCL_THER_CD     != r2.EXCL_THER_CD
+					) 
+				 OR (
+						r2.PICO_ID IS NULL
+					)
+				)
+			WITH UR
+		]]></statement>
+		<statement name="SELECT_DELETE_RECORDS"><![CDATA[
+  			SELECT t1.*
+			FROM ${schema}.CRT_MFG_RATE t1 LEFT JOIN ${schema}.CRT_MFG_RATE_LOAD t2
+			  ON t1.PICO_ID      = t2.PICO_ID
+			 AND t1.FRMLY_SRC_CD = t2.FRMLY_SRC_CD
+			 AND t1.FRMLY_ID     = t2.FRMLY_ID
+			 AND t1.NDC11_ID     = t2.NDC11_ID
+			 AND t1.EFF_DT       = t2.EFF_DT
+		   WHERE t1.EFF_DT >= CURRENT DATE + 1 DAY
+			 AND t2.PICO_ID IS NULL
+			WITH UR
+		]]></statement>
+		<statement name="INSERT_NEW_RECORDS"><![CDATA[
+			INSERT INTO ${schema}.CRT_MFG_RATE (                                
+			                    PICO_ID,
+                                FRMLY_ID,
+                                FRMLY_SRC_CD,
+                                NDC11_ID,
+                                EFF_DT,
+                                TERM_DT,
+                                DRUG_PRC_SRC_CD,
+                                DRUG_PRC_TYP_CD,
+                                RATE_QLFR_CD,
+                                MAIL_RATE_T2_AMT,
+                                MAIL_RATE_T3_AMT,
+                                RTL_RATE_T2_AMT,
+                                RTL_RATE_T3_AMT,
+                                EXCL_MAIL_CD,
+                                EXCL_THER_CD,
+                                SRC_REC_ADD_TS,
+                                SRC_REC_MOD_TS,
+                                INSRT_USER_ID,
+                                INSRT_TS,
+                                UPDT_USER_ID,
+                                UPDT_TS
+			)
+			SELECT
+				r1.PICO_ID,
+				r1.FRMLY_ID,
+				r1.FRMLY_SRC_CD,
+				r1.NDC11_ID,
+				r1.EFF_DT,
+				r1.TERM_DT,
+				r1.DRUG_PRC_SRC_CD,
+				r1.DRUG_PRC_TYP_CD,
+				r1.RATE_QLFR_CD,
+				r1.MAIL_RATE_T2_AMT,
+				r1.MAIL_RATE_T3_AMT,
+				r1.RTL_RATE_T2_AMT,
+				r1.RTL_RATE_T3_AMT,
+				r1.EXCL_MAIL_CD,
+				r1.EXCL_THER_CD,
+				CURRENT TIMESTAMP,
+				CURRENT TIMESTAMP,
+				r1.INSRT_USER_ID,
+				r1.INSRT_TS,
+				r1.UPDT_USER_ID,
+				r1.UPDT_TS
+			FROM ${schema}.CRT_MFG_RATE_LOAD r1 LEFT JOIN ${schema}.CRT_MFG_RATE r2
+              ON r1.PICO_ID      = r2.PICO_ID
+			 AND r1.FRMLY_ID     = r2.FRMLY_ID
+			 AND r1.FRMLY_SRC_CD = r2.FRMLY_SRC_CD
+			 AND r1.NDC11_ID     = r2.NDC11_ID
+			 AND r1.EFF_DT       = r2.EFF_DT
+		   WHERE r1.ERR_TXT IS NULL
+			 AND r2.PICO_ID IS NULL
+			WITH UR
+		]]></statement>
+		<group name="VALIDATE">
+			<statement name="TERM_LESS_THAN_EFFECTIVE"><![CDATA[
+				UPDATE ${schema}.CRT_MFG_RATE_LOAD
+				SET ERR_TXT = 'Term date is less than effective date'
+				WHERE TERM_DT < EFF_DT
+			]]></statement>
+			<statement name="OVERLAPPING_TERM_EFF_DATES"><![CDATA[
+				UPDATE ${schema}.CRT_MFG_RATE_LOAD
+				SET ERR_TXT = 'Overlapping term and effective dates'
+				WHERE LOAD_REC_ID IN (
+					SELECT r1.LOAD_REC_ID
+					FROM ${schema}.CRT_MFG_RATE_LOAD r1, ${schema}.CRT_MFG_RATE_LOAD r2
+					WHERE
+						r1.PICO_ID      = r2.PICO_ID AND
+						r1.FRMLY_SRC_CD = r2.FRMLY_SRC_CD AND
+						r1.FRMLY_ID     = r2.FRMLY_ID AND
+						r1.NDC11_ID     = r2.NDC11_ID AND (
+							(
+								r2.EFF_DT <= r1.TERM_DT AND
+								r2.EFF_DT >= r1.EFF_DT
+							)
+							OR (
+								r2.TERM_DT <= r1.TERM_DT AND
+								r2.TERM_DT >= r1.EFF_DT
+							)
+							OR (
+								r2.EFF_DT <= r1.EFF_DT AND
+								r2.TERM_DT >= r1.TERM_DT
+							)
+						)
+						AND r1.LOAD_REC_ID != r2.LOAD_REC_ID
+				)
+			]]></statement>
+			<statement name="INVALID_RATES"><![CDATA[
+				UPDATE ${schema}.CRT_MFG_RATE_LOAD
+				SET ERR_TXT = 'Invalid rates'
+				WHERE
+				(
+					RATE_QLFR_CD = 'P' AND 
+					(
+                        (MAIL_RATE_T2_AMT < 0 OR MAIL_RATE_T3_AMT < 0 OR  RTL_RATE_T2_AMT < 0 OR RTL_RATE_T3_AMT < 0)
+                         OR
+						(MAIL_RATE_T2_AMT > 100 OR MAIL_RATE_T3_AMT > 100 OR RTL_RATE_T2_AMT > 100 OR RTL_RATE_T3_AMT > 100)
+					)
+				) 
+				OR 
+				(
+					RATE_QLFR_CD = 'F' AND
+                    (MAIL_RATE_T2_AMT < 0 OR MAIL_RATE_T3_AMT < 0 OR RTL_RATE_T2_AMT < 0 OR RTL_RATE_T3_AMT < 0)
+				)
+			]]></statement>
+			<statement name="KEY_FIELDS_NOT_UNIQUE"><![CDATA[
+				UPDATE ${schema}.CRT_MFG_RATE_LOAD
+				SET ERR_TXT = 'Key fields are not unique'
+				WHERE LOAD_REC_ID IN (
+					SELECT t1.LOAD_REC_ID
+					FROM ${schema}.CRT_MFG_RATE_LOAD t1, (
+						SELECT PICO_ID, FRMLY_ID, FRMLY_SRC_CD, NDC11_ID, EFF_DT, COUNT(*)
+						FROM ${schema}.CRT_MFG_RATE_LOAD
+						GROUP BY PICO_ID, FRMLY_ID, FRMLY_SRC_CD, NDC11_ID, EFF_DT
+						HAVING COUNT(*) > 1
+					) t2
+					WHERE
+						t1.PICO_ID      = t2.PICO_ID AND
+						t1.FRMLY_ID     = t2.FRMLY_ID AND
+						t1.FRMLY_SRC_CD = t2.FRMLY_SRC_CD AND
+						t1.NDC11_ID     = t2.NDC11_ID AND
+						t1.EFF_DT       = t2.EFF_DT
+				)
+			]]></statement>
+			  <statement name="OLD_EFFECTIVE_DATES"><![CDATA[
+				UPDATE ${schema}.CRT_MFG_RATE_LOAD
+				SET ERR_TXT = 'New record with old effective date'
+				WHERE LOAD_REC_ID IN (
+					SELECT t1.LOAD_REC_ID
+					FROM ${schema}.CRT_MFG_RATE_LOAD t1 LEFT JOIN ${schema}.CRT_MFG_RATE t2
+                      ON
+						 t2.PICO_ID      = t1.PICO_ID AND
+						 t2.FRMLY_SRC_CD = t1.FRMLY_SRC_CD AND
+						 t2.FRMLY_ID     = t1.FRMLY_ID AND
+						 t2.NDC11_ID     = t1.NDC11_ID AND
+						 t2.EFF_DT       = t1.EFF_DT
+					WHERE
+						 t1.EFF_DT < CURRENT DATE + 1 DAY AND
+						 t2.PICO_ID IS NULL
+				)
+			]]></statement>
+			<statement name="INVALID_DELETES"><![CDATA[
+				INSERT INTO ${schema}.CRT_MFG_RATE_LOAD
+				(
+ 	                PICO_ID ,
+	                FRMLY_ID,
+	                FRMLY_SRC_CD ,
+	                NDC11_ID  ,
+	                EFF_DT,
+	                TERM_DT ,
+ 	                DRUG_PRC_SRC_CD ,
+	                DRUG_PRC_TYP_CD,
+	                RATE_QLFR_CD,
+	                MAIL_RATE_T2_AMT,
+	                MAIL_RATE_T3_AMT,
+	                RTL_RATE_T2_AMT,
+	                RTL_RATE_T3_AMT,
+	                EXCL_MAIL_CD,
+	                EXCL_THER_CD,
+	                INSRT_TS,
+	                INSRT_USER_ID,
+ 	                UPDT_TS ,
+	                UPDT_USER_ID,
+	                LOAD_REC_ID,
+	                ERR_TXT             
+				)
+				SELECT
+					r1.PICO_ID, r1.FRMLY_ID, CAST(NULL AS CHAR), r1.NDC11_ID,
+					r1.EFF_DT,
+					CAST(NULL AS DATE), CAST(NULL AS INTEGER), CAST(NULL AS INTEGER),
+					CAST(NULL AS CHAR), CAST(NULL AS DECIMAL), CAST(NULL AS DECIMAL),
+					CAST(NULL AS DECIMAL), CAST(NULL AS DECIMAL), CAST(NULL AS CHAR),
+					CAST(NULL AS CHAR),
+					r1.INSRT_TS, r1.INSRT_USER_ID, r1.UPDT_TS, r1.UPDT_USER_ID,
+					-1, 'Can not delete where EFF_DT <= TODAY'
+				FROM ${schema}.CRT_MFG_RATE r1 LEFT JOIN ${schema}.CRT_MFG_RATE_LOAD r2
+                  ON
+					r1.PICO_ID      = r2.PICO_ID  AND
+					r1.FRMLY_SRC_CD = r2.FRMLY_SRC_CD AND
+					r1.FRMLY_ID     = r2.FRMLY_ID AND
+					r1.NDC11_ID     = r2.NDC11_ID AND
+					r1.EFF_DT       = r2.EFF_DT 
+				WHERE
+				    r1.EFF_DT < CURRENT DATE + 1 DAY AND
+					r2.PICO_ID IS NULL
+				WITH UR
+			]]></statement>
+			<statement name="INVALID_TERM_MODIFICATIONS"><![CDATA[
+			    UPDATE ${schema}.CRT_MFG_RATE_LOAD
+			    SET ERR_TXT = 'Can not change term date to be < to today'
+			    WHERE LOAD_REC_ID IN (
+					SELECT r1.LOAD_REC_ID
+					FROM ${schema}.CRT_MFG_RATE_LOAD r1, ${schema}.CRT_MFG_RATE r2
+					WHERE
+						r1.PICO_ID      = r2.PICO_ID AND
+						r1.FRMLY_SRC_CD = r2.FRMLY_SRC_CD AND
+						r1.FRMLY_ID     = r2.FRMLY_ID AND
+						r1.NDC11_ID     = r2.NDC11_ID AND
+						r1.EFF_DT       = r2.EFF_DT AND
+						r1.TERM_DT      != r2.TERM_DT AND
+						r1.TERM_DT      < CURRENT DATE
+			    )
+			]]></statement>
+			<statement name="INVALID_MODIFICATIONS"><![CDATA[
+				UPDATE ${schema}.CRT_MFG_RATE_LOAD
+				SET ERR_TXT = 'Can not change a record if EFF_DT <= TODAY'
+				WHERE LOAD_REC_ID IN (
+					SELECT r1.LOAD_REC_ID
+					FROM ${schema}.CRT_MFG_RATE_LOAD r1, ${schema}.CRT_MFG_RATE r2
+					WHERE
+						r1.PICO_ID      = r2.PICO_ID AND
+						r1.FRMLY_SRC_CD = r2.FRMLY_SRC_CD AND
+						r1.FRMLY_ID     = r2.FRMLY_ID AND
+						r1.NDC11_ID     = r2.NDC11_ID AND
+						r1.EFF_DT       = r2.EFF_DT AND
+						r1.EFF_DT < CURRENT DATE + 1 DAY AND (
+							r1.RATE_QLFR_CD     != r2.RATE_QLFR_CD OR
+							r1.MAIL_RATE_T2_AMT != r2.MAIL_RATE_T2_AMT OR
+							r1.MAIL_RATE_T3_AMT != r2.MAIL_RATE_T3_AMT OR
+							r1.RTL_RATE_T2_AMT  != r2.RTL_RATE_T2_AMT OR
+							r1.RTL_RATE_T3_AMT  != r2.RTL_RATE_T3_AMT OR
+							r1.EXCL_MAIL_CD     != r2.EXCL_MAIL_CD OR
+							r1.EXCL_THER_CD     != r2.EXCL_THER_CD
+						)
+				)
+			]]></statement>
+			<statement name="INVALID_S_FORMULARY_ID"><![CDATA[
+				UPDATE ${schema}.CRT_MFG_RATE_LOAD
+				SET ERR_TXT = 'Invalid formulary id'
+				WHERE
+					FRMLY_SRC_CD = 'S' AND (
+						NOT TRANSLATE(FRMLY_ID, 'AAAAAAAAAA', '0123456789') = 'AAAAA' OR
+						NOT TRANSLATE(FRMLY_ID, 'BBBBBBBBBB', '0123456789') = 'BBBBB'
+					)
+			]]></statement>
+			<statement name="INVALID_Q_FORMULARY_ID"><![CDATA[
+				UPDATE ${schema}.CRT_MFG_RATE_LOAD
+				SET ERR_TXT = 'Invalid formulary id'
+				WHERE
+					FRMLY_SRC_CD = 'Q' AND (
+						NOT TRANSLATE(FRMLY_ID, 'AAAAAAAAAA', '0123456789') = 'AAAAAAAAA' OR
+						NOT TRANSLATE(FRMLY_ID, 'BBBBBBBBBB', '0123456789') = 'BBBBBBBBB'
+					)
+			]]></statement>
+			<statement name="INVALID_QL_PRC_SRC_TYP_COMBO"><![CDATA[
+				UPDATE ${schema}.CRT_MFG_RATE_LOAD
+				SET ERR_TXT = 'Invalid Price Source and Type combination' 
+				WHERE (
+						RATE_QLFR_CD = 'P'
+						AND (DRUG_PRC_SRC_CD, DRUG_PRC_TYP_CD) NOT IN 
+						(	  
+								SELECT CAST(X.CDSET_VL AS INTEGER), CAST (Y.CDSET_VL AS INTEGER) FROM 
+							    (SELECT * FROM CLIENT_REG.CRT_CDSET_VL WHERE CDSET_ID = 46) X, 
+							    (SELECT * FROM CLIENT_REG.CRT_CDSET_VL WHERE CDSET_ID = 47) Y
+						)
+					  )
+				OR
+					 (
+						RATE_QLFR_CD = 'F'
+						AND  DRUG_PRC_SRC_CD != 0
+						AND  DRUG_PRC_TYP_CD != 0 
+					 )
+			]]></statement>
+		</group>
+	</group>
+
+	<group name="PharmacyExclusionsFileLoad">
+		
+		<statement name="INSERT_PHARMACY_LOAD"><![CDATA[
+			INSERT INTO ${schema}.CRT_MFG_PMCY_EXCL_LOAD
+			(
+                        LOAD_REC_ID  ,
+                        ERR_TXT      ,
+                        PICO_ID      ,
+                        PMCY_ID      ,
+                        PGM_CD       ,
+                        EFF_DT       ,
+                        TERM_DT      ,
+                        INSRT_TS     ,
+                        INSRT_USER_ID,
+                        UPDT_TS      ,
+                        UPDT_USER_ID
+			)
+			VALUES(?,NULL,?,?,?,?,?, CURRENT TIMESTAMP, 'RTMD', CURRENT TIMESTAMP, 'RTMD' )
+		]]></statement>
+		<statement name="SELECT_LOAD_RECORDS"><![CDATA[
+			SELECT r1.*
+			FROM ${schema}.CRT_MFG_PMCY_EXCL_LOAD r1 LEFT JOIN ${schema}.CRT_MFG_PMCY_EXCL r2
+              ON r1.PICO_ID = r2.PICO_ID
+			 AND r1.PMCY_ID = r2.PMCY_ID
+			 AND r1.PGM_CD  = r2.PGM_CD
+			 AND r1.EFF_DT  = r2.EFF_DT 
+		   WHERE r1.ERR_TXT IS NULL 
+             AND (
+					(
+						r1.TERM_DT != r2.TERM_DT
+					) OR (
+						r2.PICO_ID IS NULL
+					)
+				)
+			WITH UR
+		]]></statement>
+		<statement name="SELECT_DELETE_RECORDS"><![CDATA[
+  			SELECT t1.*
+			FROM ${schema}.CRT_MFG_PMCY_EXCL t1 LEFT JOIN ${schema}.CRT_MFG_PMCY_EXCL_LOAD t2
+              ON
+				t1.PICO_ID = t2.PICO_ID AND
+				t1.PMCY_ID = t2.PMCY_ID AND
+				t1.PGM_CD  = t2.PGM_CD AND
+				t1.EFF_DT  = t2.EFF_DT
+		   WHERE
+				t1.EFF_DT >= CURRENT DATE + 1 DAY AND
+				t2.PICO_ID IS NULL
+			WITH UR
+		]]></statement>
+		<statement name="INSERT_NEW_RECORDS"><![CDATA[
+			INSERT INTO ${schema}.CRT_MFG_PMCY_EXCL
+			(
+				PICO_ID,
+				PMCY_ID,
+				PGM_CD,
+				EFF_DT,
+				TERM_DT,
+				SRC_REC_ADD_TS ,
+				SRC_REC_MOD_TS,
+                INSRT_TS     ,
+                INSRT_USER_ID,
+                UPDT_TS      ,
+                UPDT_USER_ID 
+			)
+			SELECT
+				r1.PICO_ID,
+				r1.PMCY_ID,
+				r1.PGM_CD,
+				r1.EFF_DT,
+				r1.TERM_DT,
+				CURRENT TIMESTAMP,
+				CURRENT TIMESTAMP,
+                r1.INSRT_TS     ,
+                r1.INSRT_USER_ID,
+                r1.UPDT_TS      ,
+                r1.UPDT_USER_ID 
+			FROM ${schema}.CRT_MFG_PMCY_EXCL_LOAD r1 LEFT JOIN ${schema}.CRT_MFG_PMCY_EXCL r2
+              ON
+				r1.PICO_ID  = r2.PICO_ID AND
+				r1.PMCY_ID  = r2.PMCY_ID AND
+				r1.PGM_CD   = r2.PGM_CD AND
+				r1.EFF_DT   = r2.EFF_DT
+			WHERE
+				r1.ERR_TXT IS NULL AND
+				r2.PICO_ID IS NULL
+			WITH UR
+		]]></statement>
+		
+		<group name="VALIDATE">
+			<statement name="TERM_LESS_THAN_EFFECTIVE"><![CDATA[
+				UPDATE ${schema}.CRT_MFG_PMCY_EXCL_LOAD
+				SET ERR_TXT = 'Term date is less than effective date'
+				WHERE TERM_DT < EFF_DT
+			]]></statement>
+			<statement name="OVERLAPPING_TERM_EFF_DATES"><![CDATA[
+				UPDATE ${schema}.CRT_MFG_PMCY_EXCL_LOAD
+				SET ERR_TXT = 'Overlapping term and effective dates'
+				WHERE LOAD_REC_ID IN (
+					SELECT r1.LOAD_REC_ID
+					FROM ${schema}.CRT_MFG_PMCY_EXCL_LOAD r1, ${schema}.CRT_MFG_PMCY_EXCL_LOAD r2
+					WHERE
+						r1.PICO_ID = r2.PICO_ID AND
+						r1.PMCY_ID = r2.PMCY_ID AND
+						r1.PGM_CD = r2.PGM_CD AND (
+							(
+								r2.EFF_DT <= r1.TERM_DT AND
+								r2.EFF_DT >= r1.EFF_DT
+							)
+							OR (
+								r2.TERM_DT <= r1.TERM_DT AND
+								r2.TERM_DT >= r1.EFF_DT
+							)
+							OR (
+								r2.EFF_DT <= r1.EFF_DT AND
+								r2.TERM_DT >= r1.TERM_DT
+							)
+						)
+						AND r1.LOAD_REC_ID != r2.LOAD_REC_ID
+				)
+			]]></statement>
+			<statement name="KEY_FIELDS_NOT_UNIQUE"><![CDATA[
+				UPDATE ${schema}.CRT_MFG_PMCY_EXCL_LOAD
+				SET ERR_TXT = 'Key fields are not unique'
+				WHERE LOAD_REC_ID IN (
+					SELECT t1.LOAD_REC_ID
+					FROM ${schema}.CRT_MFG_PMCY_EXCL_LOAD t1, (
+						SELECT PICO_ID, PMCY_ID,PGM_CD, EFF_DT, COUNT(*)
+						FROM ${schema}.CRT_MFG_PMCY_EXCL_LOAD
+						GROUP BY PICO_ID, PMCY_ID,PGM_CD, EFF_DT
+						HAVING COUNT(*) > 1
+					) t2
+					WHERE
+						t1.PICO_ID = t2.PICO_ID AND
+						t1.PMCY_ID = t2.PMCY_ID AND
+						t1.PGM_CD  = t2.PGM_CD AND
+						t1.EFF_DT  = t2.EFF_DT
+				)
+			]]></statement>
+			<statement name="OLD_EFFECTIVE_DATES"><![CDATA[
+				UPDATE ${schema}.CRT_MFG_PMCY_EXCL_LOAD
+				SET ERR_TXT = 'New record with old EFF_DT'
+				WHERE LOAD_REC_ID IN (
+					SELECT t1.LOAD_REC_ID
+					FROM ${schema}.CRT_MFG_PMCY_EXCL_LOAD t1 LEFT JOIN ${schema}.CRT_MFG_PMCY_EXCL t2
+                      ON
+						 t2.PICO_ID  = t1.PICO_ID AND
+						 t2.PMCY_ID  = t1.PMCY_ID AND
+						 t2.PGM_CD   = t1.PGM_CD AND
+						 t2.EFF_DT   = t1.EFF_DT
+					WHERE
+						 t1.EFF_DT < CURRENT DATE + 1 DAY AND
+						 t2.PICO_ID IS NULL
+				)
+			]]></statement>
+			<statement name="INVALID_DELETES"><![CDATA[
+				INSERT INTO ${schema}.CRT_MFG_PMCY_EXCL_LOAD
+				(
+                                     PICO_ID      ,
+                                     PMCY_ID      ,
+                                     PGM_CD       ,
+                                     EFF_DT       ,
+                                     TERM_DT      ,
+                                     INSRT_TS     ,
+                                     INSRT_USER_ID,
+                                     UPDT_TS      ,
+                                     UPDT_USER_ID ,
+                                     LOAD_REC_ID  ,
+                                     ERR_TXT				
+				)
+				SELECT
+                    r1.PICO_ID, r1.PMCY_ID, r1.PGM_CD, r1.EFF_DT, r1.TERM_DT,
+                    r1.INSRT_TS, r1.INSRT_USER_ID, r1.UPDT_TS, r1.UPDT_USER_ID,
+					-1, 'Can not delete where EFF_DT <= TODAY'
+				FROM ${schema}.CRT_MFG_PMCY_EXCL r1 LEFT JOIN ${schema}.CRT_MFG_PMCY_EXCL_LOAD r2
+                  ON
+					r1.PICO_ID = r2.PICO_ID AND
+					r1.PMCY_ID = r2.PMCY_ID AND
+					r1.PGM_CD  = r2.PGM_CD  AND
+					r1.EFF_DT  = r2.EFF_DT
+				WHERE
+				    r1.EFF_DT < CURRENT DATE + 1 DAY AND
+					r2.PICO_ID IS NULL
+				WITH UR
+			]]></statement>
+			<statement name="INVALID_TERM_MODIFICATIONS"><![CDATA[
+			    UPDATE ${schema}.CRT_MFG_PMCY_EXCL_LOAD
+			    SET ERR_TXT = 'Can not change term date to be < to today'
+			    WHERE LOAD_REC_ID IN (
+					SELECT r1.LOAD_REC_ID
+					FROM ${schema}.CRT_MFG_PMCY_EXCL_LOAD r1, ${schema}.CRT_MFG_PMCY_EXCL_LOAD r2
+					WHERE
+						r1.PICO_ID      = r2.PICO_ID AND
+						r1.PMCY_ID      = r2.PMCY_ID AND
+						r1.PGM_CD       = r2.PGM_CD AND
+						r1.EFF_DT       = r2.EFF_DT AND
+						r1.TERM_DT      != r2.TERM_DT AND
+						r1.TERM_DT      < CURRENT DATE
+			    )
+			]]></statement>
+		</group>
+		
+	</group>
+	
+
+	<group name="StateExclusionsFileLoad">
+		
+		<statement name="INSERT_STATE_LOAD"><![CDATA[
+			INSERT INTO ${schema}.CRT_MFG_ST_EXCL_LOAD
+			(
+                        LOAD_REC_ID  ,
+                        ERR_TXT      ,
+                        PICO_ID      ,
+                        ST_CD        ,
+                        PGM_CD    ,
+                        EFF_DT       ,
+                        TERM_DT      ,
+                        INSRT_TS     ,
+                        INSRT_USER_ID,
+                        UPDT_TS      ,
+                        UPDT_USER_ID    
+			)
+			VALUES(?,NULL,?,?,?,?,?, CURRENT TIMESTAMP, 'RTMD', CURRENT TIMESTAMP, 'RTMD')
+		]]></statement>
+		<statement name="SELECT_LOAD_RECORDS"><![CDATA[
+			SELECT r1.*
+			FROM ${schema}.CRT_MFG_ST_EXCL_LOAD r1 LEFT JOIN ${schema}.CRT_MFG_ST_EXCL r2
+              ON
+				r1.PICO_ID = r2.PICO_ID AND
+				r1.ST_CD   = r2.ST_CD   AND
+				r1.PGM_CD  = r2.PGM_CD  AND
+				r1.EFF_DT  = r2.EFF_DT  
+			WHERE
+				r1.ERR_TXT IS NULL 
+			AND (
+					(
+						r1.TERM_DT != r2.TERM_DT
+					) OR (
+						r2.PICO_ID IS NULL
+					)
+				)
+			WITH UR
+		]]></statement>
+		<statement name="SELECT_DELETE_RECORDS"><![CDATA[
+  			SELECT t1.*
+			FROM ${schema}.CRT_MFG_ST_EXCL t1 LEFT JOIN ${schema}.CRT_MFG_ST_EXCL_LOAD t2
+			  ON
+				t1.PICO_ID = t2.PICO_ID AND
+				t1.ST_CD   = t2.ST_CD AND
+				t1.PGM_CD  = t2.PGM_CD AND
+				t1.EFF_DT  = t2.EFF_DT
+		   WHERE 
+				t1.EFF_DT >= CURRENT DATE + 1 DAY AND
+				t2.PICO_ID IS NULL
+			WITH UR
+		]]></statement>
+		<statement name="INSERT_NEW_RECORDS"><![CDATA[
+			INSERT INTO ${schema}.CRT_MFG_ST_EXCL
+			(
+				PICO_ID,
+				ST_CD,
+				PGM_CD,
+				EFF_DT,
+				TERM_DT,
+				SRC_REC_ADD_TS,
+				SRC_REC_MOD_TS,
+                INSRT_TS     ,
+                INSRT_USER_ID,
+                UPDT_TS      ,
+                UPDT_USER_ID    
+			)
+			SELECT
+				r1.PICO_ID,
+				r1.ST_CD,
+				r1.PGM_CD,
+				r1.EFF_DT,
+				r1.TERM_DT,
+				CURRENT TIMESTAMP,
+				CURRENT TIMESTAMP,
+                r1.INSRT_TS     ,
+                r1.INSRT_USER_ID,
+                r1.UPDT_TS      ,
+                r1.UPDT_USER_ID    
+			FROM ${schema}.CRT_MFG_ST_EXCL_LOAD r1 LEFT JOIN ${schema}.CRT_MFG_ST_EXCL r2
+              ON
+				r1.PICO_ID  = r2.PICO_ID AND
+				r1.ST_CD    = r2.ST_CD AND
+				r1.PGM_CD   = r2.PGM_CD AND
+				r1.EFF_DT   = r2.EFF_DT
+		   WHERE
+				r1.ERR_TXT IS NULL AND
+				r2.PICO_ID IS NULL
+			WITH UR
+		]]></statement>
+		
+		<group name="VALIDATE">
+			<statement name="TERM_LESS_THAN_EFFECTIVE"><![CDATA[
+				UPDATE ${schema}.CRT_MFG_ST_EXCL_LOAD
+				SET ERR_TXT = 'Term date is less than effective date'
+				WHERE TERM_DT < EFF_DT
+			]]></statement>
+			<statement name="OVERLAPPING_TERM_EFF_DATES"><![CDATA[
+				UPDATE ${schema}.CRT_MFG_ST_EXCL_LOAD
+				SET ERR_TXT = 'Overlapping term and effective dates'
+				WHERE LOAD_REC_ID IN (
+					SELECT r1.LOAD_REC_ID
+					FROM ${schema}.CRT_MFG_ST_EXCL_LOAD r1, ${schema}.CRT_MFG_ST_EXCL_LOAD r2
+					WHERE
+						r1.PICO_ID = r2.PICO_ID AND
+						r1.PGM_CD = r2.PGM_CD AND
+						r1.ST_CD = r2.ST_CD AND (
+							(
+								r2.EFF_DT <= r1.TERM_DT AND
+								r2.EFF_DT >= r1.EFF_DT
+							)
+							OR (
+								r2.TERM_DT <= r1.TERM_DT AND
+								r2.TERM_DT >= r1.EFF_DT
+							)
+							OR (
+								r2.EFF_DT <= r1.EFF_DT AND
+								r2.TERM_DT >= r1.TERM_DT
+							)
+						)
+						AND r1.LOAD_REC_ID != r2.LOAD_REC_ID
+				)
+			]]></statement>
+			<statement name="KEY_FIELDS_NOT_UNIQUE"><![CDATA[
+				UPDATE ${schema}.CRT_MFG_ST_EXCL_LOAD
+				SET ERR_TXT = 'Key fields are not unique'
+				WHERE LOAD_REC_ID IN (
+					SELECT t1.LOAD_REC_ID
+					FROM ${schema}.CRT_MFG_ST_EXCL_LOAD t1, (
+						SELECT PICO_ID, ST_CD, PGM_CD, EFF_DT, COUNT(*)
+						FROM ${schema}.CRT_MFG_ST_EXCL_LOAD
+						GROUP BY PICO_ID, ST_CD, PGM_CD, EFF_DT
+						HAVING COUNT(*) > 1
+					) t2
+					WHERE
+						t1.PICO_ID = t2.PICO_ID AND
+						t1.ST_CD   = t2.ST_CD AND
+						t1.PGM_CD  = t2.PGM_CD AND
+						t1.EFF_DT  = t2.EFF_DT
+				)
+			]]></statement>
+			<statement name="OLD_EFFECTIVE_DATES"><![CDATA[
+				UPDATE ${schema}.CRT_MFG_ST_EXCL_LOAD
+				SET ERR_TXT = 'New record with old EFF_DT'
+				WHERE LOAD_REC_ID IN (
+					SELECT t1.LOAD_REC_ID
+					FROM ${schema}.CRT_MFG_ST_EXCL_LOAD t1 LEFT JOIN ${schema}.CRT_MFG_ST_EXCL t2
+                      ON
+						 t2.PICO_ID  = t1.PICO_ID AND
+						 t2.ST_CD    = t1.ST_CD AND
+						 t2.PGM_CD   = t1.PGM_CD AND
+						 t2.EFF_DT   = t1.EFF_DT
+					WHERE
+						 t1.EFF_DT < CURRENT DATE + 1 DAY AND
+						 t2.PICO_ID IS NULL
+				)
+			]]></statement>
+			<statement name="INVALID_DELETES"><![CDATA[
+				INSERT INTO ${schema}.CRT_MFG_ST_EXCL_LOAD
+				(
+                                PICO_ID      ,
+                                ST_CD        ,
+                                PGM_CD       ,
+                                EFF_DT       ,
+                                TERM_DT      ,
+                                INSRT_TS     ,
+                                INSRT_USER_ID,
+                                UPDT_TS      ,
+                                UPDT_USER_ID ,
+                                LOAD_REC_ID  ,
+                                ERR_TXT
+				)
+				SELECT
+                    r1.PICO_ID, r1.ST_CD, r1.PGM_CD, r1.EFF_DT, r1.TERM_DT,
+                    r1.INSRT_TS, r1.INSRT_USER_ID, r1.UPDT_TS, r1.UPDT_USER_ID,
+					-1, 'Can not delete where EFF_DT <= TODAY'
+				FROM ${schema}.CRT_MFG_ST_EXCL r1 LEFT JOIN ${schema}.CRT_MFG_ST_EXCL_LOAD r2
+                  ON r1.PICO_ID = r2.PICO_ID
+				 AND r1.ST_CD   = r2.ST_CD
+				 AND r1.PGM_CD  = r2.PGM_CD
+				 AND r1.EFF_DT  = r2.EFF_DT
+			   WHERE r1.EFF_DT < CURRENT DATE + 1 DAY
+				 AND r2.PICO_ID IS NULL
+				WITH UR
+			]]></statement>
+			<statement name="INVALID_TERM_MODIFICATIONS"><![CDATA[
+				UPDATE ${schema}.CRT_MFG_ST_EXCL_LOAD
+				SET ERR_TXT = 'Can not change term date to be < to today'
+				WHERE LOAD_REC_ID IN (
+					SELECT r1.LOAD_REC_ID
+					FROM ${schema}.CRT_MFG_ST_EXCL_LOAD r1, ${schema}.CRT_MFG_ST_EXCL_LOAD r2
+					WHERE
+						r1.PICO_ID = r2.PICO_ID AND
+						r1.ST_CD   = r2.ST_CD AND
+						r1.PGM_CD  = r2.PGM_CD AND
+						r1.EFF_DT  = r2.EFF_DT AND
+						r1.TERM_DT != r2.TERM_DT AND
+						r1.TERM_DT < CURRENT DATE
+				)
+			]]></statement>
+		</group>
+		
+	</group>
+	
+	<group name="RebatePharmacyExcl">
+		<statement name="SELECT_ROW"><![CDATA[
+			SELECT PICO_ID, PMCY_ID, PGM_CD, EFF_DT, TERM_DT, SRC_REC_ADD_TS, SRC_REC_MOD_TS,
+                   INSRT_USER_ID,
+                   INSRT_TS,
+				   UPDT_USER_ID,
+                   UPDT_TS
+			FROM ${schema}.CRT_MFG_PMCY_EXCL
+			WHERE
+				PICO_ID = ? AND
+				PMCY_ID = ? AND
+				PGM_CD = ? AND
+				EFF_DT = ?
+			WITH UR
+		]]></statement>
+		<statement name="INSERT_HIST_RECORD"><![CDATA[
+			INSERT INTO ${schema}.CRH_MFG_PMCY_EXCL
+			(
+                        PICO_ID       ,
+                        PMCY_ID       ,
+                        PGM_CD        ,
+                        EFF_DT        ,
+                        TERM_DT       ,
+                        SRC_REC_ADD_TS,
+                        INSRT_HIST_TS ,
+                        INSRT_USER_ID ,
+                        INSRT_TS      ,
+                        UPDT_USER_ID  ,
+                        UPDT_TS       ,
+                        LAST_ACCS_USER_ID,
+                        ACTN_TYP_CD   
+			)
+			VALUES(?,?,?,?,?,?,CURRENT TIMESTAMP,
+			       'RTMD', CURRENT TIMESTAMP, 'RTMD', CURRENT TIMESTAMP, 'RTMD', 'I' )
+		]]></statement>
+		<statement name="INSERT_RECORD"><![CDATA[
+			INSERT INTO ${schema}.CRT_MFG_PMCY_EXCL
+			(
+                        PICO_ID       ,
+                        PMCY_ID       ,
+                        PGM_CD        ,
+                        EFF_DT        ,
+                        TERM_DT       ,
+                        SRC_REC_ADD_TS,
+                        SRC_REC_MOD_TS,
+                        INSRT_USER_ID ,
+                        INSRT_TS      ,
+                        UPDT_USER_ID  ,
+                        UPDT_TS
+			)
+			VALUES(?,?,?,?,?,?,?, 'RTMD', CURRENT TIMESTAMP, 'RTMD', CURRENT TIMESTAMP)
+		]]></statement>
+	</group>
+	
+	<group name="RebateRateRecord">
+		<statement name="SELECT_ROW"><![CDATA[
+			SELECT
+				PICO_ID,
+				FRMLY_ID,
+				FRMLY_SRC_CD,
+				NDC11_ID,
+				EFF_DT,
+				TERM_DT,
+				DRUG_PRC_SRC_CD,
+				DRUG_PRC_TYP_CD,
+				RATE_QLFR_CD,
+				MAIL_RATE_T2_AMT,
+				MAIL_RATE_T3_AMT,
+				RTL_RATE_T2_AMT,
+				RTL_RATE_T3_AMT,
+				EXCL_MAIL_CD,
+				EXCL_THER_CD,
+				SRC_REC_ADD_TS,
+				SRC_REC_MOD_TS,
+                INSRT_USER_ID,
+                INSRT_TS,
+				UPDT_USER_ID,
+                UPDT_TS
+			FROM ${schema}.CRT_MFG_RATE
+			WHERE
+				PICO_ID = ? AND
+				FRMLY_ID = ? AND
+				FRMLY_SRC_CD = ? AND
+				NDC11_ID = ? AND
+				EFF_DT = ?
+			WITH UR
+		]]></statement>
+		<statement name="UPDATE_ROW"><![CDATA[
+			UPDATE ${schema}.CRT_MFG_RATE
+			SET
+				TERM_DT = ?,
+				DRUG_PRC_SRC_CD = ?,
+				DRUG_PRC_TYP_CD = ?,
+				RATE_QLFR_CD = ?,
+				MAIL_RATE_T2 = ?,
+				MAIL_RATE_T3 = ?,
+				RTL_RATE_T2 = ?,
+				RTL_RATE_T3 = ?,
+				EXCL_MAIL_CD = ?,
+				EXCL_THER_CD = ?,
+				SRC_REC_MOD_TS = CURRENT TIMESTAMP,
+				UPDT_USER_ID = 'RTMD',
+				UPDT_TS = CURRENT TIMESTAMP
+			WHERE
+				PICO_ID = ? AND
+				FRMLY_ID = ? AND
+				FRMLY_SRC_CD = ? AND
+				NDC11_ID = ? AND
+				EFF_DT = ?
+		]]></statement>
+		<statement name="INSERT_HIST_RECORD"><![CDATA[
+			INSERT INTO ${schema}.CRH_MFG_RATE
+			(
+                        PICO_ID         ,
+                        FRMLY_ID        ,
+                        FRMLY_SRC_CD    ,
+                        NDC11_ID        ,
+                        EFF_DT          ,
+                        TERM_DT         ,
+                        DRUG_PRC_SRC_CD ,
+                        DRUG_PRC_TYP_CD ,
+                        RATE_QLFR_CD    ,
+                        MAIL_RATE_T2_AMT,
+                        MAIL_RATE_T3_AMT,
+                        RTL_RATE_T2_AMT ,
+                        RTL_RATE_T3_AMT ,
+                        EXCL_MAIL_CD    ,
+                        EXCL_THER_CD    ,
+                        SRC_REC_ADD_TS  ,
+                        INSRT_HIST_TS   ,
+                        INSRT_USER_ID   ,
+                        INSRT_TS        ,
+                        UPDT_USER_ID    ,
+                        UPDT_TS         ,
+                        LAST_ACCS_USER_ID,
+                        ACTN_TYP_CD 
+			)
+			VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT TIMESTAMP, 
+			        'RTMD', CURRENT TIMESTAMP, 'RTMD', CURRENT TIMESTAMP, 'RTMD', 'I' )
+		]]></statement>
+		<statement name="INSERT_RECORD"><![CDATA[
+			INSERT INTO ${schema}.CRT_MFG_RATE
+			(
+                        PICO_ID         ,
+                        FRMLY_ID        ,
+                        FRMLY_SRC_CD    ,
+                        NDC11_ID        ,
+                        EFF_DT          ,
+                        TERM_DT         ,
+                        DRUG_PRC_SRC_CD ,
+                        DRUG_PRC_TYP_CD ,
+                        RATE_QLFR_CD    ,
+                        MAIL_RATE_T2_AMT,
+                        MAIL_RATE_T3_AMT,
+                        RTL_RATE_T2_AMT ,
+                        RTL_RATE_T3_AMT ,
+                        EXCL_MAIL_CD    ,
+                        EXCL_THER_CD    ,
+                        SRC_REC_ADD_TS  ,
+                        SRC_REC_MOD_TS  ,
+                        INSRT_USER_ID   ,
+                        INSRT_TS        ,
+                        UPDT_USER_ID    ,
+                        UPDT_TS
+			)
+			VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?, 
+			       'RTMD', CURRENT TIMESTAMP, 'RTMD', CURRENT TIMESTAMP)
+		]]></statement>
+	</group>
+	
+	<group name="RebateStateExcl">
+		<statement name="SELECT_ROW"><![CDATA[
+			SELECT PICO_ID, ST_CD, PGM_CD, EFF_DT, TERM_DT, SRC_REC_ADD_TS, SRC_REC_MOD_TS,
+                   INSRT_USER_ID,
+                   INSRT_TS,
+				   UPDT_USER_ID,
+                   UPDT_TS
+			FROM ${schema}.CRT_MFG_ST_EXCL
+			WHERE
+				PICO_ID = ? AND
+				ST_CD = ? AND
+				PGM_CD = ? AND
+				EFF_DT = ?
+			WITH UR
+		]]></statement>
+		<statement name="INSERT_HIST_RECORD"><![CDATA[
+			INSERT INTO ${schema}.CRH_MFG_ST_EXCL
+			(
+                        PICO_ID       ,
+                        ST_CD         ,
+                        PGM_CD        ,
+                        EFF_DT        ,
+                        TERM_DT       ,
+                        SRC_REC_ADD_TS,
+                        INSRT_HIST_TS ,
+                        ACTN_TYP_CD   ,
+                        INSRT_USER_ID ,
+                        INSRT_TS      ,
+                        UPDT_USER_ID  ,
+                        UPDT_TS       ,
+                        LAST_ACCS_USER_ID
+			)
+			VALUES(?,?,?,?,?,?,CURRENT TIMESTAMP, 
+			       'I', 'RTMD', CURRENT TIMESTAMP, 'RTMD', CURRENT TIMESTAMP, 'RTMD' )
+		]]></statement>
+		<statement name="INSERT_RECORD"><![CDATA[
+			INSERT INTO ${schema}.CRT_MFG_ST_EXCL
+			(
+                        PICO_ID       ,
+                        ST_CD         ,
+                        PGM_CD        ,
+                        EFF_DT        ,
+                        TERM_DT       ,
+                        SRC_REC_ADD_TS,
+                        SRC_REC_MOD_TS,
+                        INSRT_TS      ,
+                        INSRT_USER_ID ,
+                        UPDT_TS       ,
+                        UPDT_USER_ID
+			)
+			VALUES(?,?,?,?,?,?,?, CURRENT TIMESTAMP, 'RTMD', CURRENT TIMESTAMP, 'RTMD' )
+		]]></statement>
+	</group>
+	
+	<!-- SQL Statements for exports -->
+	<group name="Export">
+	
+		<group name="MFG_PMCY_EXCL">
+			<statement name="QLC"><![CDATA[
+				SELECT
+					CASE WHEN SRC_REC_MOD_TS > SRC_REC_ADD_TS THEN 'U' ELSE 'I' END AS CHANGE_TYPE,
+                        PICO_ID       ,
+                        PMCY_ID         ,
+                        PGM_CD        ,
+                        EFF_DT        ,
+                        TERM_DT       ,
+                        SRC_REC_ADD_TS,
+                        SRC_REC_MOD_TS,
+                    CASE WHEN SRC_REC_MOD_TS > SRC_REC_ADD_TS THEN 2 ELSE 3 END AS PROCESS_ORDER
+				FROM ${schema}.CRT_MFG_PMCY_EXCL
+				WHERE SRC_REC_MOD_TS > ?
+				
+				UNION ALL
+				
+				SELECT
+					'D' AS CHANGE_TYPE,
+					t3.PICO_ID,
+					t3.PMCY_ID,
+					t3.PGM_CD,
+					t3.EFF_DT,
+					t3.TERM_DT,
+					'1900-01-01 00:00:00' SRC_REC_ADD_TS,
+					'1900-01-01 00:00:00' SRC_REC_MOD_TS,
+                    1 AS PROCESS_ORDER
+				FROM ${schema}.CRH_MFG_PMCY_EXCL t3
+				WHERE (PICO_ID, PMCY_ID, PGM_CD, EFF_DT, INSRT_HIST_TS) IN (
+					SELECT t1.PICO_ID,
+						t1.PMCY_ID,
+						t1.PGM_CD,
+						t1.EFF_DT,
+						MAX(INSRT_HIST_TS)
+					FROM ${schema}.CRH_MFG_PMCY_EXCL t1 LEFT JOIN ${schema}.CRT_MFG_PMCY_EXCL t2 
+					  ON
+						t1.PICO_ID = t2.PICO_ID AND
+						t1.PMCY_ID = t2.PMCY_ID AND
+						t1.PGM_CD = t2.PGM_CD AND
+						t1.EFF_DT = t2.EFF_DT 
+					WHERE
+						t1.INSRT_HIST_TS >= ? AND
+						t2.PICO_ID IS NULL
+					GROUP BY
+						t1.PICO_ID,
+						t1.PMCY_ID,
+						t1.PGM_CD,
+						t1.EFF_DT
+				)
+				ORDER BY 2,3,4,PROCESS_ORDER
+				WITH UR
+			]]></statement>
+			<statement name="RECAP"><![CDATA[
+				SELECT
+					CASE WHEN SRC_REC_MOD_TS > SRC_REC_ADD_TS THEN 'U' ELSE 'I' END AS CHANGE_TYPE,
+					PICO_ID       ,
+                    PMCY_ID         ,
+                    PGM_CD        ,
+                    EFF_DT        ,
+                    TERM_DT       ,
+                    SRC_REC_ADD_TS,
+                    SRC_REC_MOD_TS,
+                    CASE WHEN SRC_REC_MOD_TS > SRC_REC_ADD_TS THEN 2 ELSE 3 END AS PROCESS_ORDER
+				FROM ${schema}.CRT_MFG_PMCY_EXCL
+				WHERE SRC_REC_MOD_TS > ?
+				
+				UNION ALL
+				
+				SELECT
+					'D' AS CHANGE_TYPE,
+					t3.PICO_ID,
+					t3.PMCY_ID,
+					t3.PGM_CD,
+					t3.EFF_DT,
+					t3.TERM_DT,
+					'1900-01-01 00:00:00' SRC_REC_ADD_TS,
+					'1900-01-01 00:00:00' SRC_REC_MOD_TS,
+                    1 AS PROCESS_ORDER
+				FROM ${schema}.CRH_MFG_PMCY_EXCL t3
+				WHERE (PICO_ID, PMCY_ID, PGM_CD, EFF_DT, INSRT_HIST_TS) IN (
+					SELECT t1.PICO_ID,
+						t1.PMCY_ID,
+						t1.PGM_CD,
+						t1.EFF_DT,
+						MAX(INSRT_HIST_TS)
+					FROM ${schema}.CRH_MFG_PMCY_EXCL t1 LEFT JOIN ${schema}.CRT_MFG_PMCY_EXCL t2  
+                      ON t1.PICO_ID = t2.PICO_ID
+					 AND t1.PMCY_ID = t2.PMCY_ID
+					 AND t1.PGM_CD = t2.PGM_CD
+					 AND t1.EFF_DT = t2.EFF_DT
+				   WHERE t1.INSRT_HIST_TS >= ? 
+					 AND t2.PICO_ID IS NULL
+					GROUP BY
+						t1.PICO_ID,
+						t1.PMCY_ID,
+						t1.PGM_CD,
+						t1.EFF_DT
+				)
+				ORDER BY 2,3,4,PROCESS_ORDER
+				WITH UR
+			]]></statement>
+			<statement name="RXC"><![CDATA[
+				SELECT
+					CASE WHEN SRC_REC_MOD_TS > SRC_REC_ADD_TS THEN 'U' ELSE 'I' END AS CHANGE_TYPE,
+                    PICO_ID       ,
+                    PMCY_ID         ,
+                    PGM_CD        ,
+                    EFF_DT        ,
+                    TERM_DT       ,
+                    SRC_REC_ADD_TS,
+                    SRC_REC_MOD_TS,					
+                    CASE WHEN SRC_REC_MOD_TS > SRC_REC_ADD_TS THEN 2 ELSE 3 END AS PROCESS_ORDER
+				FROM ${schema}.CRT_MFG_PMCY_EXCL
+				WHERE SRC_REC_MOD_TS > ?
+				
+				UNION ALL
+				
+				SELECT
+					'D' AS CHANGE_TYPE,
+					t3.PICO_ID,
+					t3.PMCY_ID,
+					t3.PGM_CD,
+					t3.EFF_DT,
+					t3.TERM_DT,
+					'1900-01-01 00:00:00' SRC_REC_ADD_TS,
+					'1900-01-01 00:00:00' SRC_REC_MOD_TS,
+                    1 AS PROCESS_ORDER
+				FROM ${schema}.CRH_MFG_PMCY_EXCL t3
+				WHERE (PICO_ID, PMCY_ID, PGM_CD, EFF_DT, INSRT_HIST_TS) IN (
+					SELECT t1.PICO_ID,
+						t1.PMCY_ID,
+						t1.PGM_CD,
+						t1.EFF_DT,
+						MAX(INSRT_HIST_TS)
+					FROM ${schema}.CRH_MFG_PMCY_EXCL t1 LEFT JOIN ${schema}.CRT_MFG_PMCY_EXCL t2  
+                      ON t1.PICO_ID = t2.PICO_ID
+					 AND t1.PMCY_ID = t2.PMCY_ID
+					 AND t1.PGM_CD = t2.PGM_CD
+					 AND t1.EFF_DT = t2.EFF_DT
+				   WHERE t1.INSRT_HIST_TS >= ? 
+					 AND t2.PICO_ID IS NULL
+					GROUP BY
+						t1.PICO_ID,
+						t1.PMCY_ID,
+						t1.PGM_CD,
+						t1.EFF_DT
+				)
+				ORDER BY 2,3,4,PROCESS_ORDER
+				WITH UR
+			]]></statement>
+		</group>
+		
+		<group name="MFG_RATE">
+			<statement name="QLC"><![CDATA[
+				SELECT
+				        CASE WHEN SRC_REC_MOD_TS > SRC_REC_ADD_TS THEN 'U' ELSE 'I' END AS CHANGE_TYPE,
+				        1 AS NHU_TYPE, 
+                        PICO_ID,
+                        FRMLY_ID,
+                        FRMLY_SRC_CD,
+                        NDC11_ID,
+                        EFF_DT,
+                        TERM_DT,
+                        DRUG_PRC_SRC_CD,
+                        DRUG_PRC_TYP_CD,
+                        RATE_QLFR_CD,
+                        MAIL_RATE_T2_AMT,
+                        MAIL_RATE_T3_AMT,
+                        RTL_RATE_T2_AMT,
+                        RTL_RATE_T3_AMT,
+                        EXCL_MAIL_CD,
+                        EXCL_THER_CD,
+                        SRC_REC_ADD_TS,
+                        SRC_REC_MOD_TS,
+				        CASE WHEN SRC_REC_MOD_TS > SRC_REC_ADD_TS THEN 2 ELSE 3 END AS PROCESS_ORDER
+				FROM ${schema}.CRT_MFG_RATE
+				WHERE
+				        SRC_REC_MOD_TS > ? AND
+				        FRMLY_SRC_CD IN ('Q')
+				
+				UNION ALL
+				
+				SELECT
+				        'D' AS CHANGE_TYPE,
+				        1 AS NHU_TYPE,
+			            t3.PICO_ID,
+				        t3.FRMLY_ID,
+				        t3.FRMLY_SRC_CD,
+				        t3.NDC11_ID,
+				        t3.EFF_DT,
+				        t3.TERM_DT,
+						t3.DRUG_PRC_SRC_CD,
+			            t3.DRUG_PRC_TYP_CD,
+				        t3.RATE_QLFR_CD,
+				        t3.MAIL_RATE_T2_AMT,
+				        t3.MAIL_RATE_T3_AMT,
+				        t3.RTL_RATE_T2_AMT,
+				        t3.RTL_RATE_T3_AMT,
+				        t3.EXCL_MAIL_CD,
+				        t3.EXCL_THER_CD,
+				        '1900-01-01 00:00:00' SRC_REC_ADD_TS,
+				        '1900-01-01 00:00:00' SRC_REC_MOD_TS,
+				        1 AS PROCESS_ORDER
+				FROM ${schema}.CRH_MFG_RATE t3
+				WHERE (PICO_ID, FRMLY_ID, FRMLY_SRC_CD, NDC11_ID, EFF_DT, INSRT_HIST_TS) IN (
+				        SELECT t1.PICO_ID,
+				                t1.FRMLY_ID,
+				                t1.FRMLY_SRC_CD,
+				                t1.NDC11_ID,
+				                t1.EFF_DT,
+				                MAX(INSRT_HIST_TS)
+				        FROM ${schema}.CRH_MFG_RATE t1 LEFT JOIN ${schema}.CRT_MFG_RATE t2 
+                          ON t1.PICO_ID = t2.PICO_ID
+				         AND t1.FRMLY_ID = t2.FRMLY_ID
+			             AND t1.FRMLY_SRC_CD = t2.FRMLY_SRC_CD
+				         AND t1.NDC11_ID = t2.NDC11_ID
+				         AND t1.EFF_DT = t2.EFF_DT
+				       WHERE t1.FRMLY_SRC_CD IN ('Q')
+				         AND t1.INSRT_HIST_TS >= ? AND
+				             t2.PICO_ID IS NULL
+				        GROUP BY
+				                t1.PICO_ID,
+				                t1.FRMLY_ID,
+				                t1.FRMLY_SRC_CD,
+				                t1.NDC11_ID,
+				                t1.EFF_DT
+				)
+				ORDER BY 3,4,5,6,PROCESS_ORDER
+				WITH UR
+			]]></statement>
+			<statement name="RECAP"><![CDATA[
+				SELECT
+				        CASE WHEN SRC_REC_MOD_TS > SRC_REC_ADD_TS THEN 'U' ELSE 'I' END AS CHANGE_TYPE,
+				        1 AS NHU_TYPE, 
+                        PICO_ID,
+                        FRMLY_ID,
+                        FRMLY_SRC_CD,
+                        NDC11_ID,
+                        EFF_DT,
+                        TERM_DT,
+                        DRUG_PRC_SRC_CD,
+                        DRUG_PRC_TYP_CD,
+                        RATE_QLFR_CD,
+                        MAIL_RATE_T2_AMT,
+                        MAIL_RATE_T3_AMT,
+                        RTL_RATE_T2_AMT,
+                        RTL_RATE_T3_AMT,
+                        EXCL_MAIL_CD,
+                        EXCL_THER_CD,
+                        SRC_REC_ADD_TS,
+                        SRC_REC_MOD_TS,
+				        CASE WHEN SRC_REC_MOD_TS > SRC_REC_ADD_TS THEN 2 ELSE 3 END AS PROCESS_ORDER
+				FROM ${schema}.CRT_MFG_RATE
+				WHERE
+				        SRC_REC_MOD_TS > ? AND
+				        FRMLY_SRC_CD IN ('S')
+				
+				UNION ALL
+				
+				SELECT
+				        'D' AS CHANGE_TYPE,
+				        1 AS NHU_TYPE,
+						t3.PICO_ID,
+				        t3.FRMLY_ID,
+				        t3.FRMLY_SRC_CD,
+				        t3.NDC11_ID,
+				        t3.EFF_DT,
+				        t3.TERM_DT,
+						t3.DRUG_PRC_SRC_CD,
+			            t3.DRUG_PRC_TYP_CD,
+				        t3.RATE_QLFR_CD,
+				        t3.MAIL_RATE_T2_AMT,
+				        t3.MAIL_RATE_T3_AMT,
+				        t3.RTL_RATE_T2_AMT,
+				        t3.RTL_RATE_T3_AMT,
+				        t3.EXCL_MAIL_CD,
+				        t3.EXCL_THER_CD,
+				        '1900-01-01 00:00:00' SRC_REC_ADD_TS,
+				        '1900-01-01 00:00:00' SRC_REC_MOD_TS,
+				        1 AS PROCESS_ORDER
+				FROM ${schema}.CRH_MFG_RATE t3
+				WHERE (PICO_ID, FRMLY_ID, FRMLY_SRC_CD, NDC11_ID, EFF_DT, INSRT_HIST_TS) IN (
+				        SELECT t1.PICO_ID,
+				                t1.FRMLY_ID,
+				                t1.FRMLY_SRC_CD,
+				                t1.NDC11_ID,
+				                t1.EFF_DT,
+				                MAX(INSRT_HIST_TS)
+				        FROM ${schema}.CRH_MFG_RATE t1 LEFT JOIN ${schema}.CRT_MFG_RATE t2  
+                          ON t1.PICO_ID = t2.PICO_ID
+				         AND t1.FRMLY_ID = t2.FRMLY_ID
+				         AND t1.FRMLY_SRC_CD = t2.FRMLY_SRC_CD
+				         AND t1.NDC11_ID = t2.NDC11_ID
+				         AND t1.EFF_DT = t2.EFF_DT
+				       WHERE t1.INSRT_HIST_TS >= ? 
+				         AND t1.FRMLY_SRC_CD IN ('S') 
+				         AND t2.PICO_ID IS NULL
+				        GROUP BY
+				                t1.PICO_ID,
+				                t1.FRMLY_ID,
+				                t1.FRMLY_SRC_CD,
+				                t1.NDC11_ID,
+				                t1.EFF_DT
+				)
+				ORDER BY 3,4,5,6,PROCESS_ORDER
+				WITH UR
+			]]></statement>
+			<statement name="RXC"><![CDATA[
+				SELECT
+			    CASE WHEN SRC_REC_MOD_TS > SRC_REC_ADD_TS THEN 'U' ELSE 'I' END AS CHANGE_TYPE,
+			    1 AS NHU_TYPE, 
+                PICO_ID,
+                FRMLY_ID,
+                FRMLY_SRC_CD,
+                NDC11_ID,
+                EFF_DT,
+                TERM_DT,
+                DRUG_PRC_SRC_CD,
+                DRUG_PRC_TYP_CD,
+                RATE_QLFR_CD,
+                MAIL_RATE_T2_AMT,
+                MAIL_RATE_T3_AMT,
+                RTL_RATE_T2_AMT,
+                RTL_RATE_T3_AMT,
+                EXCL_MAIL_CD,
+                EXCL_THER_CD,
+                SRC_REC_ADD_TS,
+                SRC_REC_MOD_TS,
+			    CASE WHEN SRC_REC_MOD_TS > SRC_REC_ADD_TS THEN 2 ELSE 3 END AS PROCESS_ORDER
+			FROM ${schema}.CRT_MFG_RATE
+			WHERE
+			    SRC_REC_MOD_TS > ? AND
+			    FRMLY_SRC_CD IN ('S','H')
+			
+			UNION ALL
+			
+			SELECT
+			    'D' AS CHANGE_TYPE,
+			    1 AS NHU_TYPE,
+			    t3.PICO_ID,
+			    t3.FRMLY_ID,
+			    t3.FRMLY_SRC_CD,
+			    t3.NDC11_ID,
+			    t3.EFF_DT,
+			    t3.TERM_DT,
+				t3.DRUG_PRC_SRC_CD,
+	            t3.DRUG_PRC_TYP_CD,
+			    t3.RATE_QLFR_CD,
+			    t3.MAIL_RATE_T2_AMT,
+			    t3.MAIL_RATE_T3_AMT,
+			    t3.RTL_RATE_T2_AMT,
+			    t3.RTL_RATE_T3_AMT,
+			    t3.EXCL_MAIL_CD,
+			    t3.EXCL_THER_CD,
+			    '1900-01-01 00:00:00' SRC_REC_ADD_TS,
+			    '1900-01-01 00:00:00' SRC_REC_MOD_TS,
+			    1 AS PROCESS_ORDER
+			FROM ${schema}.CRH_MFG_RATE t3
+			WHERE (PICO_ID, FRMLY_ID, FRMLY_SRC_CD, NDC11_ID, EFF_DT, INSRT_HIST_TS) IN (
+			    SELECT t1.PICO_ID,
+			            t1.FRMLY_ID,
+			            t1.FRMLY_SRC_CD,
+			            t1.NDC11_ID,
+			            t1.EFF_DT,
+			            MAX(INSRT_HIST_TS)
+			    FROM ${schema}.CRH_MFG_RATE t1 LEFT JOIN  ${schema}.CRT_MFG_RATE t2 
+                  ON t1.PICO_ID = t2.PICO_ID
+			     AND t1.FRMLY_ID = t2.FRMLY_ID
+			     AND t1.FRMLY_SRC_CD = t2.FRMLY_SRC_CD
+			     AND t1.NDC11_ID = t2.NDC11_ID 
+			     AND t1.EFF_DT = t2.EFF_DT
+			   WHERE t1.INSRT_HIST_TS >= ? 
+			     AND t1.FRMLY_SRC_CD IN ('S', 'H')  
+			     AND t2.PICO_ID IS NULL
+			    GROUP BY
+			            t1.PICO_ID,
+			            t1.FRMLY_ID,
+			            t1.FRMLY_SRC_CD,
+			            t1.NDC11_ID,
+			            t1.EFF_DT
+			)
+			ORDER BY 3,4,5,6,PROCESS_ORDER
+			WITH UR
+			]]></statement>
+		</group>
+		
+		<group name="MFG_ST_EXCL">
+			<statement name="QLC"><![CDATA[
+				SELECT
+					CASE WHEN SRC_REC_MOD_TS > SRC_REC_ADD_TS THEN 'U' ELSE 'I' END AS CHANGE_TYPE,
+					PICO_ID,
+					ST_CD,
+					PGM_CD,
+					EFF_DT,
+					TERM_DT,
+					SRC_REC_ADD_TS,
+					SRC_REC_MOD_TS,
+                    CASE WHEN SRC_REC_MOD_TS > SRC_REC_ADD_TS THEN 2 ELSE 3 END AS PROCESS_ORDER
+				FROM ${schema}.CRT_MFG_ST_EXCL
+				WHERE SRC_REC_MOD_TS > ?
+				
+				UNION ALL
+				
+				SELECT
+					'D' AS CHANGE_TYPE,
+					t3.PICO_ID,
+					t3.ST_CD,
+					t3.PGM_CD,
+					t3.EFF_DT,
+					t3.TERM_DT,
+					'1900-01-01 00:00:00' SRC_REC_ADD_TS,
+					'1900-01-01 00:00:00' SRC_REC_MOD_TS,
+                    1 AS PROCESS_ORDER
+				FROM ${schema}.CRH_MFG_ST_EXCL t3
+				WHERE (PICO_ID, ST_CD, PGM_CD, EFF_DT, INSRT_HIST_TS) IN (
+				  SELECT t1.PICO_ID,
+						 t1.ST_CD,
+						 t1.PGM_CD,
+						 t1.EFF_DT,
+						 MAX(INSRT_HIST_TS)
+					FROM ${schema}.CRH_MFG_ST_EXCL t1 LEFT JOIN ${schema}.CRT_MFG_ST_EXCL t2  
+                      ON t1.PICO_ID = t2.PICO_ID
+					 AND t1.ST_CD = t2.ST_CD
+					 AND t1.PGM_CD = t2.PGM_CD
+					 AND t1.EFF_DT = t2.EFF_DT
+				   WHERE t1.INSRT_HIST_TS >= ? 
+					 AND t2.PICO_ID IS NULL
+					GROUP BY
+						t1.PICO_ID,
+						t1.ST_CD,
+						t1.PGM_CD,
+						t1.EFF_DT
+				)
+				ORDER BY 2,3,4,PROCESS_ORDER
+				WITH UR
+			]]></statement>
+			<statement name="RECAP"><![CDATA[
+				SELECT
+					CASE WHEN SRC_REC_MOD_TS > SRC_REC_ADD_TS THEN 'U' ELSE 'I' END AS CHANGE_TYPE,
+					PICO_ID,
+					ST_CD,
+					PGM_CD,
+					EFF_DT,
+					TERM_DT,
+					SRC_REC_ADD_TS,
+					SRC_REC_MOD_TS,
+                    CASE WHEN SRC_REC_MOD_TS > SRC_REC_ADD_TS THEN 2 ELSE 3 END AS PROCESS_ORDER
+				FROM ${schema}.CRT_MFG_ST_EXCL
+				WHERE SRC_REC_MOD_TS > ?
+				
+				UNION ALL
+				
+				SELECT
+					'D' AS CHANGE_TYPE,
+					t3.PICO_ID,
+					t3.ST_CD,
+					t3.PGM_CD,
+					t3.EFF_DT,
+					t3.TERM_DT,
+					'1900-01-01 00:00:00' SRC_REC_ADD_TS,
+					'1900-01-01 00:00:00' SRC_REC_MOD_TS,
+                    1 AS PROCESS_ORDER
+				FROM ${schema}.CRH_MFG_ST_EXCL t3
+				WHERE (PICO_ID, ST_CD, PGM_CD, EFF_DT, INSRT_HIST_TS) IN (
+				  SELECT t1.PICO_ID,
+						 t1.ST_CD,
+						 t1.PGM_CD,
+						 t1.EFF_DT,
+						 MAX(INSRT_HIST_TS)
+					FROM ${schema}.CRH_MFG_ST_EXCL t1 LEFT JOIN ${schema}.CRT_MFG_ST_EXCL t2  
+                      ON t1.PICO_ID = t2.PICO_ID
+					 AND t1.ST_CD = t2.ST_CD
+					 AND t1.PGM_CD = t2.PGM_CD
+					 AND t1.EFF_DT = t2.EFF_DT
+				   WHERE t1.INSRT_HIST_TS >= ? 
+					 AND t2.PICO_ID IS NULL
+					GROUP BY
+						t1.PICO_ID,
+						t1.ST_CD,
+						t1.PGM_CD,
+						t1.EFF_DT
+				)
+				ORDER BY 2,3,4,PROCESS_ORDER
+				WITH UR
+			]]></statement>
+			<statement name="RXC"><![CDATA[
+				SELECT
+					CASE WHEN SRC_REC_MOD_TS > SRC_REC_ADD_TS THEN 'U' ELSE 'I' END AS CHANGE_TYPE,
+					PICO_ID,
+					ST_CD,
+					PGM_CD,
+					EFF_DT,
+					TERM_DT,
+					SRC_REC_ADD_TS,
+					SRC_REC_MOD_TS,
+                    CASE WHEN SRC_REC_MOD_TS > SRC_REC_ADD_TS THEN 2 ELSE 3 END AS PROCESS_ORDER
+				FROM ${schema}.CRT_MFG_ST_EXCL
+				WHERE SRC_REC_MOD_TS > ?
+				
+				UNION ALL
+				
+				SELECT
+					'D' AS CHANGE_TYPE,
+					t3.PICO_ID,
+					t3.ST_CD,
+					t3.PGM_CD,
+					t3.EFF_DT,
+					t3.TERM_DT,
+					'1900-01-01 00:00:00' SRC_REC_ADD_TS,
+					'1900-01-01 00:00:00' SRC_REC_MOD_TS,
+                    1 AS PROCESS_ORDER
+				FROM ${schema}.CRH_MFG_ST_EXCL t3
+				WHERE (PICO_ID, ST_CD, PGM_CD, EFF_DT, INSRT_HIST_TS) IN (
+					SELECT t1.PICO_ID,
+						t1.ST_CD,
+						t1.PGM_CD,
+						t1.EFF_DT,
+						MAX(INSRT_HIST_TS)
+					FROM ${schema}.CRH_MFG_ST_EXCL t1 LEFT JOIN ${schema}.CRT_MFG_ST_EXCL t2 
+                      ON t1.PICO_ID = t2.PICO_ID
+					 AND t1.ST_CD = t2.ST_CD
+					 AND t1.PGM_CD = t2.PGM_CD
+					 AND t1.EFF_DT = t2.EFF_DT
+				   WHERE t1.INSRT_HIST_TS >= ? 
+					 AND t2.PICO_ID IS NULL
+					GROUP BY
+						t1.PICO_ID,
+						t1.ST_CD,
+						t1.PGM_CD,
+						t1.EFF_DT
+				)
+				ORDER BY 2,3,4,PROCESS_ORDER
+				WITH UR
+			]]></statement>
+		</group>
+		
+		<!-- POS Client Export -->
+		<group name="POS_CLT">
+			
+			<statement name="RECAP"><![CDATA[ 
+				SELECT
+			        RECORD_ACTION_CODE,
+			        EXTL_LVL1_ID,
+			        EXTL_LVL2_ID,
+			        EXTL_LVL3_ID,
+			        EXTL_LVL4_ID,
+			        EXTL_LVL5_ID,
+			        EFF_DT,
+			        CASE 
+			            WHEN TERM_DT > '12/31/2039' THEN '12/31/2039'
+			            ELSE TERM_DT
+			        END AS TERM_DT,		         
+			        PLATFORM_ID,
+			        SPECLTY_EXCL,
+			        POS_INDICATOR,
+			        CACL_SHR,
+			        MODULATOR,
+			        PROCESS_ORDER
+				FROM
+				(SELECT
+				        CASE
+				        	WHEN iv.LAST_UPDATE_DT IS NULL OR 
+				        		 iv.LAST_UPDATE_DT <= INSRT_DATE OR
+				        		 iv.INSRT_DATE > iv.LAST_RUN_DT 
+                                 THEN 'I' 
+				        	ELSE 'U'
+				        END AS Record_Action_Code,
+				        EXTL_LVL1_ID,
+				        EXTL_LVL2_ID,
+				        EXTL_LVL3_ID,
+				        EXTL_LVL4_ID,
+				        EXTL_LVL5_ID,
+				        EFF_DT,
+				        TERM_DT,
+				        PLATFORM_ID,
+				        SPECLTY_EXCL,
+				        POS_INDICATOR,
+				        CACL_SHR,
+				        MODULATOR,
+				        iv.LAST_UPDATE_DT,
+				        CASE
+				        	WHEN iv.LAST_UPDATE_DT IS NULL OR 
+				        		 iv.LAST_UPDATE_DT <= INSRT_DATE OR
+				        		 iv.INSRT_DATE > iv.LAST_RUN_DT 
+                                 THEN 3
+				            ELSE 2
+				        END AS PROCESS_ORDER
+				FROM (
+		                SELECT
+		                    CAST(TRIM(EH.EXTL_LVL1_ID) || REPEAT(' ', 20-LENGTH(TRIM(EH.EXTL_LVL1_ID))) AS CHAR(20)) EXTL_LVL1_ID,
+	                        CASE
+	                             WHEN RTRIM(EH.EXTL_LVL2_ID) = '' THEN '*ALL'
+	                             ELSE RTRIM(EH.EXTL_LVL2_ID)
+	                        END AS EXTL_LVL2_ID,
+	                        CASE
+	                             WHEN RTRIM(EH.EXTL_LVL3_ID) = '' THEN '*ALL'
+	                             ELSE RTRIM(EH.EXTL_LVL3_ID)
+	                        END AS EXTL_LVL3_ID,
+	                        EH.EXTL_LVL4_ID,
+	                        EH.EXTL_LVL5_ID,
+	                        CASE
+                                WHEN RTMD.EFF_DT IS NULL THEN CEHA.RTMD_EFF_DT
+                                WHEN RTMD.EFF_DT > CEHA.RTMD_EFF_DT THEN RTMD.EFF_DT
+                                ELSE CEHA.RTMD_EFF_DT
+	                        END AS EFF_DT,
+	                        CASE
+                                WHEN RTMD.TERM_DT IS NULL THEN CEHA.RTMD_TERM_DT
+                                WHEN RTMD.TERM_DT < CEHA.RTMD_TERM_DT THEN RTMD.TERM_DT
+                                ELSE CEHA.RTMD_TERM_DT
+	                        END AS TERM_DT,
+	                        EH.EXTL_SRC_CD as PLATFORM_ID,
+	                        CASE 
+	                        	WHEN RTMD.SPCL_EXCL_CD IS NULL THEN 'N'
+	                        	WHEN RTMD.SPCL_EXCL_CD = '0' THEN 'N'
+	                        	ELSE 'Y'
+	                        END AS SPECLTY_EXCL,
+	                        CASE 
+	                        	WHEN RTMD.RTMD_ID IS NULL THEN 0
+	                        	WHEN RTMD.RTMD_ID = -1 THEN 0
+	                        	ELSE 1
+	                        END AS POS_INDICATOR,
+	                        COALESCE(RTMD.CALC_SHR_PCT,0) AS CACL_SHR,
+	                        COALESCE(RTMD.MODL_VL,0) AS MODULATOR,
+	                        CASE 
+                                WHEN RTMD.INSRT_TS IS NULL THEN CEHA.INSRT_TS
+                                WHEN RTMD.INSRT_TS > CEHA.INSRT_TS THEN RTMD.INSRT_TS
+                                ELSE CEHA.INSRT_TS
+	                        END AS INSRT_DATE,
+	                        CASE 
+                                WHEN RTMD.UPDT_TS IS NULL THEN COALESCE(CEHA.UPDT_TS, CEHA.INSRT_TS)
+                                WHEN RTMD.UPDT_TS > COALESCE(CEHA.UPDT_TS, CEHA.INSRT_TS) THEN RTMD.UPDT_TS
+                                ELSE CEHA.UPDT_TS
+	                        END AS LAST_UPDATE_DT,
+	                        xprt.LAST_RUN_TS AS LAST_RUN_DT
+		                FROM
+	                        ${schema}.CRT_CLNT clt,
+ 	                        ${schema}.CRT_RTMD_PRC RTMD,
+ 	                        ${schema}.CRT_EXTL_HRCY EH,
+ 	                        ${schema}.CRT_CLNT_EXTL_HRCY_ASSC CEHA,
+ 	                        ${schema}.CRT_POS_FILE_XPRT xprt	                        
+		                WHERE
+	                        CLT.RBAT_ID = CEHA.RBAT_ID
+	                        AND CEHA.EXTL_HRCY_ID = EH.EXTL_HRCY_ID
+	                        AND EH.EXTL_SRC_CD = 'RECAP'
+	                        AND CLT.RBAT_ID = RTMD.RBAT_ID
+	                        AND xprt.PTFM_ID = 'RECAP'
+				        	AND xprt.XPRT_TYP_ID = 'POS_CLT'
+				        ) iv,
+				        ${schema}.CRT_POS_FILE_XPRT x 
+				WHERE
+				        iv.TERM_DT >= iv.EFF_DT
+				        and iv.TERM_DT > CURRENT DATE
+				        AND x.PTFM_ID = 'RECAP'
+				        AND x.XPRT_TYP_ID = 'POS_CLT'
+				        AND (iv.INSRT_DATE >= x.LAST_RUN_TS OR iv.LAST_UPDATE_DT >= x.LAST_RUN_TS)
+				UNION ALL
+				 SELECT
+				        'D' AS Record_Action_Code,
+				        EXTL_LVL1_ID,
+				        EXTL_LVL2_ID,
+				        EXTL_LVL3_ID,
+				        EXTL_LVL4_ID,
+				        EXTL_LVL5_ID,
+				        EFF_DT,
+				        TERM_DT,
+				        PLATFORM_ID,
+				        SPECLTY_EXCL,
+				        POS_INDICATOR,
+				        CACL_SHR,
+				        MODULATOR,
+				        iv.LAST_UPDATE_DT,
+				        1 AS PROCESS_ORDER
+				FROM (
+		                SELECT
+	                    CAST(TRIM(EH.EXTL_LVL1_ID) || REPEAT(' ', 20-LENGTH(TRIM(EH.EXTL_LVL1_ID))) AS CHAR(20)) EXTL_LVL1_ID,
+	                        CASE
+	                             WHEN RTRIM(EH.EXTL_LVL2_ID) = '' THEN '*ALL'
+	                             ELSE RTRIM(EH.EXTL_LVL2_ID)
+	                        END AS EXTL_LVL2_ID,
+	                        CASE
+	                             WHEN RTRIM(EH.EXTL_LVL3_ID) = '' THEN '*ALL'
+	                             ELSE RTRIM(EH.EXTL_LVL3_ID)
+	                        END AS EXTL_LVL3_ID,
+	                        EH.EXTL_LVL4_ID,
+	                        EH.EXTL_LVL5_ID,
+	                        CASE
+                                WHEN RTMD.EFF_DT > CEHA.RTMD_EFF_DT THEN RTMD.EFF_DT
+                                ELSE CEHA.RTMD_EFF_DT
+	                        END AS EFF_DT,
+	                        CASE
+                                WHEN RTMD.TERM_DT < CEHA.RTMD_TERM_DT THEN RTMD.TERM_DT
+                                ELSE CEHA.RTMD_TERM_DT
+	                        END AS TERM_DT,
+	                        EH.EXTL_SRC_CD as PLATFORM_ID,
+	                        CASE 
+	                        	WHEN RTMD.SPCL_EXCL_CD IS NULL THEN 'N'
+	                        	WHEN RTMD.SPCL_EXCL_CD = '0' THEN 'N'
+	                        	ELSE 'Y'
+	                        END AS SPECLTY_EXCL,
+	                        CASE 
+	                        	WHEN RTMD.RTMD_ID IS NULL THEN 0
+	                        	WHEN RTMD.RTMD_ID = -1 THEN 0
+	                        	ELSE 1
+	                        END AS POS_INDICATOR,               
+	                        COALESCE(RTMD.CALC_SHR_PCT,0) AS CACL_SHR,
+	                        COALESCE(RTMD.MODL_VL,0) AS MODULATOR,
+	                        CEHA.INSRT_TS AS INSRT_DATE,
+	                        RTMD.INSRT_HIST_TS AS LAST_UPDATE_DT -- This is new
+		                FROM 
+	                        ${schema}.CRT_CLNT clt,
+ 	                        ${schema}.CRH_RTMD_PRC RTMD,
+ 	                        ${schema}.CRT_EXTL_HRCY EH,
+ 	                        ${schema}.CRT_CLNT_EXTL_HRCY_ASSC CEHA	                        
+		                WHERE
+	                        CLT.RBAT_ID = CEHA.RBAT_ID
+	                        AND CEHA.EXTL_HRCY_ID = EH.EXTL_HRCY_ID
+	                        AND EH.EXTL_SRC_CD = 'RECAP'
+	                        AND CLT.RBAT_ID = RTMD.RBAT_ID
+	                        AND RTMD.ACTN_TYP_CD = 'D' 
+				        ) iv,
+				        ${schema}.CRT_POS_FILE_XPRT x 
+				  WHERE iv.TERM_DT >= iv.EFF_DT
+				        AND iv.TERM_DT > CURRENT DATE
+				        AND x.PTFM_ID = 'RECAP'
+				        AND x.XPRT_TYP_ID = 'POS_CLT'
+				        AND iv.LAST_UPDATE_DT >= x.LAST_RUN_TS
+				        ) A
+				ORDER BY EXTL_LVL1_ID,
+		                 EXTL_LVL2_ID,
+		                 EXTL_LVL3_ID,
+		                 EXTL_LVL4_ID,
+		                 EXTL_LVL5_ID,
+		                 PROCESS_ORDER
+		            WITH UR
+			]]></statement>
+			<statement name="QLC"><![CDATA[ 
+				SELECT
+			        RECORD_ACTION_CODE,
+			        EXTL_LVL1_ID,
+			        EXTL_LVL2_ID,
+			        EXTL_LVL3_ID,
+			        EXTL_LVL4_ID,
+			        EXTL_LVL5_ID,
+			        EFF_DT,
+			        TERM_DT,
+			        PLATFORM_ID,
+			        SPECLTY_EXCL,
+			        POS_INDICATOR,
+			        CACL_SHR,
+			        MODULATOR,
+			        PROCESS_ORDER
+				FROM
+				(SELECT
+				   CASE
+				       WHEN iv.LAST_UPDATE_DT IS NULL OR
+				            iv.LAST_UPDATE_DT <= INSRT_DATE OR
+				            iv.INSRT_DATE > iv.LAST_RUN_DT
+				       THEN 'I'
+				   ELSE 'U'
+				   END AS Record_Action_Code,
+				        EXTL_LVL1_ID,
+				        EXTL_LVL2_ID,
+				        EXTL_LVL3_ID,
+				        EXTL_LVL4_ID,
+				        EXTL_LVL5_ID,
+				        EFF_DT,
+				        TERM_DT,
+				        PLATFORM_ID,
+				        SPECLTY_EXCL,
+				        POS_INDICATOR,
+				        CACL_SHR,
+				        MODULATOR,
+				        iv.LAST_UPDATE_DT,
+				    CASE
+				        WHEN iv.LAST_UPDATE_DT IS NULL OR
+				             iv.LAST_UPDATE_DT <= INSRT_DATE OR
+				             iv.INSRT_DATE > iv.LAST_RUN_DT
+                                        THEN 3
+				    ELSE 2
+				    END AS PROCESS_ORDER
+				FROM (
+		                SELECT
+		                    CAST(REPEAT('0', 20-LENGTH(TRIM(EH.EXTL_LVL1_ID))) || TRIM(EH.EXTL_LVL1_ID) AS CHAR(20)) EXTL_LVL1_ID,
+		                    CASE
+		                        WHEN RTRIM(EH.EXTL_LVL2_ID) = '' THEN
+		                            '*ALL'
+		                        ELSE
+		                        	CAST(REPEAT('0', 20-LENGTH(TRIM(EH.EXTL_LVL2_ID))) || TRIM(EH.EXTL_LVL2_ID) AS CHAR(20))
+		                    END AS EXTL_LVL2_ID,
+		                    CASE
+		                        WHEN RTRIM(EH.EXTL_LVL3_ID) = '' THEN
+		                            '*ALL'
+		                        ELSE
+		                        	CAST(REPEAT('0', 20-LENGTH(TRIM(EH.EXTL_LVL3_ID))) || TRIM(EH.EXTL_LVL3_ID) AS CHAR(20))
+		                    END AS EXTL_LVL3_ID,
+		                    EH.EXTL_LVL4_ID,
+		                    EH.EXTL_LVL5_ID,
+	                        CASE
+                                WHEN RTMD.EFF_DT IS NULL THEN CEHA.RTMD_EFF_DT
+                                WHEN RTMD.EFF_DT > CEHA.RTMD_EFF_DT THEN RTMD.EFF_DT
+                                ELSE CEHA.RTMD_EFF_DT
+	                        END AS EFF_DT,
+	                        CASE
+                                WHEN RTMD.TERM_DT IS NULL THEN CEHA.RTMD_TERM_DT
+                                WHEN RTMD.TERM_DT < CEHA.RTMD_TERM_DT THEN RTMD.TERM_DT
+                                ELSE CEHA.RTMD_TERM_DT
+	                        END AS TERM_DT,
+	                        EH.EXTL_SRC_CD as PLATFORM_ID,
+	                        CASE 
+	                        	WHEN RTMD.SPCL_EXCL_CD IS NULL THEN 'N'
+	                        	WHEN RTMD.SPCL_EXCL_CD = '0' THEN 'N'
+	                        	ELSE 'Y'
+	                        END AS SPECLTY_EXCL,
+	                        CASE 
+	                        	WHEN RTMD.RTMD_ID IS NULL THEN 0
+	                        	WHEN RTMD.RTMD_ID = -1 THEN 0
+	                        	ELSE 1
+	                        END AS POS_INDICATOR,	                        
+	                        COALESCE(RTMD.CALC_SHR_PCT,0) AS CACL_SHR,
+	                        COALESCE(RTMD.MODL_VL,0) AS MODULATOR,
+	                        CASE
+                                WHEN RTMD.INSRT_TS IS NULL THEN CEHA.INSRT_TS
+                                WHEN RTMD.INSRT_TS > CEHA.INSRT_TS THEN RTMD.INSRT_TS
+                                ELSE CEHA.INSRT_TS
+	                        END AS INSRT_DATE,
+	                        CASE
+                                WHEN RTMD.UPDT_TS IS NULL THEN COALESCE(CEHA.UPDT_TS, CEHA.INSRT_TS)
+                                WHEN RTMD.UPDT_TS > COALESCE(CEHA.UPDT_TS, CEHA.INSRT_TS) THEN RTMD.UPDT_TS
+                                ELSE CEHA.UPDT_TS
+	                        END AS LAST_UPDATE_DT,
+	                        xprt.LAST_RUN_TS AS LAST_RUN_DT
+		                FROM 
+	                        ${schema}.CRT_CLNT clt,
+ 	                        ${schema}.CRT_RTMD_PRC RTMD,
+ 	                        ${schema}.CRT_EXTL_HRCY EH,
+ 	                        ${schema}.CRT_CLNT_EXTL_HRCY_ASSC CEHA,
+ 	                        ${schema}.CRT_POS_FILE_XPRT xprt	                        
+		                WHERE
+	                        CLT.RBAT_ID = CEHA.RBAT_ID
+	                        AND CEHA.EXTL_HRCY_ID = EH.EXTL_HRCY_ID
+	                        AND EH.EXTL_SRC_CD = 'QLC'
+	                        AND CLT.RBAT_ID = RTMD.RBAT_ID
+	                        AND xprt.PTFM_ID = 'QLC'
+				        	AND xprt.XPRT_TYP_ID = 'POS_CLT'
+				        ) iv,
+				        ${schema}.CRT_POS_FILE_XPRT x 
+				WHERE
+				        iv.TERM_DT >= iv.EFF_DT
+				        and iv.TERM_DT > CURRENT DATE
+				        AND x.PTFM_ID = 'QLC'
+				        AND x.XPRT_TYP_ID = 'POS_CLT'
+				        AND (iv.INSRT_DATE >= x.LAST_RUN_TS OR iv.LAST_UPDATE_DT >= x.LAST_RUN_TS)
+				UNION ALL
+				 SELECT
+				        'D' AS Record_Action_Code,
+				        EXTL_LVL1_ID,
+				        EXTL_LVL2_ID,
+				        EXTL_LVL3_ID,
+				        EXTL_LVL4_ID,
+				        EXTL_LVL5_ID,
+				        EFF_DT,
+				        TERM_DT,
+				        PLATFORM_ID,
+				        SPECLTY_EXCL,
+				        POS_INDICATOR,
+				        CACL_SHR,
+				        MODULATOR,
+				        iv.LAST_UPDATE_DT,
+				        1 AS PROCESS_ORDER
+				FROM (
+		                SELECT
+		                    CAST(REPEAT('0', 20-LENGTH(TRIM(EH.EXTL_LVL1_ID))) || TRIM(EH.EXTL_LVL1_ID) AS CHAR(20)) AS EXTL_LVL1_ID,
+		                    CASE
+		                        WHEN RTRIM(EH.EXTL_LVL2_ID) = '' THEN
+		                            '*ALL'
+		                        ELSE
+		                        	CAST(REPEAT('0', 20-LENGTH(TRIM(EH.EXTL_LVL2_ID))) || TRIM(EH.EXTL_LVL2_ID) AS CHAR(20))
+		                    END AS EXTL_LVL2_ID,
+		                    CASE
+		                        WHEN RTRIM(EH.EXTL_LVL3_ID) = '' THEN
+		                            '*ALL'
+		                        ELSE
+		                        	CAST(REPEAT('0', 20-LENGTH(TRIM(EH.EXTL_LVL3_ID))) || TRIM(EH.EXTL_LVL3_ID) AS CHAR(20))
+		                    END AS EXTL_LVL3_ID,
+		                    EH.EXTL_LVL4_ID,
+		                    EH.EXTL_LVL5_ID,
+	                        CASE
+                                WHEN RTMD.EFF_DT > CEHA.RTMD_EFF_DT THEN RTMD.EFF_DT
+                                ELSE CEHA.RTMD_EFF_DT
+	                        END AS EFF_DT,
+	                        CASE
+                                WHEN RTMD.TERM_DT < CEHA.RTMD_TERM_DT THEN RTMD.TERM_DT
+                                ELSE CEHA.RTMD_TERM_DT
+	                        END AS TERM_DT,
+	                        EH.EXTL_SRC_CD as PLATFORM_ID,
+	                        CASE 
+	                        	WHEN RTMD.SPCL_EXCL_CD IS NULL THEN 'N'
+	                        	WHEN RTMD.SPCL_EXCL_CD = '0' THEN 'N'
+	                        	ELSE 'Y'
+	                        END AS SPECLTY_EXCL,
+	                        CASE 
+	                        	WHEN RTMD.RTMD_ID IS NULL THEN 0
+	                        	WHEN RTMD.RTMD_ID = -1 THEN 0
+	                        	ELSE 1
+	                        END AS POS_INDICATOR,
+	                        COALESCE(RTMD.CALC_SHR_PCT,0) AS CACL_SHR,
+	                        COALESCE(RTMD.MODL_VL,0) AS MODULATOR,
+	                        CEHA.INSRT_TS   AS INSRT_DATE,
+	                        RTMD.INSRT_HIST_TS AS LAST_UPDATE_DT -- This is new
+		                FROM 
+	                        ${schema}.CRT_CLNT clt,
+ 	                        ${schema}.CRH_RTMD_PRC RTMD,
+ 	                        ${schema}.CRT_EXTL_HRCY EH,
+ 	                        ${schema}.CRT_CLNT_EXTL_HRCY_ASSC CEHA	                        
+		                WHERE
+	                        CLT.RBAT_ID = CEHA.RBAT_ID
+	                        AND CEHA.EXTL_HRCY_ID = EH.EXTL_HRCY_ID
+	                        AND EH.EXTL_SRC_CD = 'QLC'
+	                        AND CLT.RBAT_ID = RTMD.RBAT_ID
+	                        AND RTMD.ACTN_TYP_CD = 'D' 
+				        ) iv,
+				        ${schema}.CRT_POS_FILE_XPRT x 
+				  WHERE iv.TERM_DT >= iv.EFF_DT
+				        AND iv.TERM_DT > CURRENT DATE
+				        AND x.PTFM_ID = 'QLC'
+				        AND x.XPRT_TYP_ID = 'POS_CLT'
+				        AND iv.LAST_UPDATE_DT >= x.LAST_RUN_TS
+				        ) A
+				ORDER BY EXTL_LVL1_ID,
+		                 EXTL_LVL2_ID,
+		                 EXTL_LVL3_ID,
+		                 EXTL_LVL4_ID,
+		                 EXTL_LVL5_ID,
+		                 PROCESS_ORDER
+		           WITH UR
+			]]></statement>
+			<statement name="RXC"><![CDATA[ 
+				SELECT
+			        RECORD_ACTION_CODE,
+			        EXTL_LVL1_ID,
+			        EXTL_LVL2_ID,
+			        EXTL_LVL3_ID,
+			        EXTL_LVL4_ID,
+			        EXTL_LVL5_ID,
+			        EFF_DT,
+			        TERM_DT,
+			        PLATFORM_ID,
+			        SPECLTY_EXCL,
+			        POS_INDICATOR,
+			        CACL_SHR,
+			        MODULATOR,
+			        PROCESS_ORDER
+				FROM
+				(SELECT
+				        CASE
+				        	WHEN iv.LAST_UPDATE_DT IS NULL OR 
+				        		 iv.LAST_UPDATE_DT <= INSRT_DATE OR
+				        		 iv.INSRT_DATE > iv.LAST_RUN_DT 
+                                 THEN 'I' 
+				        	ELSE 'U'
+				        END AS Record_Action_Code,
+				        EXTL_LVL1_ID,
+				        EXTL_LVL2_ID,
+				        EXTL_LVL3_ID,
+				        EXTL_LVL4_ID,
+				        EXTL_LVL5_ID,
+				        EFF_DT,
+				        TERM_DT,
+				        PLATFORM_ID,
+				        SPECLTY_EXCL,
+				        POS_INDICATOR,
+				        CACL_SHR,
+				        MODULATOR,
+				        iv.LAST_UPDATE_DT,
+				        CASE
+				        	WHEN iv.LAST_UPDATE_DT IS NULL OR 
+				        		 iv.LAST_UPDATE_DT <= INSRT_DATE OR
+				        		 iv.INSRT_DATE > iv.LAST_RUN_DT 
+                                 THEN 3
+				            ELSE 2
+				        END AS PROCESS_ORDER
+				FROM (
+		                SELECT
+	                    CAST(TRIM(EH.EXTL_LVL1_ID) || REPEAT(' ', 20-LENGTH(TRIM(EH.EXTL_LVL1_ID))) AS CHAR(20)) EXTL_LVL1_ID,
+	                        CASE
+	                             WHEN RTRIM(EH.EXTL_LVL2_ID) = '' THEN '*ALL'
+	                             ELSE RTRIM(EH.EXTL_LVL2_ID)
+	                        END AS EXTL_LVL2_ID,
+	                        CASE
+	                             WHEN RTRIM(EH.EXTL_LVL3_ID) = '' THEN '*ALL'
+	                             ELSE RTRIM(EH.EXTL_LVL3_ID)
+	                        END AS EXTL_LVL3_ID,
+	                        EH.EXTL_LVL4_ID,
+	                        EH.EXTL_LVL5_ID,
+	                        CASE
+                                WHEN RTMD.EFF_DT IS NULL THEN CEHA.RTMD_EFF_DT
+                                WHEN RTMD.EFF_DT > CEHA.RTMD_EFF_DT THEN RTMD.EFF_DT
+                                ELSE CEHA.RTMD_EFF_DT
+	                        END AS EFF_DT,
+	                        CASE
+                                WHEN RTMD.TERM_DT IS NULL THEN CEHA.RTMD_TERM_DT
+                                WHEN RTMD.TERM_DT < CEHA.RTMD_TERM_DT THEN RTMD.TERM_DT
+                                ELSE CEHA.RTMD_TERM_DT
+	                        END AS TERM_DT,
+	                        EH.EXTL_SRC_CD as PLATFORM_ID,
+	                        CASE 
+	                        	WHEN RTMD.SPCL_EXCL_CD IS NULL THEN 'N'
+	                        	WHEN RTMD.SPCL_EXCL_CD = '0' THEN 'N'
+	                        	ELSE 'Y'
+	                        END AS SPECLTY_EXCL,
+	                        CASE 
+	                        	WHEN RTMD.RTMD_ID IS NULL THEN 0
+	                        	WHEN RTMD.RTMD_ID = -1 THEN 0
+	                        	ELSE 1
+	                        END AS POS_INDICATOR,
+	                        COALESCE(RTMD.CALC_SHR_PCT,0) AS CACL_SHR,
+	                        COALESCE(RTMD.MODL_VL,0) AS MODULATOR,
+	                        CASE 
+                                WHEN RTMD.INSRT_TS IS NULL THEN CEHA.INSRT_TS
+                                WHEN RTMD.INSRT_TS > CEHA.INSRT_TS THEN RTMD.INSRT_TS
+                                ELSE CEHA.INSRT_TS
+	                        END AS INSRT_DATE,
+	                        CASE 
+                                WHEN RTMD.UPDT_TS IS NULL THEN COALESCE(CEHA.UPDT_TS, CEHA.INSRT_TS)
+                                WHEN RTMD.UPDT_TS > COALESCE(CEHA.UPDT_TS, CEHA.INSRT_TS) THEN RTMD.UPDT_TS
+                                ELSE CEHA.UPDT_TS
+	                        END AS LAST_UPDATE_DT,
+	                        xprt.LAST_RUN_TS AS LAST_RUN_DT
+		                FROM 
+	                        ${schema}.CRT_CLNT clt,
+ 	                        ${schema}.CRT_RTMD_PRC RTMD,
+ 	                        ${schema}.CRT_EXTL_HRCY EH,
+ 	                        ${schema}.CRT_CLNT_EXTL_HRCY_ASSC CEHA,
+ 	                        ${schema}.CRT_POS_FILE_XPRT xprt	                        
+		                WHERE
+	                        CLT.RBAT_ID = CEHA.RBAT_ID
+	                        AND CEHA.EXTL_HRCY_ID = EH.EXTL_HRCY_ID
+	                        AND EH.EXTL_SRC_CD = 'RXC'
+	                        AND CLT.RBAT_ID = RTMD.RBAT_ID
+	                        AND xprt.PTFM_ID = 'RXC'
+				        	AND xprt.XPRT_TYP_ID = 'POS_CLT'
+				        ) iv,
+				        ${schema}.CRT_POS_FILE_XPRT x 
+				WHERE
+				        iv.TERM_DT >= iv.EFF_DT
+				        and iv.TERM_DT > CURRENT DATE
+				        AND x.PTFM_ID = 'RXC'
+				        AND x.XPRT_TYP_ID = 'POS_CLT'
+				        AND (iv.INSRT_DATE >= x.LAST_RUN_TS OR iv.LAST_UPDATE_DT >= x.LAST_RUN_TS)
+				UNION ALL
+				 SELECT
+				        'D' AS Record_Action_Code,
+				        EXTL_LVL1_ID,
+				        EXTL_LVL2_ID,
+				        EXTL_LVL3_ID,
+				        EXTL_LVL4_ID,
+				        EXTL_LVL5_ID,
+				        EFF_DT,
+				        TERM_DT,
+				        PLATFORM_ID,
+				        SPECLTY_EXCL,
+				        POS_INDICATOR,
+				        CACL_SHR,
+				        MODULATOR,
+				        iv.LAST_UPDATE_DT,
+				        1 AS PROCESS_ORDER
+				FROM (
+		                SELECT
+	                    CAST(TRIM(EH.EXTL_LVL1_ID) || REPEAT(' ', 20-LENGTH(TRIM(EH.EXTL_LVL1_ID))) AS CHAR(20)) EXTL_LVL1_ID,
+	                        CASE
+	                             WHEN RTRIM(EH.EXTL_LVL2_ID) = '' THEN '*ALL'
+	                             ELSE RTRIM(EH.EXTL_LVL2_ID)
+	                        END AS EXTL_LVL2_ID,
+	                        CASE
+	                             WHEN RTRIM(EH.EXTL_LVL3_ID) = '' THEN '*ALL'
+	                             ELSE RTRIM(EH.EXTL_LVL3_ID)
+	                        END AS EXTL_LVL3_ID,
+	                        EH.EXTL_LVL4_ID,
+	                        EH.EXTL_LVL5_ID,
+	                        CASE
+                                WHEN RTMD.EFF_DT > CEHA.RTMD_EFF_DT THEN RTMD.EFF_DT
+                                ELSE CEHA.RTMD_EFF_DT
+	                        END AS EFF_DT,
+	                        CASE
+                                WHEN RTMD.TERM_DT < CEHA.RTMD_TERM_DT THEN RTMD.TERM_DT
+                                ELSE CEHA.RTMD_TERM_DT
+	                        END AS TERM_DT,
+	                        EH.EXTL_SRC_CD as PLATFORM_ID,
+	                        CASE 
+	                        	WHEN RTMD.SPCL_EXCL_CD IS NULL THEN 'N'
+	                        	WHEN RTMD.SPCL_EXCL_CD = '0' THEN 'N'
+	                        	ELSE 'Y'
+	                        END AS SPECLTY_EXCL,
+	                        CASE 
+	                        	WHEN RTMD.RTMD_ID IS NULL THEN 0
+	                        	WHEN RTMD.RTMD_ID = -1 THEN 0
+	                        	ELSE 1
+	                        END AS POS_INDICATOR,
+	                        COALESCE(RTMD.CALC_SHR_PCT,0) AS CACL_SHR,
+	                        COALESCE(RTMD.MODL_VL,0) AS MODULATOR,
+	                        CEHA.INSRT_TS   AS INSRT_DATE,
+	                        RTMD.INSRT_HIST_TS AS LAST_UPDATE_DT -- This is new
+		                FROM
+	                        ${schema}.CRT_CLNT clt,
+ 	                        ${schema}.CRH_RTMD_PRC RTMD,
+ 	                        ${schema}.CRT_EXTL_HRCY EH,
+ 	                        ${schema}.CRT_CLNT_EXTL_HRCY_ASSC CEHA	                        
+		                WHERE
+	                        CLT.RBAT_ID = CEHA.RBAT_ID
+	                        AND CEHA.EXTL_HRCY_ID = EH.EXTL_HRCY_ID
+	                        AND EH.EXTL_SRC_CD = 'RXC'
+	                        AND CLT.RBAT_ID = RTMD.RBAT_ID
+	                        AND RTMD.ACTN_TYP_CD = 'D' 
+				        ) iv,
+				        ${schema}.CRT_POS_FILE_XPRT x 
+				  WHERE iv.TERM_DT >= iv.EFF_DT
+				        AND iv.TERM_DT > CURRENT DATE
+				        AND x.PTFM_ID = 'RXC'
+				        AND x.XPRT_TYP_ID = 'POS_CLT'
+				        AND iv.LAST_UPDATE_DT >= x.LAST_RUN_TS
+				        ) A
+				ORDER BY EXTL_LVL1_ID,
+		                 EXTL_LVL2_ID,
+		                 EXTL_LVL3_ID,
+		                 EXTL_LVL4_ID,
+		                 EXTL_LVL5_ID,
+		                 PROCESS_ORDER
+		            WITH UR
+			]]></statement>
+		</group>
+		<!--  End of POSFeed Client Statements --> 
+		
+	</group>
+	
+</statements>

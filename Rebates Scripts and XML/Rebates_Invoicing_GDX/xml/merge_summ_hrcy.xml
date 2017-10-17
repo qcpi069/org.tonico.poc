@@ -1,0 +1,210 @@
+<!-- COPIES DATA FROM VRAP.RCIT_CLNT_PRD_SUMM TO CLIENT_REG.CRT_EXTL_HRCY  -->
+<!-- THIS RUNS EVERY DAY : -->
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/> 	
+	<!--
+		Set-up a try block to send an email on exception.	
+	-->  
+	<command type="try">
+		<try>
+			<!-- Copy data from GDXPRD to SILVER -->
+		<command type="copy" batch="500">					 	
+			   <source type="sql" datasource="gdxdb">
+				<![CDATA[
+					SELECT summ.EXTL_LVL1_NM,summ.EXTL_LVL2_NM,summ.EXTL_LVL3_NM,summ.EXTL_LVL4_NM,summ.EXTL_LVL5_NM,summ.MEDB_OPT_CD,summ.MEDB_MAND_CD,h.extl_hrcy_id				
+					from (select * from
+						(select  s.extl_src_cd
+							,trim(s.EXTL_LVL1_ID) as EXTL_LVL1_ID
+							,trim(COALESCE(s.EXTL_LVL2_ID,'')) as EXTL_LVL2_ID 
+							,trim(COALESCE(s.EXTL_LVL3_ID,'')) as EXTL_LVL3_ID 
+							,trim(COALESCE(s.EXTL_LVL4_ID,'')) as EXTL_LVL4_ID
+							,trim(COALESCE(s.EXTL_LVL5_ID,'')) as EXTL_LVL5_ID
+							,s.EXTL_LVL1_NM
+							,s.EXTL_LVL2_NM
+							,s.EXTL_LVL3_NM
+							,s.EXTL_LVL4_NM
+							,s.EXTL_LVL5_NM
+							,s.MEDB_OPT_CD
+							,s.MEDB_MAND_CD
+							,ROW_NUMBER() OVER (PARTITION BY s.EXTL_SRC_CD
+										        ,s.EXTL_LVL1_ID
+										        ,s.EXTL_LVL2_ID
+										        ,s.EXTL_LVL3_ID
+										        ,s.EXTL_LVL4_ID
+										        ,s.EXTL_LVL5_ID 
+									    ORDER BY s.DSPN_PRD_CD DESC) AS R 
+							 from vrap.rcit_clnt_prd_summ s ) temp
+							 where temp.r = 1) 
+							 summ inner join client_reg.crt_extl_hrcy h
+							 on (summ.extl_src_cd  = h.extl_src_cd 
+							 and summ.EXTL_LVL1_ID = h.EXTL_LVL1_ID
+							 and summ.EXTL_LVL2_ID = h.EXTL_LVL2_ID
+							 and summ.EXTL_LVL3_ID = h.EXTL_LVL3_ID
+							 and summ.EXTL_LVL4_ID = h.EXTL_LVL4_ID
+							 and summ.EXTL_LVL5_ID = h.EXTL_LVL5_ID)	
+				]]>
+			   </source>	
+				<target
+					type             = "sql"
+					datasource       = "gdxdb"
+					transaction      = "false"
+					batch            = "500"
+					reportInterval   = "500"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					update CLIENT_REG.CRT_EXTL_HRCY 
+					    set extl_lvl1_nm=?
+					       ,extl_lvl2_nm=?
+					       ,extl_lvl3_nm=?
+					       ,extl_lvl4_nm=?
+					       ,extl_lvl5_nm=?
+					       ,updt_user_id = current user
+					       ,MEDB_OPT_CD=?
+					       ,MEDB_MAND_CD=? 
+					    where extl_hrcy_id = ?
+			
+				]]></target>			
+			</command>
+		<command type="copy" batch="500">					 	
+			   <source type="sql" datasource="gdxdb">
+				<![CDATA[
+					select summ.extl_src_cd
+					      ,summ.EXTL_LVL1_ID
+					      ,summ.EXTL_LVL1_NM 
+					      ,summ.EXTL_LVL2_ID
+					      ,summ.EXTL_LVL2_NM
+					      ,summ.EXTL_LVL3_ID
+					      ,summ.EXTL_LVL3_NM
+					      ,summ.EXTL_LVL4_ID
+					      ,summ.EXTL_LVL4_NM
+					      ,summ.EXTL_LVL5_ID
+					      ,summ.EXTL_LVL5_NM
+                                              ,summ.MEDB_OPT_CD
+                                              ,summ.MEDB_MAND_CD  
+							from (select * from 
+								(select s.extl_src_cd
+    								       ,trim(s.EXTL_LVL1_ID) as EXTL_LVL1_ID
+    								       ,trim(COALESCE(s.EXTL_LVL2_ID,'')) as EXTL_LVL2_ID 
+    								       ,trim(COALESCE(s.EXTL_LVL3_ID,'')) as EXTL_LVL3_ID 
+								       ,trim(COALESCE(s.EXTL_LVL4_ID,'')) as EXTL_LVL4_ID
+								       ,trim(COALESCE(s.EXTL_LVL5_ID,'')) as EXTL_LVL5_ID
+    								       ,s.EXTL_LVL1_NM
+    								       ,s.EXTL_LVL2_NM
+    								       ,s.EXTL_LVL3_NM
+    								       ,s.EXTL_LVL4_NM
+								       ,s.EXTL_LVL5_NM
+								       ,s.MEDB_OPT_CD
+								       ,s.MEDB_MAND_CD
+								       ,ROW_NUMBER() OVER (PARTITION BY s.EXTL_SRC_CD
+								                                       ,s.EXTL_LVL1_ID
+								                                       ,s.EXTL_LVL2_ID
+								                                       ,s.EXTL_LVL3_ID
+								                                       ,s.EXTL_LVL4_ID
+								                                       ,s.EXTL_LVL5_ID 
+								                           ORDER BY s.DSPN_PRD_CD DESC) AS R 
+									from vrap.rcit_clnt_prd_summ s ) temp
+									where temp.r = 1) summ 
+									left join client_reg.crt_extl_hrcy h
+								on (summ.extl_src_cd  =h.extl_src_cd 
+								and summ.EXTL_LVL1_ID = h.EXTL_LVL1_ID
+								and summ.EXTL_LVL2_ID = h.EXTL_LVL2_ID
+								and summ.EXTL_LVL3_ID = h.EXTL_LVL3_ID
+								and summ.EXTL_LVL4_ID = h.EXTL_LVL4_ID 
+								and summ.EXTL_LVL5_ID = h.EXTL_LVL5_ID)				
+								where h.EXTL_HRCY_ID is null													
+				]]>
+			   </source>	
+				<target
+					type             = "sql"
+					datasource       = "gdxdb"
+					transaction      = "false"
+					batch            = "500"
+					reportInterval   = "500"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					insert into CLIENT_REG.CRT_EXTL_HRCY 
+					    (extl_hrcy_id
+					    ,extl_src_cd
+					    ,insrt_user_id
+					    ,insrt_ts
+					    ,updt_ts
+					    ,updt_user_id
+					    ,extl_lvl1_id
+					    ,extl_lvl1_nm
+					    ,extl_lvl2_id
+					    ,extl_lvl2_nm
+					    ,extl_lvl3_id
+					    ,extl_lvl3_nm
+					    ,extl_lvl4_id
+					    ,extl_lvl4_nm
+					    ,extl_lvl5_id
+					    ,extl_lvl5_nm
+					    ,MEDB_OPT_CD
+					    ,MEDB_MAND_CD) 					
+					values (NEXTVAL FOR CLIENT_REG.EXTL_HRCY_ID_SEQ
+					       ,?
+					       ,current user
+					       ,current timestamp
+					       ,current timestamp
+					       ,current user
+					       ,?,?,?,?,?,?,?,?,?,?,?,?)
+				]]></target>
+			
+			</command>
+			 
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+			<command
+				type="mail"
+				mailTo="gdxitd@caremark.com"
+				mailFrom="merge_summ_hrcy@caremark.com"
+				subject="[ERROR] COPY_T_SUMM_TO_HRCY.XML"
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] COPY_T_SUMM_TO_HRCY.XML</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] COPY_T_SUMM_TO_HRCY.XML</u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		</catch>
+	</command>
+</sqml>

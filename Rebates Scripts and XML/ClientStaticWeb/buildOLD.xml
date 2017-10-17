@@ -1,0 +1,20 @@
+<project name="ClientStaticWeb" default="dist">
+
+	<property name="web"      location="Web Content"/>
+	<property name="dist"     location="dist"/>
+	<property name="dist.zip" location="${dist}/ClientStaticWeb.zip.CONTENT"/>
+	
+	<target name="init">
+		<mkdir dir="${dist}"/>
+	</target>
+	
+	<target name="dist" depends="init">
+		<delete verbose="true" file="${dist.zip}"/>
+		<zip
+			destfile="${dist.zip}"
+		>
+			<zipfileset dir="${web}/mda" prefix="mda"/>
+		</zip>
+	</target>
+
+</project>

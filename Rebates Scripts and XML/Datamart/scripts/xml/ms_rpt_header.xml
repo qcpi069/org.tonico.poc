@@ -1,0 +1,77 @@
+<sqml>
+        <property name="TIMEOUT" value="0"/>
+        <datasources resource="datasource.xml"/>
+        <properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        dmt_schema=script.getProperty("dmt_schema");
+        ]]></command>
+
+        <command type="try">
+                <try>
+                        <command type="copy" batch="1000">
+                                <source type="sql" datasource="datamart"
+                                        ><![CDATA[
+with
+clnt_lkp (client_nbr,client_name,model_typ_cd,ap_compny_cd,sap_pay_type_cd, clnt_typ_cd, POOL_TYP_CD,rac,eff_dt ) as
+(select  substr(digits(c.rbat_id),3,8),
+        c.clnt_nm,
+        pm.model_typ_cd, c.ap_co_cd,
+        c.ap_pmt_typ_cd as sap_pay_type,
+        c.clnt_typ_cd,
+        max(p.POOL_TYP_CD), rac.rac_id , max(ra.eff_dt)
+from client_reg.crt_clnt c
+        join client_reg.crt_clnt_rule_assc ra
+                on ra.rbat_id = c.rbat_id
+        join client_reg.crt_prc_rule ru
+                on ra.prc_rule_id = ru.prc_rule_id
+        join client_reg.crt_prc_mstr pm
+                on ru.prc_mstr_id = pm.prc_mstr_id
+        join client_reg.crt_clnt_prc_pool_assc rac
+                on ra.rbat_id=rac.rbat_id
+        join client_reg.crt_prc_pool p
+                on p.prc_rule_id = ra.prc_rule_id and p.pool_typ_cd = rac.pool_typ_cd
+group by substr(digits(c.rbat_id),3,8),
+        c.clnt_nm,
+        pm.model_typ_cd, c.ap_co_cd,
+        c.ap_pmt_typ_cd,
+        c.clnt_typ_cd
+, rac.rac_id
+)
+select distinct prcs_nb, rbid, c.rac, ap_vendor, pay_method, smo, emo, pmt_post_cd,
+  trim(r.ap_compny_cd), r.client_name, substr(model.CDSET_VL_DESC_TXT,1,10), current date, 3, clnt_typ_cd
+  , r.POOL_TYP_CD
+from rps.ms_chkln c 
+left outer join clnt_lkp r
+  on c.rbid=r.client_nbr
+  and c.RAC=r.rac
+left outer join
+        (select CDSET_VL, CDSET_VL_DESC_TXT
+                from client_reg.crt_cdset cd join client_reg.crt_cdset_vl cv
+                        on cd.CDSET_ID=cv.CDSET_ID where CDSET_DESC_TXT='MODEL_TYPE_CD' ) model
+        on r.MODEL_TYP_CD=model.CDSET_VL
+
+
+                                ]]></source>
+
+                                <target
+                                        type             = "sql"
+                                        datasource       = "datamart"
+                                        transaction      = "true"
+                                        batch            = "1000"
+                                        reportInterval   = "1000"
+                                        queryTimeout     = "${TIMEOUT}"
+                                ><![CDATA[
+                                              insert into rps.ms_rpt_header values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+
+                                ]]></target>
+
+                        </command>
+
+                </try>
+                <catch>
+                </catch>
+        </command>
+</sqml>
+

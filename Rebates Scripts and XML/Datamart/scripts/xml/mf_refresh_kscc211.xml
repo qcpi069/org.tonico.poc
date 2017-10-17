@@ -1,0 +1,184 @@
+ 
+<!-- REFESH MAINFRAME PAYMENTS CLIENT ADVANCE PAYMENTS TABLE  -->
+  <!-- UPDATE_USERID,  -->
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+
+		   
+     <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        cli_schema=script.getProperty("cli_schema");
+        pmt_schema=script.getProperty("pmt_schema");
+	]]></command>
+	
+
+	<command type="try">
+		<try>
+			<!-- delete from DB2. -->
+			<command type="run" datasource="db2p">
+				<![CDATA[
+					DELETE FROM ${pmt_schema}.kscc211_adv_pmt 
+					
+				]]>
+			</command>
+     
+			<!-- Copy from Oracle to mainframe DB2. -->
+			<command type="copy" batch="1000">
+				<source type="sql" datasource="rebates"><![CDATA[
+        SELECT 
+			NVL(lpad(rtrim(clnt.client_nbr,' '),8,'0'),'00000000') AS rbate_id,
+			NVL(lpad(rtrim(rac.RAC,' '),5,'0'),'00000') AS rac_id,
+			ADV_PMNT_ID,
+			EFF_DT,
+			TERM_DT,
+            NVL( lpad(rtrim(SETLMNT_TYPE_CD,' '),1,' '),' ') AS SETLMNT_TYPE_CD,
+			PMNT_TIMING,
+		    CALC_TYPE,
+            CALC_SHR,
+			LEAD_DAYS,
+			LAST_UPDATE_DT,
+			'KSDY7450',
+			MODULATOR,
+                        NVL(ADVP.PAYMENT_SCHEDULE, ' ') AS PAYMENT_SCHEDULE
+         FROM  ${cli_schema}.adv_pmnts advp,
+               ${cli_schema}.client clnt,
+			   ${cli_schema}.rac   rac
+         WHERE clnt.pcs_system_id = advp.CLT_PCS_SYSTEM_ID
+           AND  rac.pcs_system_id = advp.RAC_PCS_SYSTEM_ID
+           order by 1, 2, 3, 4
+
+				]]></source> 
+				<target
+					type             = "sql"
+					datasource       = "db2p"
+					transaction      = "true"
+					batch            = "1000"
+					reportInterval   = "1000"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					INSERT INTO ${pmt_schema}.kscc211_adv_pmt
+                    (RBAT_ID,   
+					 RAC_NB,
+					 ADV_PMT_ID,
+					 EFF_DT,
+					 TERM_DT,
+					 STTL_TYP_CD,
+					 PMT_FREQ_CD,
+					 CALC_TYP_CD,
+					 CALC_SHR_AMT,
+					 LEAD_DAYS_VL,
+					 LAST_UPDT_DT,
+					 LAST_UPDT_USER_NB,
+					 CLCT_FCTR_VL,
+                                         PMT_SCHD_CD 
+                     )
+					VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )
+				]]></target>
+			</command>
+    
+	        <!-- compare totals -->
+			<command type="run" datasource="rebates" rowName="count1">
+				<![CDATA[
+					SELECT COUNT(*) FROM ( 
+        SELECT 
+			NVL(lpad(rtrim(clnt.client_nbr,' '),8,'0'),'00000000') AS rbate_id,
+			NVL(lpad(rtrim(rac.RAC,' '),5,'0'),'00000') AS rac_id,
+			ADV_PMNT_ID,
+			EFF_DT,
+			TERM_DT,
+            NVL( lpad(rtrim(SETLMNT_TYPE_CD,' '),1,' '),' ') AS SETLMNT_TYPE_CD,
+			PMNT_TIMING,
+		    CALC_TYPE,
+            CALC_SHR,
+			LEAD_DAYS,
+			LAST_UPDATE_DT,
+			'KSDY7450', 
+			MODULATOR,
+                        NVL(ADVP.PAYMENT_SCHEDULE, ' ') AS PAYMENT_SCHEDULE
+         FROM  ${cli_schema}.adv_pmnts advp,
+               ${cli_schema}.client clnt,
+			   ${cli_schema}.rac   rac
+         WHERE clnt.pcs_system_id = advp.CLT_PCS_SYSTEM_ID
+           AND  rac.pcs_system_id = advp.RAC_PCS_SYSTEM_ID
+           order by 1, 2, 3, 4
+)
+				]]>
+			</command>
+
+			<command type="run" datasource="db2p" rowName="count2">
+				<![CDATA[
+					SELECT COUNT(*) FROM ${pmt_schema}.kscc211_adv_pmt
+				]]>
+			</command>
+   
+			<command type="java">
+				count1 = script.getProperty("count1.1").intValue();  
+				count2 = script.getProperty("count2.1").intValue();
+				if (count1 != count2) {
+		//			logger.error(" kscc211_adv_pmt counts do NOT match count1=" + count1 + "  count2=" + count2);
+        //            throw new Exception(" kscc211_adv_pmt counts do NOT match count1=" + count1 + " count2=" + count2);
+				} 
+				System.out.println(" *********************************************** ");
+				System.out.println(" * Rows refreshed into KSCC211 is " + count1 + ". ");
+				System.out.println(" *********************************************** ");
+			</command>
+			 
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+		<command
+				type="mail"
+				mailTo="${mailto}"
+				mailFrom="RPMF_Refresh_Client"
+				subject="[ERROR] MF REFESH KSCC211 "
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] MF REFRESH KSCC211</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] MF REFRESH KSCC211 </u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		
+		
+		</catch>
+	</command>
+</sqml>

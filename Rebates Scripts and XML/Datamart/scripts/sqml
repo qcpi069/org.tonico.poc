@@ -1,0 +1,58 @@
+#!/bin/ksh
+#-------------------------------------------------------------------------------
+# Korn shell script to run sqml (SQL XML) interpreter.
+#-------------------------------------------------------------------------------
+
+script_name="$0"
+base_dir=""
+conf_dir=""
+lib_dir=""
+
+# Intialize the directory names for the script
+function init_dirs {
+	find_basedir
+	conf_dir="$base_dir/conf"
+	lib_dir="$base_dir/lib"
+}
+
+function find_basedir {
+	base_dir=`dirname $script_name`"/.."
+	base_dir=`ksh -c "cd $base_dir; pwd"`
+}
+
+# Builds a classpath to be used by java 
+function get_classpath {
+	printf ".:$conf_dir:$xml_dir"
+	find "$lib_dir" \( -name '*.jar' -o -name '*.zip' \) -exec printf ":%s" {} \;
+}
+
+# Finds the java command
+function get_java {
+	if [[ -n "$JAVA_HOME" && -x "${JAVA_HOME}/bin/java" ]]; then
+		_java="${JAVA_HOME}/bin/java"
+	else
+		_java=`which java 2>/dev/null`
+	fi
+	if [[ ! -x "$_java" ]]; then
+		echo "java command not found"
+		exit 1
+	fi
+	echo $_java
+}
+
+init_dirs
+
+# Source the script env.ksh in the conf directory if it exists.
+if [[ -f "$conf_dir/env.ksh" ]]; then
+	. "$conf_dir/env.ksh"
+fi
+
+JAVA=`get_java`
+export CLASSPATH=`get_classpath`
+
+echo $CLASSPATH | tr ':' '\n'
+
+# Execute the java command
+# Pass all arguments to the java command
+exec "$JAVA" com.caremark.gdx.sqml.SqlXmlScript "$@"
+

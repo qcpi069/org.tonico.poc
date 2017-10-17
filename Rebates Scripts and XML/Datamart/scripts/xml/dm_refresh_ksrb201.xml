@@ -1,0 +1,108 @@
+
+<!-- REFRESH KSZ6005_PCNTL_TRK  -->
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        dmt_schema=script.getProperty("dmt_schema");
+		pmt_schema=script.getProperty("pmt_schema");
+	]]></command>
+		       
+	<command type="try">
+		<try>
+
+		  <!-- delete from UDB (except some type 15's hand entered from vsam file -->
+			<command type="run" datasource="datamart">
+				<![CDATA[
+					DELETE FROM ${dmt_schema}.txn_cd
+				]]>
+			</command>
+		
+
+            <!-- *************** PCNTL_TRK ********************* -->
+			<!-- Copy info from mainframe  -->
+			<command type="copy" batch="500">
+				<source type="sql" datasource="db2p"><![CDATA[
+					SELECT 
+                                           TRAN_TYP_CD,
+                                           DESC_TXT
+					FROM ${pmt_schema}.ksrb201 
+				]]></source>
+		
+				<target
+					type             = "sql"
+					datasource       = "datamart"
+					transaction      = "true"
+					batch            = "500"
+					reportInterval   = "500"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					INSERT INTO ${dmt_schema}.txn_cd
+					 (
+                                           TRAN_TYP_CD,
+                                           DESC_TXT
+					  ) 
+					VALUES ( ?, ? )
+				]]></target>
+            
+			</command>
+
+				 
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+			<command
+				type="mail"
+				mailTo="${mailto}"
+				mailFrom="RPDM_Refresh"
+				subject="[ERROR] REFESH - KSRB201 "
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] REFESH - KSRB201</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] REFESH - KSRB201 </u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		</catch>
+	</command>
+</sqml>

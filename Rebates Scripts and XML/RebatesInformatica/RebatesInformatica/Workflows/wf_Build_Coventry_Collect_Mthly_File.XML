@@ -1,0 +1,1167 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE POWERMART SYSTEM "powrmart.dtd">
+<POWERMART CREATION_DATE="08/08/2016 15:43:20" REPOSITORY_VERSION="182.91">
+<REPOSITORY NAME="PCRepos_Caremark9_DEV1" VERSION="182" CODEPAGE="MS1252" DATABASETYPE="DB2">
+<FOLDER NAME="Rebates_RPSDM" GROUP="" OWNER="rebates_session_operator" SHARED="NOTSHARED" DESCRIPTION="" PERMISSIONS="rwx---r--" UUID="d66846c0-9b42-4f1c-a905-33e6f271d941">
+    <MAPPING DESCRIPTION ="" ISVALID ="YES" NAME ="m_Build_Coventry_Collect_Mthly_File" OBJECTVERSION ="1" VERSIONNUMBER ="1">
+        <TRANSFORMATION DESCRIPTION ="This aggregator will sum up the collection amounts for use in the footer.&#xD;&#xA;Since only one row will come out of this aggregator, we will also use this thread for building the Header row as well." NAME ="AGG_Footer_values" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Aggregator" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="This is only going to be used in the aggregator, not in the target." EXPRESSION ="RPT_PRCS_NB" EXPRESSIONTYPE ="GROUPBY" NAME ="RPT_PRCS_NB" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="in_PAID_AMTS" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="15" SCALE ="5"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="SUM(in_PAID_AMTS)" EXPRESSIONTYPE ="GENERAL" NAME ="CRD_Total_Paid_Amounts" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="20" SCALE ="5"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="Count(1)" EXPRESSIONTYPE ="GENERAL" NAME ="CRD_Record_Count" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="in_Filename_Header" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This needs to be a MIN because the DETAIL filename (containing the same date, down to the seconds), is set using the first row into the mapping.  However, this filename continues to be read into this Aggregator for every row.  Therefore, to match the same date value of the Detail value, need to use the first date read into this Aggregator - the minimum." EXPRESSION ="MIN(in_Filename_Header)" EXPRESSIONTYPE ="GENERAL" NAME ="out_Filename_Header" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="in_Filename_Trailer" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This needs to be a MIN because the DETAIL filename (containing the same date, down to the seconds), is set using the first row into the mapping.  However, this filename continues to be read into this Aggregator for every row.  Therefore, to match the same date value of the Detail value, need to use the first date read into this Aggregator - the minimum." EXPRESSION ="MIN(in_Filename_Trailer)" EXPRESSIONTYPE ="GENERAL" NAME ="out_Filename_Trailer" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This filename cannot have the extension added to it due to the way the concatenation script functions.&#xD;&#xA;Also, not having the file extension on this value allows us to use this variable value with the compression and SFTP script." NAME ="in_Filename_Final" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This filename cannot have the extension added to it due to the way the concatenation script functions.&#xD;&#xA;Also, not having the file extension on this value allows us to use this variable value with the compression and SFTP script.&#xD;&#xA;This needs to be a MIN because the DETAIL filename (containing the same date, down to the seconds), is set using the first row into the mapping.  However, this filename continues to be read into this Aggregator for every row.  Therefore, to match the same date value of the Detail value, need to use the first date read into this Aggregator - the minimum." EXPRESSION ="MIN(in_Filename_Final)" EXPRESSIONTYPE ="GENERAL" NAME ="out_Filename_Final" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="255" SCALE ="0"/>
+            <TABLEATTRIBUTE NAME ="Cache Directory" VALUE ="$PMCacheDir"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+            <TABLEATTRIBUTE NAME ="Sorted Input" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Aggregator Data Cache Size" VALUE ="Auto"/>
+            <TABLEATTRIBUTE NAME ="Aggregator Index Cache Size" VALUE ="Auto"/>
+            <TABLEATTRIBUTE NAME ="Transformation Scope" VALUE ="All Input"/>
+        </TRANSFORMATION>
+        <TRANSFORMATION DESCRIPTION ="This expression will be used for formattng the output fields for the header and trailer records." NAME ="EXP_Format_Header_Trailer" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Expression" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="&apos;TLR&apos;" EXPRESSIONTYPE ="GENERAL" NAME ="HC_TLR_REC_TYP" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="3" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="in_CRD_Record_Count" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="LPAD(TO_CHAR(in_CRD_Record_Count),8,&apos;0&apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="CRD_TLR_REC_CNT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="8" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="in_CRD_Total_Paid_Amounts" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="20" SCALE ="5"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="REPLACECHR is necessary otherwise the value -12345.67890 would be 00000-12345.67890" EXPRESSION ="REPLACECHR(0&#xD;&#xA;            ,IIF(IsNull(in_CRD_Total_Paid_Amounts)&#xD;&#xA;                ,&apos; 000000000000000.00000&apos;&#xD;&#xA;                ,lpad(TO_CHAR(in_CRD_Total_Paid_Amounts),22,&apos;0&apos;))&#xD;&#xA;                ,&apos;-&apos;,&apos;0&apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="v_CRD_TOT_PAID_AMTS_fmtd" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="22" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="Substring the leading negative sign back into the value if the value is &lt; 0, otherwise if positive put a leading space." EXPRESSION ="IIF(in_CRD_Total_Paid_Amounts&gt;=0,&apos; &apos;||SUBSTR(v_CRD_TOT_PAID_AMTS_fmtd,2,21),&apos;-&apos;||SUBSTR(v_CRD_TOT_PAID_AMTS_fmtd,2,21))" EXPRESSIONTYPE ="GENERAL" NAME ="CRD_TLR_TOT_PAID_AMTS" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="22" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="RPAD(&apos; &apos;,117,&apos; &apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="HC_TLR_Filler" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="117" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="out_Filename_Trailer" EXPRESSIONTYPE ="GENERAL" NAME ="out_Filename_Trailer" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="&apos;HDR&apos;" EXPRESSIONTYPE ="GENERAL" NAME ="HC_HDR_REC_TYP" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="3" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="TO_CHAR(SYSDATE,&apos;MM/DD/YYYY&apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="HC_HDR_FILE_DT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="TO_CHAR(SYSDATE,&apos;HH24:MI:SS&apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="HC_HDR_FILE_TM" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="8" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="LPAD(&apos; &apos;,129,&apos; &apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="HC_HDR_Filler" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="129" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="out_Filename_Header" EXPRESSIONTYPE ="GENERAL" NAME ="out_Filename_Header" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This filename cannot have the extension added to it due to the way the concatenation script functions.&#xD;&#xA;Also, not having the file extension on this value allows us to use this variable value with the compression and SFTP script." NAME ="in_Filename_Final" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This filename cannot have the extension added to it due to the way the concatenation script functions.&#xD;&#xA;Also, not having the file extension on this value allows us to use this variable value with the compression and SFTP script." EXPRESSION ="SETVARIABLE($$FILENAME_FINAL,in_Filename_Final)" EXPRESSIONTYPE ="GENERAL" NAME ="v_Filename_Final" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="255" SCALE ="0"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+        </TRANSFORMATION>
+        <TRANSFORMATION DESCRIPTION ="This SQ will bring in all rows from the RPS.TCLAIM_RPT_DETL table for the appropriate RPT_PRCS_NB that was used to trigger the workflow running this mapping." NAME ="SQ_TCLAIM_RPT_DETL" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Source Qualifier" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RPT_CLNT_SHORT_NME" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="STMT_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="6" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="PERIOD_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="6" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLM_GID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="13" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="TRAN_TYP_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="2" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RPT_TYP_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="3" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="PICO_ID_NB" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CTRC_ID_NB" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="3" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RBAT_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="8" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="NDC_NB" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="11" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="EXTNL_SRC_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="5" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CG_NB" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="8" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RAC_NB" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="5" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="ACCS_RBAT_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="11" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="MKSR_RBAT_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="11" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="ADMN_FEE_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="11" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RPT_PRCS_NB" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RBATE_ACCESS" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="11" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RBATE_MRKT_SHR" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="11" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RBATE_ADMIN_FEE" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="11" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLM_LVL1" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLM_LVL2" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="3" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLM_LVL3" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="1" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="DSPND_DT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="29" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLAIM_TYPE" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="2" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="MEDD_CNTRC_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="5" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CMS_PLAN_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="3" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="EXTNL_LVL1_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="EXTNL_LVL2_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="EXTNL_LVL3_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="EXTNL_LVL4_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="EXTNL_LVL5_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="small integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CORP_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="5" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="INV_MODEL" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="1" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="NABP_CODE" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="7" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="EXCP_STAT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="1" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="INSRT_USER_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="INSRT_TS" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="29" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CORP_NME" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="30" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="DRUG_NM" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="30" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="UOM_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="1" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="INGRD_COST_AMT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="15" SCALE ="5"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="FRMLY_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="MED_PYBL_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="1" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="MEDD_PRTC_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="1" SCALE ="0"/>
+            <TABLEATTRIBUTE NAME ="Sql Query" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="User Defined Join" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Source Filter" VALUE ="RPS.TCLAIM_RPT_DETL.RPT_PRCS_NB=$$RPT_PRCS_NB"/>
+            <TABLEATTRIBUTE NAME ="Number Of Sorted Ports" VALUE ="0"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+            <TABLEATTRIBUTE NAME ="Select Distinct" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Is Partitionable" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Pre SQL" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Post SQL" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Output is deterministic" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Output is repeatable" VALUE ="Never"/>
+        </TRANSFORMATION>
+        <TRANSFORMATION DESCRIPTION ="This transformation will be used to format the input into a fixed block format for the target files.  " NAME ="EXP_Format_File_Output" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Expression" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="This is only going to be used in the aggregator, not in the target." EXPRESSION ="RPT_PRCS_NB" EXPRESSIONTYPE ="GENERAL" NAME ="RPT_PRCS_NB" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="&apos;DTL&apos;" EXPRESSIONTYPE ="GENERAL" NAME ="HC_REC_TYP" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="3" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="in_CLM_LVL1" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="LPAD(IIF(IsNull(RTRIM(LTRIM(in_CLM_LVL1))),LPAD(&apos;0&apos;,20,&apos;0&apos;),RTRIM(LTRIM(in_CLM_LVL1))),20,&apos;0&apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="CRD_CLM_LVL1" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="&apos;99&apos;" EXPRESSIONTYPE ="GENERAL" NAME ="HC_PYMT_NB" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="2" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="$$STMT_END_DT" EXPRESSIONTYPE ="GENERAL" NAME ="TRG_PAID_DT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="ACCS_RBAT_AMT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="11" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="MKSR_RBAT_AMT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="11" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="ADMN_FEE_AMT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="11" SCALE ="2"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="TO_DECIMAL((ACCS_RBAT_AMT+MKSR_RBAT_AMT+ADMN_FEE_AMT),5)" EXPRESSIONTYPE ="GENERAL" NAME ="v_PAID_AMTS" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="15" SCALE ="5"/>
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="v_PAID_AMTS" EXPRESSIONTYPE ="GENERAL" NAME ="out_PAID_AMTS" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="15" SCALE ="5"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="REPLACECHR is necessary otherwise the value -12345.67890 would be 00000-12345.67890" EXPRESSION ="REPLACECHR(0&#xD;&#xA;            ,IIF(IsNull(v_PAID_AMTS)&#xD;&#xA;                ,&apos; 0000000000.00000&apos;&#xD;&#xA;                ,lpad(TO_CHAR(v_PAID_AMTS),17,&apos;0&apos;))&#xD;&#xA;                ,&apos;-&apos;,&apos;0&apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="v_PAID_AMTS_fmtd" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="17" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="The client requested a leading space in the first position for positive numbers, and a leading negative sign for negative values." EXPRESSION ="IIF(v_PAID_AMTS&gt;=0,&apos; &apos;||SUBSTR(v_PAID_AMTS_fmtd,2,17),&apos;-&apos;||SUBSTR(v_PAID_AMTS_fmtd,2,17))" EXPRESSIONTYPE ="GENERAL" NAME ="CRD_PAID_AMTS" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="17" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="&apos;0&apos;||TO_CHAR(TO_DATE($$STMT_END_DT,&apos;MM/DD/YYYY&apos;),&apos;Q&apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="CRD_PAID_DT_QTR" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="2" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="Provide the year that the payment was received, so base on the STMT_END_DT mapping variable." EXPRESSION ="SUBSTR($$STMT_END_DT,7,4)" EXPRESSIONTYPE ="GENERAL" NAME ="CRD_PAID_DT_YR" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="4" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="&apos;00&apos;" EXPRESSIONTYPE ="GENERAL" NAME ="HC_PD_REV_NB" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="2" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="&apos; 0000000000.00000&apos;" EXPRESSIONTYPE ="GENERAL" NAME ="HC_WAC_PER_UNIT" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="17" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="EXTNL_LVL1_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="RPAD(IIF(IsNull(EXTNL_LVL1_ID),&apos; &apos;,SUBSTR(EXTNL_LVL1_ID,1,4)),4,&apos; &apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="CRD_EXTNL_LVL1_ID" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="4" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="EXTNL_LVL2_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="RPAD(IIF(IsNull(EXTNL_LVL2_ID),&apos; &apos;,SUBSTR(EXTNL_LVL2_ID,1,8)),8,&apos; &apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="CRD_EXTNL_LVL2_ID" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="8" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="EXTNL_LVL3_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="20" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="RPAD(IIF(IsNull(EXTNL_LVL3_ID),&apos; &apos;,SUBSTR(EXTNL_LVL3_ID,1,15)),15,&apos; &apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="CRD_EXTNL_LVL3_ID" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="15" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLM_LVL2" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="3" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="LPAD(IIF(IsNull(RTRIM(LTRIM(CLM_LVL2))),LPAD(&apos;0&apos;,20,&apos;0&apos;),RTRIM(LTRIM(CLM_LVL2))),3,&apos;0&apos;)&#xD;&#xA;&#xD;&#xA;" EXPRESSIONTYPE ="GENERAL" NAME ="CRD_CLM_LVL2" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="3" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLAIM_TYPE" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="2" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="DECODE(CLAIM_TYPE,&apos;+1&apos;,&apos;P&apos;,&apos;-1&apos;,&apos;X&apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="CRD_CLAIM_TYPE" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="2" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="RPAD(&apos; &apos;,42,&apos; &apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="HC_FILLER" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="42" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Do not add file extension" EXPRESSION ="&apos;AetnaCVTY_Payment_Rebates_&apos;||TO_CHAR(SYSDATE,&apos;YYYYMMDDHH24MISS&apos;)" EXPRESSIONTYPE ="GENERAL" NAME ="v_Build_Filename" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="iif(instr(upper($PMRepositoryServiceName),&apos;DEV&apos;) &gt; 0&#xD;&#xA;    ,&apos;TEST_&apos;||v_Build_Filename&#xD;&#xA;    ,iif(instr(upper($PMRepositoryServiceName),&apos;SIT&apos;) &gt; 0&#xD;&#xA;        ,&apos;TEST_&apos;||v_Build_Filename&#xD;&#xA;        ,iif(instr(upper($PMRepositoryServiceName),&apos;PRD&apos;) &gt; 0&#xD;&#xA;            ,v_Build_Filename)))" EXPRESSIONTYPE ="GENERAL" NAME ="v_Region_Filename" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="v_Region_Filename||&apos;_Header&apos;||&apos;.txt&apos;" EXPRESSIONTYPE ="GENERAL" NAME ="out_Filename_Header" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="v_Region_Filename||&apos;_Detail&apos;||&apos;.txt&apos;" EXPRESSIONTYPE ="GENERAL" NAME ="out_Filename_Detail" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="" EXPRESSION ="v_Region_Filename||&apos;_Trailer&apos;||&apos;.txt&apos;" EXPRESSIONTYPE ="GENERAL" NAME ="out_Filename_Trailer" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="255" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="ERROR(&apos;transformation error&apos;)" DESCRIPTION ="This filename cannot have the extension added to it due to the way the concatenation script functions.&#xD;&#xA;Also, not having the file extension on this value allows us to use this variable value with the compression and SFTP script." EXPRESSION ="v_Region_Filename" EXPRESSIONTYPE ="GENERAL" NAME ="out_Filename_Final" PICTURETEXT ="" PORTTYPE ="OUTPUT" PRECISION ="255" SCALE ="0"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+        </TRANSFORMATION>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="1" NAME ="F_COVENTRY_COL_HDR_FILE" TRANSFORMATION_NAME ="F_COVENTRY_COL_HDR_FILE" TRANSFORMATION_TYPE ="Target Definition" TYPE ="TARGET"/>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="2" NAME ="F_COVENTRY_COL_TLR_FILE" TRANSFORMATION_NAME ="F_COVENTRY_COL_TLR_FILE" TRANSFORMATION_TYPE ="Target Definition" TYPE ="TARGET"/>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="3" NAME ="F_COVENTRY_COL_DTL_FILE" TRANSFORMATION_NAME ="F_COVENTRY_COL_DTL_FILE" TRANSFORMATION_TYPE ="Target Definition" TYPE ="TARGET"/>
+        <INSTANCE DESCRIPTION ="This aggregator will sum up the collection amounts for use in the footer.&#xD;&#xA;Since only one row will come out of this aggregator, we will also use this thread for building the Header row as well." INSTANCEID ="4" NAME ="AGG_Footer_values" REUSABLE ="NO" TRANSFORMATION_NAME ="AGG_Footer_values" TRANSFORMATION_TYPE ="Aggregator" TYPE ="TRANSFORMATION"/>
+        <INSTANCE DBDNAME ="RPSDM_RPS" DESCRIPTION ="" INSTANCEID ="5" NAME ="TCLAIM_RPT_DETL" TRANSFORMATION_NAME ="TCLAIM_RPT_DETL" TRANSFORMATION_TYPE ="Source Definition" TYPE ="SOURCE"/>
+        <INSTANCE DESCRIPTION ="This expression will be used for formattng the output fields for the header and trailer records." INSTANCEID ="6" NAME ="EXP_Format_Header_Trailer" REUSABLE ="NO" TRANSFORMATION_NAME ="EXP_Format_Header_Trailer" TRANSFORMATION_TYPE ="Expression" TYPE ="TRANSFORMATION"/>
+        <INSTANCE DESCRIPTION ="This SQ will bring in all rows from the RPS.TCLAIM_RPT_DETL table for the appropriate RPT_PRCS_NB that was used to trigger the workflow running this mapping." INSTANCEID ="7" NAME ="SQ_TCLAIM_RPT_DETL" REUSABLE ="NO" TRANSFORMATION_NAME ="SQ_TCLAIM_RPT_DETL" TRANSFORMATION_TYPE ="Source Qualifier" TYPE ="TRANSFORMATION">
+            <ASSOCIATED_SOURCE_INSTANCE NAME ="TCLAIM_RPT_DETL"/>
+        </INSTANCE>
+        <INSTANCE DESCRIPTION ="This transformation will be used to format the input into a fixed block format for the target files.  " INSTANCEID ="8" NAME ="EXP_Format_File_Output" REUSABLE ="NO" TRANSFORMATION_NAME ="EXP_Format_File_Output" TRANSFORMATION_TYPE ="Expression" TYPE ="TRANSFORMATION"/>
+        <CONNECTOR FROMFIELD ="HC_HDR_REC_TYP" FROMINSTANCE ="EXP_Format_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="HC_HDR_REC_TYP" TOINSTANCE ="F_COVENTRY_COL_HDR_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="HC_HDR_FILE_DT" FROMINSTANCE ="EXP_Format_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="HC_HDR_FILE_DT" TOINSTANCE ="F_COVENTRY_COL_HDR_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="HC_HDR_FILE_TM" FROMINSTANCE ="EXP_Format_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="HC_HDR_FILE_TM" TOINSTANCE ="F_COVENTRY_COL_HDR_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="HC_HDR_Filler" FROMINSTANCE ="EXP_Format_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="HC_HDR_FILLER" TOINSTANCE ="F_COVENTRY_COL_HDR_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_Filename_Header" FROMINSTANCE ="EXP_Format_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="FileName" TOINSTANCE ="F_COVENTRY_COL_HDR_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CRD_TLR_TOT_PAID_AMTS" FROMINSTANCE ="EXP_Format_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="CRD_TLR_TOT_PAID_AMTS" TOINSTANCE ="F_COVENTRY_COL_TLR_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="HC_TLR_Filler" FROMINSTANCE ="EXP_Format_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="HC_TLR_FILLER" TOINSTANCE ="F_COVENTRY_COL_TLR_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_Filename_Trailer" FROMINSTANCE ="EXP_Format_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="FileName" TOINSTANCE ="F_COVENTRY_COL_TLR_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="HC_TLR_REC_TYP" FROMINSTANCE ="EXP_Format_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="HC_TLR_REC_TYP" TOINSTANCE ="F_COVENTRY_COL_TLR_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CRD_TLR_REC_CNT" FROMINSTANCE ="EXP_Format_Header_Trailer" FROMINSTANCETYPE ="Expression" TOFIELD ="CRD_TLR_REC_CNT" TOINSTANCE ="F_COVENTRY_COL_TLR_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CRD_CLAIM_TYPE" FROMINSTANCE ="EXP_Format_File_Output" FROMINSTANCETYPE ="Expression" TOFIELD ="CRD_CLAIM_TYPE" TOINSTANCE ="F_COVENTRY_COL_DTL_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="HC_FILLER" FROMINSTANCE ="EXP_Format_File_Output" FROMINSTANCETYPE ="Expression" TOFIELD ="HC_FILLER" TOINSTANCE ="F_COVENTRY_COL_DTL_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CRD_CLM_LVL1" FROMINSTANCE ="EXP_Format_File_Output" FROMINSTANCETYPE ="Expression" TOFIELD ="CRD_CLM_LVL1" TOINSTANCE ="F_COVENTRY_COL_DTL_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="HC_PYMT_NB" FROMINSTANCE ="EXP_Format_File_Output" FROMINSTANCETYPE ="Expression" TOFIELD ="HC_PYMT_NB" TOINSTANCE ="F_COVENTRY_COL_DTL_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="TRG_PAID_DT" FROMINSTANCE ="EXP_Format_File_Output" FROMINSTANCETYPE ="Expression" TOFIELD ="TRG_PAID_DT" TOINSTANCE ="F_COVENTRY_COL_DTL_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="HC_WAC_PER_UNIT" FROMINSTANCE ="EXP_Format_File_Output" FROMINSTANCETYPE ="Expression" TOFIELD ="HC_WAC_PER_UNIT" TOINSTANCE ="F_COVENTRY_COL_DTL_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CRD_EXTNL_LVL1_ID" FROMINSTANCE ="EXP_Format_File_Output" FROMINSTANCETYPE ="Expression" TOFIELD ="CRD_EXTNL_LVL1_ID" TOINSTANCE ="F_COVENTRY_COL_DTL_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="out_Filename_Detail" FROMINSTANCE ="EXP_Format_File_Output" FROMINSTANCETYPE ="Expression" TOFIELD ="FileName" TOINSTANCE ="F_COVENTRY_COL_DTL_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CRD_EXTNL_LVL2_ID" FROMINSTANCE ="EXP_Format_File_Output" FROMINSTANCETYPE ="Expression" TOFIELD ="CRD_EXTNL_LVL2_ID" TOINSTANCE ="F_COVENTRY_COL_DTL_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CRD_EXTNL_LVL3_ID" FROMINSTANCE ="EXP_Format_File_Output" FROMINSTANCETYPE ="Expression" TOFIELD ="CRD_EXTNL_LVL3_ID" TOINSTANCE ="F_COVENTRY_COL_DTL_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CRD_CLM_LVL2" FROMINSTANCE ="EXP_Format_File_Output" FROMINSTANCETYPE ="Expression" TOFIELD ="CRD_CLM_LVL2" TOINSTANCE ="F_COVENTRY_COL_DTL_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CRD_PAID_AMTS" FROMINSTANCE ="EXP_Format_File_Output" FROMINSTANCETYPE ="Expression" TOFIELD ="CRD_PAID_AMTS" TOINSTANCE ="F_COVENTRY_COL_DTL_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CRD_PAID_DT_QTR" FROMINSTANCE ="EXP_Format_File_Output" FROMINSTANCETYPE ="Expression" TOFIELD ="TRG_PAID_DT_QTR" TOINSTANCE ="F_COVENTRY_COL_DTL_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="CRD_PAID_DT_YR" FROMINSTANCE ="EXP_Format_File_Output" FROMINSTANCETYPE ="Expression" TOFIELD ="TRG_PAID_DT_YR" TOINSTANCE ="F_COVENTRY_COL_DTL_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="HC_PD_REV_NB" FROMINSTANCE ="EXP_Format_File_Output" FROMINSTANCETYPE ="Expression" TOFIELD ="HC_PD_REV_NB" TOINSTANCE ="F_COVENTRY_COL_DTL_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="HC_REC_TYP" FROMINSTANCE ="EXP_Format_File_Output" FROMINSTANCETYPE ="Expression" TOFIELD ="HC_REC_TYPE" TOINSTANCE ="F_COVENTRY_COL_DTL_FILE" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="RPT_PRCS_NB" FROMINSTANCE ="EXP_Format_File_Output" FROMINSTANCETYPE ="Expression" TOFIELD ="RPT_PRCS_NB" TOINSTANCE ="AGG_Footer_values" TOINSTANCETYPE ="Aggregator"/>
+        <CONNECTOR FROMFIELD ="out_PAID_AMTS" FROMINSTANCE ="EXP_Format_File_Output" FROMINSTANCETYPE ="Expression" TOFIELD ="in_PAID_AMTS" TOINSTANCE ="AGG_Footer_values" TOINSTANCETYPE ="Aggregator"/>
+        <CONNECTOR FROMFIELD ="out_Filename_Header" FROMINSTANCE ="EXP_Format_File_Output" FROMINSTANCETYPE ="Expression" TOFIELD ="in_Filename_Header" TOINSTANCE ="AGG_Footer_values" TOINSTANCETYPE ="Aggregator"/>
+        <CONNECTOR FROMFIELD ="out_Filename_Trailer" FROMINSTANCE ="EXP_Format_File_Output" FROMINSTANCETYPE ="Expression" TOFIELD ="in_Filename_Trailer" TOINSTANCE ="AGG_Footer_values" TOINSTANCETYPE ="Aggregator"/>
+        <CONNECTOR FROMFIELD ="out_Filename_Final" FROMINSTANCE ="EXP_Format_File_Output" FROMINSTANCETYPE ="Expression" TOFIELD ="in_Filename_Final" TOINSTANCE ="AGG_Footer_values" TOINSTANCETYPE ="Aggregator"/>
+        <CONNECTOR FROMFIELD ="CRD_Record_Count" FROMINSTANCE ="AGG_Footer_values" FROMINSTANCETYPE ="Aggregator" TOFIELD ="in_CRD_Record_Count" TOINSTANCE ="EXP_Format_Header_Trailer" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="out_Filename_Header" FROMINSTANCE ="AGG_Footer_values" FROMINSTANCETYPE ="Aggregator" TOFIELD ="out_Filename_Header" TOINSTANCE ="EXP_Format_Header_Trailer" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="out_Filename_Trailer" FROMINSTANCE ="AGG_Footer_values" FROMINSTANCETYPE ="Aggregator" TOFIELD ="out_Filename_Trailer" TOINSTANCE ="EXP_Format_Header_Trailer" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="CRD_Total_Paid_Amounts" FROMINSTANCE ="AGG_Footer_values" FROMINSTANCETYPE ="Aggregator" TOFIELD ="in_CRD_Total_Paid_Amounts" TOINSTANCE ="EXP_Format_Header_Trailer" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="out_Filename_Final" FROMINSTANCE ="AGG_Footer_values" FROMINSTANCETYPE ="Aggregator" TOFIELD ="in_Filename_Final" TOINSTANCE ="EXP_Format_Header_Trailer" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="RPT_TYP_CD" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="RPT_TYP_CD" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="PICO_ID_NB" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="PICO_ID_NB" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="EXCP_STAT" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="EXCP_STAT" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CLAIM_TYPE" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CLAIM_TYPE" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="MEDD_PRTC_CD" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="MEDD_PRTC_CD" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CG_NB" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CG_NB" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="RAC_NB" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="RAC_NB" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="ACCS_RBAT_AMT" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="ACCS_RBAT_AMT" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="MKSR_RBAT_AMT" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="MKSR_RBAT_AMT" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="ADMN_FEE_AMT" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="ADMN_FEE_AMT" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="RPT_PRCS_NB" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="RPT_PRCS_NB" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="RBATE_ACCESS" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="RBATE_ACCESS" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="RBATE_MRKT_SHR" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="RBATE_MRKT_SHR" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="RBATE_ADMIN_FEE" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="RBATE_ADMIN_FEE" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="MEDD_CNTRC_ID" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="MEDD_CNTRC_ID" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CMS_PLAN_ID" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CMS_PLAN_ID" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CORP_CD" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CORP_CD" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="INV_MODEL" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="INV_MODEL" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="NABP_CODE" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="NABP_CODE" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="RPT_CLNT_SHORT_NME" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="RPT_CLNT_SHORT_NME" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="UOM_CD" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="UOM_CD" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="INGRD_COST_AMT" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="INGRD_COST_AMT" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="FRMLY_ID" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="FRMLY_ID" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="MED_PYBL_CD" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="MED_PYBL_CD" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CTRC_ID_NB" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CTRC_ID_NB" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="RBAT_ID" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="RBAT_ID" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="NDC_NB" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="NDC_NB" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="STMT_ID" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="STMT_ID" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="PERIOD_ID" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="PERIOD_ID" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="EXTNL_SRC_CD" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="EXTNL_SRC_CD" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="EXTNL_LVL4_ID" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="EXTNL_LVL4_ID" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="EXTNL_LVL5_ID" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="EXTNL_LVL5_ID" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CLM_LVL2" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CLM_LVL2" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CLM_LVL3" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CLM_LVL3" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="DSPND_DT" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="DSPND_DT" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="EXTNL_LVL1_ID" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="EXTNL_LVL1_ID" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="EXTNL_LVL2_ID" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="EXTNL_LVL2_ID" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="EXTNL_LVL3_ID" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="EXTNL_LVL3_ID" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="INSRT_USER_ID" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="INSRT_USER_ID" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="INSRT_TS" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="INSRT_TS" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CORP_NME" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CORP_NME" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CLM_LVL1" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CLM_LVL1" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="DRUG_NM" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="DRUG_NM" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CLM_GID" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CLM_GID" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="TRAN_TYP_CD" FROMINSTANCE ="TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="TRAN_TYP_CD" TOINSTANCE ="SQ_TCLAIM_RPT_DETL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CLM_LVL2" FROMINSTANCE ="SQ_TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="CLM_LVL2" TOINSTANCE ="EXP_Format_File_Output" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="CLAIM_TYPE" FROMINSTANCE ="SQ_TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="CLAIM_TYPE" TOINSTANCE ="EXP_Format_File_Output" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="EXTNL_LVL1_ID" FROMINSTANCE ="SQ_TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="EXTNL_LVL1_ID" TOINSTANCE ="EXP_Format_File_Output" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="EXTNL_LVL2_ID" FROMINSTANCE ="SQ_TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="EXTNL_LVL2_ID" TOINSTANCE ="EXP_Format_File_Output" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="EXTNL_LVL3_ID" FROMINSTANCE ="SQ_TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="EXTNL_LVL3_ID" TOINSTANCE ="EXP_Format_File_Output" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="RPT_PRCS_NB" FROMINSTANCE ="SQ_TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="RPT_PRCS_NB" TOINSTANCE ="EXP_Format_File_Output" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="ACCS_RBAT_AMT" FROMINSTANCE ="SQ_TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="ACCS_RBAT_AMT" TOINSTANCE ="EXP_Format_File_Output" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="MKSR_RBAT_AMT" FROMINSTANCE ="SQ_TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="MKSR_RBAT_AMT" TOINSTANCE ="EXP_Format_File_Output" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="ADMN_FEE_AMT" FROMINSTANCE ="SQ_TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="ADMN_FEE_AMT" TOINSTANCE ="EXP_Format_File_Output" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="CLM_LVL1" FROMINSTANCE ="SQ_TCLAIM_RPT_DETL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="in_CLM_LVL1" TOINSTANCE ="EXP_Format_File_Output" TOINSTANCETYPE ="Expression"/>
+        <TARGETLOADORDER ORDER ="1" TARGETINSTANCE ="F_COVENTRY_COL_HDR_FILE"/>
+        <TARGETLOADORDER ORDER ="1" TARGETINSTANCE ="F_COVENTRY_COL_TLR_FILE"/>
+        <TARGETLOADORDER ORDER ="1" TARGETINSTANCE ="F_COVENTRY_COL_DTL_FILE"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This filename cannot have the extension added to it due to the way the concatenation script functions.&#xD;&#xA;Also, not having the file extension on this value allows us to use this variable value with the compression and SFTP script." ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$FILENAME_FINAL" PRECISION ="255" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$STMT_END_DT" PRECISION ="10" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="integer" DEFAULTVALUE ="0" DESCRIPTION ="– This value is assigned in the mapping, read from the trigger file built by the report driver, and will be used for selecting the appropriate claims from TCLAIM_RPT_DETL" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$RPT_PRCS_NB" PRECISION ="10" SCALE ="0" USERDEFINED ="YES"/>
+        <ERPINFO/>
+    </MAPPING>
+    <MAPPING DESCRIPTION ="" ISVALID ="YES" NAME ="m_Read_Trg_Clnt_Rpt_Cntl" OBJECTVERSION ="1" VERSIONNUMBER ="1">
+        <TRANSFORMATION DESCRIPTION ="" NAME ="SQ_F_CLNT_RPT_MAESTRO_TRG" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Source Qualifier" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RPT_PRCS_NB" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RPT_CLNT_SHORT_NME" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RPT_TYP_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="3" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CORP_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RPT_PRCS_STAT_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="2" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="STMT_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="6" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="The format is YYYY/MM/DD HH24:MI:SS.MS where MS is to the 6th precision" NAME ="STMT_START_DT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="The format is YYYY/MM/DD HH24:MI:SS.MS where MS is to the 6th precision" NAME ="STMT_END_DT" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RPT_START_BILL_PRD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="6" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="LAST_RBAT_BILL_PRD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="6" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RPT_PRCS_TYP_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="FREQ_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="BILL_RNG_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="STMT_RNG_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="TXN_SET_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLM_SET_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="FMT_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="BLD_TRG_FLE_NME" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="40" SCALE ="0"/>
+            <TABLEATTRIBUTE NAME ="Sql Query" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="User Defined Join" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Source Filter" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Number Of Sorted Ports" VALUE ="0"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+            <TABLEATTRIBUTE NAME ="Select Distinct" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Is Partitionable" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Pre SQL" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Post SQL" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Output is deterministic" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Output is repeatable" VALUE ="Never"/>
+        </TRANSFORMATION>
+        <TRANSFORMATION DESCRIPTION ="" NAME ="EXP_Assign_Mapping_Variables" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Expression" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="RPT_PRCS_NB" EXPRESSIONTYPE ="GENERAL" NAME ="RPT_PRCS_NB" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="setVariable($$RPT_PRCS_NB, RPT_PRCS_NB)" EXPRESSIONTYPE ="GENERAL" NAME ="v_RPT_PRCS_NB" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RPT_CLNT_SHORT_NME" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="setVariable($$RPT_CLNT_SHORT_NME,RTRIM(LTRIM(RPT_CLNT_SHORT_NME)))" EXPRESSIONTYPE ="GENERAL" NAME ="v_RPT_CLNT_SHORT_NME" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="8" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RPT_TYP_CD" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="3" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="setVariable($$RPT_TYP_CD,RTRIM(LTRIM(RPT_TYP_CD)))" EXPRESSIONTYPE ="GENERAL" NAME ="v_RPT_TYP_CD" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="3" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CORP_CD" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="setVariable($$CORP_CD,CORP_CD)" EXPRESSIONTYPE ="GENERAL" NAME ="v_CORP_CD" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RPT_PRCS_STAT_CD" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="2" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="setVariable($$RPT_PRCS_STAT_CD,RTRIM(LTRIM(RPT_PRCS_STAT_CD)))" EXPRESSIONTYPE ="GENERAL" NAME ="v_RPT_PRCS_STAT_CD" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="2" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="STMT_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="6" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="setVariable($$STMT_ID,RTRIM(LTRIM(STMT_ID)))&#xD;&#xA;" EXPRESSIONTYPE ="GENERAL" NAME ="v_STMT_ID" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="6" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="The format is YYYY/MM/DD HH24:MI:SS.MS where MS is to the 6th precision" NAME ="STMT_START_DT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="The format is YYYY/MM/DD HH24:MI:SS.MS where MS is to the 6th precision" EXPRESSION ="setVariable($$STMT_START_DT,RTRIM(LTRIM(STMT_START_DT)))" EXPRESSIONTYPE ="GENERAL" NAME ="v_STMT_START_DT" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="The format is YYYY/MM/DD HH24:MI:SS.MS where MS is to the 6th precision" NAME ="STMT_END_DT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="The format is YYYY/MM/DD HH24:MI:SS.MS where MS is to the 6th precision" EXPRESSION ="setVariable($$STMT_END_DT,RTRIM(LTRIM(STMT_END_DT)))" EXPRESSIONTYPE ="GENERAL" NAME ="v_STMT_END_DT" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RPT_START_BILL_PRD" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="6" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="setVariable($$RPT_START_BILL_PRD,RTRIM(LTRIM(RPT_START_BILL_PRD)))" EXPRESSIONTYPE ="GENERAL" NAME ="v_RPT_START_BILL_PRD" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="6" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="LAST_RBAT_BILL_PRD" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="6" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="setVariable($$LAST_RBAT_BILL_PRD,RTRIM(LTRIM(LAST_RBAT_BILL_PRD)))" EXPRESSIONTYPE ="GENERAL" NAME ="v_LAST_RBAT_BILL_PRD" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="6" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RPT_PRCS_TYP_CD" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="setVariable($$RPT_PRCS_TYP_CD,RPT_PRCS_TYP_CD)" EXPRESSIONTYPE ="GENERAL" NAME ="v_RPT_PRCS_TYP_CD" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="FREQ_CD" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="setVariable($$FREQ_CD,FREQ_CD)" EXPRESSIONTYPE ="GENERAL" NAME ="v_FREQ_CD" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="BILL_RNG_CD" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="setVariable($$BILL_RNG_CD,BILL_RNG_CD)" EXPRESSIONTYPE ="GENERAL" NAME ="v_BILL_RNG_CD" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="STMT_RNG_CD" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="setVariable($$STMT_RNG_CD,STMT_RNG_CD)" EXPRESSIONTYPE ="GENERAL" NAME ="v_STMT_RNG_CD" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="TXN_SET_CD" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="setVariable($$TXN_SET_CD,TXN_SET_CD)" EXPRESSIONTYPE ="GENERAL" NAME ="v_TXN_SET_CD" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLM_SET_CD" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="setVariable($$CLM_SET_CD,CLM_SET_CD)" EXPRESSIONTYPE ="GENERAL" NAME ="v_CLM_SET_CD" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="FMT_CD" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" EXPRESSION ="setVariable($$FORMAT_CD,FMT_CD)" EXPRESSIONTYPE ="GENERAL" NAME ="v_FMT_CD" PICTURETEXT ="" PORTTYPE ="LOCAL VARIABLE" PRECISION ="10" SCALE ="0"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+        </TRANSFORMATION>
+        <TRANSFORMATION DESCRIPTION ="" NAME ="FIL_Block_Data" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Filter" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="decimal" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="RPT_PRCS_NB" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="10" SCALE ="0"/>
+            <TABLEATTRIBUTE NAME ="Filter Condition" VALUE ="FALSE"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+        </TRANSFORMATION>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="1" NAME ="F_CLNT_RPT_MAESTRO_TRG1" TRANSFORMATION_NAME ="F_CLNT_RPT_MAESTRO_TRG" TRANSFORMATION_TYPE ="Target Definition" TYPE ="TARGET"/>
+        <INSTANCE DBDNAME ="FlatFile" DESCRIPTION ="" INSTANCEID ="2" NAME ="F_CLNT_RPT_MAESTRO_TRG" TRANSFORMATION_NAME ="F_CLNT_RPT_MAESTRO_TRG" TRANSFORMATION_TYPE ="Source Definition" TYPE ="SOURCE"/>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="3" NAME ="SQ_F_CLNT_RPT_MAESTRO_TRG" REUSABLE ="NO" TRANSFORMATION_NAME ="SQ_F_CLNT_RPT_MAESTRO_TRG" TRANSFORMATION_TYPE ="Source Qualifier" TYPE ="TRANSFORMATION">
+            <ASSOCIATED_SOURCE_INSTANCE NAME ="F_CLNT_RPT_MAESTRO_TRG"/>
+        </INSTANCE>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="4" NAME ="EXP_Assign_Mapping_Variables" REUSABLE ="NO" TRANSFORMATION_NAME ="EXP_Assign_Mapping_Variables" TRANSFORMATION_TYPE ="Expression" TYPE ="TRANSFORMATION"/>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="5" NAME ="FIL_Block_Data" REUSABLE ="NO" TRANSFORMATION_NAME ="FIL_Block_Data" TRANSFORMATION_TYPE ="Filter" TYPE ="TRANSFORMATION"/>
+        <CONNECTOR FROMFIELD ="RPT_PRCS_NB" FROMINSTANCE ="FIL_Block_Data" FROMINSTANCETYPE ="Filter" TOFIELD ="RPT_PRCS_NB" TOINSTANCE ="F_CLNT_RPT_MAESTRO_TRG1" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="RPT_PRCS_NB" FROMINSTANCE ="F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Definition" TOFIELD ="RPT_PRCS_NB" TOINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="RPT_CLNT_SHORT_NME" FROMINSTANCE ="F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Definition" TOFIELD ="RPT_CLNT_SHORT_NME" TOINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="RPT_TYP_CD" FROMINSTANCE ="F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Definition" TOFIELD ="RPT_TYP_CD" TOINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CORP_CD" FROMINSTANCE ="F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CORP_CD" TOINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="RPT_PRCS_STAT_CD" FROMINSTANCE ="F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Definition" TOFIELD ="RPT_PRCS_STAT_CD" TOINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="STMT_ID" FROMINSTANCE ="F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Definition" TOFIELD ="STMT_ID" TOINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="STMT_START_DT" FROMINSTANCE ="F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Definition" TOFIELD ="STMT_START_DT" TOINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="STMT_END_DT" FROMINSTANCE ="F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Definition" TOFIELD ="STMT_END_DT" TOINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="RPT_START_BILL_PRD" FROMINSTANCE ="F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Definition" TOFIELD ="RPT_START_BILL_PRD" TOINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="LAST_RBAT_BILL_PRD" FROMINSTANCE ="F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Definition" TOFIELD ="LAST_RBAT_BILL_PRD" TOINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="RPT_PRCS_TYP_CD" FROMINSTANCE ="F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Definition" TOFIELD ="RPT_PRCS_TYP_CD" TOINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="FREQ_CD" FROMINSTANCE ="F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Definition" TOFIELD ="FREQ_CD" TOINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="BILL_RNG_CD" FROMINSTANCE ="F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Definition" TOFIELD ="BILL_RNG_CD" TOINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="STMT_RNG_CD" FROMINSTANCE ="F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Definition" TOFIELD ="STMT_RNG_CD" TOINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="TXN_SET_CD" FROMINSTANCE ="F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Definition" TOFIELD ="TXN_SET_CD" TOINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="CLM_SET_CD" FROMINSTANCE ="F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CLM_SET_CD" TOINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="FMT_CD" FROMINSTANCE ="F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Definition" TOFIELD ="FMT_CD" TOINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="BLD_TRG_FLE_NME" FROMINSTANCE ="F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Definition" TOFIELD ="BLD_TRG_FLE_NME" TOINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="STMT_RNG_CD" FROMINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="STMT_RNG_CD" TOINSTANCE ="EXP_Assign_Mapping_Variables" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="TXN_SET_CD" FROMINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="TXN_SET_CD" TOINSTANCE ="EXP_Assign_Mapping_Variables" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="CLM_SET_CD" FROMINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="CLM_SET_CD" TOINSTANCE ="EXP_Assign_Mapping_Variables" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="FMT_CD" FROMINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="FMT_CD" TOINSTANCE ="EXP_Assign_Mapping_Variables" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="RPT_PRCS_NB" FROMINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="RPT_PRCS_NB" TOINSTANCE ="EXP_Assign_Mapping_Variables" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="RPT_CLNT_SHORT_NME" FROMINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="RPT_CLNT_SHORT_NME" TOINSTANCE ="EXP_Assign_Mapping_Variables" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="RPT_TYP_CD" FROMINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="RPT_TYP_CD" TOINSTANCE ="EXP_Assign_Mapping_Variables" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="RPT_PRCS_STAT_CD" FROMINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="RPT_PRCS_STAT_CD" TOINSTANCE ="EXP_Assign_Mapping_Variables" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="STMT_ID" FROMINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="STMT_ID" TOINSTANCE ="EXP_Assign_Mapping_Variables" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="STMT_START_DT" FROMINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="STMT_START_DT" TOINSTANCE ="EXP_Assign_Mapping_Variables" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="STMT_END_DT" FROMINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="STMT_END_DT" TOINSTANCE ="EXP_Assign_Mapping_Variables" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="RPT_START_BILL_PRD" FROMINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="RPT_START_BILL_PRD" TOINSTANCE ="EXP_Assign_Mapping_Variables" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="LAST_RBAT_BILL_PRD" FROMINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="LAST_RBAT_BILL_PRD" TOINSTANCE ="EXP_Assign_Mapping_Variables" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="RPT_PRCS_TYP_CD" FROMINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="RPT_PRCS_TYP_CD" TOINSTANCE ="EXP_Assign_Mapping_Variables" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="CORP_CD" FROMINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="CORP_CD" TOINSTANCE ="EXP_Assign_Mapping_Variables" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="FREQ_CD" FROMINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="FREQ_CD" TOINSTANCE ="EXP_Assign_Mapping_Variables" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="BILL_RNG_CD" FROMINSTANCE ="SQ_F_CLNT_RPT_MAESTRO_TRG" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="BILL_RNG_CD" TOINSTANCE ="EXP_Assign_Mapping_Variables" TOINSTANCETYPE ="Expression"/>
+        <CONNECTOR FROMFIELD ="RPT_PRCS_NB" FROMINSTANCE ="EXP_Assign_Mapping_Variables" FROMINSTANCETYPE ="Expression" TOFIELD ="RPT_PRCS_NB" TOINSTANCE ="FIL_Block_Data" TOINSTANCETYPE ="Filter"/>
+        <TARGETLOADORDER ORDER ="1" TARGETINSTANCE ="F_CLNT_RPT_MAESTRO_TRG1"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$TXN_SET_CD" PRECISION ="10" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$STMT_RNG_CD" PRECISION ="10" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$STMT_START_DT" PRECISION ="10" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$CLM_SET_CD" PRECISION ="10" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$FREQ_CD" PRECISION ="10" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$BILL_RNG_CD" PRECISION ="10" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$STMT_END_DT" PRECISION ="10" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$RPT_PRCS_TYP_CD" PRECISION ="10" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$FORMAT_CD" PRECISION ="10" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$LAST_RBAT_BILL_PRD" PRECISION ="6" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$RPT_CLNT_SHORT_NME" PRECISION ="10" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$RPT_START_BILL_PRD" PRECISION ="6" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$RPT_TYP_CD" PRECISION ="3" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$RPT_PRCS_NB" PRECISION ="10" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$CORP_CD" PRECISION ="10" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$RPT_PRCS_STAT_CD" PRECISION ="2" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$STMT_ID" PRECISION ="6" SCALE ="0" USERDEFINED ="YES"/>
+        <ERPINFO/>
+    </MAPPING>
+    <MAPPING DESCRIPTION ="" ISVALID ="YES" NAME ="m_Dummy_Parameter_Variable" OBJECTVERSION ="1" VERSIONNUMBER ="1">
+        <TRANSFORMATION DESCRIPTION ="" NAME ="FIL_ALL" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Filter" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="LAST_UPDT_TS" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="29" SCALE ="9"/>
+            <TABLEATTRIBUTE NAME ="Filter Condition" VALUE ="FALSE"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+        </TRANSFORMATION>
+        <TRANSFORMATION DESCRIPTION ="" NAME ="SQ_RCIT_LOCK_CNTL" OBJECTVERSION ="1" REUSABLE ="NO" TYPE ="Source Qualifier" VERSIONNUMBER ="1">
+            <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="LAST_UPDT_TS" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="29" SCALE ="9"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="MODEL_TYP_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="1" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="PRD_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="6" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="CLM_LOCK_CD" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="1" SCALE ="0"/>
+            <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" NAME ="LAST_UPDT_USER_ID" PICTURETEXT ="" PORTTYPE ="INPUT/OUTPUT" PRECISION ="8" SCALE ="0"/>
+            <TABLEATTRIBUTE NAME ="Sql Query" VALUE ="SELECT CURRENT_TIMESTAMP FROM SYSIBM.SYSDUMMY1"/>
+            <TABLEATTRIBUTE NAME ="User Defined Join" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Source Filter" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Number Of Sorted Ports" VALUE ="0"/>
+            <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+            <TABLEATTRIBUTE NAME ="Select Distinct" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Is Partitionable" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Pre SQL" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Post SQL" VALUE =""/>
+            <TABLEATTRIBUTE NAME ="Output is deterministic" VALUE ="NO"/>
+            <TABLEATTRIBUTE NAME ="Output is repeatable" VALUE ="Never"/>
+        </TRANSFORMATION>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="1" NAME ="RCIT_LOCK_CNTL" TRANSFORMATION_NAME ="RCIT_LOCK_CNTL" TRANSFORMATION_TYPE ="Target Definition" TYPE ="TARGET"/>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="4" NAME ="FIL_ALL" REUSABLE ="NO" TRANSFORMATION_NAME ="FIL_ALL" TRANSFORMATION_TYPE ="Filter" TYPE ="TRANSFORMATION"/>
+        <INSTANCE DBDNAME ="GDX_VRAP" DESCRIPTION ="" INSTANCEID ="2" NAME ="RCIT_LOCK_CNTL" TRANSFORMATION_NAME ="RCIT_LOCK_CNTL" TRANSFORMATION_TYPE ="Source Definition" TYPE ="SOURCE"/>
+        <INSTANCE DESCRIPTION ="" INSTANCEID ="3" NAME ="SQ_RCIT_LOCK_CNTL" REUSABLE ="NO" TRANSFORMATION_NAME ="SQ_RCIT_LOCK_CNTL" TRANSFORMATION_TYPE ="Source Qualifier" TYPE ="TRANSFORMATION">
+            <ASSOCIATED_SOURCE_INSTANCE NAME ="RCIT_LOCK_CNTL"/>
+        </INSTANCE>
+        <CONNECTOR FROMFIELD ="LAST_UPDT_TS" FROMINSTANCE ="FIL_ALL" FROMINSTANCETYPE ="Filter" TOFIELD ="LAST_UPDT_TS" TOINSTANCE ="RCIT_LOCK_CNTL" TOINSTANCETYPE ="Target Definition"/>
+        <CONNECTOR FROMFIELD ="LAST_UPDT_TS" FROMINSTANCE ="SQ_RCIT_LOCK_CNTL" FROMINSTANCETYPE ="Source Qualifier" TOFIELD ="LAST_UPDT_TS" TOINSTANCE ="FIL_ALL" TOINSTANCETYPE ="Filter"/>
+        <CONNECTOR FROMFIELD ="CLM_LOCK_CD" FROMINSTANCE ="RCIT_LOCK_CNTL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="CLM_LOCK_CD" TOINSTANCE ="SQ_RCIT_LOCK_CNTL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="LAST_UPDT_TS" FROMINSTANCE ="RCIT_LOCK_CNTL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="LAST_UPDT_TS" TOINSTANCE ="SQ_RCIT_LOCK_CNTL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="LAST_UPDT_USER_ID" FROMINSTANCE ="RCIT_LOCK_CNTL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="LAST_UPDT_USER_ID" TOINSTANCE ="SQ_RCIT_LOCK_CNTL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="MODEL_TYP_CD" FROMINSTANCE ="RCIT_LOCK_CNTL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="MODEL_TYP_CD" TOINSTANCE ="SQ_RCIT_LOCK_CNTL" TOINSTANCETYPE ="Source Qualifier"/>
+        <CONNECTOR FROMFIELD ="PRD_ID" FROMINSTANCE ="RCIT_LOCK_CNTL" FROMINSTANCETYPE ="Source Definition" TOFIELD ="PRD_ID" TOINSTANCE ="SQ_RCIT_LOCK_CNTL" TOINSTANCETYPE ="Source Qualifier"/>
+        <TARGETLOADORDER ORDER ="1" TARGETINSTANCE ="RCIT_LOCK_CNTL"/>
+        <MAPPINGVARIABLE DATATYPE ="string" DEFAULTVALUE ="&apos;9999Q5&apos;" DESCRIPTION ="This value is used for cleanup purposes." ISEXPRESSIONVARIABLE ="NO" ISPARAM ="YES" NAME ="$$CURR_RPSDM_PRD_MINUS_1" PRECISION ="8" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE DATATYPE ="string" DEFAULTVALUE ="&apos;9999Q5&apos;" DESCRIPTION ="This value is used for cleanup purposes." ISEXPRESSIONVARIABLE ="NO" ISPARAM ="YES" NAME ="$$CURR_RPSDM_PRD_MINUS_2" PRECISION ="8" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE DATATYPE ="string" DEFAULTVALUE ="&apos;9999Q5&apos;" DESCRIPTION ="This value is used for cleanup purposes." ISEXPRESSIONVARIABLE ="NO" ISPARAM ="YES" NAME ="$$CURR_RPSDM_PRD_MINUS_3" PRECISION ="8" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE DATATYPE ="string" DEFAULTVALUE ="ERROR" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="YES" NAME ="$$MAX_GDX_QUARTER_ID" PRECISION ="6" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE DATATYPE ="string" DEFAULTVALUE ="ERROR!" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="YES" NAME ="$$MAX_QTR_STRT_DT" PRECISION ="12" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE DATATYPE ="string" DEFAULTVALUE ="ERROR!" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="YES" NAME ="$$MAX_QTR_END_DT" PRECISION ="12" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE DATATYPE ="string" DEFAULTVALUE ="ERROR!" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="YES" NAME ="$$MAX_QTR_PRD_ID" PRECISION ="8" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE DATATYPE ="string" DEFAULTVALUE ="&apos;9999Q5&apos;" DESCRIPTION ="This value is used for cleanup purposes." ISEXPRESSIONVARIABLE ="NO" ISPARAM ="YES" NAME ="$$CURR_RPSDM_PRD_MINUS_5" PRECISION ="8" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE DATATYPE ="string" DEFAULTVALUE ="&apos;9999Q5&apos;" DESCRIPTION ="This value is used for cleanup purposes." ISEXPRESSIONVARIABLE ="NO" ISPARAM ="YES" NAME ="$$CURR_RPSDM_PRD_MINUS_4" PRECISION ="8" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE AGGFUNCTION ="MAX" DATATYPE ="string" DEFAULTVALUE ="9999Q9" DESCRIPTION ="Default Value" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="NO" NAME ="$$QUARTER_ID" PRECISION ="6" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="YES" NAME ="$$ERR_TIMESTMP" PRECISION ="29" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="YES" NAME ="$$STRT_TIMESTMP" PRECISION ="29" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE DATATYPE ="string" DEFAULTVALUE ="&apos;9999Q5&apos;" DESCRIPTION ="This value is used for cleanup purposes." ISEXPRESSIONVARIABLE ="NO" ISPARAM ="YES" NAME ="$$CURR_RPSDM_PRD_MINUS_6" PRECISION ="8" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE DATATYPE ="string" DEFAULTVALUE ="ERROR!" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="YES" NAME ="$$MAX_RPSDM_PERIOD_ID" PRECISION ="8" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE DATATYPE ="string" DEFAULTVALUE ="ERROR" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="YES" NAME ="$$MAX_RPSDM_PERIOD_ID_NO_QT" PRECISION ="6" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="YES" NAME ="$$PRCS_STAT_TXT" PRECISION ="25" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="YES" NAME ="$$END_TIMESTMP" PRECISION ="29" SCALE ="0" USERDEFINED ="YES"/>
+        <MAPPINGVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" ISEXPRESSIONVARIABLE ="NO" ISPARAM ="YES" NAME ="$$PRCS_ID" PRECISION ="10" SCALE ="0" USERDEFINED ="YES"/>
+        <ERPINFO/>
+    </MAPPING>
+    <SHORTCUT COMMENTS ="" DBDNAME ="RPSDM_RPS" FOLDERNAME ="Shared_Rebates_RCI" NAME ="TCLAIM_RPT_DETL" OBJECTSUBTYPE ="Source Definition" OBJECTTYPE ="SOURCE" REFERENCEDDBD ="RPSDM_RPS" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="TCLAIM_RPT_DETL" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="This target object is for the Coventry payment reporting process and specifically for the Collection layout, the detail.&#xD;&#xA;" FOLDERNAME ="Shared_Rebates_RCI" NAME ="F_COVENTRY_COL_DTL_FILE" OBJECTSUBTYPE ="Target Definition" OBJECTTYPE ="TARGET" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="F_COVENTRY_COL_DTL_FILE" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="This target object is for the Coventry payment reporting process and specifically for the Collection layout, the trailer.  " FOLDERNAME ="Shared_Rebates_RCI" NAME ="F_COVENTRY_COL_TLR_FILE" OBJECTSUBTYPE ="Target Definition" OBJECTTYPE ="TARGET" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="F_COVENTRY_COL_TLR_FILE" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="This target object is for the Coventry payment reporting process and specifically for the Collection layout, the header.  " FOLDERNAME ="Shared_Rebates_RCI" NAME ="F_COVENTRY_COL_HDR_FILE" OBJECTSUBTYPE ="Target Definition" OBJECTTYPE ="TARGET" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="F_COVENTRY_COL_HDR_FILE" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="This flat file is used by the Payments Client reporting file process, and contains data from the MVS KSZ6020+KSZ6025 (via the VW_RBAT_CLNT_RPT_CNTL view).  " DBDNAME ="FlatFile" FOLDERNAME ="Shared_Rebates_RCI" NAME ="F_CLNT_RPT_MAESTRO_TRG" OBJECTSUBTYPE ="Source Definition" OBJECTTYPE ="SOURCE" REFERENCEDDBD ="FlatFile" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="F_CLNT_RPT_MAESTRO_TRG" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="This flat file is used by the Payments Client reporting file process, and contains data from the MVS KSZ6020+KSZ6025 (via the VW_RBAT_CLNT_RPT_CNTL view).  " FOLDERNAME ="Shared_Rebates_RCI" NAME ="F_CLNT_RPT_MAESTRO_TRG" OBJECTSUBTYPE ="Target Definition" OBJECTTYPE ="TARGET" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="F_CLNT_RPT_MAESTRO_TRG" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="" DBDNAME ="GDX_VRAP" FOLDERNAME ="Shared_Rebates_RCI" NAME ="RCIT_LOCK_CNTL" OBJECTSUBTYPE ="Source Definition" OBJECTTYPE ="SOURCE" REFERENCEDDBD ="GDX_VRAP" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="RCIT_LOCK_CNTL" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <SHORTCUT COMMENTS ="" FOLDERNAME ="Shared_Rebates_RCI" NAME ="RCIT_LOCK_CNTL" OBJECTSUBTYPE ="Target Definition" OBJECTTYPE ="TARGET" REFERENCETYPE ="LOCAL" REFOBJECTNAME ="RCIT_LOCK_CNTL" REPOSITORYNAME ="PCRepos_Caremark9_DEV1" VERSIONNUMBER ="1"/>
+    <CONFIG DESCRIPTION ="Default session configuration object" ISDEFAULT ="YES" NAME ="default_session_config" VERSIONNUMBER ="1">
+        <ATTRIBUTE NAME ="Advanced" VALUE =""/>
+        <ATTRIBUTE NAME ="Constraint based load ordering" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Cache LOOKUP() function" VALUE ="YES"/>
+        <ATTRIBUTE NAME ="Default buffer block size" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Line Sequential buffer length" VALUE ="1024"/>
+        <ATTRIBUTE NAME ="Maximum Memory Allowed For Auto Memory Attributes" VALUE ="5000MB"/>
+        <ATTRIBUTE NAME ="Maximum Percentage of Total Memory Allowed For Auto Memory Attributes" VALUE ="50"/>
+        <ATTRIBUTE NAME ="Additional Concurrent Pipelines for Lookup Cache Creation" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Custom Properties" VALUE =""/>
+        <ATTRIBUTE NAME ="Pre-build lookup cache" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Optimization Level" VALUE ="Medium"/>
+        <ATTRIBUTE NAME ="DateTime Format String" VALUE ="MM/DD/YYYY HH24:MI:SS.US"/>
+        <ATTRIBUTE NAME ="Pre 85 Timestamp Compatibility" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Log Options" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Save session log by" VALUE ="Session runs"/>
+        <ATTRIBUTE NAME ="Save session log for these runs" VALUE ="7"/>
+        <ATTRIBUTE NAME ="Session Log File Max Size" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Session Log File Max Time Period" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Maximum Partial Session Log Files" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Writer Commit Statistics Log Frequency" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Writer Commit Statistics Log Interval" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Error handling" VALUE =""/>
+        <ATTRIBUTE NAME ="Stop on errors" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Override tracing" VALUE ="None"/>
+        <ATTRIBUTE NAME ="On Stored Procedure error" VALUE ="Stop"/>
+        <ATTRIBUTE NAME ="On Pre-session command task error" VALUE ="Stop"/>
+        <ATTRIBUTE NAME ="On Pre-Post SQL error" VALUE ="Stop"/>
+        <ATTRIBUTE NAME ="Enable Recovery" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Error Log Type" VALUE ="None"/>
+        <ATTRIBUTE NAME ="Error Log Table Name Prefix" VALUE =""/>
+        <ATTRIBUTE NAME ="Error Log File Name" VALUE ="PMError.log"/>
+        <ATTRIBUTE NAME ="Log Source Row Data" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Data Column Delimiter" VALUE ="|"/>
+        <ATTRIBUTE NAME ="Partitioning Options" VALUE =""/>
+        <ATTRIBUTE NAME ="Dynamic Partitioning" VALUE ="Disabled"/>
+        <ATTRIBUTE NAME ="Number of Partitions" VALUE ="1"/>
+        <ATTRIBUTE NAME ="Multiplication Factor" VALUE ="Auto"/>
+        <ATTRIBUTE NAME ="Session on Grid" VALUE =""/>
+        <ATTRIBUTE NAME ="Is Enabled" VALUE ="NO"/>
+    </CONFIG>
+    <WORKFLOW DESCRIPTION ="These workflows are created from the Workflow Generation Wizard." ISENABLED ="YES" ISRUNNABLESERVICE ="NO" ISSERVICE ="NO" ISVALID ="YES" NAME ="wf_Build_Coventry_Collect_Mthly_File" REUSABLE_SCHEDULER ="NO" SCHEDULERNAME ="Scheduler" SERVERNAME ="IntSvc_Rebates_DEV1" SERVER_DOMAINNAME ="DOM_Caremark9_DEV1" SUSPEND_ON_ERROR ="NO" TASKS_MUST_RUN_ON_SERVER ="NO" VERSIONNUMBER ="1">
+        <SCHEDULER DESCRIPTION ="" NAME ="Scheduler" REUSABLE ="NO" VERSIONNUMBER ="1">
+            <SCHEDULEINFO SCHEDULETYPE ="ONDEMAND"/>
+        </SCHEDULER>
+        <TASK DESCRIPTION ="This command task will use the common UNIX scripts to concatenate the Header/Detail/Trailer files together and then the common SFTP module will compress and send the file via SFTP to the client." NAME ="Merge_SFTP_Execution" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+            <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="YES"/>
+            <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+            <VALUEPAIR EXECORDER ="1" NAME ="Concatenate_HdrDtlTrl_File" REVERSEASSIGNMENT ="NO" VALUE ="$PMRootDir/scripts/Common_Concatenate_HeaderDetailTrailer.ksh -d TgtFiles -s $$FILENAME_FINAL_WF -e txt -t $$FILENAME_FINAL_WF"/>
+            <VALUEPAIR EXECORDER ="2" NAME ="SFTP_File" REVERSEASSIGNMENT ="NO" VALUE ="$PMRootDir/scripts/Common_SFTP_Process.ksh -p  wf_Build_Coventry_Collect_Mthly_File.Merge_SFTP_Execution -s $$FILENAME_FINAL_WF.txt -t $$FILENAME_FINAL_WF.gz"/>
+        </TASK>
+        <TASK DESCRIPTION ="Assign the schema for the z/os region and the email addresses" NAME ="Assign_DB2_Email_and_Trigger_filename" REUSABLE ="NO" TYPE ="Assignment" VERSIONNUMBER ="1">
+            <ATTRIBUTE NAME ="Assignment Condition" VALUE =""/>
+            <VALUEPAIR COMMENTS ="This value is for the RPS DB2 system and changes in each region." EXECORDER ="1" NAME ="$$MVS_DB2_OWNER_WF" REVERSEASSIGNMENT ="NO" VALUE ="iif(instr(upper($PMRepositoryServiceName),&apos;DEV1&apos;) &gt; 0,&apos;DBAD1&apos;,&#xD;&#xA;iif(instr(upper($PMRepositoryServiceName),&apos;SIT1&apos;) &gt; 0,&apos;DBAX1&apos;,&#xD;&#xA;iif(instr(upper($PMRepositoryServiceName),&apos;DEV2&apos;) &gt; 0,&apos;DBAW1&apos;,&#xD;&#xA;iif(instr(upper($PMRepositoryServiceName),&apos;SIT2&apos;) &gt; 0,&apos;DBAE1&apos;,&#xD;&#xA;iif(instr(upper($PMRepositoryServiceName),&apos;PRD&apos;) &gt; 0,&apos;DBAP1&apos;,&apos;DBAD1&apos;)))))"/>
+            <VALUEPAIR COMMENTS ="This email value contains a distribution list for Aetna Coventry along with our internal CVS business group.  In DEV no emails to the users will be used." EXECORDER ="2" NAME ="$$CLNT_EMAIL_WF" REVERSEASSIGNMENT ="NO" VALUE ="iif(instr(upper($PMRepositoryServiceName),&apos;DEV&apos;) &gt;0, &apos;$PMSuccessEmailUser&apos;,&#xD;&#xA; iif(instr(upper($PMRepositoryServiceName),&apos;SIT&apos;) &gt;0, &apos;$PMSuccessEmailUser,rebates@cvscaremark.com&apos;,&#xD;&#xA; iif(instr(upper($PMRepositoryServiceName),&apos;PRD&apos;) &gt;0, &apos;DL201406131239275351@aetna.com,rebates@cvscaremark.com&apos;)&#xD;&#xA;))"/>
+            <VALUEPAIR COMMENTS ="This value is specific for this workflow and cannot be changed unless the corresponding Maestro job is changed.  This trigger file is what activates the Maestro job that executes this workflow.  This file will be removed at the end of the worklet included in this workflow." EXECORDER ="3" NAME ="$$BLD_TRG_FLE_NME_WF" REVERSEASSIGNMENT ="NO" VALUE ="&apos;Cvtry_mthly_col_rpt_file.trg&apos;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;--&apos;Coventry_mthly_col_clnt_rpt_file.trg&apos;"/>
+        </TASK>
+        <TASK DESCRIPTION ="This email task will send an email using the CLNT_EMAIL_WF variable assigned at the beginning of this workflow, informing all on the list that the process was successful." NAME ="Email_Client_Process_Successful" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+            <ATTRIBUTE NAME ="Email User Name" VALUE ="$$CLNT_EMAIL_WF"/>
+            <ATTRIBUTE NAME ="Email Subject" VALUE ="Aetna Coventry monthly collections file was sent successfully"/>
+            <ATTRIBUTE NAME ="Email Text" VALUE ="The Coventry collections file layout was built and the following file was sent to the CVS webtransport system.&#xD;&#xA;&#xD;&#xA;$$FILENAME_FINAL_WF.gz"/>
+        </TASK>
+        <TASK DESCRIPTION ="This removal will clean up all  prior versions of the permanent filename built in this process, and in the monthly Collections file process." NAME ="Cleanup_Prior_Client_Files" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+            <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="YES"/>
+            <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+            <VALUEPAIR EXECORDER ="1" NAME ="Cleanup_Prior_Client_Files" REVERSEASSIGNMENT ="NO" VALUE ="rm -f $PMTargetFileDir/*AetnaCVTY_Payment_Rebates*&#xD;&#xA;"/>
+        </TASK>
+        <TASK DESCRIPTION ="" NAME ="Start" REUSABLE ="NO" TYPE ="Start" VERSIONNUMBER ="1"/>
+        <SESSION DESCRIPTION ="set rpt_prcs_stat_cd = ‘F2’ to indicate that there was a failure in either the build transformation or the SFTPs." ISVALID ="YES" MAPPINGNAME ="m_Dummy_Parameter_Variable" NAME ="s_m_Dummy_Parameter_Variable_Set_Status_Fail" REUSABLE ="NO" SORTORDER ="Binary" VERSIONNUMBER ="1">
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="RCIT_LOCK_CNTL" STAGE ="1" TRANSFORMATIONNAME ="RCIT_LOCK_CNTL" TRANSFORMATIONTYPE ="Target Definition">
+                <ATTRIBUTE NAME ="Table Name Prefix" VALUE ="$$MVS_DB2_OWNER_WF"/>
+                <ATTRIBUTE NAME ="Pre SQL" VALUE ="update $$MVS_DB2_OWNER_WF.KSZ6020_RPT_PRCS_CNTL&#xD;&#xA; set rpt_prcs_stat_cd = &apos;F2&apos; &#xD;&#xA;  ,updt_ts = current timestamp&#xD;&#xA;  ,updt_user_id = &apos;INFA&apos;&#xD;&#xA;where rpt_prcs_nb = $$RPT_PRCS_NB_WF"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="SQ_RCIT_LOCK_CNTL" STAGE ="2" TRANSFORMATIONNAME ="SQ_RCIT_LOCK_CNTL" TRANSFORMATIONTYPE ="Source Qualifier"/>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="FIL_ALL" STAGE ="2" TRANSFORMATIONNAME ="FIL_ALL" TRANSFORMATIONTYPE ="Filter">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="0" SINSTANCENAME ="RCIT_LOCK_CNTL" STAGE ="0" TRANSFORMATIONNAME ="RCIT_LOCK_CNTL" TRANSFORMATIONTYPE ="Source Definition"/>
+            <CONFIGREFERENCE REFOBJECTNAME ="default_session_config" TYPE ="Session config"/>
+            <SESSIONCOMPONENT REFOBJECTNAME ="on_success_mail" REUSABLE ="NO" TYPE ="Success Email">
+                <TASK DESCRIPTION ="" NAME ="on_success_mail" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Email User Name" VALUE ="$PMFailureEmailUser"/>
+                    <ATTRIBUTE NAME ="Email Subject" VALUE ="FAILURE: %w - %d"/>
+                    <ATTRIBUTE NAME ="Email Text" VALUE ="An error occured in the workflow  %w running in  %d.&#xD;&#xA;&#xD;&#xA;Please check the workflow log to determine which session failed.  &#xD;&#xA;&#xD;&#xA;If the issue is fixable and this RPT_PRCS_NB should be rerun for this workflow, after fixing the error this workflow can only be rerun after the MVS $$MVS_DB2_OWNER_WF.KSZ6020_RPT_PRCS_CNTL.RPT_PRCS_STAT_CD is set to &apos;R1&apos; WHERE RPT_PRCS_NB = $$RPT_PRCS_NB_WF.&#xD;&#xA;&#xD;&#xA;If the issue is not going to be fixed and this specific RPT_PRCS_NB will not be rerun for this workflow, then the RPT_PRCS_STAT_CD -=MUST=- be set to &apos;F&apos;.  Otherwise no other RPT_PRCS_NB will ever be run for this client until the current RPT_PRCS_STAT_CD of &apos;F2&apos; is changed."/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Failure Email">
+                <TASK DESCRIPTION ="" NAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Email User Name" VALUE ="$PMFailureEmailUser"/>
+                    <ATTRIBUTE NAME ="Email Subject" VALUE ="FAILURE: %w - %d"/>
+                    <ATTRIBUTE NAME ="Email Text" VALUE ="The mapping %m ran in the %s session in the %w workflow ran in %d.&#xD;&#xA;&#xD;&#xA;%t&#xD;&#xA;&#xD;&#xA;%l&#xD;&#xA;&#xD;&#xA;%r&#xD;&#xA;&#xD;&#xA;Session Log is attached&#xD;&#xA;%g&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;Please check the workflow log to determine which session failed.  &#xD;&#xA;&#xD;&#xA;If the issue is fixable and this RPT_PRCS_NB should be rerun for this workflow,After fixing the error this workflow can only be rerun after the MVS $$MVS_DB2_OWNER_WF.KSZ6020_RPT_PRCS_CNTL.RPT_PRCS_STAT_CD is set to &apos;R1&apos; WHERE RPT_PRCS_NB = $$RPT_PRCS_NB_WF.&#xD;&#xA;&#xD;&#xA;If the issue is not going to be fixed and this specific RPT_PRCS_NB will not be rerun for this workflow, then the RPT_PRCS_STAT_CD -=MUST=- be set to &apos;F&apos;.  Otherwise no other RPT_PRCS_NB will ever be run for this client until the current RPT_PRCS_STAT_CD of &apos;F2&apos; is changed."/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Pre-session variable assignment">
+                <TASK DESCRIPTION ="" NAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Post-session success variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Post-session failure variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONEXTENSION NAME ="Relational Writer" SINSTANCENAME ="RCIT_LOCK_CNTL" SUBTYPE ="Relational Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" COMPONENTVERSION ="8005000" CONNECTIONNAME ="Mainframe_DB2" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="PWX DB2zOS" CONNECTIONTYPE ="Relational" VARIABLE =""/>
+                <ATTRIBUTE NAME ="Target load type" VALUE ="Normal"/>
+                <ATTRIBUTE NAME ="Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update as Update" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update as Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update else Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Delete" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Truncate target table option" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Reject file directory" VALUE ="$PMBadFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Reject filename" VALUE ="rcit_lock_cntl1.bad"/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION NAME ="Relational Reader" SINSTANCENAME ="SQ_RCIT_LOCK_CNTL" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Qualifier" TYPE ="READER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="RPS" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="DB2" CONNECTIONTYPE ="Relational" VARIABLE =""/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION DSQINSTNAME ="SQ_RCIT_LOCK_CNTL" DSQINSTTYPE ="Source Qualifier" NAME ="Relational Reader" SINSTANCENAME ="RCIT_LOCK_CNTL" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Definition" TYPE ="READER"/>
+            <ATTRIBUTE NAME ="General Options" VALUE =""/>
+            <ATTRIBUTE NAME ="Write Backward Compatible Session Log File" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session Log File Name" VALUE ="s_m_Dummy_Parameter_Variable_Set_Status_Working.log"/>
+            <ATTRIBUTE NAME ="Session Log File directory" VALUE ="$PMSessionLogDir&#x5c;"/>
+            <ATTRIBUTE NAME ="Parameter Filename" VALUE =""/>
+            <ATTRIBUTE NAME ="Enable Test Load" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="$Source connection value" VALUE =""/>
+            <ATTRIBUTE NAME ="$Target connection value" VALUE =""/>
+            <ATTRIBUTE NAME ="Treat source rows as" VALUE ="Insert"/>
+            <ATTRIBUTE NAME ="Commit Type" VALUE ="Target"/>
+            <ATTRIBUTE NAME ="Commit Interval" VALUE ="10000"/>
+            <ATTRIBUTE NAME ="Commit On End Of File" VALUE ="YES"/>
+            <ATTRIBUTE NAME ="Rollback Transactions on Errors" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+            <ATTRIBUTE NAME ="Java Classpath" VALUE =""/>
+            <ATTRIBUTE NAME ="Performance" VALUE =""/>
+            <ATTRIBUTE NAME ="DTM buffer size" VALUE ="Auto"/>
+            <ATTRIBUTE NAME ="Collect performance data" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Write performance data to repository" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Incremental Aggregation" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Enable high precision" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session retry on deadlock" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Pushdown Optimization" VALUE ="None"/>
+            <ATTRIBUTE NAME ="Allow Temporary View for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Temporary Sequence for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Pushdown for User Incompatible Connections" VALUE ="NO"/>
+        </SESSION>
+        <SESSION DESCRIPTION ="This process is shared between all workflows that build Client payment reports.&#xD;&#xA;It will read the trigger file built to run this workflow and use the values inside to set the needed workflow variables.&#xD;&#xA;No data will come out of the session, it is only used to assign the workflow variables.&#xD;&#xA;This trigger file will be removed at the end of the workflow this session is used in.&#xD;&#xA;High precision must be enabled." ISVALID ="YES" MAPPINGNAME ="m_Read_Trg_Clnt_Rpt_Cntl" NAME ="s_m_Read_Trg_Clnt_Rpt_Cntl" REUSABLE ="NO" SORTORDER ="Binary" VERSIONNUMBER ="1">
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="F_CLNT_RPT_MAESTRO_TRG1" STAGE ="1" TRANSFORMATIONNAME ="F_CLNT_RPT_MAESTRO_TRG1" TRANSFORMATIONTYPE ="Target Definition">
+                <FLATFILE CODEPAGE ="MS1252" CONSECDELIMITERSASONE ="NO" DELIMITED ="NO" DELIMITERS ="," ESCAPE_CHARACTER ="" KEEPESCAPECHAR ="NO" LINESEQUENTIAL ="NO" MULTIDELIMITERSASAND ="NO" NULLCHARTYPE ="ASCII" NULL_CHARACTER ="*" PADBYTES ="1" QUOTE_CHARACTER ="NONE" REPEATABLE ="NO" ROWDELIMITER ="0" SKIPROWS ="0" STRIPTRAILINGBLANKS ="NO"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="0" SINSTANCENAME ="F_CLNT_RPT_MAESTRO_TRG" STAGE ="0" TRANSFORMATIONNAME ="F_CLNT_RPT_MAESTRO_TRG" TRANSFORMATIONTYPE ="Source Definition">
+                <FLATFILE CODEPAGE ="US-ASCII" CONSECDELIMITERSASONE ="NO" DELIMITED ="YES" DELIMITERS ="|" ESCAPE_CHARACTER ="" KEEPESCAPECHAR ="NO" LINESEQUENTIAL ="NO" MULTIDELIMITERSASAND ="NO" NULLCHARTYPE ="ASCII" NULL_CHARACTER ="*" PADBYTES ="1" QUOTE_CHARACTER ="NONE" REPEATABLE ="NO" ROWDELIMITER ="10" SKIPROWS ="0" STRIPTRAILINGBLANKS ="NO"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="SQ_F_CLNT_RPT_MAESTRO_TRG" STAGE ="2" TRANSFORMATIONNAME ="SQ_F_CLNT_RPT_MAESTRO_TRG" TRANSFORMATIONTYPE ="Source Qualifier"/>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="EXP_Assign_Mapping_Variables" STAGE ="2" TRANSFORMATIONNAME ="EXP_Assign_Mapping_Variables" TRANSFORMATIONTYPE ="Expression">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="FIL_Block_Data" STAGE ="2" TRANSFORMATIONNAME ="FIL_Block_Data" TRANSFORMATIONTYPE ="Filter">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <CONFIGREFERENCE REFOBJECTNAME ="default_session_config" TYPE ="Session config"/>
+            <SESSIONCOMPONENT REFOBJECTNAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Failure Email">
+                <TASK DESCRIPTION ="" NAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Email User Name" VALUE ="$PMFailureEmailUser"/>
+                    <ATTRIBUTE NAME ="Email Subject" VALUE ="FAILURE: %w - %d"/>
+                    <ATTRIBUTE NAME ="Email Text" VALUE ="The mapping %m ran in the %s session in the %w workflow ran in %d.&#xD;&#xA;&#xD;&#xA;%t&#xD;&#xA;&#xD;&#xA;%l&#xD;&#xA;&#xD;&#xA;%r&#xD;&#xA;&#xD;&#xA;Session Log is attached&#xD;&#xA;%g"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Pre-session variable assignment">
+                <TASK DESCRIPTION ="" NAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+                <VALUEPAIR EXECORDER ="1" NAME ="$$RPT_PRCS_NB" REVERSEASSIGNMENT ="NO" VALUE ="$$RPT_PRCS_NB_WF"/>
+                <VALUEPAIR EXECORDER ="2" NAME ="$$RPT_CLNT_SHORT_NME" REVERSEASSIGNMENT ="NO" VALUE ="$$RPT_CLNT_SHORT_NME_WF"/>
+                <VALUEPAIR EXECORDER ="3" NAME ="$$STMT_END_DT" REVERSEASSIGNMENT ="NO" VALUE ="$$STMT_END_DT_WF"/>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Post-session success variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+                <VALUEPAIR EXECORDER ="1" NAME ="$$RPT_PRCS_NB_WF" REVERSEASSIGNMENT ="NO" VALUE ="$$RPT_PRCS_NB"/>
+                <VALUEPAIR EXECORDER ="2" NAME ="$$RPT_CLNT_SHORT_NME_WF" REVERSEASSIGNMENT ="NO" VALUE ="$$RPT_CLNT_SHORT_NME"/>
+                <VALUEPAIR EXECORDER ="3" NAME ="$$STMT_END_DT_WF" REVERSEASSIGNMENT ="NO" VALUE ="$$STMT_END_DT"/>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Post-session failure variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONEXTENSION NAME ="File Writer" SINSTANCENAME ="F_CLNT_RPT_MAESTRO_TRG1" SUBTYPE ="File Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+                <CONNECTIONREFERENCE CNXREFNAME ="Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="" VARIABLE =""/>
+                <ATTRIBUTE NAME ="Merge Type" VALUE ="No Merge"/>
+                <ATTRIBUTE NAME ="Merge File Directory" VALUE ="$PMTargetFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Merge File Name" VALUE ="f_clnt_rpt_maestro_trg1.out"/>
+                <ATTRIBUTE NAME ="Append if Exists" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Create Target Directory" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Header Options" VALUE ="No Header"/>
+                <ATTRIBUTE NAME ="Header Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Footer Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Output Type" VALUE ="File"/>
+                <ATTRIBUTE NAME ="Merge Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Output file directory" VALUE ="$PMTargetFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Output filename" VALUE ="No_Data_Out.out"/>
+                <ATTRIBUTE NAME ="Reject file directory" VALUE ="$PMBadFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Reject filename" VALUE ="No_Data_Out.bad"/>
+                <ATTRIBUTE NAME ="Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Codepage Parameter" VALUE =""/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION DSQINSTNAME ="SQ_F_CLNT_RPT_MAESTRO_TRG" DSQINSTTYPE ="Source Qualifier" NAME ="File Reader" SINSTANCENAME ="F_CLNT_RPT_MAESTRO_TRG" SUBTYPE ="File Reader" TRANSFORMATIONTYPE ="Source Definition" TYPE ="READER">
+                <CONNECTIONREFERENCE CNXREFNAME ="Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="" VARIABLE =""/>
+                <ATTRIBUTE NAME ="Input Type" VALUE ="File"/>
+                <ATTRIBUTE NAME ="Concurrent read partitioning" VALUE ="Optimize throughput"/>
+                <ATTRIBUTE NAME ="Command Type" VALUE ="Command Generating Data"/>
+                <ATTRIBUTE NAME ="Source filetype" VALUE ="Direct"/>
+                <ATTRIBUTE NAME ="Source file directory" VALUE ="$PMSourceFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Source filename" VALUE ="$$BLD_TRG_FLE_NME_WF"/>
+                <ATTRIBUTE NAME ="Command" VALUE =""/>
+                <ATTRIBUTE NAME ="File Reader Truncate String Null" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Codepage Parameter" VALUE =""/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION NAME ="File Reader" SINSTANCENAME ="SQ_F_CLNT_RPT_MAESTRO_TRG" SUBTYPE ="File Reader" TRANSFORMATIONTYPE ="Source Qualifier" TYPE ="READER"/>
+            <ATTRIBUTE NAME ="General Options" VALUE =""/>
+            <ATTRIBUTE NAME ="Write Backward Compatible Session Log File" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session Log File Name" VALUE ="s_m_Read_Trg_Clnt_Rpt_Cntl.log"/>
+            <ATTRIBUTE NAME ="Session Log File directory" VALUE ="$PMSessionLogDir&#x5c;"/>
+            <ATTRIBUTE NAME ="Parameter Filename" VALUE =""/>
+            <ATTRIBUTE NAME ="Enable Test Load" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="$Source connection value" VALUE =""/>
+            <ATTRIBUTE NAME ="$Target connection value" VALUE =""/>
+            <ATTRIBUTE NAME ="Treat source rows as" VALUE ="Insert"/>
+            <ATTRIBUTE NAME ="Commit Type" VALUE ="Target"/>
+            <ATTRIBUTE NAME ="Commit Interval" VALUE ="10000"/>
+            <ATTRIBUTE NAME ="Commit On End Of File" VALUE ="YES"/>
+            <ATTRIBUTE NAME ="Rollback Transactions on Errors" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+            <ATTRIBUTE NAME ="Java Classpath" VALUE =""/>
+            <ATTRIBUTE NAME ="Performance" VALUE =""/>
+            <ATTRIBUTE NAME ="DTM buffer size" VALUE ="Auto"/>
+            <ATTRIBUTE NAME ="Collect performance data" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Write performance data to repository" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Incremental Aggregation" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Enable high precision" VALUE ="YES"/>
+            <ATTRIBUTE NAME ="Session retry on deadlock" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Pushdown Optimization" VALUE ="None"/>
+            <ATTRIBUTE NAME ="Allow Temporary View for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Temporary Sequence for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Pushdown for User Incompatible Connections" VALUE ="NO"/>
+        </SESSION>
+        <SESSION DESCRIPTION ="This session will read from RPS.TCLAIM_RPT_DETL all the rows for the RPT_PRCS_NB being processed.  It will build 3 outputs – 1 header, 1 trailer, and a detail file.&#xD;&#xA;High precision must be enabled." ISVALID ="YES" MAPPINGNAME ="m_Build_Coventry_Collect_Mthly_File" NAME ="s_m_Build_Coventry_Col_Mthly_File" REUSABLE ="NO" SORTORDER ="Binary" VERSIONNUMBER ="1">
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="0" SINSTANCENAME ="TCLAIM_RPT_DETL" STAGE ="0" TRANSFORMATIONNAME ="TCLAIM_RPT_DETL" TRANSFORMATIONTYPE ="Source Definition">
+                <ATTRIBUTE NAME ="Owner Name" VALUE ="RPS"/>
+                <ATTRIBUTE NAME ="Source Table Name" VALUE ="TCLAIM_RPT_DETL"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="SQ_TCLAIM_RPT_DETL" STAGE ="1" TRANSFORMATIONNAME ="SQ_TCLAIM_RPT_DETL" TRANSFORMATIONTYPE ="Source Qualifier"/>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="EXP_Format_File_Output" STAGE ="1" TRANSFORMATIONNAME ="EXP_Format_File_Output" TRANSFORMATIONTYPE ="Expression">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="HASH AUTO KEYS" PIPELINE ="1" SINSTANCENAME ="AGG_Footer_values" STAGE ="2" TRANSFORMATIONNAME ="AGG_Footer_values" TRANSFORMATIONTYPE ="Aggregator">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="EXP_Format_Header_Trailer" STAGE ="2" TRANSFORMATIONNAME ="EXP_Format_Header_Trailer" TRANSFORMATIONTYPE ="Expression">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="F_COVENTRY_COL_HDR_FILE" STAGE ="3" TRANSFORMATIONNAME ="F_COVENTRY_COL_HDR_FILE" TRANSFORMATIONTYPE ="Target Definition">
+                <FLATFILE CODEPAGE ="MS1252" CONSECDELIMITERSASONE ="NO" DELIMITED ="NO" DELIMITERS ="," ESCAPE_CHARACTER ="" KEEPESCAPECHAR ="NO" LINESEQUENTIAL ="NO" MULTIDELIMITERSASAND ="NO" NULLCHARTYPE ="ASCII" NULL_CHARACTER ="*" PADBYTES ="1" QUOTE_CHARACTER ="NONE" REPEATABLE ="NO" ROWDELIMITER ="0" SKIPROWS ="0" STRIPTRAILINGBLANKS ="NO"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="F_COVENTRY_COL_TLR_FILE" STAGE ="4" TRANSFORMATIONNAME ="F_COVENTRY_COL_TLR_FILE" TRANSFORMATIONTYPE ="Target Definition">
+                <FLATFILE CODEPAGE ="MS1252" CONSECDELIMITERSASONE ="NO" DELIMITED ="NO" DELIMITERS ="," ESCAPE_CHARACTER ="" KEEPESCAPECHAR ="NO" LINESEQUENTIAL ="NO" MULTIDELIMITERSASAND ="NO" NULLCHARTYPE ="ASCII" NULL_CHARACTER ="*" PADBYTES ="1" QUOTE_CHARACTER ="NONE" REPEATABLE ="NO" ROWDELIMITER ="0" SKIPROWS ="0" STRIPTRAILINGBLANKS ="NO"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="F_COVENTRY_COL_DTL_FILE" STAGE ="5" TRANSFORMATIONNAME ="F_COVENTRY_COL_DTL_FILE" TRANSFORMATIONTYPE ="Target Definition">
+                <FLATFILE CODEPAGE ="MS1252" CONSECDELIMITERSASONE ="NO" DELIMITED ="NO" DELIMITERS ="," ESCAPE_CHARACTER ="" KEEPESCAPECHAR ="NO" LINESEQUENTIAL ="NO" MULTIDELIMITERSASAND ="NO" NULLCHARTYPE ="ASCII" NULL_CHARACTER ="*" PADBYTES ="1" QUOTE_CHARACTER ="NONE" REPEATABLE ="NO" ROWDELIMITER ="0" SKIPROWS ="0" STRIPTRAILINGBLANKS ="NO"/>
+            </SESSTRANSFORMATIONINST>
+            <CONFIGREFERENCE REFOBJECTNAME ="default_session_config" TYPE ="Session config"/>
+            <SESSIONCOMPONENT REFOBJECTNAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Failure Email">
+                <TASK DESCRIPTION ="" NAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Email User Name" VALUE ="$PMFailureEmailUser"/>
+                    <ATTRIBUTE NAME ="Email Subject" VALUE ="FAILURE: %w - %d"/>
+                    <ATTRIBUTE NAME ="Email Text" VALUE ="The mapping %m ran in the %s session in the %w workflow ran in %d.&#xD;&#xA;&#xD;&#xA;%t&#xD;&#xA;&#xD;&#xA;%l&#xD;&#xA;&#xD;&#xA;%r&#xD;&#xA;&#xD;&#xA;Session Log is attached&#xD;&#xA;%g"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Pre-session variable assignment">
+                <TASK DESCRIPTION ="" NAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+                <VALUEPAIR EXECORDER ="1" NAME ="$$FILENAME_FINAL" REVERSEASSIGNMENT ="NO" VALUE ="$$FILENAME_FINAL_WF"/>
+                <VALUEPAIR EXECORDER ="2" NAME ="$$RPT_PRCS_NB" REVERSEASSIGNMENT ="NO" VALUE ="$$RPT_PRCS_NB_WF"/>
+                <VALUEPAIR EXECORDER ="3" NAME ="$$STMT_END_DT" REVERSEASSIGNMENT ="NO" VALUE ="$$STMT_END_DT_WF"/>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Post-session success variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+                <VALUEPAIR EXECORDER ="1" NAME ="$$FILENAME_FINAL_WF" REVERSEASSIGNMENT ="NO" VALUE ="$$FILENAME_FINAL"/>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Post-session failure variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONEXTENSION DSQINSTNAME ="SQ_TCLAIM_RPT_DETL" DSQINSTTYPE ="Source Qualifier" NAME ="Relational Reader" SINSTANCENAME ="TCLAIM_RPT_DETL" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Definition" TYPE ="READER"/>
+            <SESSIONEXTENSION NAME ="Relational Reader" SINSTANCENAME ="SQ_TCLAIM_RPT_DETL" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Qualifier" TYPE ="READER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="Relational" VARIABLE ="$Source"/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION NAME ="File Writer" SINSTANCENAME ="F_COVENTRY_COL_HDR_FILE" SUBTYPE ="File Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+                <CONNECTIONREFERENCE CNXREFNAME ="Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="" VARIABLE =""/>
+                <ATTRIBUTE NAME ="Merge Type" VALUE ="No Merge"/>
+                <ATTRIBUTE NAME ="Merge File Directory" VALUE ="$PMTargetFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Merge File Name" VALUE ="f_coventry_col_hdr_file1.out"/>
+                <ATTRIBUTE NAME ="Append if Exists" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Create Target Directory" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Header Options" VALUE ="No Header"/>
+                <ATTRIBUTE NAME ="Header Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Footer Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Output Type" VALUE ="File"/>
+                <ATTRIBUTE NAME ="Merge Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Output file directory" VALUE ="$PMTargetFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Output filename" VALUE ="Filename_Dynamically_Built_in_Mapping.out"/>
+                <ATTRIBUTE NAME ="Reject file directory" VALUE ="$PMBadFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Reject filename" VALUE ="Filename_Dynamically_Built_in_Mapping.bad"/>
+                <ATTRIBUTE NAME ="Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Codepage Parameter" VALUE =""/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION NAME ="File Writer" SINSTANCENAME ="F_COVENTRY_COL_TLR_FILE" SUBTYPE ="File Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+                <CONNECTIONREFERENCE CNXREFNAME ="Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="" VARIABLE =""/>
+                <ATTRIBUTE NAME ="Merge Type" VALUE ="No Merge"/>
+                <ATTRIBUTE NAME ="Merge File Directory" VALUE ="$PMTargetFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Merge File Name" VALUE ="f_coventry_col_tlr_file1.out"/>
+                <ATTRIBUTE NAME ="Append if Exists" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Create Target Directory" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Header Options" VALUE ="No Header"/>
+                <ATTRIBUTE NAME ="Header Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Footer Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Output Type" VALUE ="File"/>
+                <ATTRIBUTE NAME ="Merge Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Output file directory" VALUE ="$PMTargetFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Output filename" VALUE ="Filename_Dynamically_Built_in_Mapping.out"/>
+                <ATTRIBUTE NAME ="Reject file directory" VALUE ="$PMBadFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Reject filename" VALUE ="Filename_Dynamically_Built_in_Mapping.bad"/>
+                <ATTRIBUTE NAME ="Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Codepage Parameter" VALUE =""/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION NAME ="File Writer" SINSTANCENAME ="F_COVENTRY_COL_DTL_FILE" SUBTYPE ="File Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+                <CONNECTIONREFERENCE CNXREFNAME ="Connection" CONNECTIONNAME ="" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="" CONNECTIONTYPE ="" VARIABLE =""/>
+                <ATTRIBUTE NAME ="Merge Type" VALUE ="No Merge"/>
+                <ATTRIBUTE NAME ="Merge File Directory" VALUE ="$PMTargetFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Merge File Name" VALUE ="f_coventry_col_dtl_file1.out"/>
+                <ATTRIBUTE NAME ="Append if Exists" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Create Target Directory" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Header Options" VALUE ="No Header"/>
+                <ATTRIBUTE NAME ="Header Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Footer Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Output Type" VALUE ="File"/>
+                <ATTRIBUTE NAME ="Merge Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Output file directory" VALUE ="$PMTargetFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Output filename" VALUE ="Filename_Dynamically_Built_in_Mapping.out"/>
+                <ATTRIBUTE NAME ="Reject file directory" VALUE ="$PMBadFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Reject filename" VALUE ="Filename_Dynamically_Built_in_Mapping.bad"/>
+                <ATTRIBUTE NAME ="Command" VALUE =""/>
+                <ATTRIBUTE NAME ="Codepage Parameter" VALUE =""/>
+            </SESSIONEXTENSION>
+            <ATTRIBUTE NAME ="General Options" VALUE =""/>
+            <ATTRIBUTE NAME ="Write Backward Compatible Session Log File" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session Log File Name" VALUE ="s_m_Build_Coventry_Col_Mthly_File.log"/>
+            <ATTRIBUTE NAME ="Session Log File directory" VALUE ="$PMSessionLogDir&#x5c;"/>
+            <ATTRIBUTE NAME ="Parameter Filename" VALUE =""/>
+            <ATTRIBUTE NAME ="Enable Test Load" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="$Source connection value" VALUE ="Relational:RPS"/>
+            <ATTRIBUTE NAME ="$Target connection value" VALUE =""/>
+            <ATTRIBUTE NAME ="Treat source rows as" VALUE ="Insert"/>
+            <ATTRIBUTE NAME ="Commit Type" VALUE ="Target"/>
+            <ATTRIBUTE NAME ="Commit Interval" VALUE ="10000"/>
+            <ATTRIBUTE NAME ="Commit On End Of File" VALUE ="YES"/>
+            <ATTRIBUTE NAME ="Rollback Transactions on Errors" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+            <ATTRIBUTE NAME ="Java Classpath" VALUE =""/>
+            <ATTRIBUTE NAME ="Performance" VALUE =""/>
+            <ATTRIBUTE NAME ="DTM buffer size" VALUE ="24000000"/>
+            <ATTRIBUTE NAME ="Collect performance data" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Write performance data to repository" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Incremental Aggregation" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Enable high precision" VALUE ="YES"/>
+            <ATTRIBUTE NAME ="Session retry on deadlock" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Pushdown Optimization" VALUE ="None"/>
+            <ATTRIBUTE NAME ="Allow Temporary View for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Temporary Sequence for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Pushdown for User Incompatible Connections" VALUE ="NO"/>
+        </SESSION>
+        <SESSION DESCRIPTION ="This session will set the KSZ6020 status for RPT_PRCS_STAT_CD = &apos;P2&apos;(report in progress) using the wf variable $$RPT_PRCS_NB_WF, from the current value of &apos;R1&apos;." ISVALID ="YES" MAPPINGNAME ="m_Dummy_Parameter_Variable" NAME ="s_m_Dummy_Parameter_Variable_Set_Status_Working" REUSABLE ="NO" SORTORDER ="Binary" VERSIONNUMBER ="1">
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="RCIT_LOCK_CNTL" STAGE ="1" TRANSFORMATIONNAME ="RCIT_LOCK_CNTL" TRANSFORMATIONTYPE ="Target Definition">
+                <ATTRIBUTE NAME ="Table Name Prefix" VALUE ="$$MVS_DB2_OWNER_WF"/>
+                <ATTRIBUTE NAME ="Pre SQL" VALUE ="update $$MVS_DB2_OWNER_WF.KSZ6020_RPT_PRCS_CNTL &#xD;&#xA;set rpt_prcs_stat_cd = &apos;P2&apos; &#xD;&#xA;  ,updt_ts = current timestamp&#xD;&#xA;  ,updt_user_id = &apos;INFA&apos;&#xD;&#xA;where rpt_prcs_nb = $$RPT_PRCS_NB_WF;&#xD;&#xA;commit;"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="SQ_RCIT_LOCK_CNTL" STAGE ="2" TRANSFORMATIONNAME ="SQ_RCIT_LOCK_CNTL" TRANSFORMATIONTYPE ="Source Qualifier"/>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="FIL_ALL" STAGE ="2" TRANSFORMATIONNAME ="FIL_ALL" TRANSFORMATIONTYPE ="Filter">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="0" SINSTANCENAME ="RCIT_LOCK_CNTL" STAGE ="0" TRANSFORMATIONNAME ="RCIT_LOCK_CNTL" TRANSFORMATIONTYPE ="Source Definition"/>
+            <CONFIGREFERENCE REFOBJECTNAME ="default_session_config" TYPE ="Session config"/>
+            <SESSIONCOMPONENT REFOBJECTNAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Failure Email">
+                <TASK DESCRIPTION ="" NAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Email User Name" VALUE ="$PMFailureEmailUser"/>
+                    <ATTRIBUTE NAME ="Email Subject" VALUE ="FAILURE: %w - %d"/>
+                    <ATTRIBUTE NAME ="Email Text" VALUE ="The session that failed changes the MVS $$MVS_DB2_OWNER_WF.KSZ6020_RPT_PRCS_CNTL.RPT_PRCS_TYP_CD from &apos;R1&apos; to &apos;P2&apos;.  Depending on where this session failure occurred, the row for $$RPT_PRCS_NB_WF may or may not have been changed to &apos;P2&apos;.  &#xD;&#xA;&#xD;&#xA;If it was updated to &apos;P2&apos;, then after determining the cause of the abend and applying any fix, the value needs to be reset to &apos;R1&apos; WHERE RPT_PRCS_NB = $$RPT_PRCS_NB_WF..&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;The mapping %m ran in the %s session in the %w workflow ran in %d.&#xD;&#xA;&#xD;&#xA;%t&#xD;&#xA;&#xD;&#xA;%l&#xD;&#xA;&#xD;&#xA;%r&#xD;&#xA;&#xD;&#xA;Session Log is attached&#xD;&#xA;%g"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Pre-session variable assignment">
+                <TASK DESCRIPTION ="" NAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Post-session success variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Post-session failure variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONEXTENSION NAME ="Relational Writer" SINSTANCENAME ="RCIT_LOCK_CNTL" SUBTYPE ="Relational Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" COMPONENTVERSION ="8005000" CONNECTIONNAME ="Mainframe_DB2" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="PWX DB2zOS" CONNECTIONTYPE ="Relational" VARIABLE =""/>
+                <ATTRIBUTE NAME ="Target load type" VALUE ="Normal"/>
+                <ATTRIBUTE NAME ="Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update as Update" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update as Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update else Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Delete" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Truncate target table option" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Reject file directory" VALUE ="$PMBadFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Reject filename" VALUE ="rcit_lock_cntl1.bad"/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION NAME ="Relational Reader" SINSTANCENAME ="SQ_RCIT_LOCK_CNTL" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Qualifier" TYPE ="READER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="RPS" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="DB2" CONNECTIONTYPE ="Relational" VARIABLE =""/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION DSQINSTNAME ="SQ_RCIT_LOCK_CNTL" DSQINSTTYPE ="Source Qualifier" NAME ="Relational Reader" SINSTANCENAME ="RCIT_LOCK_CNTL" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Definition" TYPE ="READER"/>
+            <ATTRIBUTE NAME ="General Options" VALUE =""/>
+            <ATTRIBUTE NAME ="Write Backward Compatible Session Log File" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session Log File Name" VALUE ="s_m_Dummy_Parameter_Variable_Set_Status_Working.log"/>
+            <ATTRIBUTE NAME ="Session Log File directory" VALUE ="$PMSessionLogDir&#x5c;"/>
+            <ATTRIBUTE NAME ="Parameter Filename" VALUE =""/>
+            <ATTRIBUTE NAME ="Enable Test Load" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="$Source connection value" VALUE =""/>
+            <ATTRIBUTE NAME ="$Target connection value" VALUE =""/>
+            <ATTRIBUTE NAME ="Treat source rows as" VALUE ="Insert"/>
+            <ATTRIBUTE NAME ="Commit Type" VALUE ="Target"/>
+            <ATTRIBUTE NAME ="Commit Interval" VALUE ="10000"/>
+            <ATTRIBUTE NAME ="Commit On End Of File" VALUE ="YES"/>
+            <ATTRIBUTE NAME ="Rollback Transactions on Errors" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+            <ATTRIBUTE NAME ="Java Classpath" VALUE =""/>
+            <ATTRIBUTE NAME ="Performance" VALUE =""/>
+            <ATTRIBUTE NAME ="DTM buffer size" VALUE ="Auto"/>
+            <ATTRIBUTE NAME ="Collect performance data" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Write performance data to repository" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Incremental Aggregation" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Enable high precision" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session retry on deadlock" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Pushdown Optimization" VALUE ="None"/>
+            <ATTRIBUTE NAME ="Allow Temporary View for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Temporary Sequence for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Pushdown for User Incompatible Connections" VALUE ="NO"/>
+        </SESSION>
+        <SESSION DESCRIPTION ="set rpt_prcs_stat_cd = ‘C’ to indicate the process has completed" ISVALID ="YES" MAPPINGNAME ="m_Dummy_Parameter_Variable" NAME ="s_m_Dummy_Parameter_Variable_Set_Status_Complete" REUSABLE ="NO" SORTORDER ="Binary" VERSIONNUMBER ="1">
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="RCIT_LOCK_CNTL" STAGE ="1" TRANSFORMATIONNAME ="RCIT_LOCK_CNTL" TRANSFORMATIONTYPE ="Target Definition">
+                <ATTRIBUTE NAME ="Table Name Prefix" VALUE ="$$MVS_DB2_OWNER_WF"/>
+                <ATTRIBUTE NAME ="Pre SQL" VALUE ="update $$MVS_DB2_OWNER_WF.KSZ6020_RPT_PRCS_CNTL&#xD;&#xA; set rpt_prcs_stat_cd = &apos;C&apos; &#xD;&#xA;  ,updt_ts = current timestamp&#xD;&#xA;  ,updt_user_id = &apos;INFA&apos;&#xD;&#xA;where rpt_prcs_nb = $$RPT_PRCS_NB_WF;&#xD;&#xA;commit;"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="YES" PARTITIONTYPE ="PASS THROUGH" PIPELINE ="1" SINSTANCENAME ="SQ_RCIT_LOCK_CNTL" STAGE ="2" TRANSFORMATIONNAME ="SQ_RCIT_LOCK_CNTL" TRANSFORMATIONTYPE ="Source Qualifier"/>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="1" SINSTANCENAME ="FIL_ALL" STAGE ="2" TRANSFORMATIONNAME ="FIL_ALL" TRANSFORMATIONTYPE ="Filter">
+                <PARTITION DESCRIPTION ="" NAME ="Partition #1"/>
+            </SESSTRANSFORMATIONINST>
+            <SESSTRANSFORMATIONINST ISREPARTITIONPOINT ="NO" PIPELINE ="0" SINSTANCENAME ="RCIT_LOCK_CNTL" STAGE ="0" TRANSFORMATIONNAME ="RCIT_LOCK_CNTL" TRANSFORMATIONTYPE ="Source Definition"/>
+            <CONFIGREFERENCE REFOBJECTNAME ="default_session_config" TYPE ="Session config"/>
+            <SESSIONCOMPONENT REFOBJECTNAME ="post_session_success_command" REUSABLE ="NO" TYPE ="Post-session success command">
+                <TASK DESCRIPTION ="" NAME ="post_session_success_command" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="YES"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                    <VALUEPAIR COMMENTS ="Removes the Maestro trigger file that triggered the Maestro job that executed this workflow." EXECORDER ="1" NAME ="Remove_Maestro_Trigger" REVERSEASSIGNMENT ="NO" VALUE ="rm -f $PMSourceFileDir/$$BLD_TRG_FLE_NME_WF"/>
+                    <VALUEPAIR COMMENTS ="During testing this was not accepting both the WKLT variables seperated by the underscore, so I hardcoded the client name since it would always be Coventry.&#xD;&#xA;" EXECORDER ="2" NAME ="Remove_Source_Run_Files" REVERSEASSIGNMENT ="NO" VALUE ="rm -f $PMSourceFileDir/COVENTRY_$$RPT_PRCS_NB_WF*"/>
+                    <VALUEPAIR COMMENTS ="During testing this was not accepting both the WKLT variables seperated by the underscore, so I hardcoded the client name since it would always be Coventry.&#xD;&#xA;" EXECORDER ="3" NAME ="Remove_Target_Run_Files" REVERSEASSIGNMENT ="NO" VALUE ="rm -f $PMTargetFileDir/COVENTRY_$$RPT_PRCS_NB_WF*"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Failure Email">
+                <TASK DESCRIPTION ="" NAME ="on_failure_mail" REUSABLE ="NO" TYPE ="Email" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Email User Name" VALUE ="$PMFailureEmailUser"/>
+                    <ATTRIBUTE NAME ="Email Subject" VALUE ="FAILURE: %w - %d"/>
+                    <ATTRIBUTE NAME ="Email Text" VALUE ="The session that failed changes the MVS $$MVS_DB2_OWNER_WF.KSZ6020_RPT_PRCS_CNTL.RPT_PRCS_STAT_CD from &apos;P2&apos; to &apos;C&apos;.  Depending on where this session failure occurred, the row may or may not have been changed to &apos;C&apos;.  Since this is one of the last steps in the process, determination of what caused the error needs to be evaluated and then a plan to complete the remaining steps needs to be made.&#xD;&#xA;&#xD;&#xA;Since the process completed all prior steps successfully, it is suggested that the process IS NOT RESTARTED FROM THE TOP.&#xD;&#xA;&#xD;&#xA;This session should have removed the trigger file $PMSourceFileDir/$$BLD_TRG_FLE_NME_WF - if it did not complete this, do it manually.&#xD;&#xA;&#xD;&#xA;This session should have triggered an email to the client (next email task in wf).  If that did not run, send the information to the DL manually.&#xD;&#xA;&#xD;&#xA;If the RPT_PRCS_STAT_CD was NOT updated to &apos;C&apos;, do that update manually WHERE RPT_PRCS_NB = $$RPT_PRCS_NB_WF.&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;The mapping %m ran in the %s session in the %w workflow ran in %d.&#xD;&#xA;&#xD;&#xA;%t&#xD;&#xA;&#xD;&#xA;%l&#xD;&#xA;&#xD;&#xA;%r&#xD;&#xA;&#xD;&#xA;Session Log is attached&#xD;&#xA;%g"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Pre-session variable assignment">
+                <TASK DESCRIPTION ="" NAME ="presession_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Post-session success variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_success_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONCOMPONENT REFOBJECTNAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Post-session failure variable assignment">
+                <TASK DESCRIPTION ="" NAME ="postsession_failure_variable_assignment" REUSABLE ="NO" TYPE ="Command" VERSIONNUMBER ="1">
+                    <ATTRIBUTE NAME ="Fail task if any command fails" VALUE ="NO"/>
+                    <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+                </TASK>
+            </SESSIONCOMPONENT>
+            <SESSIONEXTENSION NAME ="Relational Writer" SINSTANCENAME ="RCIT_LOCK_CNTL" SUBTYPE ="Relational Writer" TRANSFORMATIONTYPE ="Target Definition" TYPE ="WRITER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" COMPONENTVERSION ="8005000" CONNECTIONNAME ="Mainframe_DB2" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="PWX DB2zOS" CONNECTIONTYPE ="Relational" VARIABLE =""/>
+                <ATTRIBUTE NAME ="Target load type" VALUE ="Normal"/>
+                <ATTRIBUTE NAME ="Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update as Update" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update as Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Update else Insert" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Delete" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Truncate target table option" VALUE ="NO"/>
+                <ATTRIBUTE NAME ="Reject file directory" VALUE ="$PMBadFileDir&#x5c;"/>
+                <ATTRIBUTE NAME ="Reject filename" VALUE ="rcit_lock_cntl1.bad"/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION NAME ="Relational Reader" SINSTANCENAME ="SQ_RCIT_LOCK_CNTL" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Qualifier" TYPE ="READER">
+                <CONNECTIONREFERENCE CNXREFNAME ="DB Connection" CONNECTIONNAME ="RPS" CONNECTIONNUMBER ="1" CONNECTIONSUBTYPE ="DB2" CONNECTIONTYPE ="Relational" VARIABLE =""/>
+            </SESSIONEXTENSION>
+            <SESSIONEXTENSION DSQINSTNAME ="SQ_RCIT_LOCK_CNTL" DSQINSTTYPE ="Source Qualifier" NAME ="Relational Reader" SINSTANCENAME ="RCIT_LOCK_CNTL" SUBTYPE ="Relational Reader" TRANSFORMATIONTYPE ="Source Definition" TYPE ="READER"/>
+            <ATTRIBUTE NAME ="General Options" VALUE =""/>
+            <ATTRIBUTE NAME ="Write Backward Compatible Session Log File" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session Log File Name" VALUE ="s_m_Dummy_Parameter_Variable_Set_Status_Working.log"/>
+            <ATTRIBUTE NAME ="Session Log File directory" VALUE ="$PMSessionLogDir&#x5c;"/>
+            <ATTRIBUTE NAME ="Parameter Filename" VALUE =""/>
+            <ATTRIBUTE NAME ="Enable Test Load" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="$Source connection value" VALUE =""/>
+            <ATTRIBUTE NAME ="$Target connection value" VALUE =""/>
+            <ATTRIBUTE NAME ="Treat source rows as" VALUE ="Insert"/>
+            <ATTRIBUTE NAME ="Commit Type" VALUE ="Target"/>
+            <ATTRIBUTE NAME ="Commit Interval" VALUE ="10000"/>
+            <ATTRIBUTE NAME ="Commit On End Of File" VALUE ="YES"/>
+            <ATTRIBUTE NAME ="Rollback Transactions on Errors" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Recovery Strategy" VALUE ="Fail task and continue workflow"/>
+            <ATTRIBUTE NAME ="Java Classpath" VALUE =""/>
+            <ATTRIBUTE NAME ="Performance" VALUE =""/>
+            <ATTRIBUTE NAME ="DTM buffer size" VALUE ="Auto"/>
+            <ATTRIBUTE NAME ="Collect performance data" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Write performance data to repository" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Incremental Aggregation" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Enable high precision" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Session retry on deadlock" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Pushdown Optimization" VALUE ="None"/>
+            <ATTRIBUTE NAME ="Allow Temporary View for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Temporary Sequence for Pushdown" VALUE ="NO"/>
+            <ATTRIBUTE NAME ="Allow Pushdown for User Incompatible Connections" VALUE ="NO"/>
+        </SESSION>
+        <TASKINSTANCE DESCRIPTION ="This command task will use the common UNIX scripts to concatenate the Header/Detail/Trailer files together and then the common SFTP module will compress and send the file via SFTP to the client." FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="YES" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="Merge_SFTP_Execution" REUSABLE ="NO" TASKNAME ="Merge_SFTP_Execution" TASKTYPE ="Command" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <TASKINSTANCE DESCRIPTION ="set rpt_prcs_stat_cd = ‘F2’ to indicate that there was a failure in either the build transformation or the SFTPs." FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="NO" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="s_m_Dummy_Parameter_Variable_Set_Status_Fail" REUSABLE ="NO" TASKNAME ="s_m_Dummy_Parameter_Variable_Set_Status_Fail" TASKTYPE ="Session" TREAT_INPUTLINK_AS_AND ="NO"/>
+        <TASKINSTANCE DESCRIPTION ="Assign the schema for the z/os region and the email addresses" FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="YES" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="Assign_DB2_Email_and_Trigger_filename" REUSABLE ="NO" TASKNAME ="Assign_DB2_Email_and_Trigger_filename" TASKTYPE ="Assignment" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <TASKINSTANCE DESCRIPTION ="This process is shared between all workflows that build Client payment reports.&#xD;&#xA;It will read the trigger file built to run this workflow and use the values inside to set the needed workflow variables.&#xD;&#xA;No data will come out of the session, it is only used to assign the workflow variables.&#xD;&#xA;This trigger file will be removed at the end of the workflow this session is used in.&#xD;&#xA;High precision must be enabled." FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="YES" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="s_m_Read_Trg_Clnt_Rpt_Cntl" REUSABLE ="NO" TASKNAME ="s_m_Read_Trg_Clnt_Rpt_Cntl" TASKTYPE ="Session" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <TASKINSTANCE DESCRIPTION ="This session will read from RPS.TCLAIM_RPT_DETL all the rows for the RPT_PRCS_NB being processed.  It will build 3 outputs – 1 header, 1 trailer, and a detail file.&#xD;&#xA;High precision must be enabled." FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="YES" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="s_m_Build_Coventry_Col_Mthly_File" REUSABLE ="NO" TASKNAME ="s_m_Build_Coventry_Col_Mthly_File" TASKTYPE ="Session" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <TASKINSTANCE DESCRIPTION ="This email task will send an email using the CLNT_EMAIL_WF variable assigned at the beginning of this workflow, informing all on the list that the process was successful." FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="YES" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="Email_Client_Process_Successful" REUSABLE ="NO" TASKNAME ="Email_Client_Process_Successful" TASKTYPE ="Email" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <TASKINSTANCE DESCRIPTION ="This removal will clean up all  prior versions of the permanent filename built in this process, and in the monthly Collections file process." FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="YES" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="Cleanup_Prior_Client_Files" REUSABLE ="NO" TASKNAME ="Cleanup_Prior_Client_Files" TASKTYPE ="Command" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <TASKINSTANCE DESCRIPTION ="This session will set the KSZ6020 status for RPT_PRCS_STAT_CD = &apos;P2&apos;(report in progress) using the wf variable $$RPT_PRCS_NB_WF, from the current value of &apos;R1&apos;." FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="YES" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="s_m_Dummy_Parameter_Variable_Set_Status_Working" REUSABLE ="NO" TASKNAME ="s_m_Dummy_Parameter_Variable_Set_Status_Working" TASKTYPE ="Session" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <TASKINSTANCE DESCRIPTION ="" ISENABLED ="YES" NAME ="Start" REUSABLE ="NO" TASKNAME ="Start" TASKTYPE ="Start"/>
+        <TASKINSTANCE DESCRIPTION ="set rpt_prcs_stat_cd = ‘C’ to indicate the process has completed" FAIL_PARENT_IF_INSTANCE_DID_NOT_RUN ="YES" FAIL_PARENT_IF_INSTANCE_FAILS ="YES" ISENABLED ="YES" NAME ="s_m_Dummy_Parameter_Variable_Set_Status_Complete" REUSABLE ="NO" TASKNAME ="s_m_Dummy_Parameter_Variable_Set_Status_Complete" TASKTYPE ="Session" TREAT_INPUTLINK_AS_AND ="YES"/>
+        <WORKFLOWLINK CONDITION ="$s_m_Build_Coventry_Col_Mthly_File.Status=Succeeded" FROMTASK ="s_m_Build_Coventry_Col_Mthly_File" TOTASK ="Merge_SFTP_Execution"/>
+        <WORKFLOWLINK CONDITION ="$s_m_Build_Coventry_Col_Mthly_File.Status=Failed" FROMTASK ="s_m_Build_Coventry_Col_Mthly_File" TOTASK ="s_m_Dummy_Parameter_Variable_Set_Status_Fail"/>
+        <WORKFLOWLINK CONDITION ="$Merge_SFTP_Execution.Status=Failed" FROMTASK ="Merge_SFTP_Execution" TOTASK ="s_m_Dummy_Parameter_Variable_Set_Status_Fail"/>
+        <WORKFLOWLINK CONDITION ="$s_m_Dummy_Parameter_Variable_Set_Status_Complete.Status=Failed" FROMTASK ="s_m_Dummy_Parameter_Variable_Set_Status_Complete" TOTASK ="s_m_Dummy_Parameter_Variable_Set_Status_Fail"/>
+        <WORKFLOWLINK CONDITION ="" FROMTASK ="Start" TOTASK ="Assign_DB2_Email_and_Trigger_filename"/>
+        <WORKFLOWLINK CONDITION ="$Cleanup_Prior_Client_Files.Status=Succeeded" FROMTASK ="Cleanup_Prior_Client_Files" TOTASK ="s_m_Read_Trg_Clnt_Rpt_Cntl"/>
+        <WORKFLOWLINK CONDITION ="$s_m_Dummy_Parameter_Variable_Set_Status_Working.Status=Succeeded" FROMTASK ="s_m_Dummy_Parameter_Variable_Set_Status_Working" TOTASK ="s_m_Build_Coventry_Col_Mthly_File"/>
+        <WORKFLOWLINK CONDITION ="$s_m_Dummy_Parameter_Variable_Set_Status_Complete.Status=Succeeded" FROMTASK ="s_m_Dummy_Parameter_Variable_Set_Status_Complete" TOTASK ="Email_Client_Process_Successful"/>
+        <WORKFLOWLINK CONDITION ="$Assign_DB2_Email_and_Trigger_filename.Status=Succeeded" FROMTASK ="Assign_DB2_Email_and_Trigger_filename" TOTASK ="Cleanup_Prior_Client_Files"/>
+        <WORKFLOWLINK CONDITION ="$s_m_Read_Trg_Clnt_Rpt_Cntl.Status=Succeeded&#xD;&#xA;and $$RPT_PRCS_NB_WF&gt;0" FROMTASK ="s_m_Read_Trg_Clnt_Rpt_Cntl" TOTASK ="s_m_Dummy_Parameter_Variable_Set_Status_Working"/>
+        <WORKFLOWLINK CONDITION ="$Merge_SFTP_Execution.Status=Succeeded" FROMTASK ="Merge_SFTP_Execution" TOTASK ="s_m_Dummy_Parameter_Variable_Set_Status_Complete"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Merge_SFTP_Execution.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Merge_SFTP_Execution.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Merge_SFTP_Execution.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Merge_SFTP_Execution.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Merge_SFTP_Execution.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Merge_SFTP_Execution.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Fail.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Fail.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Fail.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Fail.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Fail.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Fail.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Fail.SrcSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Fail.SrcFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully loaded" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Fail.TgtSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to load" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Fail.TgtFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Total number of transformation errors" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Fail.TotalTransErrors" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="First error code" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Fail.FirstErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="First error message" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Fail.FirstErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Assign_DB2_Email_and_Trigger_filename.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Assign_DB2_Email_and_Trigger_filename.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Assign_DB2_Email_and_Trigger_filename.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Assign_DB2_Email_and_Trigger_filename.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Assign_DB2_Email_and_Trigger_filename.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Assign_DB2_Email_and_Trigger_filename.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Read_Trg_Clnt_Rpt_Cntl.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Read_Trg_Clnt_Rpt_Cntl.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Read_Trg_Clnt_Rpt_Cntl.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Read_Trg_Clnt_Rpt_Cntl.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Read_Trg_Clnt_Rpt_Cntl.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Read_Trg_Clnt_Rpt_Cntl.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Read_Trg_Clnt_Rpt_Cntl.SrcSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Read_Trg_Clnt_Rpt_Cntl.SrcFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully loaded" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Read_Trg_Clnt_Rpt_Cntl.TgtSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to load" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Read_Trg_Clnt_Rpt_Cntl.TgtFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Total number of transformation errors" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Read_Trg_Clnt_Rpt_Cntl.TotalTransErrors" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="First error code" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Read_Trg_Clnt_Rpt_Cntl.FirstErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="First error message" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Read_Trg_Clnt_Rpt_Cntl.FirstErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Build_Coventry_Col_Mthly_File.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Build_Coventry_Col_Mthly_File.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Build_Coventry_Col_Mthly_File.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Build_Coventry_Col_Mthly_File.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Build_Coventry_Col_Mthly_File.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Build_Coventry_Col_Mthly_File.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Build_Coventry_Col_Mthly_File.SrcSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Build_Coventry_Col_Mthly_File.SrcFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully loaded" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Build_Coventry_Col_Mthly_File.TgtSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to load" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Build_Coventry_Col_Mthly_File.TgtFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Total number of transformation errors" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Build_Coventry_Col_Mthly_File.TotalTransErrors" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="First error code" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Build_Coventry_Col_Mthly_File.FirstErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="First error message" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Build_Coventry_Col_Mthly_File.FirstErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Email_Client_Process_Successful.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Email_Client_Process_Successful.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Email_Client_Process_Successful.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Email_Client_Process_Successful.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Email_Client_Process_Successful.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Email_Client_Process_Successful.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Cleanup_Prior_Client_Files.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Cleanup_Prior_Client_Files.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Cleanup_Prior_Client_Files.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Cleanup_Prior_Client_Files.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Cleanup_Prior_Client_Files.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Cleanup_Prior_Client_Files.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Working.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Working.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Working.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Working.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Working.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Working.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Working.SrcSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Working.SrcFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully loaded" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Working.TgtSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to load" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Working.TgtFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Total number of transformation errors" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Working.TotalTransErrors" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="First error code" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Working.FirstErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="First error message" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Working.FirstErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$Start.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task started" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Complete.StartTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="The time this task completed" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Complete.EndTime" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Complete.Status" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Status of the previous task that is not disabled" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Complete.PrevTaskStatus" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Error code for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Complete.ErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Error message for this task&apos;s execution" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Complete.ErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Complete.SrcSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to read" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Complete.SrcFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows successfully loaded" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Complete.TgtSuccessRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Rows failed to load" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Complete.TgtFailedRows" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Total number of transformation errors" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Complete.TotalTransErrors" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="First error code" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Complete.FirstErrorCode" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="First error message" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$s_m_Dummy_Parameter_Variable_Set_Status_Complete.FirstErrorMsg" USERDEFINED ="NO"/>
+        <WORKFLOWVARIABLE DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$RPT_PRCS_NB_WF" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$CLNT_EMAIL_WF" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$STMT_END_DT_WF" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$BLD_TRG_FLE_NME_WF" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$FILENAME_FINAL_WF" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$RPT_CLNT_SHORT_NME_WF" USERDEFINED ="YES"/>
+        <WORKFLOWVARIABLE DATATYPE ="nstring" DEFAULTVALUE ="" DESCRIPTION ="" ISNULL ="NO" ISPERSISTENT ="NO" NAME ="$$MVS_DB2_OWNER_WF" USERDEFINED ="YES"/>
+        <ATTRIBUTE NAME ="Parameter Filename" VALUE =""/>
+        <ATTRIBUTE NAME ="Write Backward Compatible Workflow Log File" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Workflow Log File Name" VALUE ="wf_m_Build_Coventry_Col_Mthly_File.log"/>
+        <ATTRIBUTE NAME ="Workflow Log File Directory" VALUE ="$PMWorkflowLogDir&#x5c;"/>
+        <ATTRIBUTE NAME ="Save Workflow log by" VALUE ="By runs"/>
+        <ATTRIBUTE NAME ="Save workflow log for these runs" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Service Name" VALUE =""/>
+        <ATTRIBUTE NAME ="Service Timeout" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Is Service Visible" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Is Service Protected" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Fail task after wait time" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Enable HA recovery" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Automatically recover terminated tasks" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Service Level Name" VALUE ="Default"/>
+        <ATTRIBUTE NAME ="Allow concurrent run with unique run instance name" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Allow concurrent run with same run instance name" VALUE ="NO"/>
+        <ATTRIBUTE NAME ="Maximum number of concurrent runs" VALUE ="0"/>
+        <ATTRIBUTE NAME ="Assigned Web Services Hubs" VALUE =""/>
+        <ATTRIBUTE NAME ="Maximum number of concurrent runs per Hub" VALUE ="1000"/>
+        <ATTRIBUTE NAME ="Expected Service Time" VALUE ="1"/>
+        <METADATAEXTENSION DATATYPE ="STRING" DESCRIPTION ="" DOMAINNAME ="User Defined Metadata Domain" ISCLIENTEDITABLE ="YES" ISCLIENTVISIBLE ="YES" ISREUSABLE ="YES" ISSHAREREAD ="NO" ISSHAREWRITE ="NO" MAXLENGTH ="256" NAME ="Creation_date" VALUE ="18-dec-2012" VENDORNAME ="INFORMATICA"/>
+        <METADATAEXTENSION DATATYPE ="STRING" DESCRIPTION ="" DOMAINNAME ="User Defined Metadata Domain" ISCLIENTEDITABLE ="YES" ISCLIENTVISIBLE ="YES" ISREUSABLE ="YES" ISSHAREREAD ="NO" ISSHAREWRITE ="NO" MAXLENGTH ="256" NAME ="Workflow_author" VALUE ="Arpit Mishra" VENDORNAME ="INFORMATICA"/>
+    </WORKFLOW>
+</FOLDER>
+</REPOSITORY>
+</POWERMART>

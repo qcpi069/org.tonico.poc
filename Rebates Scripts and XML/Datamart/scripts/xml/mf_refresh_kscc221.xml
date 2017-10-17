@@ -1,0 +1,130 @@
+ 
+<!-- REFESH MAINFRAME PAYMENTS TABLE kscc221_clnt_hrcy_qtr_dtl  -->
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+
+		   
+     <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        dmt_schema=script.getProperty("cli_schema");
+        pmt_schema=script.getProperty("pmt_schema");
+	]]></command>
+	
+
+	<command type="try">
+		<try>
+			<!-- delete from DB2. -->
+                        <command type="run" datasource="db2p" batch="500">
+                                <![CDATA[
+                                        DELETE FROM ${pmt_schema}.kscc221_clnt_hrcy_qtr_dtl 
+						where QTR_2_ID='${QPARM}'
+                                ]]>
+                        </command>
+
+    
+			<!-- Copy from datamart UDB to mainframe DB2. -->
+			<command type="copy" batch="1000">
+				<source type="sql" datasource="datamart"><![CDATA[
+    SELECT distinct PRD_CYQ_Q_CD,
+                                          RBAT_ID,
+                                          EFF_DT,
+                                          TERM_DT,
+                                          EXTL_HRCY_ID,
+                                          EXTL_SRC_CD,
+                                          EXTL_LVL1_ID,
+                                          EXTL_LVL2_ID,
+                                          EXTL_LVL3_ID,
+                                          EXTL_LVL4_ID,
+                                          EXTL_LVL5_ID,
+                                          ${PART_NB}
+    FROM  client_reg.crt_clnt_hrcy_qtr_dtl
+    where PRD_CYQ_Q_CD='${QPARM}'
+
+				]]></source> 
+				<target
+					type             = "sql"
+					datasource       = "db2p"
+					transaction      = "true"
+					batch            = "1000"
+					reportInterval   = "1000"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					INSERT INTO ${pmt_schema}.kscc221_clnt_hrcy_qtr_dtl
+                    			( QTR_2_ID,
+                                          RBAT_ID,
+                                          EFF_DT,
+                                          TERM_DT,
+                                          clnt_EXTL_HRCY_ID,
+                                          EXTL_SRC_CD,
+                                          EXTL_LVL1_ID,
+                                          EXTL_LVL2_ID,
+                                          EXTL_LVL3_ID,
+                                          EXTL_LVL4_ID,
+                                          EXTL_LVL5_ID,
+                                          db2_part_nb
+					)
+					VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+				]]></target>
+			</command>
+    
+
+			  
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+		<command
+				type="mail"
+				mailTo="${mailto}"
+				mailFrom="MF_Refresh_Client"
+				subject="[ERROR] MF REFESH kscc221 "
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] MF REFRESH kscc221</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] MF REFRESH kscc221 </u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		
+		
+		</catch>
+	</command>
+</sqml>

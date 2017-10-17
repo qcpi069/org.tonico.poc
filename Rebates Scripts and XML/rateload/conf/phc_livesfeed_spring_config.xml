@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<!--
+	This is the spring configuration file for discount client split conversion process
+	-->																																				 
+																																					 <!--  - Application context definition for "springapp" DispatcherServlet.  -->
+<beans>    
+	<!--  transaction manager -->
+	
+	<!--  the driver class -->
+	<bean id="main" class="com.caremark.rebates.registration.batch.main.PHCLivesFeedMain">	
+		<property name="service">
+    			<ref bean="livesfeedService"/>
+    		</property>		
+		<property name="PHCLivesFeedEmailTemplate">
+    			<value>PHCLivesFeedEmailTemplate.txt</value>
+    		</property>	
+		
+		<property name="mailFrom">
+    			<value>PHCLivesFeed@caremark.com</value>
+    		</property>	
+		<!--
+		<property name="mailTo">
+    			<value>gdxitd@caremark.com</value>
+    		</property>	
+			-->
+		<property name="mailTo">
+    			<value>gdxitd@caremark.com</value>
+    		</property>	
+    </bean>
+	<bean id="livesfeedService" class="com.caremark.rebates.registration.batch.service.LivesFeedService">	
+		<property name="dataSource">
+            <ref bean="rbateRegDataSource"/>
+        </property>	
+		<property name="transactionTemplate">
+            <ref bean="transactionTemplate"/>
+        </property> 
+		
+		<property name="archivePrefix">
+    			<value>PHC_LIVES_FEED</value>
+    		</property>	
+		<property name="inputDir">
+    			<value>data/incoming</value>
+    		</property>	
+    	<property name="zipFileName">
+    			<value>PENRL.ZIP</value>
+    		</property>		
+		<property name="dataFileName">
+			<value>PENRL.DAT</value>
+    		</property>	
+		<property name="archiveDir">
+    			<value>data/completed</value>
+    		</property>	
+		<property name="errorDir">
+    			<value>data/errors</value>
+    		</property>	
+		<property name="logDir">
+    			<value>logs</value>
+    		</property>
+    	<property name="livesFeedFileParser">
+    			<value>LivesFeedFileParser.xml</value>
+    	</property>		
+		<property name="extlHrcyDAO">
+    			<ref bean="extlHrcyDAO"/>
+    		</property>	
+		<property name="enrollDAO">
+    			<ref bean="enrollDAO"/>
+    		</property>	
+    	
+    </bean>	
+	
+</beans>

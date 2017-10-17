@@ -1,0 +1,151 @@
+
+<!-- REFRESH crt_prd  -->
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        cli_schema=script.getProperty("cli_schema");        
+	]]></command>
+		       
+	<command type="try">
+		<try>
+            <!-- *************** crt_prd ********************* -->
+			<command type="run" datasource="gdx" rowName="count1">
+				<![CDATA[
+					SELECT COUNT(*) FROM ${cli_schema}.crt_prd
+				]]>
+			</command>
+
+			<!-- Copy crt_prd info from GDX to RPSDM. -->
+			<command type="copy" batch="1000">
+				<source type="sql" datasource="gdx"><![CDATA[
+					SELECT 
+                                          PRD_ID,
+                                          PRD_NM,
+                                          PRD_BEG_DT,
+                                          PRD_END_DT,
+                                          PRD_PAR_ID,
+                                          PRD_INTRV_TYP_CD,
+                                          PRD_CYQ_CD,
+                                          PRD_CYQ_Q_CD,
+                                          PRD_CYM_CD,
+                                          APC_PMT_LOCK_CD,
+                                          APC_INV_LOCK_CD,
+                                          CLM_LOCK_DSC_CD,
+                                          CLM_LOCK_GPO_CD,
+                                          CLM_LOCK_XMD_CD,
+                                          INSRT_USER_ID,
+                                          INSRT_TS,
+                                          UPDT_USER_ID,
+                                          UPDT_TS
+					FROM ${cli_schema}.crt_prd 
+				]]></source>
+				<target
+					type             = "sql"
+					datasource       = "datamart"
+					transaction      = "true"
+					batch            = "1000"
+					reportInterval   = "1000"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					INSERT INTO ${cli_schema}.crt_prd
+					 (PRD_ID,
+                                          PRD_NM,
+                                          PRD_BEG_DT,
+                                          PRD_END_DT,
+                                          PRD_PAR_ID,
+                                          PRD_INTRV_TYP_CD,
+                                          PRD_CYQ_CD,
+                                          PRD_CYQ_Q_CD,
+                                          PRD_CYM_CD,
+                                          APC_PMT_LOCK_CD,
+                                          APC_INV_LOCK_CD,
+                                          CLM_LOCK_DSC_CD,
+                                          CLM_LOCK_GPO_CD,
+                                          CLM_LOCK_XMD_CD,
+                                          INSRT_USER_ID,
+                                          INSRT_TS,
+                                          UPDT_USER_ID,
+                                          UPDT_TS
+					  ) 
+					VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+				]]></target>
+			</command>
+	        <!-- compare totals -->
+
+			<command type="run" datasource="datamart" rowName="count2">
+				<![CDATA[
+					SELECT COUNT(*) FROM ${cli_schema}.crt_prd
+				]]>
+			</command>
+			<command type="java">
+				count1 = script.getProperty("count1.1").intValue();
+				count2 = script.getProperty("count2.1").intValue();
+				logger.warn("GDX crt_prd COUNT = " + count1);
+				logger.warn("RPSDM crt_prd COUNT = " + count2);
+				if (count1 != count2) {
+					logger.error(" crt_prd counts do NOT match count1=" + count1 + "  count2=" + count2);
+                    throw new Exception(" crt_prd counts do NOT match count1=" + count1 + " count2=" + count2);
+				} 
+			</command> 
+				 
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+			<command
+				type="mail"
+				mailTo="${mailto}"
+				mailFrom="helen.tang@caremark.com"
+				subject="[ERROR] GDX -> DM REFESH - crt_prd "
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] GDX -> DM REFRESH - crt_prd</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] GDX -> DM REFRESH - crt_prd </u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		</catch>
+		
+        </command>
+</sqml>
+

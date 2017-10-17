@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<!--
+	This is the spring configuration file for discount client APC Status Load process
+	-->																																				 
+																																					 <!--  - Application context definition for "springapp" DispatcherServlet.  -->
+<beans>    
+	
+	<!--  the driver class -->
+	<bean id="main" class="com.caremark.rebates.registration.batch.main.PurgeOldEntriesMain">	
+		<property name="purgeOldEntriesService">
+    		<ref bean="purgeOldEntriesService"/>
+    	</property>	    			
+		<property name="mailFrom">
+    			<value>PurgeFallOutStatus@caremark.com</value>
+    	</property>			
+		<property name="mailTo">
+    			<value>gdxitd@caremark.com</value>
+    	</property>	
+    	<property name="subject">
+    			<value>ERROR OCCURED WHILE PROCESSING PURGING OLD ENTRIES BATCH</value>
+    	</property>		
+    </bean>
+	<bean id="purgeOldEntriesService" class="com.caremark.rebates.registration.batch.service.PurgeOldEntriesService">	
+		
+		<property name="dataSource">
+            <ref bean="rbateRegDataSource"/>
+        </property>	
+		
+		<property name="purgeOldEntriesDAO">
+    		<ref bean="purgeOldEntriesDAO"/>
+    	</property>	
+		
+    </bean>	
+ 	
+</beans>
+

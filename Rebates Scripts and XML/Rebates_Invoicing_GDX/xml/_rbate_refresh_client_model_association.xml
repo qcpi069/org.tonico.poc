@@ -1,0 +1,216 @@
+
+<!-- REFESH CLIENT MODEL ASSOCIATION -->
+
+<sqml>
+	
+	<property name="TIMEOUT" value="0"/>
+	
+	<datasources resource="datasource.xml"/>
+	
+	<!--
+		Set-up a try block to send an email on exception.	
+	-->         
+	<command type="try">
+		<try>
+
+			<!--
+				Copies client info from Oracle to DB2.
+				Rows are inserted into tclt_consolidated with the 
+				userid of JAVABTC1 so that those records can be distinguished
+				from those inserted into tclt_consolidated from tclt.
+				
+				Copy Rebate ID's from client registration system.
+				(GPO clients - After November 15th, 2005 QL clients
+				 will be registered in client registration.)
+				
+				
+			-->
+			<command type="copy" batch="500">
+				<source type="sql" datasource="silver"><![CDATA[
+					SELECT
+						CAST(clnt.client_nbr AS INTEGER) AS cn,
+						clnt.client_name
+					FROM 
+						rbate_reg.client clnt,
+						rbate_reg.rebate_invoice reb_inv 
+					WHERE
+						clnt.pcs_system_id = reb_inv.pcs_system_id AND
+						NVL(reb_inv.rebate_inv_term_dt, TO_DATE('12319999','MMDDYYYY'))
+							>= ADD_MONTHS(TO_DATE(TO_CHAR(SYSDATE)),-9) AND
+						UPPER(clnt.client_nbr) = LOWER(clnt.client_nbr)
+					ORDER BY cn
+				]]></source>
+				<target
+					type             = "sql"
+					datasource       = "gdxprd"
+					transaction      = "true"
+					batch            = "500"
+					ignoredSqlStates = "23505"
+					reportInterval   = "500"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					INSERT INTO VRAP.tclt_consolidated
+					VALUES (
+						?,
+						?,
+						NULL,
+						'JAVAORA1',
+						CURRENT_DATE,
+						CURRENT_TIME,
+						'JAVAORA1',
+						CURRENT_DATE,
+						CURRENT_TIME
+					)
+				]]></target>
+			</command>
+			
+			<!--
+				Copies ids from tclt to tclt_consolidated.
+				The user id JAVABTC2 is used to identify records inserted from
+				tclt.
+				
+				Copies Quantum Leap clients to the consolidated client table.
+				
+				Note: This should come out after 11/15/2005.
+			-->
+			<command
+				type="run"
+				datasource="gdxprd"
+				transaction="true"
+				queryTimeout="${TIMEOUT}"
+			><![CDATA[
+				INSERT INTO VRAP.tclt_consolidated
+				SELECT
+					tc.clt_id,
+					tc.clt_nm,
+					tc.client_cd,
+					'JAVAUDB1',
+					CURRENT_DATE,
+					CURRENT_TIME,
+					'JAVAUDB1',
+					CURRENT_DATE,
+					CURRENT_TIME
+				FROM VRAP.tclt tc
+				WHERE tc.clt_id NOT IN (
+					SELECT DISTINCT t.clt_id
+					FROM VRAP.tclt_consolidated t
+				)
+				ORDER BY tc.clt_id
+			]]></command>
+			
+			<!--
+				Copy rows from tclt_consolidated into tclt_model	
+			-->
+			<command
+				type="run"
+				datasource="gdxprd"
+				transaction="true"
+				queryTimeout="${TIMEOUT}"
+			><![CDATA[
+				INSERT INTO VRAP.tclt_model
+				SELECT
+					tcc.clt_id,
+					'1900-01-01',
+					'12-31-9999',
+					CASE WHEN CREATE_USER_ID = 'JAVAORA1' THEN 'G' ELSE 'D' END AS model_typ_cd,
+					CREATE_USER_ID,
+					CURRENT_DATE,
+					CURRENT_TIME,
+					UPDT_USER_ID,
+					CURRENT_DATE,
+					CURRENT_TIME
+				FROM VRAP.tclt_consolidated tcc
+				WHERE tcc.clt_id NOT IN (
+					SELECT DISTINCT tm.clt_id
+					FROM VRAP.tclt_model tm
+				)
+				ORDER BY model_typ_cd desc, tcc.clt_id
+			]]></command>
+			
+			<!--
+				Copies client info from Oracle to DB2
+				(for now just outputting to file).	
+			-->
+			<command type="copy" batch="500">
+				<source type="sql" datasource="gdxprd"><![CDATA[
+					SELECT
+						m.CLT_ID,
+						m.EFFECTIVE_DT,
+						m.EXPIRATION_DT,
+						m.MODEL_TYP_CD,
+						m.CREATE_USER_ID,
+						TIMESTAMP(m.CREATE_DT, m.CREATE_TIME),
+						m.UPDT_USER_ID,
+						TIMESTAMP(m.UPDT_DT, m.UPDT_TIME)
+					FROM VRAP.TCLT_MODEL AS m
+					WHERE
+						m.CREATE_DT >= CURRENT_DATE - 90 DAYS
+				]]></source>
+				<target
+					type             = "sql"
+					datasource       = "silver"
+					transaction      = "true"
+					batch            = "0"
+					ignoredSqlStates = "23000"
+					reportInterval   = "500"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					INSERT INTO DMA_RBATE2.t_clt_model
+					VALUES (?,?,?,?,?,?,?,?)
+				]]></target>
+			</command>
+				
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+			<command
+				type="mail"
+				mailTo="${email_address}"
+				mailFrom="client_model_refesh@caremark.com"
+				subject="[${region}] [ERROR] REFESH CLIENT MODEL ASSOCIATION"
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] REFESH CLIENT MODEL ASSOCIATION</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] REFESH CLIENT MODEL ASSOCIATION</u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		</catch>
+	</command>
+</sqml>

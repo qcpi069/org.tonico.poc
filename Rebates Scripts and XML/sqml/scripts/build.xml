@@ -1,0 +1,106 @@
+<project default="build" basedir="..">
+
+	<property name="version" value="1.0"/>
+
+	<property name="src"        location="src"/>
+	<property name="src.java"   location="${src}"/>
+	<property name="build"      location="classes"/>
+	<property name="lib"        location="../gdx_lib"/>
+	<property name="conf"       location="conf"/>
+	<property name="doc"        location="doc"/>
+	<property name="dist"       location="dist"/>
+	<property name="jarfile"    location="${dist}/gdx-sqml-${version}.jar"/>
+	<property name="dbfpx"      value="Common_java_db_interface"/>
+	<property name="common"     location="../common"/>
+	
+	<path id="classpath">
+		<fileset dir="${lib}" includes="**/*.jar"/>
+		<fileset dir="${common}/dist" includes="**/*.jar"/>
+		<pathelement location="${build}"/>
+		<pathelement location="${conf}"/>
+	</path>
+
+	<target name="build" depends="clean,javadoc,dist"/>
+
+	<target name="init">
+		<mkdir dir="${build}"/>
+		<mkdir dir="${dist}"/>
+	</target>
+
+	<target name="clean">
+		<delete dir="${build}"/>
+		<delete failonerror="false">
+			<fileset dir="${dist}" includes="*.jar,*.war,*.ear,*.zip"/>
+		</delete>
+	</target>
+
+	<target name="compile" depends="init">
+		<javac
+			classpathref="classpath"
+			srcdir="${src.java}"
+			destdir="${build}"
+			debug="true"
+			target="1.1"
+			source="1.3"
+		/>
+	</target>
+
+	<target name="dist" depends="compile">
+		<jar destfile="${jarfile}">
+			<fileset dir="${build}"/>
+			<zipfileset dir="${src.java}" prefix="src"/>
+		</jar>
+		<antcall target="make.dbtool.dist">
+			<param name="target.env" value="r07tst07"/>
+		</antcall>
+		<antcall target="make.dbtool.dist">
+			<param name="target.env" value="r07prd01"/>
+		</antcall>
+		<antcall target="make.dbtool.dist">
+			<param name="target.env" value="r07tst07-QA"/>
+		</antcall>
+		<antcall target="make.generic.dist">
+			<param name="target.env" value="r07tst07-QA"/>
+		</antcall>
+	</target>
+
+	<target name="make.generic.dist">
+		<fixcrlf srcdir="conf" includes="*.properties,*.xml" eol="lf"/>
+		<fixcrlf srcdir="install" includes="*.ksh,*.sh,*.xml" eol="lf"/>
+		<zip destfile="${dist}/gdx-sqml-${version}.zip">
+			<zipfileset dir="${common}/dist" includes="*.jar" prefix="sqml/lib"/>
+			<zipfileset dir="${dist}" includes="*.jar" prefix="sqml/lib"/>
+			<zipfileset dir="${lib}" includes="*.jar" prefix="sqml/lib"/>
+			<zipfileset dir="lib" includes="*.jar,*.config" prefix="sqml/lib"/>
+			<zipfileset dir="install" includes="sqml.*" prefix="sqml/scripts"/>
+			<zipfileset dir="conf/generic" prefix="sqml/conf"/>
+		</zip>
+	</target>
+
+	<target name="make.dbtool.dist">
+		<fixcrlf srcdir="conf" includes="*.properties,*.xml" eol="lf"/>
+		<fixcrlf srcdir="conf/${target.env}" includes="*.properties,*.xml" eol="lf"/>
+		<fixcrlf srcdir="install" includes="*.ksh,*.sh,*.xml" eol="lf"/>
+		<zip destfile="${dist}/${dbfpx}-${target.env}-${version}.zip">
+			<zipfileset dir="${common}/dist" includes="*.jar" prefix="${dbfpx}/lib"/>
+			<zipfileset dir="${dist}" includes="*.jar" prefix="${dbfpx}/lib"/>
+			<zipfileset dir="${lib}" includes="*.jar" prefix="${dbfpx}/lib"/>
+			<zipfileset dir="install" includes="*.ksh,*.sh,*.xml" prefix="${dbfpx}/install"/>
+			<zipfileset dir="conf/${target.env}" prefix="${dbfpx}/conf"/>
+			<zipfileset dir="lib" includes="*.jar,*.config" prefix="${dbfpx}/lib"/>
+		</zip>
+	</target>
+	
+	<target name="javadoc" depends="compile">
+		<delete dir="${doc}/api" failonerror="false"/>
+		<mkdir dir="${doc}/api"/>
+		<javadoc
+			sourcepath="${src.java}"
+			destdir="${doc}/api"
+			classpathref="classpath"
+			failonerror="false"
+			packagenames="com.caremark.gdx.sqml"
+		/>
+	</target>
+
+</project>

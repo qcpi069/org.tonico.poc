@@ -1,0 +1,130 @@
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        cli_schema=script.getProperty("cli_schema");
+	]]></command>
+	
+	       
+	<command type="try">
+		<try>
+		    <!-- delete from UDB -->
+			
+			<command type="run" datasource="zeus" rowName="count1">
+				<![CDATA[
+					SELECT COUNT(*) FROM SUMMARY.TACTIV_PBM_PBR_CPG  
+                ]]>
+			</command>
+                        <command type="java">
+				count1 = script.getProperty("count1.1").intValue();
+				logger.warn("Zeus SUMMARY.TACTIV_PBM_PBR_CPG COUNT = " + count1);
+				
+			</command>
+
+			<!-- Copy client info from Oracle to DB2. -->
+			<command type="copy" batch="3000">
+				<source type="sql" datasource="zeus"><![CDATA[
+					SELECT BILLING_END_MONTH,
+     						DEP_TRANSMITTAL_CD,
+     						CLIENT_ID,
+     						CLT_PLAN_GROUP_ID,
+     						PB_ID_M,
+     						PB_ID_R,
+     						PT_ELIG_COUNT_QY,
+    						CDH_ELIG_COUNT_QY,
+						PROCESSED_DT
+					FROM SUMMARY.TACTIV_PBM_PBR_CPG 
+				]]></source>
+
+                                <target
+				        type        = "queue"
+					threadCount = "1">
+
+				<target
+					type             = "sql"
+					datasource       = "datamart"
+					transaction      = "false"
+					batch            = "3000"
+					reportInterval   = "3000"
+					queryTimeout     = "${TIMEOUT}"
+					><![CDATA[
+					INSERT INTO RPS.TQL_TACTIV_PBM_PBR_CPG
+						VALUES (?,?,?,?,?,?,?,?,?) 
+				]]></target>
+                                </target> 
+			</command>
+	        <!-- compare totals -->
+
+			<command type="run" datasource="datamart" rowName="count2">
+				<![CDATA[
+					SELECT COUNT(*) FROM RPS.TQL_TACTIV_PBM_PBR_CPG 
+                ]]>
+			</command>
+			<command type="java">
+				count1 = script.getProperty("count1.1").intValue();
+				count2 = script.getProperty("count2.1").intValue();
+				logger.warn("Zeus SUMMARY.TACTIV_PBM_PBR_CPG COUNT = " + count1);
+				logger.warn("RPS RPS.TQL_TACTIV_PBM_PBR_CPG = " + count2);
+				if (count1 != count2) {
+					logger.error(" CLIENT counts do NOT match count1=" + count1 + "  count2=" + count2);
+                    throw new Exception(" Record counts do NOT match count1=" + count1 + " count2=" + count2);
+				} 
+			</command> 
+				 
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+			<command
+				type="mail"
+				mailTo="${mailto}"
+				mailFrom="dm_refresh_TQL_TACTIV_PBM_PBR_CPG"
+				subject="[ERROR] REFESH RPS.TQL_TACTIV_PBM_PBR_CPG "
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] REFESH CLIENT</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] REFESH CLIENT </u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		</catch>
+	</command>
+</sqml>

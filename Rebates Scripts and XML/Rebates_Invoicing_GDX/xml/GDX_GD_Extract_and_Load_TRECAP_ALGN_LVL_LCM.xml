@@ -1,0 +1,107 @@
+<!-- COPIES DATA FROM GOLD DWCORP.t_algn_lvl_lcm TO GDXPRD VRAP.trecap_algn_lvl_lcm  -->
+<!-- THE SCHEDULE THAT EXECUTES THIS LOADS daily AND IS RUN dependant upon completion of GD_0090J - see maestro list -->
+<!-- If ABEND, the job can be restarted from beginning with no issues. -->
+
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	
+	<!--
+		Set-up a try block to send an email on exception.	
+	-->         
+	<command type="try">
+		<try>
+			<!-- Clear out the table on GDXPRD. -->
+			<command type="run" datasource="gdxprd" transaction="false">
+				<![CDATA[
+					DELETE FROM VRAP.trecap_algn_lvl_lcm
+				]]>
+			</command>
+			<!-- Copy data from GOLD to GDXPRD -->
+				<command type="copy" batch="500">
+				<source type="sql" datasource="edwdb"><![CDATA[
+				SELECT a.algn_lvl_gid
+				      ,a.eff_date
+				      ,a.end_date
+				      ,a.lcm_code
+				      ,to_date(to_char(a.load_tstmp,'yyyy-mm-dd'),'yyyy-mm-dd')
+				      ,a.src_flag
+				      ,a.src_name
+				  FROM dwcorp.t_algn_lvl_lcm a
+				]]></source>
+                                <target type="queue" threadCount="5">
+				<target
+				type             = "sql"
+				datasource       = "gdxprd"
+				transaction      = "false"
+				batch            = "500"
+				reportInterval   = "500"
+				queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+			             INSERT INTO vrap.trecap_algn_lvl_lcm 
+					(algn_lvl_gid
+					,eff_date
+					,end_date
+					,lcm_code
+					,load_tstmp
+					,src_flag
+					,src_name )
+					VALUES ( ?, ?, ?, ?, ?, ?, ?  )
+				]]></target>
+                                   </target>
+			</command>				 
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+			<command
+				type="mail"
+				mailTo="gdxitd@caremark.com"
+				mailFrom="TRECAP_ALGN_LVL_LCM@caremark.com"
+				subject="[ERROR] GDX_GD_Extract_and_Load_TRECAP_ALGN_LVL_LCM.xml"
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] GDX_GD_Extract_and_Load_TRECAP_ALGN_LVL_LCM.xml</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] GDX_GD_Extract_and_Load_TRECAP_ALGN_LVL_LCM.xml</u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		</catch>
+	</command>
+</sqml>

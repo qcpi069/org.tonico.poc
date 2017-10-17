@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+  <class name="com.caremark.controller.beans.ProcessControlDetail" table="VRAP.RCIT_PRCS_CNTL_DTL">
+   <id name="processDetailID" type="int" column="PRCS_DTL_GID" >
+   		<generator class="native"/>
+  </id>
+  <property name="processID">
+     <column name="PRCS_GID" />
+  </property>
+  <property name="sequenceNumber">
+    <column name="SEQ_NB"/>
+  </property>
+  <property name="detailTaskSequenceType">
+    <column name="DTL_TASK_SEQ_TYP_CD"/>
+  </property>
+  <property name="processDetailCode">
+     <column name="PRCS_DTL_CD" />    
+  </property>
+  <property name="processDetailType">
+     <column name="PRCS_DTL_TYP_CD" />
+  </property>
+  <property name="statusCode">
+    <column name="PRCS_DTL_STAT_CD"/>
+  </property>
+  <property name="updateUserID">
+    <column name="UPDT_USER_ID"/>
+  </property>
+  <property name="updateDate">
+     <column name="UPDT_TS" />
+  </property>
+  <property name="startTime">
+    <column name="STRT_TS"/>
+  </property>  
+  <property name="endTime">
+    <column name="END_TS"/>
+  </property>
+  <property name="prcsCmndLnTxt">
+    <column name="PRCS_CMND_LN_TXT"/>
+  </property>
+ </class>
+</hibernate-mapping>
+

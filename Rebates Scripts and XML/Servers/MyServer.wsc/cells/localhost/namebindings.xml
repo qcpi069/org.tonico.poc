@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:namebindings="http://www.ibm.com/websphere/appserver/schemas/5.0/namebindings.xmi">
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130784704011" name="localhost_apps_mda_db_name" nameInNameSpace="JNDI/localhost/apps/mda/db/name" stringToBind="GDXDEV"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130787407138" name="localhost_apps_mda_db_vratabschema" nameInNameSpace="JNDI/localhost/apps/mda/db/vratabschema" stringToBind="VRAP."/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130787486692" name="localhost_apps_mda_db_claimstabschema" nameInNameSpace="JNDI/localhost/apps/mda/db/claimstabschema" stringToBind="CLAIMSP."/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130789281694" name="localhost_apps_mda_act_rmipath" nameInNameSpace="JNDI/localhost/apps/mda/act/rmipath" stringToBind="//tstras1:8000/ReportBrokerRMI"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130789646278" name="localhost_apps_mda_act_boxname" nameInNameSpace="JNDI/localhost/apps/mda/act/boxname" stringToBind="tstras1"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130789726673" name="localhost_apps_mda_act_userid" nameInNameSpace="JNDI/localhost/apps/mda/act/userid" stringToBind="VRAActuateProxy"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130789833537" name="localhost_jdbc_pass_vra2" nameInNameSpace="JNDI/localhost/jdbc/pass/vra2" stringToBind="mkcrosson"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130790281731" name="localhost_jdbc_url_vra2" nameInNameSpace="JNDI/localhost/jdbc/url/vra2" stringToBind="jdbc:db2:GDXDEV"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130790359814" name="localhost_jdbc_id_vra2" nameInNameSpace="JNDI/localhost/jdbc/id/vra2" stringToBind="vactuate"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130790448812" name="localhost_apps_mda_act_location" nameInNameSpace="JNDI/localhost/apps/mda/act/location" stringToBind="null"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130791262141" name="localhost_apps_mda_act_location" nameInNameSpace="JNDI/localhost/apps/mda/act/location" stringToBind="JNDI/localhost/apps/mda/act/location"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130791437744" name="localhost_server1_cics_region_primary" nameInNameSpace="JNDI/localhost/server1/cics/region/primary" stringToBind="QCPCICSJ"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130791596121" name="localhost_jdbc_url_mf" nameInNameSpace="JNDI/localhost/jdbc/url/mf" stringToBind="jdbc:db2:DSN2"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130792869292" name="localhost_server1_jdbc_schema_security" nameInNameSpace="JNDI/localhost/server1/jdbc/schema/security" stringToBind="QCPDT3A"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130792963227" name="localhost_ssl_flag" nameInNameSpace="JNDI/localhost/ssl/flag" stringToBind="n"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130794491184" name="localhost_server1_environment_id" nameInNameSpace="JNDI/localhost/server1/environment/id" stringToBind="localhost"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130794551331" name="localhost_jdbc_id_infra" nameInNameSpace="JNDI/localhost/jdbc/id/infra" stringToBind="QCPU98i"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130794617356" name="localhost_jdbc_pass_infra" nameInNameSpace="JNDI/localhost/jdbc/pass/infra" stringToBind="gdxmda1"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130794673366" name="localhost_server1_jdbc_schema_primary" nameInNameSpace="JNDI/localhost/server1/jdbc/schema/primary" stringToBind="QCPDT3A"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130794737238" name="localhost_server1_cics_sharesize" nameInNameSpace="JNDI/localhost/server1/cics/sharesize" stringToBind="5"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130794932579" name="localhost_jdbc_id_log" nameInNameSpace="JNDI/localhost/jdbc/id/log" stringToBind="QCPU98i"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130794990482" name="localhost_jdbc_pass_log" nameInNameSpace="JNDI/localhost/jdbc/pass/log" stringToBind="gdxmda1"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130795054875" name="localhost_apps_mda_act_password" nameInNameSpace="JNDI/localhost/apps/mda/act/password" stringToBind="mdaprod1"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130795343039" name="localhost_server1_cics_gateway_primary" nameInNameSpace="JNDI/localhost/server1/cics/gateway/primary" stringToBind="198.187.115.21"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130795402555" name="localhost_server1_cics_gateway_port" nameInNameSpace="JNDI/localhost/server1/cics/gateway/port" stringToBind="2006"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130795465245" name="localhost_apps_cmrrxmetrics_volume" nameInNameSpace="JNDI/localhost/apps/cmrrxmetrics/volume" stringToBind="lns-7jhw231"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130795786217" name="localhost_apps_ext_url_cmr" nameInNameSpace="JNDI/localhost/apps/ext/url/cmr" stringToBind="http://localhost:9080/cmrrxmetrics/getfolderitems.do"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130795874153" name="localhost_apps_ext_url_rxnevg" nameInNameSpace="JNDI/localhost/apps/ext/url/rxnevg" stringToBind="s99011"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130795971453" name="localhost_apps_mda_rxmetrics_url" nameInNameSpace="JNDI/localhost/apps/mda/rxmetrics/url" stringToBind="http://tstras1:8700/iportal/login.jsp"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130796121909" name="localhost_apps_actuate_volume" nameInNameSpace="JNDI/localhost/apps/actuate/volume" stringToBind="lns-7jhw231"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130796191790" name="localhost_apps_actuate_password" nameInNameSpace="JNDI/localhost/apps/actuate/password" stringToBind="jp7233"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130796309189" name="localhost_apps_mda_act_volume_discount" nameInNameSpace="JNDI/localhost/apps/mda/act/volume/discount" stringToBind="dsc"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1130796388733" name="localhost_apps_mda_act_volume_gpo" nameInNameSpace="JNDI/localhost/apps/mda/act/volume/gpo" stringToBind="gpo"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1134751859807" name="localhost_apps_mda_act_volume_xmd" nameInNameSpace="JNDI/localhost/apps/mda/act/volume/xmd" stringToBind="xmd"/>
+  <namebindings:StringNameSpaceBinding xmi:id="StringNameSpaceBinding_1248790376701" name="localhost_apps_mda_gdxcash_url" nameInNameSpace="JNDI/localhost/apps/mda/gdxcash/url" stringToBind="https://dev1ras.caremarkrx.net/rebate_cash"/>
+</xmi:XMI>

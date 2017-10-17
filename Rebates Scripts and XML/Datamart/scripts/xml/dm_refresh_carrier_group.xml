@@ -1,0 +1,168 @@
+
+<!-- REFRESH CARRIER_GROUP  -->
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        cli_schema=script.getProperty("cli_schema");
+        dmt_schema=script.getProperty("dmt_schema");
+	]]></command>
+		       
+	<command type="try">
+		<try>
+            <!-- *************** CARRIER_GROUP ********************* -->
+			<command type="run" datasource="rebates" rowName="count1">
+					SELECT COUNT(*) FROM ${cli_schema}.carrier_group
+			</command>
+			<!-- Copy carrier_group info from Oracle to DB2. -->
+			<command type="copy" batch="500">
+				<source type="sql" datasource="rebates"><![CDATA[
+					SELECT 
+					  EXTL_SRC_CD,
+					  EXTL_LVL1_ID,
+					  EXTL_LVL2_ID,
+					  EXTL_LVL3_ID,
+					  EXTL_LVL4_ID,
+					  EXTL_LVL5_ID,
+					  RAC,
+					  LPAD(TRIM(CLIENT_NBR),8,'0'),
+					  PCS_SYSTEM_ID,
+					  CARRIER_GROUP_NAME,
+					  CG_EFF_DT,
+					  CG_TERM_DT,
+					  BA_NBR,
+					  AR_NBR,
+					  PCS_CLIENT_NBR,
+					  INSURANCE_CD,
+					  EDEN_INDICATOR,
+					  ECLIPS_LOAD_DT,
+					  GP1,
+					  GP2,
+					  GP3,
+					  GP4,
+					  CLIENT_TYPE_ECLIPS,
+					  FUNDING_TYPE,
+					  LCM,
+					  MDO_PHARMACY,
+					  UPDATE_USERID,
+					  INSRT_DATE
+					FROM ${cli_schema}.carrier_group
+						ORDER BY 1,2,3,4,5,6,9
+				]]></source>
+			<target type= "queue" threads="6" >  
+				<target 
+					type             = "sql"
+					datasource       = "datamart"
+					transaction      = "true"
+					batch            = "500"
+					reportInterval   = "500"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					INSERT INTO ${cli_schema}.carrier_group
+					 (EXTL_SRC_CD,
+					  EXTL_LVL1_ID,
+					  EXTL_LVL2_ID,
+					  EXTL_LVL3_ID,
+					  EXTL_LVL4_ID,
+					  EXTL_LVL5_ID,
+					  RAC,
+					  CLIENT_NBR,
+					  PCS_SYSTEM_ID,
+					  CARRIER_GROUP_NAME,
+					  CG_EFF_DT,
+					  CG_TERM_DT,
+					  BA_NBR,
+					  AR_NBR,
+					  PCS_CLIENT_NBR,
+					  INSURANCE_CD,
+					  EDEN_INDICATOR,
+					  ECLIPS_LOAD_DT,
+					  GP1,
+					  GP2,
+					  GP3,
+					  GP4,
+					  CLIENT_TYPE_ECLIPS,
+					  FUNDING_TYPE,
+					  LCM,
+					  MDO_PHARMACY,
+					  UPDATE_USERID,
+					  INSRT_DATE	
+					  ) 
+					VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )
+				]]></target>
+			</target>
+			</command>
+	        <!-- compare totals -->
+
+			<command type="run" datasource="datamart" rowName="count2">
+					SELECT COUNT(*) FROM ${cli_schema}.carrier_group
+			</command>
+			<command type="java">
+				count1 = script.getProperty("count1.1").intValue();
+				count2 = script.getProperty("count2.1").intValue();
+				logger.warn("Silver RBATE_REG.CARRIER_GROUP COUNT = " + count1);
+				logger.warn("RPS RBATE_REG.CARRIER_GROUP COUNT = " + count2);
+				if (count1 != count2) {
+					logger.error(" CARRIER_GROUP counts do NOT match count1=" + count1 + "  count2=" + count2);
+                    throw new Exception(" CARRIER_GROUP counts do NOT match count1=" + count1 + " count2=" + count2);
+				} 
+			</command> 
+				 
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+			<command
+				type="mail"
+				mailTo="${mailto}"
+				mailFrom="RPDM_Client_Refresh"
+				subject="[ERROR] REFESH CLIENT - CARRIER_GROUP "
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] REFRESH CLIENT - CARRIER_GROUP</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] REFRESH CLIENT - CARRIER_GROUP </u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		</catch>
+	</command>
+</sqml>

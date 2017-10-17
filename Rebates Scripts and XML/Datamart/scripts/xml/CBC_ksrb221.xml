@@ -1,0 +1,59 @@
+
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+	dmt_schema=script.getProperty("dmt_schema");
+	pmt_schema=script.getProperty("pmt_schema");
+	]]></command>
+		       
+	<command type="try">
+		<try>
+			<command type="copy" batch="1000">
+				<source type="sql" datasource="db2p"><![CDATA[
+
+SELECT B.CLM_EXTNL_ID, B.RBAT_BILL_PRD_NM, 
+	B.FIX_ALOC_AMT,B.MKSR_ALOC_AMT,B.ADMN_ALOC_AMT,B.LAST_UPDT_TS
+FROM ${pmt_schema}.KSRB220_FEBASE A JOIN                           
+     ${pmt_schema}.KSRB221_FEDTL B                                       
+  ON A.RBAT_BILL_PRD_NM = B.RBAT_BILL_PRD_NM                     
+ AND A.EXTL_SRC_CD = B.EXTL_SRC_CD                               
+ AND A.CLM_EXTNL_ID = B.CLM_EXTNL_ID                             
+WHERE A.RBAT_BILL_PRD_NM = '${QPARM}'                              
+AND A.EXTL_SRC_CD ='RXC'                                        
+AND A.RBAT_ID  = '${RBATE}'
+AND B.RBAT_BILL_PRD_NM = '${QPARM}'
+AND B.EXTL_SRC_CD ='RXC'
+
+
+				]]></source>
+				<target
+					type             = "sql"
+					datasource       = "datamart"
+					transaction      = "true"
+					batch            = "1000"
+					reportInterval   = "1000"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					INSERT INTO ${dmt_schema}.CBC_RPS_LKP
+					 (CLAIM_GID,
+					  RBAT_BILL_PRD_NM,
+					  FIX_ALOC_AMT,
+					  MKSR_ALOC_AMT,
+					  ADMN_ALOC_AMT,
+					  LAST_UPDT_TS
+					  ) 
+					VALUES ( ?,?,?,?,?,? )
+
+				]]></target>
+			</command>
+
+		</try>
+		<catch>
+		</catch>
+	</command>
+</sqml>

@@ -1,0 +1,134 @@
+<parsers>
+	
+	<record
+		type="qllives.trailer"
+		objectType="java.util.HashMap"
+		acceptPattern="^T"
+	>
+		<tokenizer type="fixed">
+			<field offset="0" length="1"/>
+			<field offset="1" length="10"/>
+			<field offset="11" length="40"/>
+			<field offset="51" length="10"/>
+		</tokenizer>
+		<field
+			name="trailer"
+			position="0"
+			dataType="string"
+			trim="true"
+		/>
+		<field
+			name="date"
+			position="1"
+			dataType="date"
+			format="MM/dd/yyyy"
+			trim="true"
+		/>
+		<field
+			name="fileName"
+			position="2"
+			dataType="string"
+			trim="true"
+		/>
+		<field
+			name="recordCount"
+			position="3"
+			dataType="long"
+			trim="true"
+		/>
+	</record>
+		
+	<record
+		type="qllives"
+		objectType="com.caremark.gdx.rateload.QLEnrollmentRecord"
+		acceptPattern=".*"
+	>
+		<tokenizer type="fixed">
+			<field offset="0" length="20"/>
+			<field offset="20" length="20"/>
+			<field offset="40" length="20"/>
+			<field offset="60" length="20"/>
+			<field offset="80" length="20"/>
+			<field offset="100" length="10"/>
+			<field offset="110" length="10"/>
+			<field offset="120" length="1"/>
+			<field offset="121" length="10"/>
+			<field offset="131" length="30"/>
+			<field offset="161" length="5"/>
+		</tokenizer>
+		<field
+			name="externalLevel1"
+			position="0"
+			dataType="string"
+			trim="true"
+			validationPattern="^\d+$"
+			script="Integer.toString(Integer.parseInt(value))"
+		/>
+		<field
+			name="externalLevel2"
+			position="1"
+			dataType="string"
+			trim="true"
+			validationPattern="^\d+$"
+			script="Integer.toString(Integer.parseInt(value))"
+		/>
+		<field
+			name="externalLevel3"
+			position="2"
+			dataType="string"
+			trim="true"
+			validationPattern="^\d+$"
+			script="Integer.toString(Integer.parseInt(value))"
+		/>
+		<field
+			name="externalLevel4"
+			position="3"
+			dataType="string"
+			trim="true"
+		/>
+		<field
+			name="externalLevel5"
+			position="4"
+			dataType="string"
+			trim="true"
+		/>
+		<field
+			name="effectiveDate"
+			position="5"
+			dataType="date"
+			format="MM/dd/yyyy"
+			trim="true"
+		/>
+		<field
+			name="termDate"
+			position="6"
+			dataType="date"
+			format="MM/dd/yyyy"
+			trim="true"
+		/>
+		<field
+			name="planType"
+			position="7"
+			dataType="string"
+			validationPattern="^[0123456]$"		
+		/>
+		<field
+			name="enrollmentCount"
+			position="8"
+			dataType="long"
+			trim="true"
+		/>
+		<field
+			name="clientName"
+			position="9"
+			dataType="string"
+			trim="true"
+		/>
+		<field
+			name="contractNumber"
+			position="10"
+			dataType="string"
+			trim="true"
+		/>
+	</record>
+</parsers>

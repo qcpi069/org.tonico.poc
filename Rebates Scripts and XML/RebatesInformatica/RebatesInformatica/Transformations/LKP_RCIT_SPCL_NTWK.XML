@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<!DOCTYPE POWERMART SYSTEM "powrmart.dtd">
+<POWERMART CREATION_DATE="10/30/2013 12:10:11" REPOSITORY_VERSION="182.91">
+<REPOSITORY NAME="PCRepos_Caremark9_PRD1" VERSION="182" CODEPAGE="MS1252" DATABASETYPE="DB2">
+<FOLDER NAME="Shared_Rebates_RCI" GROUP="" OWNER="rebates_session_operator" SHARED="SHARED" DESCRIPTION="Shared Objects" PERMISSIONS="rwx---r--" UUID="482f1f88-6499-4f1e-95c4-5f8d78fe0b3e">
+    <TRANSFORMATION DESCRIPTION ="This lookup was added for ITPR002957 FEP 2012 for Rebates.   &#xD;&#xA;&#xD;&#xA;It is to be used to do claim level lookups during the claim extracts using the claim pharmacy network ID, and the assigned Rebate ID, to determine if it&apos;s using a Specialty Network.  If the claim fields match the a row in the lookup, use the SPCL_DRUG_CD on the lookup for the target field value on BCA.&#xD;&#xA;&#xD;&#xA;Changed to be an unconnected lookup for project ITPR000634." NAME ="LKP_RCIT_SPCL_NTWK" OBJECTVERSION ="1" REUSABLE ="YES" TYPE ="Lookup Procedure" VERSIONNUMBER ="1">
+        <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Used for lookup to identify FEP specialty pharmacies in LKP_RCIT_SPCL_NTWK, matched to the RBAT_ID on BCI during claim extract." NAME ="RBAT_ID" PICTURETEXT ="" PORTTYPE ="LOOKUP" PRECISION ="10" SCALE ="0"/>
+        <TRANSFORMFIELD DATATYPE ="integer" DEFAULTVALUE ="" DESCRIPTION ="Used for lookup to identify FEP specialty pharmacies in LKP_RCIT_SPCL_NTWK, matched to the RBAT_ID on BCI during claim extract." NAME ="in_RBAT_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="10" SCALE ="0"/>
+        <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Used for lookup to identify FEP specialty pharmacies in LKP_RCIT_SPCL_NTWK, matched to the claims RX/NABP Network ID during claim extract." NAME ="PMCY_NTWK_ID" PICTURETEXT ="" PORTTYPE ="LOOKUP" PRECISION ="20" SCALE ="0"/>
+        <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="Used for lookup to identify FEP specialty pharmacies in LKP_RCIT_SPCL_NTWK, matched to the claims RX/NABP Network ID during claim extract." NAME ="in_PMCY_NTWK_ID" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="20" SCALE ="0"/>
+        <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="Used for lookup to identify FEP specialty pharmacies in LKP_RCIT_SPCL_NTWK, compared to the DSPN_DT on BCI during claim extract." NAME ="EFF_DT" PICTURETEXT ="" PORTTYPE ="LOOKUP" PRECISION ="29" SCALE ="9"/>
+        <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="Used for lookup to identify FEP specialty pharmacies in LKP_RCIT_SPCL_NTWK, compared to the DSPN_DT on BCI during claim extract." NAME ="TERM_DT" PICTURETEXT ="" PORTTYPE ="LOOKUP" PRECISION ="29" SCALE ="9"/>
+        <TRANSFORMFIELD DATATYPE ="date/time" DEFAULTVALUE ="" DESCRIPTION ="Used for lookup to identify FEP specialty pharmacies in LKP_RCIT_SPCL_NTWK, compared to the DSPN_DT on BCI during claim extract." NAME ="in_DSPN_DT" PICTURETEXT ="" PORTTYPE ="INPUT" PRECISION ="29" SCALE ="9"/>
+        <TRANSFORMFIELD DATATYPE ="string" DEFAULTVALUE ="" DESCRIPTION ="This value will be used to set the RCIT_BASE_CLM_APC.SPCL_DRUG_CD value when a claim matches the row in this table." NAME ="SPCL_DRUG_CD" PICTURETEXT ="" PORTTYPE ="LOOKUP/RETURN/OUTPUT" PRECISION ="1" SCALE ="0"/>
+        <TABLEATTRIBUTE NAME ="Lookup Sql Override" VALUE =""/>
+        <TABLEATTRIBUTE NAME ="Lookup table name" VALUE ="VRAP.RCIT_SPCL_NTWK"/>
+        <TABLEATTRIBUTE NAME ="Lookup Source Filter" VALUE =""/>
+        <TABLEATTRIBUTE NAME ="Lookup caching enabled" VALUE ="YES"/>
+        <TABLEATTRIBUTE NAME ="Lookup policy on multiple match" VALUE ="Use First Value"/>
+        <TABLEATTRIBUTE NAME ="Lookup condition" VALUE ="RBAT_ID = in_RBAT_ID AND PMCY_NTWK_ID = in_PMCY_NTWK_ID AND EFF_DT &lt;= in_DSPN_DT AND TERM_DT &gt;= in_DSPN_DT"/>
+        <TABLEATTRIBUTE NAME ="Connection Information" VALUE ="$Source"/>
+        <TABLEATTRIBUTE NAME ="Source Type" VALUE ="Database"/>
+        <TABLEATTRIBUTE NAME ="Recache if Stale" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Tracing Level" VALUE ="Normal"/>
+        <TABLEATTRIBUTE NAME ="Lookup cache directory name" VALUE ="$PMCacheDir"/>
+        <TABLEATTRIBUTE NAME ="Lookup cache initialize" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Lookup cache persistent" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Lookup Data Cache Size" VALUE ="Auto"/>
+        <TABLEATTRIBUTE NAME ="Lookup Index Cache Size" VALUE ="Auto"/>
+        <TABLEATTRIBUTE NAME ="Dynamic Lookup Cache" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Synchronize Dynamic Cache" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Output Old Value On Update" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Update Dynamic Cache Condition" VALUE ="TRUE"/>
+        <TABLEATTRIBUTE NAME ="Cache File Name Prefix" VALUE =""/>
+        <TABLEATTRIBUTE NAME ="Re-cache from lookup source" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Insert Else Update" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Update Else Insert" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Datetime Format" VALUE =""/>
+        <TABLEATTRIBUTE NAME ="Thousand Separator" VALUE ="None"/>
+        <TABLEATTRIBUTE NAME ="Decimal Separator" VALUE ="."/>
+        <TABLEATTRIBUTE NAME ="Case Sensitive String Comparison" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Null ordering" VALUE ="Null Is Highest Value"/>
+        <TABLEATTRIBUTE NAME ="Sorted Input" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Lookup source is static" VALUE ="NO"/>
+        <TABLEATTRIBUTE NAME ="Pre-build lookup cache" VALUE ="Auto"/>
+        <TABLEATTRIBUTE NAME ="Subsecond Precision" VALUE ="6"/>
+    </TRANSFORMATION>
+</FOLDER>
+</REPOSITORY>
+</POWERMART>

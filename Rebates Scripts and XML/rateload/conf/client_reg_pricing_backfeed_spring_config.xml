@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<!--
+	This is the spring configuration file for discount client APC Status Load process
+	-->																																				 
+																																					 <!--  - Application context definition for "springapp" DispatcherServlet.  -->
+<beans>    
+	
+	<!--  the driver class -->
+	<bean id="main" class="com.caremark.rebates.registration.batch.main.ClientRegPricingBackfeedMain">	
+		<property name="service">
+    		<ref bean="clientRegPricingBackfeedService"/>
+    	</property>		
+    </bean>
+	<bean id="clientRegPricingBackfeedService" class="com.caremark.rebates.registration.batch.service.PrcBackFeedService">	
+		
+		<property name="dataSource">
+            <ref bean="rbateRegDataSource"/>
+        </property>	
+        
+        <property name="transactionTemplate">
+        	<ref bean="transactionTemplate"/>
+        </property> 
+		
+		<property name="clientRegPricingBackfeedDAO">
+    		<ref bean="clientRegPricingBackfeedDAO"/>
+    	</property>	
+    	
+    	<property name="logDir">
+    			<value>logs</value>
+    	</property>
+    	
+    	<property name="backfeedEmailTemplate">
+    		<value>BackfeedEmailTemplate.txt</value>
+    	</property>	
+		
+		<property name="mailFrom">
+    		<value>CRbackfeedbatch@caremark.com</value>
+    	</property>	
+		
+		<property name="mailTo">
+    		<value>ITD.Rebates@caremark.com; RebateReg@caremark.com</value>
+    	</property>
+		
+    </bean>	
+ 	 	
+</beans>

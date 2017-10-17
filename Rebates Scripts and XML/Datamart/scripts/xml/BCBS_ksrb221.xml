@@ -1,0 +1,61 @@
+
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+	dmt_schema=script.getProperty("dmt_schema");
+	pmt_schema=script.getProperty("pmt_schema");
+	]]></command>
+		       
+	<command type="try">
+		<try>
+			<command type="copy" batch="1000">
+				<source type="sql" datasource="db2p"><![CDATA[
+
+SELECT B.CLM_EXTNL_ID, B.RBAT_BILL_PRD_NM, B.EXTL_SRC_CD,
+	sum(B.FIX_ALOC_AMT),sum(B.CLNT_SHR_AMT),sum(B.CO_SHR_AMT),sum(B.FIX_RBAT_AMT),max(B.LAST_UPDT_TS)
+FROM ${pmt_schema}.KSRB220_FEBASE A JOIN                           
+     ${pmt_schema}.KSRB221_FEDTL B                                       
+  ON A.RBAT_BILL_PRD_NM = B.RBAT_BILL_PRD_NM                     
+ AND A.EXTL_SRC_CD = B.EXTL_SRC_CD                               
+ AND A.CLM_EXTNL_ID = B.CLM_EXTNL_ID                             
+WHERE A.RBAT_BILL_PRD_NM = '${QPARM}'                              
+AND A.EXTL_SRC_CD in ('PHC','RXC')                                        
+AND A.RBAT_ID in ('00043764','00044034','00041051','00041064','00042758')
+AND B.RBAT_BILL_PRD_NM = '${QPARM}'
+AND B.EXTL_SRC_CD in ('PHC','RXC')                                        
+group by B.CLM_EXTNL_ID, B.RBAT_BILL_PRD_NM, B.EXTL_SRC_CD
+
+				]]></source>
+				<target
+					type             = "sql"
+					datasource       = "datamart"
+					transaction      = "true"
+					batch            = "1000"
+					reportInterval   = "1000"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					INSERT INTO ${dmt_schema}.BCBS_ksrb221
+					 (claim_gid,
+					  Inv_qtr,
+					  EXTL_SRC_CD,
+					  FIX_ALOC_AMT,
+					  CLNT_SHR_AMT,
+					  CO_SHR_AMT,
+					  FIX_RBAT_AMT,
+					  LAST_UPDT_TS
+					  ) 
+					VALUES ( ?,?,?,?,?,?,?,? )
+
+				]]></target>
+			</command>
+
+		</try>
+		<catch>
+		</catch>
+	</command>
+</sqml>

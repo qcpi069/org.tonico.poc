@@ -1,0 +1,37 @@
+<!DOCTYPE aspectwerkz PUBLIC "-//AspectWerkz//DTD//EN" "http://aspectwerkz.codehaus.org/dtd/aspectwerkz2.dtd">
+<aspectwerkz>
+    <system id="methodLevelSecurity">
+		
+		<!--
+		  This Aspect makes sure the user has write access for the currently
+		  selected model. Otherwise a SecurityAuthorizationException is thrown. Move to GDX
+		-->
+		<aspect class="com.caremark.psd.datasales.vra2.security.SecurityAspect" name="WriteSecurity">
+			<param name="permission" value="write"/>
+			<pointcut name="SECURITY_CHECK">
+				execution(* com.caremark.psd.datasales.vra2.datasources.jdbc.*Table.save*(..)) OR
+				execution(* com.caremark.psd.datasales.vra2.datasources.jdbc.*Table.update*(..)) OR
+				execution(* com.caremark.psd.datasales.vra2.datasources.jdbc.*Table.insert*(..)) OR
+				execution(* com.caremark.psd.datasales.vra2.datasources.jdbc.*Table.delete*(..)) OR
+				execution(* com.caremark.psd.datasales.vra2.datasources.jdbc.codetables.*Table.save*(..)) OR
+				execution(* com.caremark.psd.datasales.vra2.datasources.jdbc.codetables.*Table.update*(..)) OR
+				execution(* com.caremark.psd.datasales.vra2.datasources.jdbc.codetables.*Table.insert*(..)) OR
+				execution(* com.caremark.psd.datasales.vra2.datasources.jdbc.codetables.*Table.delete*(..)) OR
+				execution(* com.caremark.psd.datasales.vra2.soap.ActuateScheduler.schedule*(..)) OR
+				execution(* com.caremark.psd.datasales.vra2.soap.ActuateScheduler.submit*(..))
+			</pointcut>
+			<advice name="checkSecurity" type="around" bind-to="SECURITY_CHECK"/>
+		</aspect>
+		
+		<!-- Trace execution of controllers and renderers -->
+		<!--
+		<aspect class="com.caremark.psd.datasales.vra2.security.TracingAspect">
+			<pointcut name="TRACE">
+				execution(* ..*Table.*(..))
+			</pointcut>
+			<advice name="trace" type="around" bind-to="TRACE"/>
+		</aspect>
+		-->
+		
+	</system>
+</aspectwerkz>

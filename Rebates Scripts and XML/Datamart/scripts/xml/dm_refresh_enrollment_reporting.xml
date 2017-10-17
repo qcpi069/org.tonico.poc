@@ -1,0 +1,155 @@
+
+<!-- REFRESH ENROLMENT_REPORTING  -->
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        cli_schema=script.getProperty("cli_schema");        
+	]]></command>
+		       
+	<command type="try">
+		<try>
+            <!-- *************** ENROLMENT_REPORTING ********************* -->
+			<command type="run" datasource="rebates" rowName="count1">
+				<![CDATA[
+					SELECT COUNT(*) FROM ${cli_schema}.enrollment_reporting
+				]]>
+			</command>
+			<!-- Copy enrolment_reporting info from Oracle to DB2. -->
+			<command type="copy" batch="500">
+				<source type="sql" datasource="rebates"><![CDATA[
+					SELECT 
+					  LPAD(TRIM(CLIENT_NBR),8,'0'),
+					  RAC,
+					  REPORT_GROUP_NBR,
+					  CLT_ID,
+					  RAC_ID,
+					  RI_EFF_DT,
+					  RI_TERM_DT,
+					  REPORT_GROUP_NAME,
+					  AKA_NAME,
+					  PROCESSOR,
+					  FORMULARY_STATUS,
+					  CLIENT_TYPE,
+					  RUN_DATE,
+					  QUARTER,
+					  MONTH,
+					  YEAR,
+					  CLNT_NB_TYPE_CD,
+					  LCM_CD,
+					  LIVES_CNT,
+					  EXTNL_SRC_CD
+					FROM ${cli_schema}.enrollment_reporting 
+						ORDER BY 1
+				]]></source>
+			<target type= "queue" threads="6" >  
+				<target
+					type             = "sql"
+					datasource       = "datamart"
+					transaction      = "true"
+					batch            = "500"
+					reportInterval   = "500"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					INSERT INTO ${cli_schema}.enrollment_reporting 
+					 (CLIENT_NBR,
+					  RAC,
+					  REPORT_GROUP_NBR,
+					  CLT_ID,
+					  RAC_ID,
+					  RI_EFF_DT,
+					  RI_TERM_DT,
+					  REPORT_GROUP_NAME,
+					  AKA_NAME,
+					  PROCESSOR,
+					  FORMULARY_STATUS,
+					  CLIENT_TYPE,
+					  RUN_DATE,
+					  QUARTER,
+					  MONTH,
+					  YEAR,
+					  CLNT_NB_TYPE_CD,
+					  LCM_CD,
+					  LIVES_CNT,
+					  EXTNL_SRC_CD		
+					  ) 
+					VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )
+				]]></target>
+			 </target>
+			</command>
+	        <!-- compare totals -->
+
+			<command type="run" datasource="datamart" rowName="count2">
+				<![CDATA[
+					SELECT COUNT(*) FROM ${cli_schema}.enrollment_reporting
+				]]>
+			</command>
+			<command type="java">
+				count1 = script.getProperty("count1.1").intValue();
+				count2 = script.getProperty("count2.1").intValue();
+				logger.warn("Silver RBATE_REG.ENROLLMENT_REPORTING COUNT = " + count1);
+				logger.warn("RPS RBATE_REG.ENROLLMENT_REPORTING COUNT = " + count2);
+				if (count1 != count2) {
+					logger.error(" ENROLLMENT_REPORTING counts do NOT match count1=" + count1 + "  count2=" + count2);
+                    throw new Exception(" ENROLLMENT_REPORTING counts do NOT match count1=" + count1 + " count2=" + count2);
+				} 
+			</command> 
+				 
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+			<command
+				type="mail"
+				mailTo="${mailto}"
+				mailFrom="RPDM_Client_Refresh"
+				subject="[ERROR] REFESH CLIENT - ENROLLMENT REPORTING "
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] REFRESH CLIENT - ENROLLMENT_REPORTING</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] REFRESH CLIENT - ENROLLMENT_REPORTING </u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		</catch>
+	</command>
+</sqml>

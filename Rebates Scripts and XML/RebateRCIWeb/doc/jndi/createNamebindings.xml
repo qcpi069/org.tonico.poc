@@ -1,0 +1,180 @@
+<!-- File: createNamebindings.xml                                                  -->
+<!-- Authors: Stephen Schnabel                                                     -->
+<!-- Purpose: ANT script for creating namebindings.xml files (cell + server)       -->
+<!--          with the correct values and also places this in the correct          -->
+<!--          RAD profile cell folder.                                             -->
+<!--                                                                               -->
+<!-- History: 2017.01.17  SMS  Created.                                            -->
+
+<!-- This is an ANT script that performs a few simple tasks for developers         -->
+<!-- while working with the CSS projects. To execute an ANT task in WSAD           -->
+<!-- perform the following steps:                                                  -->
+<!--                                                                               -->
+<!--    1. Right-click the export.xml file in WebSphere.                           -->
+<!--    2. Select "Run Ant..." from the pop-up menu. The "Run Ant" window          -->
+<!--       should appear.                                                          -->
+<!--    3. Set all of the below properties (space seperated)                       -->
+<!--       It should look something like the following:                            -->
+<!--                                                                               -->
+<!--          -Dprofile.dir="C:\IBM\WebSphere\AppServer85\profiles\REBATES-RCI"    -->
+<!--          -Dcell.name="HP6K52UA9491K62Node03Cell"                              -->
+<!--          -Dnode.name="HP6K52UA9491K62NodeRCI"                                  -->
+<!--          -Dserver.name="server1"                                              -->
+<!--          -Denvironment="DEV1"                                                 -->
+<!--                                                                               -->
+<!--    4. Click the checkbox next to the desired targets in the                   -->
+<!--       "Available Targets:" listbox. Each "target" performs a                  -->
+<!--       specific series of tasks.                                               -->
+<!--    5. Click the "Finish" button. Ant will run the script using the            -->
+<!--       selected targets.                                                       -->
+                      
+<project name="RebateRCIWeb" default="all">
+
+    <description>Create the namebindings.xml file for the RCI server.</description>                   
+	
+	<target name="check.args" description="Validates that all arguments have been supplied.">	
+	    <fail unless="profile.dir"/>
+	    <fail unless="cell.name"/>
+	    <fail unless="node.name"/>
+	    <fail unless="server.name"/>
+	    <fail unless="environment"/>
+	    
+	    <condition property="DEV1">
+        	<equals arg1="DEV1" arg2="${environment}"/>
+    	</condition>
+    	
+    	<condition property="DEV2">
+        	<equals arg1="DEV2" arg2="${environment}"/>
+    	</condition>
+    	
+    	<condition property="SIT1">
+        	<equals arg1="SIT1" arg2="${environment}"/>
+    	</condition>
+    	
+    	<condition property="SIT2">
+        	<equals arg1="SIT2" arg2="${environment}"/>
+    	</condition>	
+ 	</target>    	
+ 	
+ 	<target name="display.props" description="Display all internal property values.">
+ 		<!--  Set additional properties -->	
+		<property name="cell.dir" location="${profile.dir}/config/cells/${cell.name}"/>
+ 		<property name="server.dir" location="${profile.dir}/config/cells/${cell.name}/nodes/${node.name}/servers/${server.name}"/> 				
+		<property name="jndi.source.dir" location=""/>				
+		
+		<!--  Display properties -->					
+		<echo message="Cell Directory: ${cell.dir}"></echo>
+ 		<echo message="Server Directory: ${server.dir}"></echo> 		 		
+		<echo message="Node Name: ${node.name}"></echo>		 
+		<echo message="Server Name: ${server.name}"></echo>
+		<echo message="Environment: ${environment}"></echo>
+        <echo message="JNDI Source Directory: ${jndi.source.dir}"></echo>                    		       
+ 	</target>    	 
+ 	
+ 	<target name="copy.file.cell" description="Copies the namebindings.xml template to the RCI Profile (cell-level).">
+ 		<echo message="*** COPY FILE ***"></echo>	
+        <copy todir="${cell.dir}" overwrite="true">
+            <fileset dir="${jndi.source.dir}">
+                <include name="namebindings.xml"/>
+            </fileset>
+        </copy>        	    
+ 	</target>
+ 	
+	<target name="copy.file.server" description="Copies the namebindings.xml template to the RCI Profile (server-level).">
+ 		<echo message="*** COPY FILE ***"></echo>	
+        <copy todir="${server.dir}" overwrite="true">
+            <fileset dir="${jndi.source.dir}">
+                <include name="namebindings.xml"/>
+            </fileset>
+        </copy>        	    
+ 	</target>
+	
+	<target name="all" depends="check.args, display.props, copy.file.cell, copy.file.server, DEV1, DEV2, SIT1, SIT2" description="Create the namebindings.xml files (cell+server) for the RCI Profile.">
+		<!--
+        <echo message="*** REPLACE NON-ENVIRONMENT SPECIFIC TAGS ***"></echo>	
+        <replace file="${cell.dir}/namebindings.xml">
+	  		<replacefilter token="%CELL%" value="${cell.name}"/>	  			  		
+	  		<replacefilter token="%NODE%" value="${node.name}"/>
+	  		<replacefilter token="%SERVER%" value="${server.name}"/>	  		  		
+		</replace>
+        <echo message="Completed replacement of non-environment-specific tags: %CELL%, %NODE%, and %SERVER%."></echo>
+        -->                    							             
+    </target>            
+    
+    <target name="DEV1" if="DEV1">    	
+   		<echo message="The environment is set to DEV1!"></echo>
+    	<!--
+		<echo message="*** REPLACE ENVIRONMENT SPECIFIC TAGS ***"></echo>	
+        <replace file="${cell.dir}/namebindings.xml">
+            <replacefilter token="%GDX_HOST%" value="TSTDBS1"/>
+            <replacefilter token="%GDX_PORT%" value="50006"/>
+            <replacefilter token="%GDX_DB%" value="GDXDEV1"/>            
+	  		<replacefilter token="%GDX_USER%" value="vactuate"/>
+	  		<replacefilter token="%GDX_PASSWORD%" value="mkcross0n"/>
+	  		<replacefilter token="%INFRA_DB%" value="DSN2"/>
+	  		<replacefilter token="%INFRA_SCHEMA%" value="QCPDI3A"/>
+	  		<replacefilter token="%INFRA_USER%" value="qcpu89i"/>
+	  		<replacefilter token="%INFRA_PASSWORD%" value="tstng22"/>	  		 	  		
+		</replace>
+        <echo message="Completed replacement of environment-specific tags: %GDX_HOST%, %GDX_PORT%, %GDX_DB%, %GDX_USER%, %GDX_PASSWORD%, %INFRA_DB%, %INFRA_SCHEMA%, %INFRA_USER%, and %INFRA_PASSWORD%."></echo>
+        -->
+	</target>
+
+	<target name="DEV2" if="DEV2">
+   		<echo message="The environment is set to DEV2!"></echo>
+		<!--
+		<echo message="*** REPLACE ENVIRONMENT SPECIFIC TAGS ***"></echo>	
+        <replace file="${cell.dir}/namebindings.xml">
+            <replacefilter token="%GDX_HOST%" value="TSTDBS2"/>
+            <replacefilter token="%GDX_PORT%" value="50144"/>
+            <replacefilter token="%GDX_DB%" value="GDXDEV"/>     
+	  		<replacefilter token="%GDX_USER%" value="vactuate"/>
+	  		<replacefilter token="%GDX_PASSWORD%" value="mkcrosson"/>
+	  		<replacefilter token="%INFRA_DB%" value="DSN2"/>
+	  		<replacefilter token="%INFRA_SCHEMA%" value="QCPDS3A"/>
+	  		<replacefilter token="%INFRA_USER%" value="qcpu89i"/>
+	  		<replacefilter token="%INFRA_PASSWORD%" value="tstng22"/>	  		 	  		
+		</replace>
+        <echo message="Completed replacement of environment-specific tags: %GDX_HOST%, %GDX_PORT%, %GDX_DB%, %GDX_USER%, %GDX_PASSWORD%, %INFRA_DB%, %INFRA_SCHEMA%, %INFRA_USER%, and %INFRA_PASSWORD%."></echo>
+        -->
+	</target>   
+
+    <target name="SIT1" if="SIT1">
+   		<echo message="The environment is set to SIT1!"></echo>
+    	<!--
+    	<echo message="*** REPLACE ENVIRONMENT SPECIFIC TAGS ***"></echo>	
+        <replace file="${cell.dir}/namebindings.xml">
+            <replacefilter token="%GDX_HOST%" value="TSTDBS4"/>
+            <replacefilter token="%GDX_PORT%" value="50006"/>
+            <replacefilter token="%GDX_DB%" value="GDXSIT1"/>     
+	  		<replacefilter token="%GDX_USER%" value="vactuate"/>
+	  		<replacefilter token="%GDX_PASSWORD%" value="mkcross0n"/>
+	  		<replacefilter token="%INFRA_DB%" value="DSNB"/>
+	  		<replacefilter token="%INFRA_SCHEMA%" value="QCPDG3A"/>
+	  		<replacefilter token="%INFRA_USER%" value="qcpu89i"/>
+	  		<replacefilter token="%INFRA_PASSWORD%" value="tstng22"/>	  		 	  		
+		</replace>
+        <echo message="Completed replacement of environment-specific tags: %GDX_HOST%, %GDX_PORT%, %GDX_DB%, %GDX_USER%, %GDX_PASSWORD%, %INFRA_DB%, %INFRA_SCHEMA%, %INFRA_USER%, and %INFRA_PASSWORD%."></echo>
+        -->
+	</target>
+
+	<target name="SIT2" if="SIT2">
+   		<echo message="The environment is set to SIT2!"></echo>
+		<!--
+		<echo message="*** REPLACE ENVIRONMENT SPECIFIC TAGS ***"></echo>		
+        <replace file="${cell.dir}/namebindings.xml">
+            <replacefilter token="%GDX_HOST%" value="TSTDBS5"/>
+            <replacefilter token="%GDX_PORT%" value="50144"/>
+            <replacefilter token="%GDX_DB%" value="GDXSIT2"/>     
+	  		<replacefilter token="%GDX_USER%" value="vactuate"/>
+	  		<replacefilter token="%GDX_PASSWORD%" value="mkcross0n"/>
+	  		<replacefilter token="%INFRA_DB%" value="DSNB"/>
+	  		<replacefilter token="%INFRA_SCHEMA%" value="QCPDH3A"/>
+	  		<replacefilter token="%INFRA_USER%" value="qcpu89i"/>
+	  		<replacefilter token="%INFRA_PASSWORD%" value="tstng22"/>	  		 	  		
+		</replace>
+        <echo message="Completed replacement of environment-specific tags: %GDX_HOST%, %GDX_PORT%, %GDX_DB%, %GDX_USER%, %GDX_PASSWORD%, %INFRA_DB%, %INFRA_SCHEMA%, %INFRA_USER%, and %INFRA_PASSWORD%."></echo>
+        -->
+	</target>  
+
+</project>

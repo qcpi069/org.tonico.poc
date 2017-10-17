@@ -1,0 +1,56 @@
+
+<!-- build table gn_pricing  -->
+
+<sqml>
+        <property name="TIMEOUT" value="0"/>
+        <datasources resource="datasource.xml"/>
+        <properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        dmt_schema=script.getProperty("dmt_schema");
+        ]]></command>
+
+        <command type="try">
+                <try>
+
+                      <!-- truncate table rpsadm.ms_adv_w_GN -->
+                        <command type="run" datasource="datamart">
+                                <![CDATA[
+                                        DELETE FROM rps.ms_adv_w_inv
+                                ]]>
+                        </command>
+
+                        <command type="copy" batch="1000">
+                                <source type="sql" datasource="datamart"
+					><![CDATA[
+
+ select RAC_ID, EFF_DT, TERM_DT, CALC_SHR_AMT, MODL_VL
+from rps.t_advance_base
+where CALC_TYP_CD='1'
+	and PRC_TYP_CD='R'
+
+
+                                ]]></source>
+
+                                <target
+                                        type             = "sql"
+                                        datasource       = "datamart"
+                                        transaction      = "true"
+                                        batch            = "1000"
+                                        reportInterval   = "1000"
+                                        queryTimeout     = "${TIMEOUT}"
+                                ><![CDATA[
+					insert into rps.ms_adv_w_inv values
+						(?,?,?,?,?)
+
+                                ]]></target>
+
+                        </command>
+
+                </try>
+                <catch>
+                </catch>
+        </command>
+</sqml>
+

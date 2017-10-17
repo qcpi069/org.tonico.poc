@@ -1,0 +1,123 @@
+
+<!-- REFRESH REBATE  -->
+
+<sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+
+    <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        cli_schema=script.getProperty("cli_schema");        
+	]]></command>
+		       
+	<command type="try">
+		<try>
+            <!-- *************** REBATE ********************* -->
+			<command type="run" datasource="rebates" rowName="count1">
+				<![CDATA[
+					SELECT COUNT(*) FROM ${cli_schema}.rebate
+				]]>
+			</command>
+			<!-- Copy rebate info from Oracle to DB2. -->
+			<command type="copy" batch="1000">
+				<source type="sql" datasource="rebates"><![CDATA[
+					SELECT 
+					  PCS_SYSTEM_ID,
+					  REPORTING_LEVEL,
+					  PICO_ADMIN_FEE_CD,
+					  UPDATE_USERID,
+					  INSRT_DATE 
+					FROM ${cli_schema}.rebate 
+						ORDER BY 1
+				]]></source>
+				<target
+					type             = "sql"
+					datasource       = "datamart"
+					transaction      = "true"
+					batch            = "1000"
+					reportInterval   = "1000"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+					INSERT INTO ${cli_schema}.rebate 
+					 (PCS_SYSTEM_ID,
+					  REPORTING_LEVEL,
+					  PICO_ADMIN_FEE_CD,
+					  UPDATE_USERID,
+					  INSRT_DATE		
+					  ) 
+					VALUES ( ?, ?, ?, ?, ? )
+				]]></target>
+			</command>
+	        <!-- compare totals -->
+
+			<command type="run" datasource="datamart" rowName="count2">
+				<![CDATA[
+					SELECT COUNT(*) FROM ${cli_schema}.rebate
+				]]>
+			</command>
+			<command type="java">
+				count1 = script.getProperty("count1.1").intValue();
+				count2 = script.getProperty("count2.1").intValue();
+				logger.warn("Silver RBATE_REG.REBATE COUNT = " + count1);
+				logger.warn("RPS RBATE_REG.REBATE COUNT = " + count2);
+				if (count1 != count2) {
+					logger.error(" REBATE counts do NOT match count1=" + count1 + "  count2=" + count2);
+                    throw new Exception(" REBATE counts do NOT match count1=" + count1 + " count2=" + count2);
+				} 
+			</command> 
+				 
+		</try>
+		<catch>
+			<!-- Send an email on error -->
+			<command
+				type="mail"
+				mailTo="${mailto}"
+				mailFrom="RPDM_Client_Refresh"
+				subject="[ERROR] REFESH CLIENT - REBATE "
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] REFRESH CLIENT - REBATE</title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] REFRESH CLIENT - REBATE </u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]></command>
+		</catch>
+	</command>
+</sqml>

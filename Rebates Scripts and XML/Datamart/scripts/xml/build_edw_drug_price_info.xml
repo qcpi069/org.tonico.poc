@@ -1,0 +1,229 @@
+  <sqml>
+	<property name="TIMEOUT" value="0"/>
+	<datasources resource="datasource.xml"/>
+	<properties resource="datamart.properties"/>
+        <command type="java"><![CDATA[
+        mailto=script.getProperty("mailto");
+        dmt_schema=script.getProperty("dmt_schema");
+	cli_schema=script.getProperty("cli_schema");
+	]]></command>
+
+
+    <command type="try">
+	<try>
+        <!-- Query DB for current processing quarter info -->
+			<command type="run" datasource="datamart" rowName="inv_qtr"><![CDATA[
+				SELECT CAST(MAX(rbate_cycle_gid) AS CHAR(6))
+					,CHAR(cycle_start_date,USA)
+					,CHAR(cycle_end_date + 1 day,USA) 
+				  FROM rps.trbate_cycle
+				 WHERE rbate_cycle_gid = (SELECT MAX(rbate_cycle_gid) 
+							    FROM rps.trbate_cycle
+							   WHERE rbate_cycle_type_id = 2
+							     AND rbate_cycle_status = UPPER('C'))
+				GROUP BY CHAR(cycle_start_date,USA)
+				        ,CHAR(cycle_end_date + 1 day,USA)
+				   
+			]]></command>
+			<!-- Command to set quarter parameters-->
+			<command type="java"><![CDATA[
+				 
+				 String  qtrBeginDate ="";
+				 String  qtrEndDate ="";
+				 String  qtrId ="";
+				 
+		    	         if (script.getProperty("qtrenddt") == null) {
+				     qtrId = script.getProperty("inv_qtr.1");
+				     qtrBeginDate = script.getProperty("inv_qtr.2");
+				     qtrEndDate   = script.getProperty("inv_qtr.3");
+				 
+				     if (qtrId==null || qtrId.trim().length()==0 ||
+				     qtrBeginDate==null || qtrBeginDate.trim().length()==0 ||
+				     qtrEndDate==null || qtrEndDate.trim().length()==0) 
+				     { 
+				     throw new Exception("Processing Cycle Info not found ");
+				     }
+				    
+				     script.setProperty("qtrId",qtrId);
+				     script.setProperty("qtrBeginDate",qtrBeginDate);
+				     script.setProperty("qtrEndDate",qtrEndDate);
+				 }  
+				 else { 
+				     qtrEndDate = script.getProperty("qtrenddt");
+				     if (qtrEndDate.trim().length()!=10) 
+				     {
+				         throw new Exception("Invalid quarter end date passed in");
+				      }
+				      script.setProperty("qtrEndDate",qtrEndDate);
+				  } 
+			
+			]]></command>
+	
+		
+	<command type="copy" batch="1000">
+				<source type="sql" datasource="edwdb"><![CDATA[
+	SELECT
+	a.drug_gid,
+        a.ndc_code,
+        a.usc_code,
+        a.dsg_form,
+        a.strgh_desc,
+        a.route_name,
+        a.gcn_nbr,
+	(CASE WHEN a.brand_name IS NOT NULL THEN a.brand_name
+	      WHEN a.recap_brand_name IS NOT NULL THEN a.recap_brand_name
+	      WHEN a.fdb_brand_name IS NOT NULL THEN a.fdb_brand_name
+	      WHEN a.prdct_name IS NOT NULL THEN a.prdct_name
+	      WHEN a.lbl_name IS NOT NULL THEN a.lbl_name 
+	      ELSE NULL END) brand_name,
+	(CASE WHEN z.price_type_1 = 'B' THEN z.price_cst_1
+	      WHEN z.price_type_2 = 'B' THEN z.price_cst_2
+	      WHEN z.price_type_3 = 'B' THEN z.price_cst_3
+	      WHEN z.price_type_4 = 'B' THEN z.price_cst_4
+	      WHEN z.price_type_5 = 'B' THEN z.price_cst_5
+	      WHEN z.price_type_6 = 'B' THEN z.price_cst_6
+	      WHEN z.price_type_1 = '6' THEN z.price_cst_1
+	      WHEN z.price_type_2 = '6' THEN z.price_cst_2
+	      WHEN z.price_type_3 = '6' THEN z.price_cst_3
+	      WHEN z.price_type_4 = '6' THEN z.price_cst_4
+	      WHEN z.price_type_5 = '6' THEN z.price_cst_5
+	      WHEN z.price_type_6 = '6' THEN z.price_cst_6
+	      WHEN z.price_type_1 = 'N' THEN z.price_cst_1
+	      WHEN z.price_type_2 = 'N' THEN z.price_cst_2
+	      WHEN z.price_type_3 = 'N' THEN z.price_cst_3
+	      WHEN z.price_type_4 = 'N' THEN z.price_cst_4
+	      WHEN z.price_type_5 = 'N' THEN z.price_cst_5
+	      WHEN z.price_type_6 = 'N' THEN z.price_cst_6
+	      ELSE 0 END) AS awp,
+	(CASE WHEN z.price_type_1 = '9' THEN z.price_cst_1
+	      WHEN z.price_type_2 = '9' THEN z.price_cst_2
+	      WHEN z.price_type_3 = '9' THEN z.price_cst_3
+	      WHEN z.price_type_4 = '9' THEN z.price_cst_4
+	      WHEN z.price_type_5 = '9' THEN z.price_cst_5
+	      WHEN z.price_type_6 = '9' THEN z.price_cst_6
+	      WHEN z.price_type_1 = 'W' THEN z.price_cst_1
+	      WHEN z.price_type_2 = 'W' THEN z.price_cst_2
+	      WHEN z.price_type_3 = 'W' THEN z.price_cst_3
+	      WHEN z.price_type_4 = 'W' THEN z.price_cst_4
+	      WHEN z.price_type_5 = 'W' THEN z.price_cst_5
+	      WHEN z.price_type_6 = 'W' THEN z.price_cst_6
+	      WHEN z.price_type_1 = 'O' THEN z.price_cst_1
+	      WHEN z.price_type_2 = 'O' THEN z.price_cst_2
+	      WHEN z.price_type_3 = 'O' THEN z.price_cst_3
+	      WHEN z.price_type_4 = 'O' THEN z.price_cst_4
+	      WHEN z.price_type_5 = 'O' THEN z.price_cst_5
+	      WHEN z.price_type_6 = 'O' THEN z.price_cst_6
+	      ELSE 0 END) AS whn,
+	      0 as WHN_CALC_RATIO
+	FROM
+	(SELECT drug_gid,
+		MAX (DECODE (rn, 1, iv.price_type,  NULL)) price_type_1,MAX (DECODE (rn, 1, iv.price_cst, NULL)) price_cst_1,
+		MAX (DECODE (rn, 2, iv.price_type,  NULL)) price_type_2,MAX (DECODE (rn, 2, iv.price_cst,  NULL)) price_cst_2,
+		MAX (DECODE (rn, 3, iv.price_type,  NULL)) price_type_3,MAX (DECODE (rn, 3, iv.price_cst,  NULL)) price_cst_3,
+		MAX (DECODE (rn, 4, iv.price_type,  NULL)) price_type_4,MAX (DECODE (rn, 4, iv.price_cst,  NULL)) price_cst_4,
+		MAX (DECODE (rn, 5, iv.price_type,  NULL)) price_type_5,MAX (DECODE (rn, 5, iv.price_cst,  NULL)) price_cst_5,
+		MAX (DECODE (rn, 6, iv.price_type,  NULL)) price_type_6,MAX (DECODE (rn, 6, iv.price_cst,  NULL)) price_cst_6
+		FROM 
+		(SELECT a.drug_gid,
+			b.price_type,
+			b.price_cst,
+			ROW_NUMBER()OVER(PARTITION BY b.drug_gid ORDER BY b.price_type) rn                                                                          
+			FROM dwcorp.v_drug_denorm a,
+			     dwcorp.v_drug_price b
+		       WHERE a.drug_gid = b.drug_gid
+			 AND b.eff_date <= TO_DATE('${qtrEndDate}','MM/DD/YYYY')
+			 AND NVL(b.end_date,TO_DATE('12/31/9999','MM/DD/YYYY')) >= TO_DATE('${qtrEndDate}','MM/DD/YYYY')
+			 AND b.price_type IN ('B','6','N','9','W','O')) iv
+		 GROUP BY drug_gid) z,
+	dwcorp.v_drug_denorm a
+	 WHERE a.drug_gid = z.drug_gid
+	   AND brand_name IS NOT NULL   
+	   AND UPPER(a.ndc_code) = LOWER(a.ndc_code)
+	   AND  a.ndc_code BETWEEN '00000000000' AND '99999999999' 
+	   AND LENGTH(TRIM(a.ndc_code)) = 11
+
+				]]></source>
+				   <target
+					type             = "sql"
+					datasource       = "datamart"
+					transaction      = "true"
+					batch            = "1000"
+					reportInterval   = "1000"
+					queryTimeout     = "${TIMEOUT}"
+				><![CDATA[
+
+	INSERT INTO RPS.TDRUG_FINUND_CALC
+	(DRUG_GID,
+	 NDC_NB,
+	 USC_CODE,
+	 DSG_FORM,
+	 STRGH_DESC,
+	 ROUTE_NAME,
+	 GCN_NBR,
+	 BRAND_NAME,
+	 AWP,
+	 WHN,
+	 WHN_CALC_RATIO)
+       
+        Values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+
+				]]></target>
+		
+	</command>
+	
+	</try>
+	<catch>
+	<!-- Send an email on error -->
+			<command
+				type="mail"
+				mailTo="${mailto}"
+				mailFrom="TDRUG_SQLSUMMARY_CALC"
+				subject="[ERROR] REFESH - TDRUG_SQLSUMMARY_CALC "
+				contentType="text/html"
+				throwsException="false"
+			><![CDATA[
+				<html>
+				<head>
+				<title>[ERROR] TDRUG_SQLSUMMARY_CALC load </title>
+				</head>
+				<body>
+			
+				<h3><u>[ERROR] TDRUG_SQLSUMMARY_CALC </u></h3>
+			
+				<table cellpadding="2">
+					<tr><td><b>Host:</b></td><td>${localhost}<td></tr>
+					<tr><td><b>Started:</b></td><td>${startTime}<td></tr>
+					<tr><td><b>Script:</b></td><td>${scriptName}<td></tr>
+					#if (${system.getProperty('logfile')})
+						<tr>
+							<td><b>Log File:</b></td>
+							<td>
+								${system.getProperty('logfile')}
+							<td>
+						</tr>
+					#end
+				</table>
+
+				<br>			
+				<br>
+				
+				#if (${script.getLastStatement()})
+					<h3><u>Last Statement</u></h3>
+					<font style="color: blue; font-size: small">	
+					${script.getLastStatement()}
+					</font>
+				
+					<br>
+					<br>
+				#end
+			
+				<h3><u>Stack Trace</u></h3>		
+				<pre style="color: red; font-size: small;">${stackTrace}</pre>
+				</body>
+				</html>
+			]]>
+		     </command>
+		</catch>
+	</command>
+  </sqml>
+

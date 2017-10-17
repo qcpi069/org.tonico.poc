@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<libraries:Library xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:libraries="http://www.ibm.com/websphere/appserver/schemas/5.0/libraries.xmi" xmi:id="Library_1130784370782" name="CMX SharedLib">
+  <classPath>$(SharedComponents)/cbom.jar</classPath>
+  <classPath>$(SharedComponents)/IBMXMLParserForJava.jar</classPath>
+  <classPath>$(SharedComponents)/infra.jar</classPath>
+  <classPath>$(SharedComponents)/Security.jar</classPath>
+  <classPath>$(SharedComponents)/tcf.jar</classPath>
+  <classPath>$(SharedComponents)/tran.jar</classPath>
+  <classPath>$(SharedComponents)/ClientAppsResources.jar</classPath>
+  <classPath>$(SharedComponents)/Log4J.jar</classPath>
+  <classPath>$(SharedComponents)/CryptographyFrw.jar</classPath>
+  <classPath>$(SharedComponents)/jakarta_regexp.jar</classPath>
+  <classPath>$(SharedComponents)/ctgclient.jar</classPath>
+</libraries:Library>
