@@ -1,9 +1,0 @@
-<sqml>
-	
-	<properties resource="test.properties"/>
-
-	<command type="java"><![CDATA[
-		System.out.println(script.getProperty("name"));
-	]]></command>
-	
-</sqml>

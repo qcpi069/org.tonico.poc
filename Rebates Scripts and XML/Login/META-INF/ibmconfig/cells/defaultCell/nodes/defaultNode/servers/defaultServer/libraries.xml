@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<libraries:Library xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:libraries="http://www.ibm.com/websphere/appserver/schemas/5.0/libraries.xmi" xmi:id="Library_1274479849697" name="GDXSharedLibLogin" description="Shared library used by loginweb">
-  <classPath>C:\RebatesUIWorkSpace\shared</classPath>
-</libraries:Library>

@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<security:Security xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:security="http://www.ibm.com/websphere/appserver/schemas/5.0/security.xmi" xmi:id="Security_1273871382314">
-  <authDataEntries xmi:id="JAASAuthData_1274460086917" alias="gdx_dev" userId="vactuate" password="{xor}MjQ8LTAsLDAx" description="gdx_dev"/>
-  <authDataEntries xmi:id="JAASAuthData_1274460960997" alias="infra_dev" userId="QCPU90I" password="{xor}Nzo+O25tbGs=" description="infra_dev"/>
-</security:Security>

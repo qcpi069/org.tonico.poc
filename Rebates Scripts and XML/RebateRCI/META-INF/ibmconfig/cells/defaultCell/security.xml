@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<security:Security xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:security="http://www.ibm.com/websphere/appserver/schemas/5.0/security.xmi" xmi:id="Security_1221018712692">
-  <authDataEntries xmi:id="JAASAuthData_1221063875639" alias="oracle_cr" userId="rbate_reg" password="{xor}OzopLT0+KzoALTo4" description="oracle_cr"/>
-  <authDataEntries xmi:id="JAASAuthData_1242932501468" alias="udb_cr" userId="vactuate" password="mkcross0n" description="udb_cr"/>
-</security:Security>

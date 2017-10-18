@@ -1,5 +1,0 @@
-<FlatFile name="UtilizationPN0101">
-  <FilePart name="Header" filename="c:\RebateBilling\ConcurrentEngine\xml\UtilHeader0101.xml"/>
-  <FilePart name="Detail" filename="c:\RebateBilling\ConcurrentEngine\xml\UtilMrktDetail0101.xml"/>
-  <FilePart name="Trailer" filename="c:\RebateBilling\ConcurrentEngine\xml\UtilTrailer0101.xml"/>
-</FlatFile>
